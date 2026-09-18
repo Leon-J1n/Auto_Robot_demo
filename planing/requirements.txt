@@ -1,0 +1,2 @@
+# Windows/Python 3.10 wheel; ROBOTSIM's offline API is compatible with this version.
+ruckig==0.12.2

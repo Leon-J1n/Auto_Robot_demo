@@ -1,0 +1,47 @@
+{
+  "registry": "../common/scenes/scene_001.interactions.json",
+  "commands": [
+    {"skill_name":"move","parameters":{"target":"blue_cabinet_handle"}},
+    {"skill_name":"grasp","parameters":{"target":"blue_cabinet_handle"}},
+    {"skill_name":"pull","parameters":{"target":"blue_cabinet_door"}},
+    {"skill_name":"release","parameters":{"target":"blue_cabinet_handle"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"red_ball"}},
+    {"skill_name":"grasp","parameters":{"target":"red_ball"}},
+    {"skill_name":"move","parameters":{"target":"end_effector","relation":"above","distance_m":0.15,"planning_method":"linear"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"blue_cabinet_upper_compartment"}},
+    {"skill_name":"release","parameters":{"target":"red_ball"}},
+    {"skill_name":"move","parameters":{"target":"end_effector","relation":"behind","distance_m":0.15,"planning_method":"linear"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"grasp","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"pull","parameters":{"target":"small_cabinet_upper_drawer"}},
+    {"skill_name":"release","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"drawer_cube"}},
+    {"skill_name":"grasp","parameters":{"target":"drawer_cube"}},
+    {"skill_name":"move","parameters":{"target":"end_effector","relation":"above","distance_m":0.15,"planning_method":"linear"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"blue_cabinet_lower_compartment"}},
+    {"skill_name":"release","parameters":{"target":"drawer_cube"}},
+    {"skill_name":"move","parameters":{"target":"end_effector","relation":"behind","distance_m":0.15,"planning_method":"linear"}},
+    {"skill_name":"move","parameters":{"target":"home"}},
+
+    {"skill_name":"move","parameters":{"target":"blue_cabinet_handle"}},
+    {"skill_name":"grasp","parameters":{"target":"blue_cabinet_handle"}},
+    {"skill_name":"push","parameters":{"target":"blue_cabinet_door"}},
+    {"skill_name":"release","parameters":{"target":"blue_cabinet_handle"}},
+
+    {"skill_name":"move","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"grasp","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"push","parameters":{"target":"small_cabinet_upper_drawer"}},
+    {"skill_name":"release","parameters":{"target":"small_cabinet_upper_drawer_handle"}},
+    {"skill_name":"move","parameters":{"target":"home"}}
+  ]
+}
