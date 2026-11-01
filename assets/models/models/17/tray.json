@@ -1,0 +1,62 @@
+{
+  "semantic_properties": {
+    "object_name": "tray",
+    "object_id": 17,
+    "deformable": false,
+    "scalable": true,
+    "interactable": true,
+    "tag": "brown,green,rectangular"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.32,
+      0.46,
+      0.075
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.22,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.45,
+        0.004,
+        0.0004
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      0.5,
+      2.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.05,
+        3.14,
+        0.0,
+        1.57,
+        0,
+        1,
+        0,
+        1.04
+      ],
+      [
+        0.0,
+        0.0,
+        0.05,
+        3.14,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        1.04
+      ]
+    ]
+  }
+}

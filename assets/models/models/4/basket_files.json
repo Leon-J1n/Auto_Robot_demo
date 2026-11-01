@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "basket.json",
+  "path": "basket.obj",
+  "thumbnail": "basket_thumbnail.png",
+  "reference": [
+    "basket.png",
+    "basket.mtl"
+  ]
+}

@@ -1,0 +1,138 @@
+<robot name="cabinet">
+  <link name="root" />
+  <joint name="root_rotation" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="root" />
+    <child link="cabinet0132" />
+  </joint>
+  <link name="cabinet0132">
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.009 0.4399338" />
+      <geometry>
+        <box size="0.3 0.209999996 0.0201599993" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.0080598 0.3001128" />
+      <geometry>
+        <box size="0.26142 0.184259999 0.0122400004" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.0080598 0.1487328" />
+      <geometry>
+        <box size="0.26142 0.184259999 0.0122400004" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.009 0.0100662" />
+      <geometry>
+        <box size="0.3 0.209999996 0.0201599993" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.1403496 0.009 0.225105" />
+      <geometry>
+        <box size="0.0193200007 0.209999996 0.411240005" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.1403496 0.009 0.2251698" />
+      <geometry>
+        <box size="0.0193200007 0.209999996 0.410640013" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-9.36e-05 0.1071 0.2251044" />
+      <geometry>
+        <box size="0.2625 0.0138 0.41135999" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_meshes/cabinet0132/part_00/mesh.obj" scale="0.6 0.6 0.6" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0 0.009 0.224999964" rpy="0 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0369900188" ixy="0" ixz="0" iyy="0.0438750097" iyz="0" izz="0.0201150091" />
+    </inertial>
+  </link>
+  <link name="cabinet0132_door01">
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.1349172 7.5e-05 0.1933038" />
+      <geometry>
+        <box size="0.198779994 0.0109200004 0.03552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.1349262 7.56e-05 -0.1888452" />
+      <geometry>
+        <box size="0.198779994 0.0109200004 0.035580001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.2520828 7.5e-05 0.0022242" />
+      <geometry>
+        <box size="0.03552 0.0109200004 0.417720008" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.017766 7.5e-05 0.0022254" />
+      <geometry>
+        <box size="0.03552 0.0109200004 0.417720008" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.1349208 0.0012234 0.0022368" />
+      <geometry>
+        <box size="0.198779994 0.00180000002 0.346620011" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_meshes/cabinet0132_door01/part_00/mesh.obj" scale="0.6 0.6 0.6" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="cabinet_meshes/cabinet0132_door01/part_01/mesh.obj" scale="0.6 0.6 0.6" />
+      </geometry>
+    </visual>
+    <collision name="graspable_handle_bar_cabinet0132_door01">
+      <origin xyz="-0.252100593 -0.029497086 0.002207979" rpy="0 0 0" />
+      <geometry>
+        <box size="0.021600036 0.009207984 0.173673828" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_a_cabinet0132_door01">
+      <origin xyz="-0.252090381 -0.019657614 -0.0844814281" rpy="0 0 0" />
+      <geometry>
+        <box size="0.023477844 0.028886928 0.0236473978" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_b_cabinet0132_door01">
+      <origin xyz="-0.252090381 -0.019657614 0.0889328221" rpy="0 0 0" />
+      <geometry>
+        <box size="0.023477844 0.028886928 0.0236473978" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.134927826 -0.014277639 0.002225697" rpy="0 0 0" />
+      <mass value="0.45" />
+      <inertia ixx="0.00660206517" ixy="0" ixz="0" iyy="0.00927395124" iyz="0" izz="0.00278977669" />
+    </inertial>
+  </link>
+  <joint name="cabinet0132_door01" type="revolute">
+    <parent link="cabinet0132" />
+    <child link="cabinet0132_door01" />
+    <axis xyz="0.000000 0.000000 1.000000" />
+    <limit effort="100.0000" lower="-0.0" upper="2.356194496154785" velocity="3.0000" />
+    <origin rpy="0 0 0" xyz="0.1349358 -0.1024062 0.2228112" />
+    <dynamics damping="0.15" friction="0.05" />
+  </joint>
+</robot>

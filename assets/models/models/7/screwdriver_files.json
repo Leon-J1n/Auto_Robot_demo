@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "screwdriver.json",
+  "path": "screwdriver.obj",
+  "thumbnail": "screwdriver_thumbnail.png",
+  "reference": [
+    "screwdriver.png",
+    "screwdriver.mtl"
+  ]
+}

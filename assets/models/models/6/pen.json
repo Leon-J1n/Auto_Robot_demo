@@ -1,0 +1,50 @@
+{
+  "semantic_properties": {
+    "object_name": "pen",
+    "object_id": 6,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "black,slim"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.131262,
+      0.010011,
+      0.014203
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.025,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.35,
+        0.002,
+        0.0002
+      ]
+    },
+    "restitution": 0.12,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        3.1415926,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        1.04
+      ]
+    ]
+  }
+}

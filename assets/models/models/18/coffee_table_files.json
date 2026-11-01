@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "coffee_table.json",
+  "path": "coffee_table.obj",
+  "thumbnail": "coffee_table_thumbnail.png",
+  "reference": [
+    "coffee_table.png",
+    "coffee_table.mtl"
+  ]
+}

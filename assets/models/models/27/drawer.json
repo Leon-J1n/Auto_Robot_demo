@@ -1,0 +1,62 @@
+{
+  "semantic_properties": {
+    "object_name": "drawer",
+    "object_id": 27,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "black,double"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.331064,
+      0.3124561,
+      0.34801392
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 2.5,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.7,
+        0.01,
+        0.001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      0.5,
+      2.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        -0.16,
+        0.27,
+        -1.57,
+        0.0,
+        0.0,
+        1,
+        0,
+        0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.16,
+        0.15,
+        -1.57,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        0.0
+      ]
+    ]
+  }
+}

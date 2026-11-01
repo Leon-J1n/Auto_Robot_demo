@@ -1,0 +1,3 @@
+newmtl source_material
+Kd 1 1 1
+map_Kd test_tube.png

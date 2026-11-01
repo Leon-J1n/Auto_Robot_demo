@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "mug.json",
+  "path": "mug.obj",
+  "thumbnail": "mug_thumbnail.png",
+  "reference": [
+    "mug.png",
+    "mug.mtl"
+  ]
+}

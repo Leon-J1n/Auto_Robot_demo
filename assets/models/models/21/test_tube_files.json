@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "test_tube.json",
+  "path": "test_tube.obj",
+  "thumbnail": "test_tube_thumbnail.png",
+  "reference": [
+    "test_tube.png",
+    "test_tube.mtl"
+  ]
+}

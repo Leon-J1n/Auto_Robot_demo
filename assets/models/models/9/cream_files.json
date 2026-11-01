@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "cream.json",
+  "path": "cream.obj",
+  "thumbnail": "cream_thumbnail.png",
+  "reference": [
+    "cream.png",
+    "cream.mtl"
+  ]
+}

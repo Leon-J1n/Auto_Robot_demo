@@ -1,0 +1,34 @@
+{
+  "by_name": {
+    "ur5e_arm": [
+      1
+    ],
+    "robotiq_2f85": [
+      2
+    ],
+    "d435i": [
+      3
+    ],
+    "robot_pedestal": [
+      4
+    ]
+  },
+  "by_id": {
+    "1": "ur5e_arm",
+    "2": "robotiq_2f85",
+    "3": "d435i",
+    "4": "robot_pedestal"
+  },
+  "category": {
+    "1": "机械臂.UR5",
+    "2": "机械臂.夹爪",
+    "3": "机械臂.摄像机",
+    "4": "机械臂.底座"
+  },
+  "thumbnail": {
+    "1": "1/ur5e_arm_thumbnail.png",
+    "2": "2/robotiq_2f85_thumbnail.png",
+    "3": "3/d435i_thumbnail.png",
+    "4": "4/robot_pedestal_thumbnail.png"
+  }
+}

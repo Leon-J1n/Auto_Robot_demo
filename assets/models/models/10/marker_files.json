@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "marker.json",
+  "path": "marker.obj",
+  "thumbnail": "marker_thumbnail.png",
+  "reference": [
+    "marker.png",
+    "marker.mtl"
+  ]
+}

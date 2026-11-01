@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "school_bell.json",
+  "path": "school_bell.obj",
+  "thumbnail": "school_bell_thumbnail.png",
+  "reference": [
+    "school_bell.png",
+    "school_bell.mtl"
+  ]
+}
