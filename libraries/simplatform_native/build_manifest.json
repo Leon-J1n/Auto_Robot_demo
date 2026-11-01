@@ -1,0 +1,32 @@
+{
+  "build_type": "Release",
+  "compiler": "MSVC 14.44.35207, x64",
+  "dependencies": {
+    "fcl": "0.7.0#5",
+    "eigen3": "5.0.1",
+    "assimp": "6.0.5",
+    "urdfdom": "3.1.1#1"
+  },
+  "sha256": {
+    "libraries\\simplatform_native\\deps\\vcpkg.zip": "1617713bf2bc09b07cabe0563bd814f26e3ade10018ff6deee197dc27e546bac",
+    "libraries\\simplatform_native\\deps\\BqLog.zip": "2c29ac863e48c8711dd2649192d46e850904428965d63c55436cbc38b65689c8",
+    "libraries\\simplatform\\bin\\sim_platform_c.dll": "eae46e9568f4b1e6b778e0d0bef6cdc225bb7e52de05cb6d24cdd6c82598e3fd",
+    "libraries\\simplatform\\source\\SimPlatform-main\\src\\fcl_backend.cpp": "f74277c3806c1a93bc0ca1c45152dbae228ce4def5d10e28212d2d2f1193db54",
+    "libraries\\simplatform\\source\\SimPlatform-main\\src\\c_api.cpp": "29df10032c87529a39f9bd42f9557a6116f059b8fee94604d52a0e1da063b336",
+    "libraries\\simplatform\\source\\SimPlatform-main\\include\\sim\\collision.hpp": "d17a3f30e887ef2e1e9a8161b7680a810859cacb5fe99cfe1fd835cfcd48bcb4",
+    "libraries\\simplatform\\source\\SimPlatform-main\\include\\sim\\c_api.h": "21ffe22c7b3f74d5dceae96928c77ab807b85df9058026ca749749a1d7d61155",
+    "libraries\\simplatform\\source\\SimPlatform-main\\python\\sim_platform\\sdk.py": "a8b02d6303e5ed32422185291381ba96fae87ed7a080b89c73f4ee0f507c26d7",
+    "libraries\\simplatform\\source\\SimPlatform-main\\tests\\test_core.cpp": "93adf2c487f7de921c74f776ffd369adfef979b9ad0d90955a438429d80f5b3e"
+  },
+  "detector_update": {
+    "date": "2026-10-26",
+    "changes": [
+      "Read-only per-query candidate FK",
+      "Copy only moving FCL collision objects",
+      "Conservative local-box separation",
+      "Reuse immutable exclusion encoding"
+    ],
+    "tests": "Python 67/67; native CTest 2/2; old/new DLL contacts 120/120 at 1e-9 m; two serial runs per command in tests/output/planning_timing_20261025/detector_optimization_summary.json"
+  }
+}
+

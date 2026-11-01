@@ -1,0 +1,196 @@
+{
+  "by_name": {
+    "apple": [
+      1
+    ],
+    "banana": [
+      2
+    ],
+    "baseball": [
+      3
+    ],
+    "basket": [
+      4,
+      12
+    ],
+    "pen": [
+      5,
+      6
+    ],
+    "screwdriver": [
+      7,
+      13
+    ],
+    "gum_bottle": [
+      8
+    ],
+    "cream": [
+      9
+    ],
+    "marker": [
+      10
+    ],
+    "test_tube_rack": [
+      11,
+      20
+    ],
+    "mug": [
+      14,
+      23,
+      24
+    ],
+    "rubiks_cube": [
+      15
+    ],
+    "school_bell": [
+      16
+    ],
+    "tray": [
+      17
+    ],
+    "coffee_table": [
+      18
+    ],
+    "sugar_box": [
+      19
+    ],
+    "test_tube": [
+      21
+    ],
+    "doll": [
+      22
+    ],
+    "drawer": [
+      25,
+      26,
+      27
+    ],
+    "cabinet": [
+      28
+    ],
+    "table": [
+      29
+    ],
+    "microwave": [
+      30,
+      31
+    ],
+    "bottle": [
+      32
+    ],
+    "button": [
+      33
+    ],
+    "can": [
+      34
+    ]
+  },
+  "by_id": {
+    "1": "apple",
+    "2": "banana",
+    "3": "baseball",
+    "4": "basket",
+    "5": "pen",
+    "6": "pen",
+    "7": "screwdriver",
+    "8": "gum_bottle",
+    "9": "cream",
+    "10": "marker",
+    "11": "test_tube_rack",
+    "12": "basket",
+    "13": "screwdriver",
+    "14": "mug",
+    "15": "rubiks_cube",
+    "16": "school_bell",
+    "17": "tray",
+    "18": "coffee_table",
+    "19": "sugar_box",
+    "20": "test_tube_rack",
+    "21": "test_tube",
+    "22": "doll",
+    "23": "mug",
+    "24": "mug",
+    "25": "drawer",
+    "26": "drawer",
+    "27": "drawer",
+    "28": "cabinet",
+    "29": "table",
+    "30": "microwave",
+    "31": "microwave",
+    "32": "bottle",
+    "33": "button",
+    "34": "can"
+  },
+  "category": {
+    "1": "模型.抓取物",
+    "2": "模型.抓取物",
+    "3": "模型.抓取物",
+    "4": "模型.放置物",
+    "5": "模型.抓取物",
+    "6": "模型.抓取物",
+    "7": "模型.抓取物",
+    "8": "模型.抓取物",
+    "9": "模型.抓取物",
+    "10": "模型.抓取物",
+    "11": "模型.放置物",
+    "12": "模型.放置物",
+    "13": "模型.抓取物",
+    "14": "模型.抓取物",
+    "15": "模型.抓取物",
+    "16": "模型.抓取物",
+    "17": "模型.放置物",
+    "18": "模型.放置物",
+    "19": "模型.抓取物",
+    "20": "模型.放置物",
+    "21": "模型.抓取物",
+    "22": "模型.抓取物",
+    "23": "模型.抓取物",
+    "24": "模型.抓取物",
+    "25": "模型.放置物",
+    "26": "模型.放置物",
+    "27": "模型.放置物",
+    "28": "模型.放置物",
+    "29": "模型.放置物",
+    "30": "模型.放置物",
+    "31": "模型.放置物",
+    "32": "模型.抓取物",
+    "33": "模型.抓取物",
+    "34": "模型.抓取物"
+  },
+  "thumbnail": {
+    "1": "1/apple_thumbnail.png",
+    "2": "2/banana_thumbnail.png",
+    "3": "3/baseball_thumbnail.png",
+    "4": "4/basket_thumbnail.png",
+    "5": "5/pen_thumbnail.png",
+    "6": "6/pen_thumbnail.png",
+    "7": "7/screwdriver_thumbnail.png",
+    "8": "8/gum_bottle_thumbnail.png",
+    "9": "9/cream_thumbnail.png",
+    "10": "10/marker_thumbnail.png",
+    "11": "11/test_tube_rack_thumbnail.png",
+    "12": "12/basket_thumbnail.png",
+    "13": "13/screwdriver_thumbnail.png",
+    "14": "14/mug_thumbnail.png",
+    "15": "15/rubiks_cube_thumbnail.png",
+    "16": "16/school_bell_thumbnail.png",
+    "17": "17/tray_thumbnail.png",
+    "18": "18/coffee_table_thumbnail.png",
+    "19": "19/sugar_box_thumbnail.png",
+    "20": "20/test_tube_rack_thumbnail.png",
+    "21": "21/test_tube_thumbnail.png",
+    "22": "22/doll_thumbnail.png",
+    "23": "23/mug_thumbnail.png",
+    "24": "24/mug_thumbnail.png",
+    "25": "25/drawer_thumbnail.png",
+    "26": "26/drawer_thumbnail.png",
+    "27": "27/drawer_thumbnail.png",
+    "28": "28/cabinet_thumbnail.png",
+    "29": "29/table_thumbnail.png",
+    "30": "30/microwave_thumbnail.png",
+    "31": "31/microwave_thumbnail.png",
+    "32": "32/bottle_thumbnail.png",
+    "33": "33/button_thumbnail.png",
+    "34": "34/can_thumbnail.png"
+  }
+}

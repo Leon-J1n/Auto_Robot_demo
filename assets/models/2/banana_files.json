@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "banana.json",
+  "path": "banana.obj",
+  "thumbnail": "banana_thumbnail.png",
+  "reference": [
+    "banana.mtl",
+    "banana.png"
+  ]
+}

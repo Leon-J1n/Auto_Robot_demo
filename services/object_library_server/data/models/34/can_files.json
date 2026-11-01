@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "can.json",
+  "path": "can.obj",
+  "thumbnail": "can_thumbnail.png",
+  "reference": [
+    "can.mtl",
+    "can.png"
+  ]
+}

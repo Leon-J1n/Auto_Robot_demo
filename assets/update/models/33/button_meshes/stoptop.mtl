@@ -1,0 +1,8 @@
+# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
+
+newmtl surface
+Ka 0.7 0.5 0
+Kd 0.7 0.5 0
+Ks 0.15 0.15 0.15
+Ns 30
+d 1.0

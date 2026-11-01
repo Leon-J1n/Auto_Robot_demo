@@ -1,0 +1,26 @@
+{
+  "asset_root": "../../../assets/models",
+  "scenes": {
+    "unified_arm_test": {
+      "version": 2,
+      "path": "scene.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {
+            "viewer": {
+              "lookat": [
+                0.15,
+                0,
+                0.7
+              ],
+              "distance": 2.7,
+              "azimuth": 135,
+              "elevation": -25
+            }
+          }
+        }
+      }
+    }
+  }
+}

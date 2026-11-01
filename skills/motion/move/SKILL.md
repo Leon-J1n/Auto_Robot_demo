@@ -40,7 +40,7 @@ skill.py
 - `planners/collision_free_planner.py`：纯 Python 双向 RRT-Connect、TrajOpt 路径优化和最终复检；
 - `planners/trajopt_optimizer.py`：固定起终点的信赖域顺序凸平滑，每次更新均进行连续碰撞检查。
 
-当前 Windows 环境没有可加载的 IKFast 原生扩展，因此显式指定 `ikfast` 时会返回 `IK_FAILED`。`auto` 会先尝试 IKFast，再使用 TRAC-IK 数值路径。当前 TRAC-IK 数值路径使用 MuJoCo Jacobian 多起点阻尼最小二乘兼容实现；迁移 Linux 并编译官方 TRAC-IK 后，只需替换 `libraries` 后端。
+当前 `auto` 默认先尝试 EAIK，再使用 Jacobian 数值路径；IKFast 暂不参与自动回退，显式指定 `ikfast` 时仍按请求调用。当前 Jacobian 路径使用多起点阻尼最小二乘实现。
 
 默认执行采用 MuJoCo 运动学轨迹回放，保证终点可重复。根目录 `utils.SceneRobotRuntime` 也保留 `execution_mode="actuator"`，用于以后控制器增益调好后的动力学跟踪。
 

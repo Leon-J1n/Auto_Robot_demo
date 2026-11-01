@@ -1,0 +1,64 @@
+[
+  {
+    "ik_method": "auto",
+    "robot_model": "ChainRobotModel",
+    "steps": [
+      {
+        "name": "move near glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move linearly to glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "grasp glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move to end_effector",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move to serving_tray",
+        "success": true,
+        "error": null
+      }
+    ]
+  },
+  {
+    "ik_method": "eaik",
+    "robot_model": "ChainRobotModel",
+    "steps": [
+      {
+        "name": "move near glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move linearly to glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "grasp glass_cup",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move to end_effector",
+        "success": true,
+        "error": null
+      },
+      {
+        "name": "move to serving_tray",
+        "success": true,
+        "error": null
+      }
+    ]
+  }
+]

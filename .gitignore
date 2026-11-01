@@ -1,0 +1,11 @@
+.cache/collision/
+/demo/**/__pycache__/
+/demo/**/*.py[cod]
+.cache/
+backups/
+bqlog_mmap/
+logs/
+tests/output/
+tests/generated_config_*.json
+*.pyc
+__pycache__/

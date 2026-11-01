@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="d435i">
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="d435i.obj" />
+      </geometry>
+    </visual>
+  </link>
+</robot>

@@ -1,0 +1,92 @@
+{
+  "asset_root": ".",
+  "scenes": {
+    "unified_arm_test": {
+      "version": 4,
+      "path": "scenes/unified_arm_test.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {
+            "viewer": {
+              "lookat": [
+                0.35,
+                0,
+                0.7
+              ],
+              "distance": 2.6,
+              "azimuth": 135,
+              "elevation": -25
+            }
+          }
+        }
+      }
+    },
+    "scene.001": {
+      "version": 1,
+      "path": "scene.001.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {
+            "viewer": {
+              "lookat": [
+                0.35,
+                0,
+                0.7
+              ],
+              "distance": 2.6,
+              "azimuth": 135,
+              "elevation": -25
+            }
+          }
+        }
+      },
+      "runtime_config": "../demo/config/scene.001.runtime.json"
+    },
+    "scene.002": {
+      "version": 1,
+      "path": "scene.002.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {
+            "viewer": {
+              "lookat": [
+                0.4,
+                0.07,
+                0.77
+              ],
+              "distance": 1.6,
+              "azimuth": -35,
+              "elevation": -25
+            }
+          }
+        }
+      },
+      "runtime_config": "../demo/config/scene.002.runtime.json"
+    },
+    "scene.004": {
+      "version": 1,
+      "path": "scene.004.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {
+            "viewer": {
+              "lookat": [
+                0.48,
+                -0.08,
+                0.75
+              ],
+              "distance": 1.8,
+              "azimuth": 135,
+              "elevation": -25
+            }
+          }
+        }
+      },
+      "runtime_config": "../demo/config/scene.004.runtime.json"
+    }
+  }
+}

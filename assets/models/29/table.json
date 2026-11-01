@@ -1,0 +1,37 @@
+{
+  "semantic_properties": {
+    "object_name": "table",
+    "object_id": 29,
+    "deformable": false,
+    "scalable": true,
+    "interactable": true,
+    "tag": "brown,small"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.75,
+      1.5,
+      0.6
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 22.0,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.8,
+        0.01,
+        0.001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      0.8,
+      2.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}

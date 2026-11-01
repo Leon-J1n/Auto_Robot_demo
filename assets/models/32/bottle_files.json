@@ -1,0 +1,25 @@
+{
+  "is_on_cos": false,
+  "metadata": "bottle.json",
+  "path": "bottle.urdf",
+  "thumbnail": "bottle_thumbnail.png",
+  "reference": [
+    "bottle_meshes/body_2.mtl",
+    "bottle_meshes/body_2.obj",
+    "bottle_meshes/body_3.mtl",
+    "bottle_meshes/body_3.obj",
+    "bottle_meshes/body_4.mtl",
+    "bottle_meshes/body_4.obj",
+    "bottle_meshes/body_5.mtl",
+    "bottle_meshes/body_5.obj",
+    "bottle_meshes/body_6.mtl",
+    "bottle_meshes/body_6.obj",
+    "bottle_meshes/body_8.mtl",
+    "bottle_meshes/body_8.obj",
+    "bottle_meshes/cap.mtl",
+    "bottle_meshes/cap.obj",
+    "bottle_meshes/texture_0.png",
+    "bottle_meshes/texture_1.png",
+    "bottle_dry.obj"
+  ]
+}

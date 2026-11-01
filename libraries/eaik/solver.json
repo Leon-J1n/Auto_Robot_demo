@@ -1,0 +1,6 @@
+{
+  "api_version": 1,
+  "name": "eaik",
+  "factory": "libraries.eaik.adapter:create_backend",
+  "auto_priority": 10
+}

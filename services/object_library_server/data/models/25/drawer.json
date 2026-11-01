@@ -1,0 +1,62 @@
+{
+  "semantic_properties": {
+    "object_name": "drawer",
+    "object_id": 25,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "light,wooden,double"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.39617499,
+      0.32015629,
+      0.39884971
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 2.5,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.7,
+        0.01,
+        0.001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      2.5
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        -0.165,
+        0.305,
+        -1.75,
+        0.0,
+        0.0,
+        1,
+        0,
+        0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.165,
+        0.16,
+        -1.57,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        0.0
+      ]
+    ]
+  }
+}

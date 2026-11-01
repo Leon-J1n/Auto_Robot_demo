@@ -172,8 +172,7 @@ input:
       ik_method:
         type: string
         default: auto
-        enum: [auto, ikfast, trac_ik]
-        description: IKFast is analytic; TRAC-IK is numerical. Auto tries IKFast first.
+        description: Registered solver name or alias from libraries/*/solver.json; auto uses manifest priorities. trac_ik is a compatibility alias for jacobian.
       ik_seed:
         type: array
         item_type: float
@@ -184,6 +183,16 @@ input:
         unit: meter
         range: [0.001, 0.1]
         default: 0.02
+      max_joint_step:
+        type: float
+        unit: radian
+        range: [0.001, 0.4]
+        default: 0.4
+      linear_search_mode:
+        type: string
+        enum: [fast, exhaustive]
+        default: fast
+        description: Try the measured continuous branch first; exhaustive compares all expanded IK branches.
       via_point: {type: object}
       arc_center: {type: object}
       arc_axis: {type: object}

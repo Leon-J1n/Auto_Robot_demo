@@ -43,7 +43,7 @@ strategies:
     defaults:
       cartesian_step: 0.02
       orientation_mode: fixed
-      jump_threshold: 0.0
+      max_joint_step: 0.4
       min_path_fraction: 0.98
 
   circular_move:
@@ -65,6 +65,7 @@ planning:
     default_planner: rrt_connect
     planning_time: 5.0
     max_attempts: 3
+    rrt_collision_resolution: 0.02
     optimize_path: true
     smooth_result: true
     allow_path_type_relaxation_only_for_soft_constraint: true
@@ -76,7 +77,7 @@ planning:
       minimum_trust_region: 0.0001
       convergence_tolerance: 0.00001
       smoothness_weight: 0.25
-      collision_resolution: 0.02
+      collision_resolution: 0.01
 
   replanning:
     enabled: true
@@ -93,16 +94,6 @@ collision:
     approach: 0.02
     retreat: 0.02
     contact: 0.005
-
-trajectory:
-  optimize: true
-  smooth_linear: true
-  timing_method: auto
-  sample_period: 0.01
-  velocity_limits: 1.0
-  acceleration_limits: 2.0
-  jerk_limits: 10.0
-  jerk_scale: 1.0
 
 robot:
   joint_limit_check: true

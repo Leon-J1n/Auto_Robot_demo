@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "baseball.json",
+  "path": "baseball.obj",
+  "thumbnail": "baseball_thumbnail.png",
+  "reference": [
+    "baseball.mtl",
+    "baseball.png"
+  ]
+}

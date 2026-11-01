@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "pen.json",
+  "path": "pen.obj",
+  "thumbnail": "pen_thumbnail.png",
+  "reference": [
+    "pen.mtl",
+    "pen.png"
+  ]
+}

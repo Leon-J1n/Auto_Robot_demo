@@ -1,0 +1,34 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.19045.
+-- Configuring done (0.3s)
+-- Generating done (0.1s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_TOOLCHAIN_FILE
+
+
+-- Build files have been written to: C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build
+适用于 .NET Framework MSBuild 版本 17.14.14+a129329f1
+
+  Checking File Globs
+  Checking Build System
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+  sim_test_plugin.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_test_plugin.dll
+  fcl_backend.cpp
+  sim_core.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_core.lib
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+    正在创建库 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_logging_compile_tests.lib 和对象 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_logging_compile_tests.exp
+  sim_logging_compile_tests.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_logging_compile_tests.exe
+    正在创建库 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_platform_c.lib 和对象 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_platform_c.exp
+  sim_c_api.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_platform_c.dll
+    正在创建库 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_core_tests.lib 和对象 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_core_tests.exp
+  sim_core_tests.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_core_tests.exe
+  Building Custom Rule C:/Users/21474/Desktop/robot-agent/libraries/simplatform/source/SimPlatform-main/CMakeLists.txt
+DLL: C:\Users\21474\Desktop\robot-agent\libraries\simplatform/bin/sim_platform_c.dll
+
+
+
+

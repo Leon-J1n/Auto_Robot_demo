@@ -1,0 +1,138 @@
+{
+  "scene_id": "scene.004",
+  "scene_version": 1,
+  "scene_settings": {},
+  "object_components": {
+    "2": [
+      {
+        "component_type": "RobotModelRef",
+        "properties": {
+          "urdf": "robots/1/ur5e_arm.urdf",
+          "base_link": "base",
+          "tip_link": "attachment_site",
+          "allowed_collision_link_pairs": [
+            [
+              "robotiq_2f85_base_mount",
+              "wrist_2_link"
+            ]
+          ],
+          "grasp_frame": {
+            "link": "robotiq_2f85_base",
+            "position": [
+              0,
+              0,
+              0.145
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      }
+    ],
+    "3": [
+      {
+        "component_type": "RobotAttachment",
+        "properties": {
+          "parent_object_id": 2,
+          "parent_joint": "wrist_3_joint",
+          "parent_link": "attachment_site",
+          "child_link": "robotiq_2f85_mount",
+          "connection_type": "fixed",
+          "transform": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "reference_frame": "parent_link"
+          }
+        }
+      },
+      {
+        "component_type": "GripperModel",
+        "properties": {
+          "urdf": "robots/2/robotiq_2f85.urdf",
+          "type": "robotiq_2f85"
+        }
+      }
+    ],
+    "1": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/29/table.urdf"
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true
+        }
+      }
+    ],
+    "6": [
+      {
+        "component_type": "MeshRenderer",
+        "properties": {
+          "forceOverrideColor": "#FFFFFF",
+          "color": [
+            0.25,
+            0.28,
+            0.32,
+            1
+          ]
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true,
+          "shape": "cylinder",
+          "size": [
+            0.14,
+            0.14,
+            0.498
+          ]
+        }
+      }
+    ],
+    "11": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/14/mug.obj"
+        }
+      }
+    ],
+    "32": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/32/bottle_dry.obj"
+        }
+      },
+      {
+        "component_type": "RigidBody",
+        "properties": {
+          "dynamic": true,
+          "mass": 0.0476
+        }
+      }
+    ]
+  },
+  "nonphysical_objects": [
+    "0",
+    "4",
+    "5"
+  ]
+}

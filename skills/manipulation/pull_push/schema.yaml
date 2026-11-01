@@ -1,0 +1,108 @@
+name: PullPush
+version: "4.0"
+description: Plan a safe linear or circular prefix, execute through actuators, and report measured progress on completion or failure.
+
+input:
+  grasp:
+    type: object
+    description: Requested holding mode. When omitted, use the existing grasp state. This skill never creates a weld or changes grasp mode.
+    properties:
+      mode: {type: string, enum: [binding, physical]}
+  target:
+    type: object
+    required: true
+    properties:
+      type:
+        type: string
+        required: true
+        enum: [object, mechanism]
+        description: Use object for a free body and mechanism for a hinge or slider.
+      object_id: {type: string, required: true}
+      contact_point: {type: array, item_type: float, description: "Optional measured contact point in target-body local coordinates (metres)."}
+      contact_geom: {type: string, description: "Target surface geom name; optional; otherwise infer from existing pad contact."}
+      contact_normal:
+        type: array
+        item_type: float
+        description: Initial contact normal in world coordinates (optional). For free objects this is the outward surface normal.
+      normal_frame: {type: string, enum: [world], default: world}
+      expected_motion: {type: object}
+  manipulation:
+    type: object
+    required: true
+    properties:
+      operation: {type: string, enum: [push, pull]}
+      trajectory: {type: string, enum: [auto, linear, circular]}
+      interaction_mode: {type: string, enum: [auto, mechanism, free_object], default: auto}
+      contact_mode: {type: string, enum: [auto, grasp, push_contact], default: auto}
+      maintain_contact: {type: boolean, default: false}
+      verification_mode: {type: string, enum: [auto]}
+  motion:
+    type: object
+    description: "Optional explicit end-effector path geometry. It is independent of target.type; manipulation.trajectory remains a backwards-compatible alias."
+    properties:
+      path_type: {type: string, enum: [linear, circular]}
+  constraints:
+    type: object
+    properties:
+      maximum_force: {type: float, unit: newton, nullable: true, default: null, description: "Optional sum of measured pad normal forces; null disables force-limit stopping."}
+      zero_force_threshold: {type: float, unit: newton, default: 0.0, description: "Force at or below this value is treated as lost contact after contact is established."}
+      maximum_travel: {type: float, unit: meter, nullable: true, default: null}
+      maximum_angle: {type: float, unit: radian, nullable: true, default: null}
+      contact_threshold: {type: float, unit: newton, default: 1.0}
+      speed: {type: float, unit: meter_per_second, default: 0.03}
+      angular_speed: {type: float, unit: radian_per_second, default: 0.2}
+      timeout: {type: float, unit: second, default: 30.0}
+      normal_alignment_tolerance: {type: float, unit: degree, default: 1.0}
+      avoid_collision: {type: boolean, default: true}
+      verify_motion: {type: boolean, default: true}
+      stop_on_contact_loss: {type: boolean, default: true, description: "Contact loss always stops execution after contact is established."}
+      emergency_retract: {type: boolean, default: false, description: "Automatic retreat is unsupported; true is rejected."}
+      ignore_path_constraints: {type: boolean, default: true, description: "Ignore continuous IK and smoothed Cartesian path rejection while retaining collision and force checks."}
+      cartesian_step: {type: float, unit: meter, default: 0.005}
+      angular_step: {type: float, unit: radian, default: 0.02}
+      position_tolerance: {type: float, unit: meter, default: 0.01}
+      angle_tolerance: {type: float, unit: radian, default: 0.04}
+      contact_loss_timeout: {type: float, unit: second, default: 0.1}
+      settle_time: {type: float, unit: second, default: 1.0}
+      max_joint_speed: {type: float, unit: radian_per_second, default: 0.5}
+      max_joint_acceleration: {type: float, unit: radian_per_second_squared, default: 1.0}
+  strategy_params:
+    type: object
+    properties:
+      direction: {type: array, item_type: float}
+      distance: {type: float, unit: meter}
+      arc_center: {type: array, item_type: float, description: "Required for circular: a point on the world-frame axis line in metres."}
+      arc_axis: {type: array, item_type: float, description: "Required for circular: nonzero world-frame axis direction."}
+      arc_angle: {type: float, unit: radian}
+      frame: {type: string, enum: [world]}
+      carried_objects:
+        type: array
+        item_type: string
+        description: Deprecated; non-empty values are rejected. Contents move only through physics contacts.
+
+  validation_rules:
+    - when: manipulation.trajectory == circular
+      require: [strategy_params.arc_center, strategy_params.arc_axis, strategy_params.arc_angle]
+    - when: manipulation.trajectory == linear
+      require: [strategy_params.direction, strategy_params.distance]
+
+output:
+  success: {type: boolean}
+  status: {type: string, enum: [success, error, suspend], description: "success: full motion completed; suspend: execution started but did not finish; error: validation/precondition/planning failed before motion."}
+  selection: {type: object, nullable: true}
+  pull_push_result:
+    type: object
+    nullable: true
+    description: Present on completion and motion stops; precondition/validation errors may have no result.
+    properties:
+      requested_delta: {type: float}
+      grasp_mode: {type: string, enum: [binding, physical]}
+      bound: {type: boolean}
+      actual_delta: {type: float}
+      remaining_delta: {type: float, description: Absolute difference between requested and measured travel.}
+      unit: {type: string, enum: [m, rad]}
+      stop_reason: {type: string}
+      target_reached: {type: boolean}
+      motion_executed: {type: boolean}
+      peak_force: {type: float, unit: newton}
+  error: {type: object, nullable: true}

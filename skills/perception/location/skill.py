@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional
 
-from selector import StrategySelectionError, StrategySelector
-from strategies import (
+from .selector import StrategySelectionError, StrategySelector
+from .strategies import (
     ApproachPointLocate,
     GraspPosePrediction,
     KnownCategoryLocate,
@@ -18,9 +18,9 @@ from strategies import (
     RelativePointLocate,
     UnknownObjectLocate,
 )
-from utils.error_codes import ErrorCode, failure_result
-from utils.validation import LocateValidationError, validate_locate_request
-from validators import PoseValidator
+from .utils.error_codes import ErrorCode, failure_result
+from .utils.validation import LocateValidationError, validate_locate_request
+from .validators import PoseValidator
 
 
 class LocateSkill:
@@ -66,9 +66,15 @@ class LocateSkill:
             raw_result = self._locate_with_fallback(
                 normalized, context, selection
             )
-            localization_result = self.pose_validator.validate(
-                raw_result, normalized, context
-            )
+            # Unknown-object capture is intentionally usable before the VLM and
+            # pose-estimation stages are implemented.  It returns RGB-D evidence
+            # and an explicit pending status instead of pretending to have a pose.
+            if raw_result.get("observation_only", False):
+                localization_result = raw_result
+            else:
+                localization_result = self.pose_validator.validate(
+                    raw_result, normalized, context
+                )
 
             return {
                 "success": True,
@@ -112,9 +118,12 @@ class LocateSkill:
         self, request: Mapping[str, Any]
     ) -> Mapping[str, Any]:
         """Read synchronized sensor, transform, model and robot context."""
-        raise NotImplementedError(
-            "Connect _get_runtime_context() to the robot runtime/context manager."
-        )
+        if self.robot_runtime is None:
+            raise RuntimeError("A robot runtime is required for Locate Skill.")
+        getter = getattr(self.robot_runtime, "get_context", None)
+        context = dict(getter(request) if getter is not None else {})
+        context["runtime"] = self.robot_runtime
+        return context
 
     def _locate_with_fallback(
         self,

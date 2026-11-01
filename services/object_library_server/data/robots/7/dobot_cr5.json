@@ -1,0 +1,37 @@
+{
+  "semantic_properties": {
+    "object_name": "dobot_cr5",
+    "object_id": 7,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "dobot cr5"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.14800286,
+      0.32210010386837173,
+      1.0965003803724864
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 23.0,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        1.0,
+        0.005,
+        0.0001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}

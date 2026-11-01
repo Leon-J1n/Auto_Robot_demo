@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import math
 from typing import Any, Dict, Mapping
 
 
@@ -45,6 +46,11 @@ def validate_grasp_request(
     normalized["grasp"] = dict(normalized["grasp"])
     normalized["grasp"].setdefault("strategy", "auto")
     normalized["grasp"].setdefault("operation", "grasp")
+    normalized["grasp"].setdefault("mode", "binding")
+    if not isinstance(normalized["grasp"]["mode"], str) or normalized["grasp"]["mode"] not in {"binding", "physical"}:
+        raise GraspValidationError("grasp.mode must be binding or physical.")
+    if not (isinstance(target.get('object_id'), str) and target['object_id']):
+        raise GraspValidationError('Grasp requires an explicit target.object_id string.')
     normalized["grasp"].setdefault("gripper_id", "default_gripper")
     normalized["grasp"].setdefault("verification_mode", "auto")
     if normalized["grasp"]["strategy"] not in {"auto", "default_grasp"}:
@@ -75,6 +81,10 @@ def validate_grasp_request(
     normalized["strategy_params"] = dict(normalized["strategy_params"])
 
     constraints = normalized["constraints"]
+    for key in ('timeout', 'maximum_force', 'minimum_width', 'maximum_width'):
+        value = constraints.get(key)
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)):
+            raise GraspValidationError(f'constraints.{key} must be a finite number.')
     retry_count = constraints.get("retry_count")
     if not isinstance(retry_count, int) or retry_count < 0:
         raise GraspValidationError("constraints.retry_count must be a non-negative integer.")
@@ -102,12 +112,15 @@ def validate_grasp_request(
     for key in ("verify_grasp", "hold_on_success", "contact_required", "slip_check", "require_pose_alignment"):
         if not isinstance(constraints[key], bool):
             raise GraspValidationError(f"constraints.{key} must be boolean.")
-    for key in ("open_width", "close_width", "grasp_force", "hold_force", "contact_threshold", "position_tolerance", "force_tolerance", "settle_time"):
+    for key in ("open_width", "close_width", "grasp_force", "hold_force", "contact_threshold", "position_tolerance", "force_tolerance", "settle_time", "confirmation_time", "width_stability_tolerance", "position_stability_tolerance", "orientation_stability_tolerance"):
         if key in normalized["strategy_params"]:
             value = normalized["strategy_params"][key]
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
                 raise GraspValidationError(f"strategy_params.{key} must be a non-negative number.")
             normalized["strategy_params"][key] = float(value)
+    for key in ("confirmation_time", "contact_threshold"):
+        if key in normalized["strategy_params"] and normalized["strategy_params"][key] <= 0:
+            raise GraspValidationError(f"strategy_params.{key} must be positive.")
     speed = normalized["strategy_params"].get("close_speed")
     if speed is not None and (isinstance(speed, bool) or not isinstance(speed, (int, float)) or not 0.0 < float(speed) <= 1.0):
         raise GraspValidationError("strategy_params.close_speed must be in (0, 1].")

@@ -1,0 +1,2 @@
+AppVersion 1.0.4-rel
+built at 2026-10-16T11:51:28

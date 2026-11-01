@@ -1,0 +1,29 @@
+{
+  "is_on_cos": false,
+  "metadata": "drawer.json",
+  "path": "drawer.urdf",
+  "thumbnail": "drawer_thumbnail.png",
+  "reference": [
+    "drawer_meshes/Nightstand0017/part_00/base_color.png",
+    "drawer_meshes/Nightstand0017/part_00/material.mtl",
+    "drawer_meshes/Nightstand0017/part_00/mesh.obj",
+    "drawer_meshes/Nightstand0017/part_01/base_color.png",
+    "drawer_meshes/Nightstand0017/part_01/material.mtl",
+    "drawer_meshes/Nightstand0017/part_01/mesh.obj",
+    "drawer_meshes/Nightstand0017/part_02/base_color.png",
+    "drawer_meshes/Nightstand0017/part_02/material.mtl",
+    "drawer_meshes/Nightstand0017/part_02/mesh.obj",
+    "drawer_meshes/Nightstand0017_drawer01/part_00/base_color.png",
+    "drawer_meshes/Nightstand0017_drawer01/part_00/material.mtl",
+    "drawer_meshes/Nightstand0017_drawer01/part_00/mesh.obj",
+    "drawer_meshes/Nightstand0017_drawer01/part_01/base_color.png",
+    "drawer_meshes/Nightstand0017_drawer01/part_01/material.mtl",
+    "drawer_meshes/Nightstand0017_drawer01/part_01/mesh.obj",
+    "drawer_meshes/Nightstand0017_drawer02/part_00/base_color.png",
+    "drawer_meshes/Nightstand0017_drawer02/part_00/material.mtl",
+    "drawer_meshes/Nightstand0017_drawer02/part_00/mesh.obj",
+    "drawer_meshes/Nightstand0017_drawer02/part_01/base_color.png",
+    "drawer_meshes/Nightstand0017_drawer02/part_01/material.mtl",
+    "drawer_meshes/Nightstand0017_drawer02/part_01/mesh.obj"
+  ]
+}

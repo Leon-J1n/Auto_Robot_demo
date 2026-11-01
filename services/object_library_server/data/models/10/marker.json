@@ -1,0 +1,50 @@
+{
+  "semantic_properties": {
+    "object_name": "marker",
+    "object_id": 10,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "black,white"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.018813,
+      0.120847,
+      0.018788
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.0158,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.5,
+        0.003,
+        0.0003
+      ]
+    },
+    "restitution": 0.15,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.02,
+        3.1415926,
+        0.0,
+        1.57,
+        0,
+        1,
+        0,
+        1.04
+      ]
+    ]
+  }
+}

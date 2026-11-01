@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "tray.json",
+  "path": "tray.obj",
+  "thumbnail": "tray_thumbnail.png",
+  "reference": [
+    "tray.mtl",
+    "tray.png"
+  ]
+}

@@ -10,6 +10,8 @@ description: >
 
 input_schema: strategies/unknown_object_locate/unknown_object_locate.schema.yaml
 implementation: strategies/unknown_object_locate/unknown_object_locate.py
+
+当前实现先完成 RGB-D 观测采集：从 runtime 读取指定相机的当前帧，并可保存 RGB PNG、深度 PNG 和米制深度 NPY。VLM 目标判断、分割、深度采样和 3-D 位姿估计暂留为 `pending_implementation`，不会伪造定位结果。
 ---
 
 # Unknown Object Locate Strategy

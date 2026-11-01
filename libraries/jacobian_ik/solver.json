@@ -1,0 +1,7 @@
+{
+  "api_version": 1,
+  "name": "jacobian",
+  "aliases": ["trac_ik"],
+  "factory": "libraries.jacobian_ik.adapter:create_backend",
+  "auto_priority": 20
+}

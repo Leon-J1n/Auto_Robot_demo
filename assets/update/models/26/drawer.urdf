@@ -1,0 +1,232 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="drawer">
+  <link name="root" />
+  <joint name="root_rotation" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="root" />
+    <child link="Nightstand0061" />
+  </joint>
+  <link name="Nightstand0061">
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.00910774 0.32143194" />
+      <geometry>
+        <box size="0.32410399 0.235711997 0.0347999992" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0 0.00910774 0.07252958" />
+      <geometry>
+        <box size="0.319347996 0.230956003 0.0331759998" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.14425296 0.00910774 0.1966113" />
+      <geometry>
+        <box size="0.035612 0.235711997 0.216166003" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.14425238 0.00910774 0.1965533" />
+      <geometry>
+        <box size="0.035612 0.235711997 0.216050001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.00029058 0.12299364 0.19685026" />
+      <geometry>
+        <box size="0.253866002 0.00794600001 0.216629994" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.14285748 -0.08925794 0.02961828" />
+      <geometry>
+        <box size="0.033639999 0.0342200002 0.0549260007" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.14285748 0.10747342 0.02948836" />
+      <geometry>
+        <box size="0.033639999 0.0342200002 0.0546360001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.14285748 -0.08925794 0.02920648" />
+      <geometry>
+        <box size="0.033639999 0.0342200002 0.0540559989" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.14285748 0.10747342 0.02920996" />
+      <geometry>
+        <box size="0.033639999 0.0342200002 0.0540559989" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061/part_00/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061/part_01/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="-1.653e-07 0.0084245493 0.169417991" rpy="0 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.025652366" ixy="0" ixz="0" iyy="0.0332963945" iyz="0" izz="0.0245058136" />
+    </inertial>
+  </link>
+  <link name="Nightstand0061_drawer01">
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="6.96e-06 0.00087812 -0.00012818" />
+      <geometry>
+        <box size="0.250328003 0.00881600015 0.103124" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.10923024 0.11408774 -0.0087" />
+      <geometry>
+        <box size="0.0110199996 0.218138002 0.0718040012" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.10923024 0.11408426 -0.0087" />
+      <geometry>
+        <box size="0.0110199996 0.218138002 0.0718040012" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="1.914e-05 0.2176479 -0.0087" />
+      <geometry>
+        <box size="0.208974003 0.0110199996 0.0718040012" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="5.51e-05 0.10912468 -0.03907924" />
+      <geometry>
+        <box size="0.209437993 0.207930002 0.0110199996" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061_drawer01/part_00/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <collision name="graspable_handle_bar_Nightstand0061_drawer01">
+      <origin xyz="4.11278e-05 -0.0448024538 0.0019672034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.175594745 0.0092645256 0.02334877" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_a_Nightstand0061_drawer01">
+      <origin xyz="-0.0789765074 -0.021742199 0.0019672208" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0175594745 0.0553850352 0.0233488048" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_b_Nightstand0061_drawer01">
+      <origin xyz="0.079058763 -0.021742199 0.0019672208" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0175594745 0.0553850352 0.0233488048" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061_drawer01/part_01/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="-2.668e-06 0.086861612 -0.0001284671" rpy="0 0 0" />
+      <mass value="0.35" />
+      <inertia ixx="0.00247730306" ixy="0" ixz="0" iyy="0.0021382018" iyz="0" izz="0.00399545956" />
+    </inertial>
+  </link>
+  <link name="Nightstand0061_drawer02">
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-2.32e-06 0.00083636 -9.338e-05" />
+      <geometry>
+        <box size="0.250385995 0.00881600015 0.108982004" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="0.10923024 0.11406454 -0.0087" />
+      <geometry>
+        <box size="0.0110199996 0.218195994 0.077662001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.10923024 0.11407498 -0.0087" />
+      <geometry>
+        <box size="0.0110199996 0.218138002 0.077662001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.00016646 0.2176479 -0.0087" />
+      <geometry>
+        <box size="0.209263999 0.0110199996 0.077662001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin rpy="0.000000 -0.000000 0.000000" xyz="-0.00017922 0.10932188 -0.0420239" />
+      <geometry>
+        <box size="0.209090005 0.208393993 0.0110199996" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061_drawer02/part_00/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <collision name="graspable_handle_bar_Nightstand0061_drawer02">
+      <origin xyz="4.1238e-05 -0.0448441094 0.0015034992" rpy="0 0 0" />
+      <geometry>
+        <box size="0.175594745 0.009264514 0.0233487352" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_a_Nightstand0061_drawer02">
+      <origin xyz="-0.0789763972 -0.0217838488 0.0015034992" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0175594745 0.0553850352 0.0233487352" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_support_b_Nightstand0061_drawer02">
+      <origin xyz="0.0790588732 -0.0217838488 0.0015034992" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0175594745 0.0553850352 0.0233487352" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="drawer_meshes/Nightstand0061_drawer02/part_01/mesh.obj" scale="0.58 0.58 0.58" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="-2.552e-06 0.0868407871 -9.32176e-05" rpy="0 0 0" />
+      <mass value="0.35" />
+      <inertia ixx="0.00251439161" ixy="0" ixz="0" iyy="0.00217462802" iyz="0" izz="0.00399612189" />
+    </inertial>
+  </link>
+  <joint name="Nightstand0061_drawer01" type="prismatic">
+    <parent link="Nightstand0061" />
+    <child link="Nightstand0061_drawer01" />
+    <axis xyz="0.000000 -1.000000 0.000000" />
+    <limit effort="100.0000" lower="-0" upper="0.210622245" velocity="0.5" />
+    <origin rpy="0 0 0" xyz="2.9e-06 -0.10522128 0.25162952" />
+    <dynamics damping="0.8" friction="0.2" />
+  </joint>
+  <joint name="Nightstand0061_drawer02" type="prismatic">
+    <parent link="Nightstand0061" />
+    <child link="Nightstand0061_drawer02" />
+    <axis xyz="0.000000 -1.000000 0.000000" />
+    <limit effort="100.0000" lower="-0" upper="0.210622245" velocity="0.5" />
+    <origin rpy="0 0 0" xyz="2.32e-06 -0.10517952 0.144391" />
+    <dynamics damping="0.8" friction="0.2" />
+  </joint>
+</robot>

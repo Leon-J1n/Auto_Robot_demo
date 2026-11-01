@@ -1,0 +1,440 @@
+{
+  "scene_schema_version": 2,
+  "scene_version": 2,
+  "scene_id": "unified_arm_test",
+  "scene_name": "Shared URDF arm motion test",
+  "objects": [
+    {
+      "object_id_in_scene": 1,
+      "object_name_in_scene": "Robot_ur5e",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              0.65
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "RobotModelRef",
+          "properties": {
+            "urdf": "robots/1/ur5e_arm.urdf",
+            "base_link": "base",
+            "tip_link": "attachment_site"
+          }
+        },
+        {
+          "component_type": "RobotDriver",
+          "properties": {
+            "joint_sequence": [
+              "shoulder_pan_joint",
+              "shoulder_lift_joint",
+              "elbow_joint",
+              "wrist_1_joint",
+              "wrist_2_joint",
+              "wrist_3_joint"
+            ],
+            "initial_joint_positions_rad": {
+              "shoulder_pan_joint": 0.0,
+              "shoulder_lift_joint": -1.2,
+              "elbow_joint": 1.5,
+              "wrist_1_joint": -1.8,
+              "wrist_2_joint": -1.57,
+              "wrist_3_joint": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 2,
+      "object_name_in_scene": "Table",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "AssetRef",
+          "properties": {
+            "asset_path": "models/29/table.urdf"
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 3,
+      "object_name_in_scene": "Apple",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.18,
+              -0.4,
+              0.64
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "AssetRef",
+          "properties": {
+            "asset_path": "models/1/apple.obj"
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "shape": "mesh",
+            "mesh": "models/1/apple.obj"
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "color": [
+              0.75,
+              0.12,
+              0.08,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 4,
+      "object_name_in_scene": "floor",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              -0.06
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "shape": "box",
+            "size": [
+              6,
+              6,
+              0.12
+            ]
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "color": [
+              0.72,
+              0.75,
+              0.78,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 5,
+      "object_name_in_scene": "probe_block",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.65,
+              -0.55,
+              0.1
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "shape": "box",
+            "size": [
+              0.2,
+              0.2,
+              0.2
+            ]
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "color": [
+              0.95,
+              0.55,
+              0.12,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 6,
+      "object_name_in_scene": "physics_cube",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              -1,
+              0.5,
+              0.25
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "shape": "box",
+            "size": [
+              0.1,
+              0.1,
+              0.1
+            ]
+          }
+        },
+        {
+          "component_type": "RigidBody",
+          "properties": {
+            "dynamic": true,
+            "mass": 0.2
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "color": [
+              0.2,
+              0.65,
+              0.4,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 7,
+      "object_name_in_scene": "robot_mount",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              0.623
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "shape": "box",
+            "size": [
+              0.26,
+              0.26,
+              0.05
+            ]
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "color": [
+              0.2,
+              0.24,
+              0.3,
+              1
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "named_targets": {
+    "inspection_a": {
+      "request": {
+        "target": {
+          "type": "pose",
+          "frame": "world",
+          "position": {
+            "x": 0.4478170823346059,
+            "y": 0.3729910570993537,
+            "z": 1.0100310939020134
+          },
+          "orientation": {
+            "representation": "quaternion",
+            "x": 0.7408121953139561,
+            "y": -0.6706988426252718,
+            "z": -0.03669948685592131,
+            "w": -0.0036744305340782983
+          }
+        }
+      }
+    },
+    "inspection_b": {
+      "request": {
+        "target": {
+          "type": "pose",
+          "frame": "world",
+          "position": {
+            "x": 0.7524994191609493,
+            "y": -0.2068279092912435,
+            "z": 0.9576287807869981
+          },
+          "orientation": {
+            "representation": "quaternion",
+            "x": -0.6520494146463585,
+            "y": 0.7572096075447968,
+            "z": 0.0007380422873658635,
+            "w": 0.03827043760892028
+          }
+        }
+      }
+    },
+    "home": {
+      "request": {
+        "target": {
+          "type": "joint",
+          "joint_positions": [
+            0,
+            -1.2,
+            1.5,
+            -1.8,
+            -1.57,
+            0
+          ]
+        }
+      }
+    }
+  },
+  "move_defaults": {
+    "constraints": {
+      "avoid_collision": true,
+      "safety_distance": 0.003,
+      "velocity_scale": 0.25,
+      "acceleration_scale": 0.25,
+      "timeout": 60
+    },
+    "planning": {
+      "mode": "auto",
+      "planning_time": 5,
+      "allow_replan": true
+    }
+  }
+}

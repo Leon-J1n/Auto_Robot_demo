@@ -8,7 +8,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from ..pose_utils import effective_orientation
-from ...planners.errors import PlanningError
+from planning.errors import PlanningError
 
 
 class CircularMove:
@@ -57,8 +57,8 @@ class CircularMove:
         for angle in np.linspace(0.0, total_angle, count)[1:]:
             point = center + _rotate(start - center, axis, angle)
             pose = {"position": point, "orientation": orientation}
-            result = self.kinematics.solve(pose, seed=seed, method=params.get("ik_method", "auto"), timeout=min(float(request["planning"]["planning_time"]), 1.0))
-            seed = np.asarray(result["solution"], dtype=float)
+            result = self.kinematics.solve_one(pose, seed=seed, backend=params.get("ik_method", "auto"), timeout=min(float(request["planning"]["planning_time"]), 1.0))
+            seed = np.asarray(result.solution, dtype=float)
             joints.append(seed)
         points = np.asarray(joints)
         return {
@@ -100,3 +100,4 @@ def _angle_through_via(start: np.ndarray, via: np.ndarray, goal: np.ndarray, axi
     via_angle = _signed_angle(start, via, axis) % (2.0 * math.pi)
     goal_angle = _signed_angle(start, goal, axis) % (2.0 * math.pi)
     return goal_angle if via_angle <= goal_angle else goal_angle - 2.0 * math.pi
+

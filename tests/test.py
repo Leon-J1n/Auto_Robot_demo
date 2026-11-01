@@ -21,12 +21,13 @@ if str(PROJECT_ROOT) not in sys.path:
 from skills.motion.move.skill import MoveSkill
 from skills.manipulation.grasp.skill import GraspSkill
 from skills.manipulation.press.skill import PressSkill
-from skills.manipulation.push_pull.skill import PushPullSkill
+from skills.manipulation.pull_push.skill import PullPushSkill
 from skills.manipulation.release.skill import ReleaseSkill
+from skills.perception.location.skill import LocateSkill
 from utils import SceneRobotRuntime
 
 
-DEFAULT_CONFIG = Path(__file__).with_name("test_config_001.json")
+DEFAULT_CONFIG = Path(__file__).with_name("test_config_002.json")
 KEY_CODES = {"SPACE": 32, "ENTER": 257}
 
 
@@ -70,8 +71,9 @@ def run_visual_test(config_path: Path = DEFAULT_CONFIG) -> list[dict[str, Any]]:
     skill = MoveSkill(robot_runtime=runtime)
     grasp_skill = GraspSkill(robot_runtime=runtime)
     press_skill = PressSkill(robot_runtime=runtime)
-    push_pull_skill = PushPullSkill(robot_runtime=runtime)
+    push_pull_skill = PullPushSkill(robot_runtime=runtime)
     release_skill = ReleaseSkill(robot_runtime=runtime)
+    locate_skill = LocateSkill(robot_runtime=runtime)
     continue_event = threading.Event()
     allowed_keys = {KEY_CODES[name] for name in viewer_config.get("continue_keys", ["SPACE", "ENTER"])}
 
@@ -99,7 +101,7 @@ def run_visual_test(config_path: Path = DEFAULT_CONFIG) -> list[dict[str, Any]]:
                 result = skill.execute(request)
                 _print_result(result)
             else:
-                result = _execute_action(step, runtime, grasp_skill, release_skill, press_skill, push_pull_skill)
+                result = _execute_action(step, runtime, grasp_skill, release_skill, press_skill, push_pull_skill, locate_skill)
                 _print_action_result(step, result)
                 if result["success"] and step_type in {"grasp", "release"}:
                     skill = MoveSkill(robot_runtime=runtime)
@@ -173,7 +175,8 @@ def _execute_action(
     grasp_skill: GraspSkill,
     release_skill: ReleaseSkill,
     press_skill: PressSkill,
-    push_pull_skill: PushPullSkill,
+    push_pull_skill: PullPushSkill,
+    locate_skill: LocateSkill,
 ) -> dict[str, Any]:
     action_type = action.get("type")
     if action_type == "grasp":
@@ -195,14 +198,21 @@ def _execute_action(
         return press_skill.execute(action["request"])
     if action_type == "push_pull":
         return push_pull_skill.execute(action["request"])
+    if action_type == "locate":
+        return locate_skill.execute(action["request"])
     return {"success": False, "error": {"error_code": "INVALID_TEST_ACTION", "error_message": f"Unsupported post_action type: {action_type}", "failed_stage": "test_action", "recoverable": True}}
 
 
 def _print_action_result(action: Mapping[str, Any], result: Mapping[str, Any]) -> None:
-    labels = {"grasp": "抓取", "release": "释放", "press": "按压", "push_pull": "推拉"}
+    labels = {"grasp": "抓取", "release": "释放", "press": "按压", "push_pull": "推拉", "locate": "定位观测"}
     label = labels.get(action.get("type"), "动作")
     if result["success"]:
         print(f"{label}完成。")
+        if action.get("type") == "locate":
+            observation = result.get("localization_result", {}).get("observation", {})
+            for path in observation.get("saved_files", {}).values():
+                print(f"已保存相机文件：{path}")
+            print("VLM判断：待实现；当前仅完成RGB-D采集。")
     else:
         print(f"{label}失败：{json.dumps(result['error'], ensure_ascii=False)}")
 

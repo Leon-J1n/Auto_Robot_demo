@@ -25,6 +25,8 @@ class DefaultGrasp:
             "grasp_force": 20.0, "hold_force": 10.0,
             "contact_threshold": 2.0, "position_tolerance": 0.002,
             "force_tolerance": 2.0, "settle_time": 0.3,
+            "confirmation_time": 0.1, "width_stability_tolerance": 0.0005,
+            "position_stability_tolerance": 0.001, "orientation_stability_tolerance": 0.035,
         }
         configured = self.config.get("strategies", {}).get("default_grasp", {}).get("defaults", {})
         params = {**defaults, **configured, **request.get("strategy_params", {})}
@@ -41,9 +43,10 @@ class DefaultGrasp:
                 params["close_width"], speed=params["close_speed"],
                 force=params["grasp_force"], timeout=request["constraints"]["timeout"],
                 target_object_id=request["target"].get("object_id"),
+                mode=request['grasp']['mode'], maximum_force=request['constraints']['maximum_force'],
+                **{key: params[key] for key in ('confirmation_time', 'contact_threshold',
+                    'width_stability_tolerance', 'position_stability_tolerance', 'orientation_stability_tolerance')},
             )
-            if params["settle_time"] > 0 and context["runtime"].realtime:
-                time.sleep(params["settle_time"])
             if close_result["contact_detected"] and request["constraints"]["hold_on_success"]:
                 controller.hold(params["hold_force"])
             state = controller.get_state(request["target"].get("object_id"))

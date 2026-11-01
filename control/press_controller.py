@@ -8,18 +8,18 @@ from typing import Any, Mapping, Sequence
 import mujoco
 import numpy as np
 
-from kinematics import IKError, MujocoKinematics
+from kinematics import IKError
 from skills.manipulation.press.utils.error_codes import ErrorCode, PressExecutionError
 
 
 class MujocoPressController:
     """Execute short fixed-axis presses without invoking global planning."""
 
-    def __init__(self, runtime: Any) -> None:
+    def __init__(self, runtime: Any, *, kinematics=None) -> None:
         self.runtime = runtime
         self.model = runtime.model
         self.data = runtime.data
-        self.kinematics = MujocoKinematics(runtime)
+        self.kinematics = kinematics if kinematics is not None else runtime.kinematics
         self.ready = True
         self.force_feedback_available = True
         self.force_sensor_calibrated = True
@@ -106,10 +106,10 @@ class MujocoPressController:
                 travel = min(travel + step, maximum_travel)
                 target_position = start_position + direction * travel
                 try:
-                    solved = self.kinematics.solve({"position": target_position, "orientation": orientation}, seed=final_q, method="auto", timeout=0.25, max_joint_step=0.3)
+                    solved = self.kinematics.solve_one({"position": target_position, "orientation": orientation}, seed=final_q, backend="auto", timeout=0.25, max_joint_step=0.3)
                 except IKError as exc:
                     raise PressExecutionError(f"Local press IK failed at travel {travel:.6f} m: {exc}", error_code=ErrorCode.PRESS_EXECUTION_ERROR, failed_stage="local_motion", recoverable=True, recommended_action="Move to a better pre-press pose without changing the requested press axis.") from exc
-                next_q = np.asarray(solved["solution"], dtype=float)
+                next_q = np.asarray(solved.solution, dtype=float)
                 self._set_joints(next_q)
                 final_q = next_q
                 force, raw_contact, contacts = self._target_contact(options["target_object_id"])

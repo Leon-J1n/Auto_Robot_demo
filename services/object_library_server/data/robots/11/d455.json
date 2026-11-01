@@ -1,0 +1,37 @@
+{
+  "semantic_properties": {
+    "object_name": "d455",
+    "object_id": 11,
+    "deformable": false,
+    "scalable": false,
+    "interactable": false,
+    "tag": "d455 camera"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.124,
+      0.029,
+      0.026
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.072,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.8,
+        0.01,
+        0.001
+      ]
+    },
+    "restitution": 0.08,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}

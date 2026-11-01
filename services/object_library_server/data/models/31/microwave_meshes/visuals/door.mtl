@@ -1,0 +1,8 @@
+# Texture supplies the base color; neutral Kd prevents duplicate tint.
+
+newmtl microwave_surface
+Kd 1 1 1
+Ka 1 1 1
+Ks 0.15 0.15 0.15
+Ns 25
+map_Kd texture.png

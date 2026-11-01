@@ -41,5 +41,18 @@ input:
     type: string
     default: auto
 
+  camera_id:
+    type: string
+    default: global
+    enum: [global, global_camera, wrist, wrist_camera]
+
+  save_dir:
+    type: string
+    description: Optional directory for RGB PNG, depth PNG and metric depth NPY files.
+
+  file_prefix:
+    type: string
+    description: Optional filename prefix for the captured frame.
+
 validation_rules:
   - require_any: [target_description, locate.target.object, locate.target.instruction]

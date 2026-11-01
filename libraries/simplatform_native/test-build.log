@@ -1,0 +1,8 @@
+适用于 .NET Framework MSBuild 版本 17.14.14+a129329f1
+
+  Checking File Globs
+  sim_test_plugin.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_test_plugin.dll
+  sim_core.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_core.lib
+  test_core.cpp
+    正在创建库 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_core_tests.lib 和对象 C:/Users/21474/Desktop/robot-agent/libraries/simplatform_native/build/Release/sim_core_tests.exp
+  sim_core_tests.vcxproj -> C:\Users\21474\Desktop\robot-agent\libraries\simplatform_native\build\Release\sim_core_tests.exe

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import Any, Dict, Mapping
+from kinematics.registry import get_registry
 
 
 class MoveValidationError(ValueError):
@@ -70,10 +71,16 @@ def validate_move_request(
     normalized["constraints"].setdefault("orientation_tolerance", 2.0)
     normalized["constraints"].setdefault("keep_end_effector_orientation", False)
     normalized["constraints"].setdefault("timeout", 30.0)
+    phase_buffers = {"transit": 0.05, "approach": 0.02, "retreat": 0.02, "contact": 0.005}
+    normalized["constraints"].setdefault(
+        "safety_distance", phase_buffers.get(normalized["motion"].get("phase"), 0.0)
+    )
     normalized.setdefault("strategy_params", {})
     if not isinstance(normalized["strategy_params"], Mapping):
         raise MoveValidationError("strategy_params must be an object.")
     normalized["strategy_params"] = dict(normalized["strategy_params"])
+    _enum({"linear_search_mode": normalized["strategy_params"].get("linear_search_mode", "fast")},
+          "linear_search_mode", {"fast", "exhaustive"})
 
     _enum(normalized["motion"], "path_type", {"auto", "joint", "linear", "circular"})
     _enum(normalized["motion"], "path_constraint", {"soft", "hard"})
@@ -117,10 +124,13 @@ def validate_move_request(
         if params.get("via_point") is None and not all(params.get(k) is not None for k in ("arc_center", "arc_axis", "arc_angle")):
             raise MoveValidationError("Circular motion requires via_point or arc_center/arc_axis/arc_angle.")
     ik_method = normalized["strategy_params"].get("ik_method", "auto")
-    if ik_method not in {"auto", "ikfast", "trac_ik"}:
-        raise MoveValidationError("strategy_params.ik_method must be auto, ikfast, or trac_ik.")
+    allowed_methods = {"auto", *get_registry().names}
+    if not isinstance(ik_method, str) or ik_method not in allowed_methods:
+        raise MoveValidationError(f"strategy_params.ik_method must be one of: {', '.join(sorted(allowed_methods))}.")
     if "cartesian_step" in normalized["strategy_params"]:
         _number_range(normalized["strategy_params"], "cartesian_step", 0.001, 0.1)
+    if "max_joint_step" in normalized["strategy_params"]:
+        _number_range(normalized["strategy_params"], "max_joint_step", 0.001, 0.4)
     if "ik_seed" in normalized["strategy_params"]:
         seed = normalized["strategy_params"]["ik_seed"]
         if not isinstance(seed, (list, tuple)) or len(seed) != 6:

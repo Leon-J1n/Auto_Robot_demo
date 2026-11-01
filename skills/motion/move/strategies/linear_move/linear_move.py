@@ -5,9 +5,10 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 import numpy as np
+from kinematics import IKError
 
 from ..pose_utils import effective_orientation
-from ...planners.errors import PlanningError
+from planning.errors import PlanningError
 
 
 class LinearMove:
@@ -55,73 +56,65 @@ class LinearMove:
             for alpha, waypoint_orientation in zip(alphas, waypoint_orientations)
         ]
 
-        # An explicit seed remains an authoritative branch hint.  Otherwise,
-        # enumerate target-pose branches and validate each complete Cartesian
-        # path before selecting the smoothest collision-free one.
-        if seed_value is not None:
-            branch_seeds = [seed]
-        else:
-            physical_branches = self.kinematics.solve_candidates(
-                poses[-1], seed=start_q, method=method,
-                timeout=min(float(request["planning"]["planning_time"]), 3.0), max_solutions=8,
-            )
-            branch_seeds = []
-            for physical_branch in physical_branches:
-                branch_seeds.extend(self.kinematics.equivalent_configurations(physical_branch, start_q, max_variants=8))
-            branch_seeds.sort(key=lambda q: float(np.linalg.norm(q - start_q)))
-            branch_seeds = branch_seeds[:32]
-            if not branch_seeds:
-                branch_seeds = [seed]
+        exhaustive = params.get("linear_search_mode", "fast") == "exhaustive"
+        # Caches live for one path build only: target, scene and constraints
+        # cannot change between branches. Use exact joint values, not modulo
+        # or rounded keys, to retain distinct windings and continuity behavior.
+        cache = {"ik": {}, "collision": {}, "ik_hits": 0, "collision_hits": 0}
+        candidates, colliding_candidates, rejected = [], [], []
+        evaluated_count = 0
 
-        candidates = []
-        colliding_candidates = []
-        rejected = []
-        for branch_index, branch_seed in enumerate(branch_seeds):
-            joints = [start_q]
-            current_seed = np.asarray(branch_seed, dtype=float)
-            ik_diagnostics = []
-            first_collision = None
-            try:
-                for pose in poses:
-                    result = self.kinematics.solve(
-                        pose, seed=current_seed, method=method,
-                        timeout=min(float(request["planning"]["planning_time"]), 1.0),
-                    )
-                    next_q = np.asarray(result["solution"], dtype=float)
-                    previous_q = joints[-1]
-                    joints.append(next_q)
-                    current_seed = next_q
-                    ik_diagnostics.append({key: value for key, value in result.items() if key not in {"solution", "solutions"}})
-                    if first_collision is None and request["constraints"]["avoid_collision"] and self.collision_checker is not None:
-                        collision = self.collision_checker.check_path(
-                            [previous_q, next_q], resolution=0.04,
-                            safety_distance=float(request["constraints"].get("safety_distance", 0.0)),
-                        )
-                        if collision.in_collision:
-                            first_collision = collision
-            except Exception as exc:
-                rejected.append({"branch": branch_index, "reason": f"ik_failed: {exc}"})
-                continue
-            if len(joints) != len(poses) + 1:
-                continue
-            points = np.asarray(joints)
-            deltas = np.diff(points, axis=0)
-            score = float(np.sum(np.linalg.norm(deltas, axis=1)) + 2.0 * np.max(np.abs(deltas)))
-            candidate = (score, points, ik_diagnostics, branch_index)
-            if first_collision is None:
-                candidates.append(candidate)
-            else:
-                rejected.append({"branch": branch_index, "reason": "collision", "contacts": list(first_collision.contacts)})
+        def evaluate(branch_seed):
+            nonlocal evaluated_count
+            index = evaluated_count
+            evaluated_count += 1
+            _, candidate, rejection, colliding = self._evaluate_branch(
+                index, branch_seed, poses, start_q, request, method, cache=cache,
+            )
+            if rejection is not None:
+                rejected.append(rejection)
+            elif colliding:
                 colliding_candidates.append(candidate)
+                rejected.append({"branch": index, "reason": "collision", "contacts": list(colliding)})
+            elif candidate is not None:
+                candidates.append(candidate)
+
+        branch_seeds = []
+        if seed_value is not None or not exhaustive:
+            branch_seeds.append(seed)
+            evaluate(seed)
+        # A collision is also a failed fast path. Search other branches before
+        # allowing the existing soft-path collision-free fallback.
+        if seed_value is None and (exhaustive or not candidates):
+            try:
+                physical_branches = self.kinematics.solve_all(
+                    poses[-1], seed=start_q, backend=method,
+                    timeout=min(float(request["planning"]["planning_time"]), 3.0), max_solutions=8,
+                ).solutions
+            except IKError:
+                # A failed multi-start search can still try the measured seed below.
+                physical_branches = []
+            alternatives = []
+            for physical_branch in physical_branches:
+                alternatives.extend(self.kinematics.equivalent_configurations(physical_branch, start_q, max_variants=8))
+            alternatives.sort(key=lambda q: float(np.linalg.norm(q - start_q)))
+            alternatives = alternatives[:32]
+            if not alternatives and not branch_seeds:
+                alternatives = [seed]
+            for alternative in alternatives:
+                if any(np.array_equal(alternative, known) for known in branch_seeds):
+                    continue
+                branch_seeds.append(alternative)
+                evaluate(alternative)
+                if candidates and not exhaustive:
+                    break
 
         if not candidates:
             if colliding_candidates:
                 # A soft Cartesian request may legally relax its path.  Pass
                 # the best reachable goal branch to DirectPlanner so its
                 # collision result can trigger the configured RRT fallback.
-                safe_goals = [item for item in colliding_candidates if not self.collision_checker.check(
-                    item[1][-1], safety_distance=float(request["constraints"].get("safety_distance", 0.0))).in_collision]
-                _, points, ik_diagnostics, selected_branch = min(safe_goals or colliding_candidates, key=lambda item: item[0])
+                _, points, ik_diagnostics, selected_branch = min(colliding_candidates, key=lambda item: item[0])
             else:
                 raise PlanningError(
                     f"No continuous IK branch reaches the target ({len(rejected)} branches rejected).",
@@ -143,10 +136,74 @@ class LinearMove:
             "orientation_constraint": {"enabled": hold_orientation, "orientation": orientation},
             "diagnostics": {"ik": ik_diagnostics, "ik_branch_selection": {
                 "candidate_count": len(branch_seeds), "rejected": rejected, "selected_branch": selected_branch,
-                "explicit_seed": seed_value is not None,
+                "evaluated_count": evaluated_count, "explicit_seed": seed_value is not None,
+                "exhaustive_search": exhaustive and seed_value is None,
+                "search_mode": "exhaustive" if exhaustive else "fast",
+                "ik_cache_hits": cache["ik_hits"], "collision_cache_hits": cache["collision_hits"],
             }},
         }
 
+    def _evaluate_branch(self, branch_index, branch_seed, poses, start_q, request, method, *, cache=None):
+        """Evaluate one IK branch using thread-local MuJoCo workspaces."""
+        kinematics, collision_checker = self.kinematics, self.collision_checker
+        joints = [start_q]
+        current_seed = np.asarray(branch_seed, dtype=float)
+        ik_diagnostics = []
+        first_collision = None
+        max_step = float(request["strategy_params"].get("max_joint_step", 0.4))
+        if cache is None:
+            cache = {"ik": {}, "collision": {}, "ik_hits": 0, "collision_hits": 0}
+
+        def solve(pose_index, pose, seed, continuity=None):
+            key = (pose_index, np.asarray(seed, dtype=float).tobytes(), continuity)
+            if key in cache["ik"]:
+                cache["ik_hits"] += 1
+                return cache["ik"][key]
+            kwargs = {"max_joint_step": continuity} if continuity is not None else {}
+            result = kinematics.solve_one(
+                pose, seed=seed, backend=method,
+                timeout=min(float(request["planning"]["planning_time"]), 1.0), **kwargs,
+            )
+            cache["ik"][key] = result
+            return result
+
+        try:
+            for pose_index, pose in enumerate(poses):
+                result = solve(pose_index, pose, current_seed)
+                next_q = np.asarray(result.solution, dtype=float)
+                previous_q = joints[-1]
+                if np.max(np.abs(next_q - previous_q)) > max_step:
+                    # A branch hint must never override continuity from the
+                    # measured start or the preceding accepted waypoint.
+                    result = solve(pose_index, pose, previous_q, max_step)
+                    next_q = np.asarray(result.solution, dtype=float)
+                if np.max(np.abs(next_q - previous_q)) > max_step:
+                    raise PlanningError("Linear IK exceeds the joint continuity limit.", code="PATH_CONSTRAINT_INFEASIBLE")
+                joints.append(next_q)
+                current_seed = next_q
+                ik_diagnostics.append(result.metadata())
+                if first_collision is None and request["constraints"]["avoid_collision"] and collision_checker is not None:
+                    key = (previous_q.tobytes(), next_q.tobytes())
+                    if key in cache["collision"]:
+                        cache["collision_hits"] += 1
+                        collision = cache["collision"][key]
+                    else:
+                        collision = collision_checker.check_path(
+                            [previous_q, next_q], resolution=0.04,
+                            safety_distance=float(request["constraints"].get("safety_distance", 0.0)),
+                        )
+                        cache["collision"][key] = collision
+                    if collision.in_collision:
+                        first_collision = collision
+        except Exception as exc:
+            return branch_index, None, {"branch": branch_index, "reason": f"ik_failed: {exc}"}, None
+        if len(joints) != len(poses) + 1:
+            return branch_index, None, {"branch": branch_index, "reason": "ik_failed: incomplete path"}, None
+        points = np.asarray(joints)
+        deltas = np.diff(points, axis=0)
+        score = float(np.sum(np.linalg.norm(deltas, axis=1)) + 2.0 * np.max(np.abs(deltas)))
+        candidate = (score, points, ik_diagnostics, branch_index)
+        return branch_index, candidate, None, first_collision.contacts if first_collision is not None else None
 
 def _waypoint_orientations(
     target: Mapping[str, Any] | None,
@@ -203,3 +260,4 @@ def _orientation_to_wxyz(orientation: Mapping[str, Any]) -> np.ndarray:
     if not np.all(np.isfinite(quaternion)) or np.linalg.norm(quaternion) < 1e-12:
         raise ValueError("Target orientation must define a finite nonzero quaternion.")
     return quaternion / np.linalg.norm(quaternion)
+

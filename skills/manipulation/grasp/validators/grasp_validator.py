@@ -35,6 +35,16 @@ class GraspValidator:
         controller_state = context.get("gripper_controller_state", {})
         safety = context.get("safety_state", {})
         state = context.get("current_gripper_state", {})
+        if not request['constraints']['hold_on_success']:
+            self._fail('Grasp requires hold_on_success=true.', ErrorCode.INVALID_GRIPPER_PARAMETERS, 'preconditions', True)
+        if getattr(context['gripper_controller'], 'held_name', None) is not None and request['grasp']['operation'] != 'verify_only':
+            self._fail('Release the current payload before grasping again.', ErrorCode.INVALID_GRIPPER_PARAMETERS, 'preconditions', True)
+        try:
+            context['gripper_controller'].validate_target(request['target'].get('object_id'), mode=request['grasp']['mode'])
+        except (ValueError, NotImplementedError) as exc:
+            self._fail(str(exc), ErrorCode.TARGET_NOT_GRASPABLE, 'preconditions', True)
+        if request['grasp']['operation'] == 'verify_only' and (not state.get('holding') or state.get('mode') != request['grasp']['mode']):
+            self._fail('No active grasp in the requested mode for this target.', ErrorCode.GRASP_VERIFICATION_FAILED, 'verification', True)
         if not controller_state.get("ready") or controller_state.get("fault"):
             self._fail("Gripper controller is not ready.", ErrorCode.GRIPPER_NOT_READY, "preconditions", True)
         if not state.get("known") or not state.get("initialized"):
@@ -51,7 +61,7 @@ class GraspValidator:
         if not 0.0 <= close_width <= open_width <= maximum_width:
             self._fail("Gripper widths must satisfy 0 <= close_width <= open_width <= maximum_width.", ErrorCode.INVALID_GRIPPER_PARAMETERS, "preconditions", True)
         for key in ("grasp_force", "hold_force"):
-            force = float(params.get(key, 0.0))
+            force = float(params.get(key, 20.0 if key == 'grasp_force' else 10.0))
             maximum_force = min(float(request["constraints"]["maximum_force"]), float(limits["maximum_force"]))
             if not 0.0 <= force <= maximum_force:
                 self._fail(f"{key} exceeds the permitted force range.", ErrorCode.FORCE_LIMIT_EXCEEDED, "preconditions", True)

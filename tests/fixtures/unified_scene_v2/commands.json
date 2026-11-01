@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "request_id": "unified-arm-test-001",
+  "scene_id": "unified_arm_test",
+  "scene_version": 2,
+  "commands": [
+    {
+      "command_id": "command-001",
+      "skill_name": "locate",
+      "parameters": {
+        "target": "Apple"
+      }
+    },
+    {
+      "command_id": "command-002",
+      "skill_name": "move",
+      "parameters": {
+        "target": "inspection_a",
+        "planning_method": "joint"
+      }
+    },
+    {
+      "command_id": "command-003",
+      "skill_name": "move",
+      "parameters": {
+        "target": "end_effector",
+        "relation": "above",
+        "distance_m": 0.1,
+        "planning_method": "linear",
+        "keep_end_effector_orientation": true
+      }
+    },
+    {
+      "command_id": "command-004",
+      "skill_name": "move",
+      "parameters": {
+        "target": "inspection_b",
+        "planning_method": "joint"
+      }
+    },
+    {
+      "command_id": "command-005",
+      "skill_name": "move",
+      "parameters": {
+        "target": "home",
+        "planning_method": "joint"
+      }
+    }
+  ]
+}

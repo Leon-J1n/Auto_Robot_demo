@@ -1,0 +1,50 @@
+{
+  "semantic_properties": {
+    "object_name": "mug",
+    "object_id": 23,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "white,textured"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.13074,
+      0.096522,
+      0.114624
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.118,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.6,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0,
+        0.05,
+        0.01,
+        3.14,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.0
+      ]
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "semantic_properties": {
+    "object_name": "can",
+    "object_id": 34,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "red,metallic,slim"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.065,
+      0.065,
+      0.122
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.013,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.65,
+        0.005,
+        0.0001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0.0,
+        0.006,
+        0.111,
+        3.14,
+        -1.57,
+        1.57,
+        0,
+        1,
+        0,
+        0.1
+      ]
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "by_name": {
+    "d435i": [
+      3
+    ],
+    "d455": [
+      11
+    ],
+    "dobot_cr5": [
+      7
+    ],
+    "nero": [
+      9
+    ],
+    "piper": [
+      8
+    ],
+    "piper_r": [
+      14
+    ],
+    "pr2": [
+      13
+    ],
+    "robot_pedestal": [
+      4
+    ],
+    "robotiq_2f140": [
+      10
+    ],
+    "robotiq_2f85": [
+      2
+    ],
+    "ur10": [
+      6
+    ],
+    "ur3": [
+      5
+    ],
+    "ur5e_arm": [
+      1
+    ],
+    "xarm_vacuum_gripper": [
+      12
+    ]
+  },
+  "by_id": {
+    "1": "ur5e_arm",
+    "2": "robotiq_2f85",
+    "3": "d435i",
+    "4": "robot_pedestal",
+    "5": "ur3",
+    "6": "ur10",
+    "7": "dobot_cr5",
+    "8": "piper",
+    "9": "nero",
+    "10": "robotiq_2f140",
+    "11": "d455",
+    "12": "xarm_vacuum_gripper",
+    "13": "pr2",
+    "14": "piper_r"
+  },
+  "category": {
+    "1": "机械臂.UR5",
+    "2": "机械臂.夹爪",
+    "3": "机械臂.摄像机",
+    "4": "机械臂.底座",
+    "5": "机械臂.UR3",
+    "6": "机械臂.UR10",
+    "7": "机械臂.Dobot_CR5",
+    "8": "机械臂.PiPER",
+    "9": "机械臂.NERO",
+    "10": "机械臂.夹爪",
+    "11": "机械臂.摄像机",
+    "12": "机械臂.吸盘",
+    "13": "机械臂.PR2",
+    "14": "机械臂.PiPER_R"
+  },
+  "thumbnail": {
+    "1": "1/ur5e_arm_thumbnail.png",
+    "2": "2/robotiq_2f85_thumbnail.png",
+    "3": "3/d435i_thumbnail.png",
+    "4": "4/robot_pedestal_thumbnail.png",
+    "5": "5/ur3_thumbnail.png",
+    "6": "6/ur10_thumbnail.png",
+    "7": "7/dobot_cr5_thumbnail.png",
+    "8": "8/piper_thumbnail.png",
+    "9": "9/nero_thumbnail.png",
+    "10": "10/robotiq_2f140_thumbnail.png",
+    "11": "11/d455_thumbnail.png",
+    "12": "12/xarm_vacuum_gripper_thumbnail.png",
+    "13": "13/pr2_thumbnail.png",
+    "14": "14/piper_r_thumbnail.png"
+  }
+}

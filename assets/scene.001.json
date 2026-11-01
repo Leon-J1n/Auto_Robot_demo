@@ -1,0 +1,366 @@
+{
+  "scene_schema_version": 1,
+  "scene_version": 1,
+  "scene_id": "scene.001",
+  "scene_name": "OLS object-ID to grasp-center motion",
+  "objects": [
+    {
+      "object_id_in_scene": 1,
+      "object_name_in_scene": "Robot_ur5e",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.0,
+              0.0,
+              0.55
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "RobotDriver",
+          "properties": {
+            "joint_sequence": [
+              "shoulder_pan_joint",
+              "shoulder_lift_joint",
+              "elbow_joint",
+              "wrist_1_joint",
+              "wrist_2_joint",
+              "wrist_3_joint"
+            ],
+            "initial_joint_positions_rad": {
+              "shoulder_pan_joint": 0.0,
+              "shoulder_lift_joint": -2.094395,
+              "elbow_joint": 1.570796,
+              "wrist_1_joint": -1.5707963,
+              "wrist_2_joint": -1.5707963,
+              "wrist_3_joint": 0.0
+            }
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "path": "$LIBRARY_SERVER/1",
+            "type": "robot"
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 3,
+      "object_name_in_scene": "Robotiq2F85Gripper",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "parent": 1,
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "component_type": "RobotAttachment",
+          "properties": {
+            "parent_object_id": 1,
+            "parent_link": "attachment_site",
+            "child_link": "robotiq_2f85_mount",
+            "connection_type": "fixed",
+            "transform": {
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "quaternion_xyzw": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "reference_frame": "parent_link"
+            }
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "path": "$LIBRARY_SERVER/2",
+            "type": "robot"
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 2,
+      "object_name_in_scene": "Table",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.525,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "path": "$LIBRARY_SERVER/29",
+            "type": "model"
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 4,
+      "object_name_in_scene": "floor",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              -0.06
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "forceOverrideColor": "#D1D6E0",
+            "color": [
+              0.82,
+              0.84,
+              0.88,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 7,
+      "object_name_in_scene": "robot_pedestal",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0,
+              0,
+              0.299
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "forceOverrideColor": "#404752",
+            "color": [
+              0.25,
+              0.28,
+              0.32,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 101,
+      "object_name_in_scene": "Apple",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.5,
+              0.22,
+              0.64
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "type": "model",
+            "path": "$LIBRARY_SERVER/1"
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "forceOverrideColor": "#BF1F14",
+            "color": [
+              0.75,
+              0.12,
+              0.08,
+              1
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 102,
+      "object_name_in_scene": "SugarBox",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.65,
+              0.4,
+              0.6849173069999999
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "type": "model",
+            "path": "$LIBRARY_SERVER/19"
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 103,
+      "object_name_in_scene": "Basket",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "position": [
+              0.55,
+              -0.35,
+              0.598536
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": null
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "type": "model",
+            "path": "$LIBRARY_SERVER/12"
+          }
+        },
+        {
+          "component_type": "MeshRenderer",
+          "properties": {
+            "forceOverrideColor": "#D9D9CC",
+            "color": [
+              0.85,
+              0.85,
+              0.8,
+              1
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

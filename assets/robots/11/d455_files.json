@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "d455.json",
+  "path": "d455.obj",
+  "thumbnail": "d455_thumbnail.png",
+  "reference": [
+    "d455.mtl",
+    "d455.png"
+  ]
+}

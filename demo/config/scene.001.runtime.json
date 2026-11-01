@@ -1,0 +1,189 @@
+{
+  "scene_id": "scene.001",
+  "scene_version": 1,
+  "scene_settings": {
+    "named_targets": {
+      "test_move": {
+        "request": {
+          "target": {
+            "type": "pose",
+            "frame": "world",
+            "position": {
+              "x": 0.3144333621190116,
+              "y": 0.2784246895614467,
+              "z": 1.1180646104096947
+            },
+            "orientation": {
+              "representation": "quaternion",
+              "x": 0.7690888480757962,
+              "y": -0.6288291972181137,
+              "z": 0.053351723597052675,
+              "w": -0.10114236540980653
+            }
+          }
+        }
+      },
+      "home": {
+        "request": {
+          "target": {
+            "type": "joint",
+            "joint_positions": [
+              0.0,
+              -2.094395,
+              1.570796,
+              -1.5707963,
+              -1.5707963,
+              0.0
+            ]
+          }
+        }
+      }
+    }
+  },
+  "object_components": {
+    "1": [
+      {
+        "component_type": "RobotModelRef",
+        "properties": {
+          "urdf": "robots/1/ur5e_arm.urdf",
+          "base_link": "base",
+          "tip_link": "attachment_site",
+          "allowed_collision_link_pairs": [
+            [
+              "robotiq_2f85_base_mount",
+              "wrist_2_link"
+            ]
+          ],
+          "grasp_frame": {
+            "link": "robotiq_2f85_base",
+            "position": [
+              0,
+              0,
+              0.145
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      }
+    ],
+    "3": [
+      {
+        "component_type": "GripperModel",
+        "properties": {
+          "urdf": "robots/2/robotiq_2f85.urdf",
+          "type": "robotiq_2f85"
+        }
+      }
+    ],
+    "2": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/29/table.urdf"
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true
+        }
+      }
+    ],
+    "4": [
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true,
+          "shape": "box",
+          "size": [
+            6,
+            6,
+            0.12
+          ]
+        }
+      }
+    ],
+    "7": [
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true,
+          "shape": "cylinder",
+          "size": [
+            0.14,
+            0.14,
+            0.498
+          ]
+        }
+      }
+    ],
+    "101": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/1/apple.obj"
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true
+        }
+      },
+      {
+        "component_type": "RigidBody",
+        "properties": {
+          "dynamic": true,
+          "mass": 0.1
+        }
+      }
+    ],
+    "102": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/19/sugar_box.obj"
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true
+        }
+      },
+      {
+        "component_type": "RigidBody",
+        "properties": {
+          "dynamic": true,
+          "mass": 0.514
+        }
+      }
+    ],
+    "103": [
+      {
+        "component_type": "AssetRef",
+        "properties": {
+          "asset_path": "models/12/basket.obj"
+        }
+      },
+      {
+        "component_type": "Collider",
+        "properties": {
+          "enabled": true
+        }
+      },
+      {
+        "component_type": "RigidBody",
+        "properties": {
+          "dynamic": false,
+          "mass": 0.12
+        }
+      }
+    ]
+  }
+}

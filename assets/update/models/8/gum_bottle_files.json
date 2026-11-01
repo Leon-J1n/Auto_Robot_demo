@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "gum_bottle.json",
+  "path": "gum_bottle.obj",
+  "thumbnail": "gum_bottle_thumbnail.png",
+  "reference": [
+    "gum_bottle.mtl",
+    "gum_bottle.png"
+  ]
+}

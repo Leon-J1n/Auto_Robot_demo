@@ -1,0 +1,6 @@
+# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
+
+newmtl driver_material
+Ka 0.5 0.52 0.55
+Kd 0.5 0.52 0.55
+Ks 0 0 0

@@ -1,1 +1,1 @@
-"""Adapters and vendored sources for optional third-party libraries."""
+"""Third-party and reusable algorithm backends."""

@@ -42,7 +42,7 @@ input:
     type: float
     range: [0.0, 10000.0]
     default: 2.0
-    description: Force, current or position-derived threshold for target contact.
+    description: Minimum measured normal contact force on EACH target-contacting finger pad; must be positive.
 
   position_tolerance:
     type: float
@@ -56,11 +56,21 @@ input:
     range: [0.0, 10000.0]
     default: 2.0
 
+  confirmation_time:
+    type: float
+    unit: second
+    default: 0.1
+    description: Positive continuous simulated time satisfying bilateral force and stability conditions.
+  width_stability_tolerance: {type: float, unit: meter, default: 0.0005}
+  position_stability_tolerance: {type: float, unit: meter, default: 0.001}
+  orientation_stability_tolerance: {type: float, unit: radian, default: 0.035}
+
   settle_time:
     type: float
     unit: second
     range: [0.0, 60.0]
     default: 0.3
+    description: Legacy field; binding uses confirmation_time with physics stepping instead of a wall-clock sleep.
 
 validation_rules:
   - assert: close_width <= open_width

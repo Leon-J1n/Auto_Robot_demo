@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "basket",
+    "object_id": 12,
+    "deformable": false,
+    "scalable": true,
+    "interactable": true,
+    "tag": "white woven"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.270455,
+      0.268026,
+      0.217507
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.12,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.7,
+        0.005,
+        0.001
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      1.0,
+      2.5
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 3,
+    "poses": [
+      [
+        0,
+        0,
+        0.15,
+        3.14,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1.047
+      ],
+      [
+        0,
+        0,
+        0.15,
+        3.14,
+        0,
+        1.57,
+        1,
+        0,
+        0,
+        1.047
+      ],
+      [
+        0,
+        0,
+        0.15,
+        3.14,
+        -1.57,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    ]
+  }
+}

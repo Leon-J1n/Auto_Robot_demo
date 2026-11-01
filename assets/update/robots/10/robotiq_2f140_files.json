@@ -1,0 +1,28 @@
+{
+  "is_on_cos": false,
+  "metadata": "robotiq_2f140.json",
+  "path": "robotiq_2f140.urdf",
+  "thumbnail": "robotiq_2f140_thumbnail.png",
+  "reference": [
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_base_link.mtl",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_base_link.obj",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_inner_finger.mtl",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_inner_finger.obj",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_inner_knuckle.mtl",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_inner_knuckle.obj",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_outer_finger.mtl",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_outer_finger.obj",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_outer_knuckle.mtl",
+    "robotiq_2f140_meshes/collision/robotiq_2f_140_outer_knuckle.obj",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_base_link.mtl",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_base_link.obj",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_inner_finger.mtl",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_inner_finger.obj",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_inner_knuckle.mtl",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_inner_knuckle.obj",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_outer_finger.mtl",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_outer_finger.obj",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_outer_knuckle.mtl",
+    "robotiq_2f140_meshes/visual/robotiq_2f_140_outer_knuckle.obj"
+  ]
+}

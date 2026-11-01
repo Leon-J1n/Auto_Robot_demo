@@ -16,16 +16,17 @@
 - 已有解析候选时不再为凑够候选数量额外启动数值多初值搜索。
 - 多个解析解按参考关节角规范化，关节运动会优先选择无碰撞目标分支。
 
-显式 `ikfast` 禁用数值回退；显式 `trac_ik` 使用原来的数值兼容实现。
+显式 `ikfast` 禁用数值回退；显式 `jacobian` 使用原来的数值实现，`trac_ik` 保留为兼容别名。
 结果中的 `solver`、`backend` 表明真正使用的算法；auto 数值回退还包含 `fallback_reason`。
 
 ## 坐标与模型
 
 IKFast 的目标是其生成模型的工具端，不是世界坐标系的夹爪 pinch 点。
-`kinematics/mujoco_kinematics.py` 自动提取机器人基座世界变换，并推导工具端到
+`libraries/ikfast/adapter.py` 通过 RobotModel 提取机器人基座世界变换，并推导工具端到
 当前末端 site 的刚性变换。首次使用会在不同关节姿态下对比两个模型的 FK；
 不匹配会拒绝使用该解析后端。每个返回解还会通过实际 MuJoCo 模型的 FK 复核。
 只适用于与该生成源码运动学一致、末端 site 刚性连接在工具端的机器人。
+插件由本目录 `solver.json` 注册；统一接口与新增库说明见 [运动学接口](../../kinematics/README.md)。
 
 ## 构建和依赖
 
@@ -51,8 +52,8 @@ SciPy 到 `.venv`。独立部署建议安装上面的 requirements，避免依�
 ## 测试
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -p test_ikfast_backend.py -v
+.\.venv\Scripts\python.exe -B -m unittest discover -s tests -p test_kinematics_plugins.py -v
 ```
 
 IKFast 尤其适合多分支候选搜索，但不保证每次调用都快于已有良好初值的数值法。
-碰撞检测、轨迹时间参数化以及实际播放时长不由 IK 求解速度决定。
+碰撞检测以及实际播放时长不由 IK 求解速度决定。

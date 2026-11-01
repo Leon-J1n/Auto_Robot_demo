@@ -3,6 +3,7 @@ version: "2.0"
 description: Default configuration for Grasp Skill execution.
 
 grasp:
+  default_mode: binding
   default_strategy: default_grasp
   default_operation: grasp
   default_verification_mode: auto
@@ -31,6 +32,10 @@ strategies:
       position_tolerance: 0.002
       force_tolerance: 2.0
       settle_time: 0.3
+      confirmation_time: 0.1
+      width_stability_tolerance: 0.0005
+      position_stability_tolerance: 0.001
+      orientation_stability_tolerance: 0.035
 
 validation:
   preconditions:

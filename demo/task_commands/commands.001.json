@@ -1,0 +1,78 @@
+{
+  "schema_version": "2.0",
+  "request_id": "ols-pick-position-001",
+  "scene_id": "scene.001",
+  "scene_version": 1,
+  "commands": [
+    {
+      "command_id": "1",
+      "skill_name": "pick",
+      "parameters": {
+        "target": 101,
+        "planning_method": "joint",
+        "grasp": {
+          "mode": "physical"
+        },
+        "grasp_request": {
+          "strategy_params": {
+            "hold_force": 10.0,
+            "safety_distance": 0.01
+          }
+        },
+        "retreat_lift_height": 0.02
+      }
+    },
+    {
+      "command_id": "2",
+      "skill_name": "put",
+      "parameters": {
+        "target": 103,
+        "planning_method": "joint",
+        "release_request": {
+          "strategy_params": {
+            "open_width": 0.085
+          }
+        }
+      }
+    },
+    {
+      "command_id": "3",
+      "skill_name": "pick",
+      "parameters": {
+        "target": 102,
+        "planning_method": "joint",
+        "grasp": {
+          "mode": "physical"
+        },
+        "grasp_request": {
+          "strategy_params": {
+            "hold_force": 40.0,
+            "safety_distance": 0.01
+          }
+        },
+        "retreat_lift_height": 0.02
+      }
+    },
+    {
+      "command_id": "4",
+      "skill_name": "put",
+      "parameters": {
+        "target": 103,
+        "planning_method": "joint",
+        "release_request": {
+          "strategy_params": {
+            "open_width": 0.085
+          }
+        }
+      }
+    },
+    {
+      "command_id": "5",
+      "skill_name": "move",
+      "parameters": {
+        "target": "home",
+        "planning_method": "joint"
+      }
+    }
+  ]
+}

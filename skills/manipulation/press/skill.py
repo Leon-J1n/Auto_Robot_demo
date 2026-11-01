@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional
 
-from collision import MujocoCollisionChecker
+from collision import SimPlatformFCLCollisionChecker
 from control import MujocoPressController
 from skills.manipulation.press.selector import StrategySelectionError, StrategySelector
 from skills.manipulation.press.strategies import DisplacementPress, ForceControlledPress
@@ -16,9 +16,12 @@ from skills.manipulation.press.validators import PressExecutionValidationError, 
 class PressSkill:
     """Execute and verify one bounded fixed-axis local press."""
 
-    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: Any = None) -> None:
+    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: Any = None, kinematics=None) -> None:
         self.config: Mapping[str, Any] = config or {}
         self.robot_runtime = robot_runtime
+        self.kinematics = kinematics
+        self.collision_checker = (SimPlatformFCLCollisionChecker(robot_runtime)
+                                  if robot_runtime is not None else None)
         self.selector = StrategySelector(self.config)
         self.strategies = {
             "displacement_press": DisplacementPress(self.config),
@@ -59,11 +62,13 @@ class PressSkill:
             raise PressExecutionError("A robot runtime is required.", error_code=ErrorCode.PRESS_CONTROLLER_NOT_READY, failed_stage="runtime_context", recoverable=True, recommended_action="Provide an initialized robot runtime at the pre-press pose.")
         controller = getattr(self.robot_runtime, "press_controller", None)
         if controller is None:
-            controller = MujocoPressController(self.robot_runtime)
+            controller = MujocoPressController(self.robot_runtime, kinematics=self.kinematics)
             self.robot_runtime.press_controller = controller
+        elif self.kinematics is not None:
+            controller.kinematics = self.kinematics
         state = controller.get_state(request["target"].get("object_id"))
         runtime_context = self.robot_runtime.get_context(request)
-        collision = MujocoCollisionChecker(self.robot_runtime).check(self.robot_runtime.get_joint_positions())
+        collision = self.collision_checker.check(self.robot_runtime.get_joint_positions())
         target_state = self._target_state(request)
         return {
             **runtime_context,

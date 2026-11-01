@@ -35,6 +35,11 @@ input:
         default: grasp
         enum: [grasp, regrasp, verify_only]
       gripper_id: {type: string, default: default_gripper}
+      mode:
+        type: string
+        default: binding
+        enum: [binding, physical]
+        description: Both modes require stable bilateral contact; binding enables a weld, physical retains actuator-driven frictional contact without a weld.
       verification_mode:
         type: string
         default: auto
@@ -116,6 +121,8 @@ output:
     nullable: true
     properties:
       grasped: {type: boolean}
+      mode: {type: string, enum: [binding, physical]}
+      bound: {type: boolean}
       contact_detected: {type: boolean}
       final_width: {type: float, unit: meter}
       final_force: {type: float, unit: newton}

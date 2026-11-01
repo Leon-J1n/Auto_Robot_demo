@@ -1,0 +1,6 @@
+# Texture supplies the base color; neutral Kd prevents duplicate tint.
+
+newmtl material_0
+Kd 1 1 1
+map_Kd basket.png
+Ka 1 1 1

@@ -2,6 +2,6 @@
 
 from .gripper_controller import MujocoGripperController
 from .press_controller import MujocoPressController
-from .push_pull_controller import MujocoPushPullController
+from .pull_push_controller import MujocoPullPushController
 
-__all__ = ["MujocoGripperController", "MujocoPressController", "MujocoPushPullController"]
+__all__ = ["MujocoGripperController", "MujocoPressController", "MujocoPullPushController"]

@@ -1,0 +1,42 @@
+[
+  {
+    "scene": "world_model\\robotsim\\scene_000.xml",
+    "sample_count": 202,
+    "max_position_error_m": 5.715222817774257e-16,
+    "max_rotation_element_error": 9.992007221626409e-16,
+    "max_jacobian_element_error": 1.887379141862766e-15,
+    "live_qpos_unchanged": true
+  },
+  {
+    "scene": "world_model\\robotsim\\scene_001.xml",
+    "sample_count": 202,
+    "max_position_error_m": 5.715222817774257e-16,
+    "max_rotation_element_error": 9.992007221626409e-16,
+    "max_jacobian_element_error": 1.887379141862766e-15,
+    "live_qpos_unchanged": true
+  },
+  {
+    "scene": "world_model\\robotsim\\scene_002.xml",
+    "sample_count": 202,
+    "max_position_error_m": 5.715222817774257e-16,
+    "max_rotation_element_error": 9.992007221626409e-16,
+    "max_jacobian_element_error": 1.887379141862766e-15,
+    "live_qpos_unchanged": true
+  },
+  {
+    "scene": "world_model\\robotsim\\scene_003.xml",
+    "sample_count": 202,
+    "max_position_error_m": 5.715222817774257e-16,
+    "max_rotation_element_error": 9.992007221626409e-16,
+    "max_jacobian_element_error": 1.887379141862766e-15,
+    "live_qpos_unchanged": true
+  },
+  {
+    "scene": "world_model\\robotsim\\scene_999.xml",
+    "sample_count": 202,
+    "max_position_error_m": 5.715222817774257e-16,
+    "max_rotation_element_error": 9.992007221626409e-16,
+    "max_jacobian_element_error": 1.887379141862766e-15,
+    "live_qpos_unchanged": true
+  }
+]

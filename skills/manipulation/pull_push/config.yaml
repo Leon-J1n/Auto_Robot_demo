@@ -1,0 +1,28 @@
+name: pull_push
+version: "4.0"
+strategies:
+  linear_pull_push: {enabled: true}
+  circular_pull_push: {enabled: true}
+constraints:
+  maximum_force: null
+  maximum_travel: null
+  maximum_angle: null
+  contact_threshold: 1.0
+  zero_force_threshold: 0.0
+  speed: 0.03
+  angular_speed: 0.2
+  timeout: 30.0
+  normal_alignment_tolerance: 1.0
+  avoid_collision: true
+  verify_motion: true
+  stop_on_contact_loss: true
+  emergency_retract: false
+  ignore_path_constraints: true
+  cartesian_step: 0.005
+  angular_step: 0.02
+  position_tolerance: 0.01
+  angle_tolerance: 0.04
+  contact_loss_timeout: 0.1
+  settle_time: 1.0
+  max_joint_speed: 0.5
+  max_joint_acceleration: 1.0

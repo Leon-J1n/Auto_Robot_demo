@@ -1,0 +1,50 @@
+{
+  "semantic_properties": {
+    "object_name": "cabinet",
+    "object_id": 28,
+    "deformable": false,
+    "scalable": true,
+    "interactable": true,
+    "tag": "red,wooden,single"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.3000192,
+      0.25050735,
+      0.4500276
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 2.25,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.7,
+        0.01,
+        0.001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      0.8,
+      3.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        -0.12,
+        -0.13,
+        0.23,
+        3.14,
+        -1.57,
+        1.57,
+        1,
+        0,
+        0,
+        0.0
+      ]
+    ]
+  }
+}

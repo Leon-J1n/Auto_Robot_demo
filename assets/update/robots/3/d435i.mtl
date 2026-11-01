@@ -1,0 +1,7 @@
+# Texture supplies the base color; neutral Kd prevents duplicate tint.
+
+newmtl d435i_atlas
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.0 0.0 0.0
+map_Kd d435i.png

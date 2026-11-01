@@ -1,0 +1,37 @@
+{
+  "semantic_properties": {
+    "object_name": "piper",
+    "object_id": 8,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "piper"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.371493679846576,
+      0.0970000179753196,
+      0.2415006053716347
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 4.2,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        1.0,
+        0.005,
+        0.0001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}

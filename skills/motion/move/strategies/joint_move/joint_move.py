@@ -6,7 +6,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from ...planners.errors import PlanningError
+from planning.errors import PlanningError
 
 
 class JointMove:
@@ -27,6 +27,7 @@ class JointMove:
         target = request["target"]
         start = np.asarray(context["current_joint_state"], dtype=float)
         diagnostics = {}
+        candidate_goals = None
         if target["type"] == "joint":
             goal = np.asarray(target["joint_positions"], dtype=float)
         elif target["type"] == "named_state":
@@ -43,22 +44,23 @@ class JointMove:
         else:
             seed_value = request["strategy_params"].get("ik_seed")
             ik_seed = np.asarray(seed_value, dtype=float) if seed_value is not None else start
-            result = self.kinematics.solve(
+            solutions = self.kinematics.solve_all(
                 target,
                 seed=ik_seed,
-                method=request["strategy_params"].get("ik_method", "auto"),
+                backend=request["strategy_params"].get("ik_method", "auto"),
                 timeout=min(float(request["planning"]["planning_time"]), 2.0),
-            )
-            goal = np.asarray(result["solution"], dtype=float)
-            if request["constraints"]["avoid_collision"] and self.collision_checker is not None:
-                # Analytic IK returns several branches. The nearest algebraic
-                # solution can collide even when another branch is feasible.
-                candidates = sorted(result.get("solutions", [goal]), key=lambda q: float(np.linalg.norm(np.asarray(q)-ik_seed)))
-                for candidate in candidates:
-                    if not self.collision_checker.check(candidate, safety_distance=float(request["constraints"].get("safety_distance", 0.0))).in_collision:
-                        goal = np.asarray(candidate, dtype=float)
-                        break
-            diagnostics["ik"] = {key: value for key, value in result.items() if key not in {"solution", "solutions"}}
+                max_solutions=8,
+            ).solutions
+            if not solutions:
+                raise PlanningError("No IK configuration reaches the target.", code="IK_FAILED", recoverable=True)
+            candidate_goals = []
+            for solution in solutions:
+                for candidate in self.kinematics.equivalent_configurations(solution, start, max_variants=8):
+                    if not any(np.allclose(candidate, q, atol=1e-8) for q in candidate_goals):
+                        candidate_goals.append(np.asarray(candidate, dtype=float))
+            candidate_goals.sort(key=lambda q: float(np.sum(np.abs(q - start))))
+            goal = candidate_goals[0]
+            diagnostics["ik"] = {"candidate_count": len(candidate_goals)}
         limits = self.kinematics.limits
         if np.any(goal < limits[:, 0]) or np.any(goal > limits[:, 1]):
             raise PlanningError(
@@ -66,4 +68,6 @@ class JointMove:
                 code="JOINT_LIMIT_VIOLATION", recoverable=True,
                 details={"target": goal.tolist(), "limits": limits.tolist()},
             )
-        return {"path_type": "joint", "joint_waypoints": np.vstack((start, goal)), "start": start, "goal": goal, "diagnostics": diagnostics}
+        return {"path_type": "joint", "joint_waypoints": np.vstack((start, goal)), "start": start, "goal": goal, "diagnostics": diagnostics,
+                **({"candidate_goals": candidate_goals} if candidate_goals is not None else {})}
+

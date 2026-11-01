@@ -1,0 +1,9 @@
+{
+  "is_on_cos": false,
+  "metadata": "robot_pedestal.json",
+  "path": "robot_pedestal.obj",
+  "thumbnail": "robot_pedestal_thumbnail.png",
+  "reference": [
+    "robot_pedestal.mtl"
+  ]
+}

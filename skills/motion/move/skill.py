@@ -1,27 +1,29 @@
-"""Executable Move Skill for a MuJoCo UR5e simulation."""
+"""Move Skill with injectable kinematics, collision checking and execution."""
 
 from __future__ import annotations
 
 import sys
 import time
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Mapping, Optional
 
-import mujoco
+import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from collision import MujocoCollisionChecker
-from kinematics import IKError, MujocoKinematics
-from planing import TrajectoryProcessor
-from skills.motion.move.planners import CollisionFreePlanner, CollisionPlanningError, DirectPlanner, PlanningError
+from collision import SimPlatformFCLCollisionChecker
+from kinematics import IKError, KinematicsService
+from planning.prepared_trajectory import PreparedTrajectory, planning_state_signature
+from planning import CollisionFreePlanner, CollisionPlanningError, DirectPlanner, PlanningError
 from skills.motion.move.selector import StrategySelectionError, StrategySelector
 from skills.motion.move.strategies import CircularMove, JointMove, LinearMove
 from skills.motion.move.utils.error_codes import ErrorCode, failure_result
 from skills.motion.move.utils.validation import MoveValidationError, validate_move_request
-from utils import SceneRobotRuntime
+if TYPE_CHECKING:
+    from utils import SceneRobotRuntime
 
 
 DEFAULT_SCENE = PROJECT_ROOT / "world_model" / "robotsim" / "scene_000.xml"
@@ -30,11 +32,16 @@ DEFAULT_SCENE = PROJECT_ROOT / "world_model" / "robotsim" / "scene_000.xml"
 class MoveSkill:
     """Validate, select, plan, collision-check, and execute one motion request."""
 
-    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None) -> None:
+    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None, kinematics: KinematicsService | None = None, collision_checker: Any = None) -> None:
         self.config: Mapping[str, Any] = config or {}
-        self.robot_runtime = robot_runtime or SceneRobotRuntime(scene_path)
-        self.kinematics = MujocoKinematics(self.robot_runtime)
-        self.collision_checker = MujocoCollisionChecker(self.robot_runtime)
+        if robot_runtime is None:
+            from utils import SceneRobotRuntime
+            robot_runtime = SceneRobotRuntime(scene_path)
+        self.robot_runtime = robot_runtime
+        self.kinematics = kinematics if kinematics is not None else self.robot_runtime.kinematics
+        # Planning collision queries are independent of the live MuJoCo model.
+        # MuJoCo remains the execution/physics backend below this layer.
+        self.collision_checker = collision_checker if collision_checker is not None else SimPlatformFCLCollisionChecker(self.robot_runtime)
         self.selector = StrategySelector(self.config)
         self.trajectory_callback = trajectory_callback
         self.strategies = {
@@ -49,7 +56,7 @@ class MoveSkill:
         self.direct_planner = DirectPlanner(self.config, **planner_kwargs)
         self.collision_free_planner = CollisionFreePlanner(self.config, kinematics=self.kinematics, **planner_kwargs)
 
-    def execute(self, request: Mapping[str, Any]) -> Dict[str, Any]:
+    def execute(self, request: Mapping[str, Any], *, prepared_trajectory: PreparedTrajectory | None = None) -> Dict[str, Any]:
         """Run the complete Move pipeline and always return a structured result."""
         selection: Dict[str, Any] | None = None
         timing: Dict[str, float] = {}
@@ -61,13 +68,11 @@ class MoveSkill:
             finally:
                 timing["validation"] = time.perf_counter() - stage_started
             target_body_name = normalized.get("target_body_name")
-            if target_body_name:
-                body_id = mujoco.mj_name2id(self.robot_runtime.model, mujoco.mjtObj.mjOBJ_BODY, str(target_body_name))
-                if body_id >= 0:
-                    self.collision_checker.allowed_target_geom_ids = {
-                        geom_id for geom_id in range(self.robot_runtime.model.ngeom)
-                        if int(self.robot_runtime.model.geom_bodyid[geom_id]) == body_id
-                    }
+            self.collision_checker.allowed_target_geom_ids = None
+            if hasattr(self.collision_checker, "set_allowed_target_names"):
+                self.collision_checker.set_allowed_target_names(set())
+            if target_body_name and hasattr(self.collision_checker, "set_allowed_target_names"):
+                self.collision_checker.set_allowed_target_names({str(target_body_name)})
             stage_started = time.perf_counter()
             try:
                 context = self._get_runtime_context(normalized)
@@ -81,27 +86,16 @@ class MoveSkill:
             strategy = self.strategies[selection["path_strategy"]]
             stage_started = time.perf_counter()
             try:
-                path_request = strategy.build_path_request(normalized, context)
+                trajectory = self._reuse_prepared_trajectory(prepared_trajectory, normalized, context, selection)
+                path_request = strategy.build_path_request(normalized, context) if trajectory is None else None
             finally:
                 timing["path_generation"] = time.perf_counter() - stage_started
             stage_started = time.perf_counter()
             try:
-                trajectory = self._plan_with_fallback(normalized, context, selection, path_request)
+                if trajectory is None:
+                    trajectory = self._plan_with_fallback(normalized, context, selection, path_request)
             finally:
                 timing["planning"] = time.perf_counter() - stage_started
-            stage_started = time.perf_counter()
-            try:
-                try:
-                    trajectory = TrajectoryProcessor(
-                        kinematics=self.kinematics,
-                        collision_checker=self.collision_checker,
-                        joint_limits=self.robot_runtime.joint_limits,
-                        config=self.config.get("trajectory", {}),
-                    ).process(trajectory, normalized)
-                except ValueError as exc:
-                    raise PlanningError(str(exc), code="TRAJECTORY_INVALID", recoverable=True) from exc
-            finally:
-                timing["trajectory_processing"] = time.perf_counter() - stage_started
             if self.trajectory_callback is not None:
                 self.trajectory_callback(trajectory, normalized, selection)
             stage_started = time.perf_counter()
@@ -118,7 +112,7 @@ class MoveSkill:
         except StrategySelectionError as exc:
             result = failure_result(ErrorCode.UNKNOWN_STRATEGY, str(exc), failed_stage="selection", recoverable=True)
         except IKError as exc:
-            result = failure_result(ErrorCode.IK_FAILED, str(exc), failed_stage="kinematics", recoverable=True, recommended_action="Try TRAC-IK, another seed, or a reachable target pose.")
+            result = failure_result(ErrorCode.IK_FAILED, str(exc), failed_stage="kinematics", recoverable=True, recommended_action="Try another registered IK backend, another seed, or a reachable target pose.")
         except CollisionPlanningError as exc:
             result = failure_result(ErrorCode.COLLISION_DETECTED, str(exc), failed_stage="planning", recoverable=True, recommended_action="Allow collision-free planning or change the target/path constraint.", details={"contacts": exc.details or []})
         except PlanningError as exc:
@@ -149,12 +143,41 @@ class MoveSkill:
         """Delegate scene and robot-state acquisition to the root utils module."""
         return self.robot_runtime.get_context(request)
 
+    def _reuse_prepared_trajectory(self, prepared, request, context, selection):
+        if (not isinstance(prepared, PreparedTrajectory) or request != prepared.request
+                or selection["path_strategy"] != "joint_move"
+                or planning_state_signature(self.robot_runtime, self.collision_checker) != prepared.state_signature):
+            return None
+        trajectory = deepcopy(dict(prepared.trajectory))
+        points = np.asarray(trajectory.get("waypoints", []), dtype=float)
+        if (points.ndim != 2 or points.shape[1] != 6 or len(points) < 2
+                or not np.all(np.isfinite(points))
+                or np.any(points < self.robot_runtime.joint_limits[:, 0])
+                or np.any(points > self.robot_runtime.joint_limits[:, 1])
+                or not np.allclose(points[0], context["current_joint_state"], atol=1e-10, rtol=0)
+                or not np.allclose(points[-1], request["target"]["joint_positions"], atol=1e-10, rtol=0)):
+            return None
+        # Final validation uses the live skill and its held-object/contact rules.
+        if self.collision_checker.check_path(
+            points, resolution=0.01,
+            safety_distance=float(request["constraints"]["safety_distance"]),
+        ).in_collision:
+            return None
+        selection.update(prepared.selection)
+        selection["prepared_trajectory_reused"] = True
+        trajectory["planning_time"] = 0.0
+        trajectory.setdefault("diagnostics", {})["prepared_trajectory_reused"] = True
+        return trajectory
+
     def _plan_with_fallback(self, request: Mapping[str, Any], context: Mapping[str, Any], selection: Dict[str, Any], path_request: Mapping[str, Any]) -> Mapping[str, Any]:
         """Always test the direct path before applying a permitted fallback."""
+        if "candidate_goals" in path_request:
+            return self._plan_joint_candidates(request, context, selection, path_request)
         try:
             trajectory = self.direct_planner.plan(path_request, request, context)
             selection["planning_mode"] = "direct"
             return trajectory
+
         except CollisionPlanningError as collision_error:
             mode = request["planning"]["mode"]
             hard_constraint = request["motion"]["path_constraint"] == "hard"
@@ -173,6 +196,100 @@ class MoveSkill:
             selection["selection_reason"] += "; direct path collision triggered RRT-Connect"
             return trajectory
 
+    def _plan_joint_candidates(self, request, context, selection, path_request):
+        """Compare direct and bypass paths using actual total joint travel."""
+        started = time.perf_counter()
+        deadline = started + float(request["planning"]["planning_time"])
+        start = np.asarray(path_request["start"], dtype=float)
+        goals = sorted(path_request["candidate_goals"], key=lambda q: float(np.sum(np.abs(np.asarray(q) - start))))
+        validator = path_request.get("candidate_validator")
+        best = None
+        pending = []
+        failures = []
+        evaluated = 0
+        validated = pruned = rejected = 0
+
+        def consider(trajectory, candidate_selection):
+            nonlocal best
+            travel = np.sum(np.abs(np.diff(np.asarray(trajectory["waypoints"]), axis=0)), axis=0)
+            score = (float(np.sum(travel)), float(np.max(travel)))
+            if best is None or score < best[0]:
+                best = (score, trajectory, candidate_selection)
+
+        for goal_index, goal in enumerate(goals):
+            lower_bound = float(np.sum(np.abs(np.asarray(goal) - start)))
+            if best is not None and lower_bound > best[0][0] + 1e-9:
+                pruned += 1
+                continue
+            # Approach contact validation is expensive. Apply the proven
+            # travel lower bound before constructing another contact line.
+            if validator is not None:
+                validated += 1
+                if not validator(goal):
+                    rejected += 1
+                    continue
+            path = {key: value for key, value in path_request.items() if key not in {"candidate_goals", "candidate_validator"}}
+            path.update(goal=np.asarray(goal), joint_waypoints=np.vstack((start, goal)))
+            candidate_selection = dict(selection)
+            try:
+                trajectory = self.direct_planner.plan(path, request, context)
+                candidate_selection.update(planning_mode="direct", fallback_used=False)
+                consider(trajectory, candidate_selection)
+            except CollisionPlanningError as exc:
+                failures.append(exc)
+                if validator is None:
+                    pending.append((lower_bound, path))
+                else:
+                    # Establish a feasible bypass early so its cost can prune
+                    # remaining approach configurations before IK validation.
+                    remaining = deadline - time.perf_counter()
+                    if remaining > 0:
+                        bounded = deepcopy(request)
+                        bounded["planning"].update(
+                            planning_time=min(remaining, max(0.25, remaining / (len(goals) - goal_index))),
+                            max_attempts=1)
+                        try:
+                            consider(self._plan_with_fallback(bounded, context, candidate_selection, path), candidate_selection)
+                        except PlanningError as planning_error:
+                            failures.append(planning_error)
+                            # An early small search budget is not evidence of
+                            # infeasibility. Retry competitive goals with the
+                            # remaining budget after pruning other candidates.
+                            pending.append((lower_bound, path))
+                    else:
+                        pending.append((lower_bound, path))
+            except PlanningError as exc:
+                failures.append(exc)
+            evaluated += 1
+        for pending_index, (lower_bound, path) in enumerate(pending):
+            if best is not None and lower_bound > best[0][0] + 1e-9:
+                continue
+            remaining = deadline - time.perf_counter()
+            if remaining <= 0:
+                break
+            bounded = deepcopy(request)
+            bounded["planning"].update(planning_time=remaining / (len(pending) - pending_index), max_attempts=1)
+            candidate_selection = dict(selection)
+            try:
+                consider(self._plan_with_fallback(bounded, context, candidate_selection, path), candidate_selection)
+            except PlanningError as exc:
+                failures.append(exc)
+        if best is None:
+            if failures:
+                raise failures[-1]
+            raise PlanningError("No feasible joint configuration found.", code="PATH_NOT_FOUND", recoverable=True)
+        score, trajectory, chosen = best
+        selection.update(chosen)
+        trajectory["planning_time"] = time.perf_counter() - started
+        trajectory.setdefault("diagnostics", {})["configuration_selection"] = {
+            "objective": "total_joint_travel_rad", "total_joint_travel_rad": score[0],
+            "maximum_joint_travel_rad": score[1], "candidate_count": len(goals),
+            "direct_candidates_evaluated": evaluated,
+            "contact_candidates_validated": validated, "contact_candidates_rejected": rejected,
+            "candidates_pruned_by_lower_bound": pruned,
+            "budget_exhausted": time.perf_counter() >= deadline,
+        }
+        return trajectory
     def _execute_trajectory(self, trajectory: Mapping[str, Any], request: Mapping[str, Any], context: Mapping[str, Any]) -> Dict[str, Any]:
         if not context["controller_state"].get("ready"):
             raise MoveExecutionError(

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional
 
-from control import MujocoGripperController
 from skills.manipulation.grasp.selector import StrategySelectionError, StrategySelector
 from skills.manipulation.grasp.strategies import DefaultGrasp
 from skills.manipulation.grasp.utils.error_codes import ErrorCode, failure_result
@@ -57,6 +56,22 @@ class GraspSkill:
             grasp_result = self.grasp_validator.validate_result(
                 raw_result, normalized, context
             )
+            if normalized['grasp']['operation'] != 'verify_only':
+                if not grasp_result['grasped'] or not context['gripper_controller'].confirmed:
+                    raise GraspExecutionValidationError('Stable bilateral grasp was not confirmed.',
+                        error_code=ErrorCode.GRASP_VERIFICATION_FAILED, failed_stage='verification', recoverable=True)
+                mode = normalized['grasp']['mode']
+                controller = context['gripper_controller']
+                if mode == 'binding':
+                    controller.bind(normalized['target'].get('object_id'))
+                else:
+                    controller.retain_physical(normalized['target'].get('object_id'))
+                grasp_result = dict(grasp_result, holding=True, bound=mode == 'binding', mode=mode)
+                evidence_key = 'binding_state' if mode == 'binding' else 'physical_state'
+                grasp_result['evidence'][evidence_key] = controller.get_state(normalized['target'].get('object_id'))
+            else:
+                state = context['gripper_controller'].get_state(normalized['target'].get('object_id'))
+                grasp_result = dict(grasp_result, bound=state.get('bound', False), mode=state['mode'])
 
             return {
                 "success": True,
@@ -127,8 +142,13 @@ class GraspSkill:
             )
         controller = getattr(self.robot_runtime, "gripper_controller", None)
         if controller is None:
-            controller = MujocoGripperController(self.robot_runtime)
+            factory = getattr(self.robot_runtime, 'create_gripper_controller', None)
+            if factory is None:
+                raise NotImplementedError('Binding grasp requires a runtime with articulated gripper and payload weld support.')
+            controller = factory()
             self.robot_runtime.gripper_controller = controller
+        if request['grasp']['mode'] not in getattr(controller, 'supported_grasp_modes', set()):
+            raise NotImplementedError('This gripper controller does not support the requested grasp mode.')
         target_id = request["target"].get("object_id")
         state = controller.get_state(target_id)
         return {

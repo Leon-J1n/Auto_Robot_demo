@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "name": "ur5e_table_empty",
+    "task_category": "空白"
+  },
+  {
+    "id": 2,
+    "name": "ur5e_table_apple",
+    "task_category": "抓取"
+  },
+  {
+    "id": 3,
+    "name": "ur5e_table_sorting",
+    "task_category": "抓取"
+  },
+  {
+    "id": 4,
+    "name": "ur5e_table_cabinet",
+    "task_category": "开柜"
+  },
+  {
+    "id": 5,
+    "name": "cobotmagic_table_grasp",
+    "task_category": "抓取"
+  },
+  {
+    "id": 6,
+    "name": "piper_r_table_twist",
+    "task_category": "旋转扭动"
+  },
+  {
+    "id": 7,
+    "name": "ur5e_table_push_pull",
+    "task_category": "推拉"
+  }
+]

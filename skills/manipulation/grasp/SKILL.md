@@ -20,16 +20,24 @@ Grasp
 
 ## Current Implementation
 
-当前 Windows/MuJoCo 实现使用 `control/gripper_controller.py` 驱动 Robotiq 2F-85：
+统一场景的抓取模式由 `grasp.mode` 指定：
 
-- `skill.py` 负责运行时上下文、策略调度、有限重试和结构化结果。
-- `utils/validation.py` 负责请求归一化和参数范围检查。
-- `validators/grasp_validator.py` 负责控制器状态、夹爪限制和抓取证据验证。
-- `strategies/default_grasp/default_grasp.py` 执行张开、闭合、接触检测与保持。
-- 有效接触限定为目标物体与左右指垫的接触，避免把掌部或环境碰撞误判为抓取。
-- 当前仿真验证使用接触、夹爪宽度和目标存在证据；力值是控制命令语义值，不是标定后的真实力传感器测量。
+- `binding`（默认）：驱动可动 Robotiq 夹爪闭合，双侧指垫分别接触同一目标且法向力各达到 `contact_threshold`，夹宽和物体相对位姿连续稳定 `confirmation_time` 后，经过结果校验才启用临时 weld。
+- `physical`：同样先确认稳定双侧接触，随后仅依靠夹爪电机和接触摩擦保持物体，不启用 weld，也不回退到绑定模式。`hold_force` 控制保持阶段电机力矩上限（当前映射为参数值 × 0.04 N·m），实际指垫接触力以日志为准。
+- `control/binding_gripper.py` 读取实际 MuJoCo 接触力；不通过逐帧写物体 qpos 携物。
+- 默认确认时间 0.1 秒（仿真时间），夹宽变化不超过 0.5 mm、相对位置变化不超过 1 mm、相对转角变化不超过 0.035 rad。空夹间距阈值为 2 mm。
+- 结果包含 `mode`、`bound`、左右接触力和稳定区间证据。稳定接触确认不代表纯摩擦承重能力验证。
+- 统一场景运行时需提供 `create_gripper_controller()`，模型需有活动夹爪，以及目标自由刚体或声明的 hinge/slide 活动 link；绑定模式还需默认关闭的 weld。机构抓取保留原关节，释放关闭 weld，不将门板转换为自由物体。旧 `SceneRobotRuntime` 暂不支持此绑定协议，调用会明确返回 `NOT_IMPLEMENTED`。
+- 两种模式均要求明确的 `target.object_id` 和 `hold_on_success=true`；夹持期间需先释放再重新抓取。
+- 物理携物期间按执行帧检查双侧接触（各 > 0.1 N），相对位移限值 5 mm、相对转角限值 0.1 rad；超限或丢失接触即报告滑移并停止后续运动。绑定模式仍使用 2 mm / 0.035 rad。物理模式限值容纳柔性接触位移，并不代表对任意物体承重能力的保证。
 
-测试入口位于 `tests/grasp_skill`。自动测试会先把机械臂置于抓取位姿；这属于测试准备，不改变 Grasp Skill“不负责移动机械臂”的职责边界。
+请求示例：
+
+```json
+{"target":{"type":"object","object_id":"Apple"},"grasp":{"mode":"binding"},"strategy_params":{"confirmation_time":0.1,"contact_threshold":2.0}}
+```
+
+绑定模式的自动测试位于 `tests/test_binding_grasp.py`。自动测试会先把机械臂置于抓取位姿；这属于测试准备，不改变 Grasp Skill“不负责移动机械臂”的职责边界。
 
 Grasp Skill 将抓取执行拆分为三个阶段：
 - Grasp Strategy：定义夹爪采用何种抓取执行流程

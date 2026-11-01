@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="microwave">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="microwave_meshes/visuals/body001.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="microwave_meshes/visuals/disc001.obj" />
+      </geometry>
+    </visual>
+    <collision name="panel_1">
+      <origin xyz="0.26505053 -0.21284153 0.03140467" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02873235568 0.00153959461 0.02668740414" />
+      </geometry>
+    </collision>
+    <collision name="panel_2">
+      <origin xyz="0.2086322 -0.21284153 0.03115159" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02928545512 0.001539596124 0.0272242669" />
+      </geometry>
+    </collision>
+    <collision name="panel_4">
+      <origin xyz="0.00022452 0.21556661 0.1578075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5686757565 0.04776426405 0.3066753149" />
+      </geometry>
+    </collision>
+    <collision name="panel_5">
+      <origin xyz="-0.2426098 0.0096559 0.15957894" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08300715685 0.4004042745 0.3031324148" />
+      </geometry>
+    </collision>
+    <collision name="panel_6">
+      <origin xyz="0.22390804 0.00897172 0.1592334" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1213086396 0.398740232 0.3038235307" />
+      </geometry>
+    </collision>
+    <collision name="panel_7">
+      <origin xyz="-0.05128234 0.00906298 0.30546168" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4565396607 0.39996171 0.01136689354" />
+      </geometry>
+    </collision>
+    <collision name="panel_8">
+      <origin xyz="-0.05162154 0.00064078 0.0137931" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4565396607 0.3826844692 0.01260533556" />
+      </geometry>
+    </collision>
+    <collision name="panel_9">
+      <origin xyz="0.23655933 -0.19828415 0.15957242" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09573103487 0.02458192222 0.30425933" />
+      </geometry>
+    </collision>
+    <collision name="panel_10">
+      <origin xyz="-0.04321811 0.2439125 0.15986707" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4061338305 0.005308003165 0.2782975733" />
+      </geometry>
+    </collision>
+    <collision name="panel_11">
+      <origin xyz="0.23369126 0.01649758 0.00535239" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04376407713 0.4161598682 0.01070507243" />
+      </geometry>
+    </collision>
+    <collision name="panel_12">
+      <origin xyz="-0.22992377 0.01649758 0.00535239" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04376407713 0.4161598682 0.01070508547" />
+      </geometry>
+    </collision>
+    <collision name="panel_13">
+      <origin xyz="-0.25150034 -0.20093538 0.15977833" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06548012793 0.01851522736 0.3035314381" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="door_link">
+    <visual>
+      <geometry>
+        <mesh filename="microwave_meshes/visuals/door.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="microwave_meshes/visuals/door_clear.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.36714828 -0.04112494 -0.00791978" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="microwave_meshes/visuals/graspable_handle.obj" />
+      </geometry>
+      <material name="graspable_handle_color">
+        <color rgba="0.16 0.16 0.16 1" />
+      </material>
+    </visual>
+    <collision name="panel_1">
+      <origin xyz="0.20020828 -0.00049879 -0.00467451" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3848841488 0.01898146234 0.2966700196" />
+      </geometry>
+    </collision>
+    <collision name="panel_2">
+      <origin xyz="0.20031509 0.00170258 -0.00496642" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3852010965 0.01003638934 0.2557241917" />
+      </geometry>
+    </collision>
+    <collision name="graspable_handle_bar_1">
+      <origin xyz="0.36714828 -0.04112494 -0.00791978" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0427214792 0.0176706668 0.2121379077" />
+      </geometry>
+    </collision>
+    <collision name="panel_4">
+      <origin xyz="0.36719951 -0.0373517 0.11538098" rpy="-0.472675879 0 0" />
+      <geometry>
+        <box size="0.02762471698 0.01318601239 0.02551749162" />
+      </geometry>
+    </collision>
+    <collision name="panel_5">
+      <origin xyz="0.36719951 -0.02160068 0.12343851" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02762471698 0.02580399066 0.01374934614" />
+      </geometry>
+    </collision>
+    <collision name="panel_6">
+      <origin xyz="0.36719951 -0.0350724 -0.13135589" rpy="-2.609574342 0 0" />
+      <geometry>
+        <box size="0.02762471698 0.01318601333 0.02551749162" />
+      </geometry>
+    </collision>
+    <collision name="panel_7">
+      <origin xyz="0.36719951 -0.02160068 -0.13654478" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02762471698 0.02580399066 0.013749348" />
+      </geometry>
+    </collision>
+    <collision name="panel_8">
+      <origin xyz="0.20020828 -0.00780287 -0.00467451" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3848853707 0.004373441916 0.2966707647" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.18 0 0" rpy="0 0 0" />
+      <mass value="1.2" />
+      <inertia ixx="0.009" iyy="0.024" izz="0.016" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="door_joint" type="revolute">
+    <origin xyz="-0.20478417 -0.20020254 0.16524366" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="door_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.57079633" upper="0" effort="20" velocity="1.5" />
+    <dynamics damping="1.0" friction="1.0" />
+  </joint>
+</robot>

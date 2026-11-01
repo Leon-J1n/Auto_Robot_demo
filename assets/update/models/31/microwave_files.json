@@ -1,0 +1,33 @@
+{
+  "is_on_cos": false,
+  "metadata": "microwave.json",
+  "path": "microwave.urdf",
+  "thumbnail": "microwave_thumbnail.png",
+  "reference": [
+    "microwave_meshes/visuals/body001.mtl",
+    "microwave_meshes/visuals/body001.obj",
+    "microwave_meshes/visuals/button001.mtl",
+    "microwave_meshes/visuals/button001.obj",
+    "microwave_meshes/visuals/button002.mtl",
+    "microwave_meshes/visuals/button002.obj",
+    "microwave_meshes/visuals/button003.mtl",
+    "microwave_meshes/visuals/button003.obj",
+    "microwave_meshes/visuals/button004.mtl",
+    "microwave_meshes/visuals/button004.obj",
+    "microwave_meshes/visuals/button005.mtl",
+    "microwave_meshes/visuals/button005.obj",
+    "microwave_meshes/visuals/button006.mtl",
+    "microwave_meshes/visuals/button006.obj",
+    "microwave_meshes/visuals/disc001.mtl",
+    "microwave_meshes/visuals/disc001.obj",
+    "microwave_meshes/visuals/door.mtl",
+    "microwave_meshes/visuals/door.obj",
+    "microwave_meshes/visuals/door_clear.mtl",
+    "microwave_meshes/visuals/door_clear.obj",
+    "microwave_meshes/visuals/graspable_handle.mtl",
+    "microwave_meshes/visuals/graspable_handle.obj",
+    "microwave_meshes/visuals/knob001.mtl",
+    "microwave_meshes/visuals/knob001.obj",
+    "microwave_meshes/visuals/texture.png"
+  ]
+}

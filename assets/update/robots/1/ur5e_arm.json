@@ -1,0 +1,37 @@
+{
+  "semantic_properties": {
+    "object_name": "ur5e_arm",
+    "object_id": 1,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "ur5"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.932499,
+      0.309525,
+      0.243
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 20.9949,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        1.0,
+        0.005,
+        0.0001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}
