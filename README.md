@@ -17,7 +17,7 @@
 | `planning/` | 运动规划模块，负责直接路径、避碰路径、交互接近/撤退候选、接触路径检查、轨迹优化和时间参数化。 |
 | `sensors/` | 与具体后端无关的传感器接口和数据结构，例如统一的 RGB-D 相机帧。 |
 | `services/` | 独立服务模块，目前主要包含对象库服务、场景索引和服务启动入口。 |
-| `skills/` | 原子技能实现，包括运动、抓取、释放、推拉、按压、定位和搜索等技能的接口、配置、校验和策略。 |
+| `atomic_action/` | 原子技能实现，包括运动、抓取、释放、推拉、按压、定位和搜索等技能的接口、配置、校验和策略。 |
 | `tests/` | 单元测试、集成测试、测试配置和测试夹具。运行生成的报告和临时输出不属于源码。 |
 | `utils/` | 跨模块复用的通用工具，目前主要提供仿真运行时辅助功能。 |
 | `assets/` | 当前仿真和对象服务使用的场景、机器人和物体资产。旧的 `world_model/` 场景目录已移除。 |
@@ -48,13 +48,14 @@
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
   --commands demo\task_commands\commands.001.json `
-  --start-object-library `
   --viewer
 ```
 
 ### 2. 加载场景和资源
 
-`demo.run_demo` 读取场景配置和命令文件，`execution/` 负责装配机器人运行时，`assets/` 和对象库服务提供当前使用的场景、机器人和物体资源。
+`demo.run_demo` 只读场景配置和命令文件。`demo.scene.assembler.SceneAssembler` 在内存中复制场景，按场景中的 `MetadataRef` 向 OLS 查询机器人、夹爪和物体元数据，再从 `assets/` 的本地镜像定位对应 URDF/网格，生成本次运行专用的运行时场景。原始场景 JSON 和任务 JSON 不会被修改。
+
+没有显式传入 `--object-library-url` 时，入口会自动启动项目内的 OLS；因此新场景只要使用有效的 OLS `MetadataRef`，就可以直接进入同一条 pipeline。`--start-object-library` 仍然兼容旧命令，但不再是必需参数。
 
 需要对象查询时，`services/` 中的对象库服务读取场景对象、类别、链接和交互元数据。`demo/` 将服务返回的对象标识转换为当前运行时中的 MuJoCo body、几何体和对象状态。
 
@@ -63,7 +64,7 @@
 `collision/` 为场景中的碰撞几何建立查询场景。
 
 - 已有的基础碰撞体和 URDF 碰撞定义直接使用。
-- 独立 OBJ/STL 网格通过 `collision/mesh_assets.py` 预处理。
+- 独立 OBJ/STL 网格通过 `collision/mesh_preprocessing.py` 预处理。
 - 非凸网格由 CoACD 分解为多个凸块。
 - 预处理结果写入 `.cache/collision/`，后续运行在缓存有效时直接复用。
 
@@ -71,7 +72,7 @@
 
 ### 4. 解析任务并组织阶段
 
-`demo/task_commands/` 中的命令由 `demo/` 解析，`demo/task_skills/runner.py` 按任务类型组织执行阶段。
+`demo/task_commands/` 中的命令由 `demo/` 解析，`atomic_skill/runner.py` 按任务类型组织执行阶段。
 
 典型阶段包括：
 
@@ -82,13 +83,13 @@
 - 抬升、撤退和释放
 - 结果验证与报告记录
 
-`demo/task_skills/` 负责任务语义和阶段编排，生成标准化的技能请求，不直接承担通用规划器的执行职责。
+`atomic_skill/` 负责任务语义和阶段编排，生成标准化的技能请求，不直接承担通用规划器的执行职责。
 
 ### 5. 运动学求解和路径规划
 
 任务请求进入技能和规划链路后，通常经过以下模块：
 
-1. `skills/` 校验请求、选择技能策略并生成执行所需的标准请求。
+1. `atomic_action/` 校验请求、选择技能策略并生成执行所需的标准请求。
 2. `kinematics/` 根据目标位姿或关节目标求解 IK，并验证解的连续性、关节限制和目标可达性。
 3. `planning/` 生成直接路径或避碰路径，执行接近、接触、撤退等候选路径检查，并进行轨迹平滑和时间参数化。
 4. `collision/` 检查目标状态、路径采样点和轨迹段是否碰撞。
@@ -121,6 +122,7 @@
 - [运动学接口说明](KINEMATICS_INTERFACES.md)
 - [规划接口说明](PLANNING_PIPELINE_INTERFACES.md)
 - [MuJoCo 依赖说明](MUJOCO_DEPENDENCIES.md)
+
 
 
 

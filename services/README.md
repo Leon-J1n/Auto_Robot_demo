@@ -29,7 +29,7 @@ commands: move.parameters.target = 101
   → 世界系夹持中心位姿 → 控制 TCP 位姿
   → demo 搜索接近点并验证到目标的直线路径
   → demo 生成两条普通 Move 请求：到接近点 → 保持姿态直线到目标
-  → 现有 EAIK / Jacobian、FCL、MoveSkill / Planning
+  → 现有 EAIK / Jacobian、FCL、_MoveExecutor / Planning
   → 关节轨迹 → MuJoCo 实际执行 → 校验夹持中心到达误差
 ```
 
@@ -93,9 +93,9 @@ T_world_control = T_world_grasp × inverse(T_control_grasp)
 | `DemoInteractionMove(resolver, resources, kinematics, collision_checker, joint_limits)` | demo 层的对象移动编排器，不扩展技能接口 |
 | `demo_move.prepare(request, state)` | 输入 demo 的对象引用及同步场景状态，返回普通运动请求列表与解析信息；查询失败抛出异常，由 demo 记录 |
 
-客户端位于 `services/object_library.py`，位姿解析器位于 `demo/interaction/object_library.py`，接近编排器位于 `demo/task_skills/move.py`，命令执行位于 `demo/run_demo.py`。服务只提供模型交互数据，运动学与碰撞计算仍由项目现有模块完成。
+客户端位于 `services/object_library.py`，位姿解析器位于 `demo/interaction/object_library.py`，接近编排器位于 `atomic_skill/move.py`，命令执行位于 `demo/run_demo.py`。服务只提供模型交互数据，运动学与碰撞计算仍由项目现有模块完成。
 
-对象 ID 仅属于 demo 命令层。`SkillCommandConverter` 通过注册表 `scene_object_ids` 识别对象，生成 demo 内部的对象引用；随后由编排器解析。底层 `MoveSkill.execute()` 仍只接收既有 `pose` / `joint` / `named_state` 请求，不接受整数对象 ID、不查询服务，也没有 `target_resolver` 参数。未经用户明确允许，不修改 `skills/` 中任何文件。
+对象 ID 仅属于 demo 命令层。`SkillCommandConverter` 通过注册表 `scene_object_ids` 识别对象，生成 demo 内部的对象引用；随后由编排器解析。底层 `_MoveExecutor.execute()` 仍只接收既有 `pose` / `joint` / `named_state` 请求，不接受整数对象 ID、不查询服务，也没有 `target_resolver` 参数。未经用户明确允许，不修改 `atomic_action/` 中任何文件。
 
 第一段保留 `planning_method` 指定的路径类型，关节模式使用选定接近点的关节目标，直线/圆弧模式使用接近点位姿；圆弧仍需补充原有参数。第二段固定为保持姿态的直线运动，使用硬路径约束，禁止退化成关节绕行。执行第二段时从实际到达状态重新规划与检查。为保证夹持中心准确到达服务位姿，对象 ID 命令暂不支持 `keep_end_effector_orientation=true` 或 `relation/distance_m/anchor` 偏移；后续撤离可以单独使用 `move end_effector`。
 
@@ -118,6 +118,7 @@ $env:SIM_PLATFORM_LIBRARY = "libraries\simplatform\bin\sim_platform_c.dll"
 .\.venv\Scripts\python.exe -B -m unittest tests.test_object_library_grasp tests.test_unified_execution tests.test_interpolated_timing
 .\.venv\Scripts\python.exe -B services/object_library_server/tests/test_api.py
 ```
+
 
 
 
