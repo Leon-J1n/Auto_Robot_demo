@@ -1,9 +1,22 @@
 """Demo put: approach from world +Z, descend, release, and retreat."""
 import numpy as np
 
-from demo.task_skills.pick import DemoInteractionPick
+from atomic_skill.pick import DemoInteractionPick
 from demo.task_commands.converter import _deep_merge
-from skills.manipulation.release.utils.validation import validate_release_request
+
+
+def validate_release_request(request):
+    """Normalize the small release request used by the demo put skill."""
+    if not isinstance(request, dict) or not isinstance(request.get('target'), dict):
+        raise ValueError('release request requires an object target')
+    request.setdefault('release', {})
+    if not isinstance(request['release'], dict):
+        raise ValueError('release must be an object')
+    request['release'].setdefault('operation', 'release')
+    if request['release']['operation'] not in {'release', 'verify_only'}:
+        raise ValueError('release.operation must be release or verify_only')
+    request.setdefault('strategy_params', {})
+    return request
 
 
 class PutTargetError(ValueError):
