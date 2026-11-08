@@ -95,6 +95,8 @@ class BindingGripperController:
             raise NotImplementedError(f'Unsupported grasp mode: {mode}')
         if self.held_name is not None:
             raise ValueError('Release the held object before acquiring another grasp')
+        if target_object_id is None:
+            return self.close_untracked(width, speed=speed, force=force, timeout=timeout)
         body = self.validate_target(target_object_id, mode=mode)
         self.target_name, self.confirmed = target_object_id, False
         self.mode = mode
@@ -145,6 +147,29 @@ class BindingGripperController:
             self.runtime.contact_target = None
             if not self.confirmed:
                 self.data.ctrl[self.actuator_id] = float(self.data.qpos[self.driver_address])
+
+    def close_untracked(self, width, *, speed=.5, force=20., timeout=5.):
+        """Close the fingers without resolving or retaining a target body."""
+        self.mode = 'physical'
+        self.target_name = None
+        self.confirmed = False
+        self.runtime.contact_target = None
+        self.model.actuator_forcerange[self.actuator_id] = [-force * .04, force * .04]
+        start = float(self.data.time)
+        goal = float(np.clip(.8 * (1 - width / self.maximum_width), 0, .8))
+        try:
+            while self.data.time - start < timeout:
+                self.data.ctrl[self.actuator_id] = min(goal, self.data.ctrl[self.actuator_id] + .8 * speed * .01)
+                self.runtime.advance_gripper(.01)
+                if abs(self.data.qpos[self.driver_address] - goal) < .005 and abs(self.data.ctrl[self.actuator_id] - goal) < 1e-8:
+                    break
+            self.data.ctrl[self.actuator_id] = min(self.data.ctrl[self.actuator_id], goal)
+            self.evidence = {'mode': 'physical', 'confirmed': False,
+                             'reason': 'direct_close_without_target'}
+            return {'contact_detected': False, 'final_width': self.width,
+                    'evidence': dict(self.evidence)}
+        finally:
+            self.runtime.contact_target = None
 
     def bind(self, target):
         if not self.confirmed or target != self.target_name:

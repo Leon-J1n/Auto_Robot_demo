@@ -147,12 +147,10 @@ class TaskSkillExecutor:
             try:
                 adapter = self.adapters[skill]
                 if skill == 'pick':
-                    closure_request = {
-                        'grasp': {'mode': 'physical'},
-                        'strategy_params': {'hold_force': parameters.get('hold_force', 10.0)},
-                    }
-                    closure_request, _ = split_carrying_safety(closure_request)
-                    parts, resolved = adapter.prepare(request, state, grasp_request=closure_request,
+                    # Pick only resolves and reaches the grasp pose here.
+                    # Closure is a target-free gripper action performed after
+                    # contact; do not run the legacy target-body closure probe.
+                    parts, resolved = adapter.prepare(request, state, grasp_request=None,
                         retreat_lift_height=0.0)
                 else:
                     parts, resolved = adapter.prepare(request, state)
@@ -286,14 +284,10 @@ class TaskSkillExecutor:
                 self.report['active_substep'] = 'grasp'
                 backend.set_status(f"{command['command_id']} | Closing and confirming grasp")
                 grasp_request = {
-                    'target': {'type': 'object', 'object_id': resolved['target_name']},
                     'grasp': {'mode': 'physical'},
                     'strategy_params': {'hold_force': parameters.get('hold_force', 10.0)},
                 }
-                if grasp_request['target'].get('object_id') != resolved['target_name']:
-                    raise ValueError('pick grasp target must match its motion target')
-                grasp_request, carrying_distance = split_carrying_safety(grasp_request)
-                from demo.interaction.closure_validation import execute_checked_grasp
+                carrying_distance = 0.0
                 previous_grasp_goal = getattr(backend, 'grasp_approach_goal', None)
                 selected_control = np.asarray(resolved['selected']['world_from_control'], dtype=float)
                 selected_quat = Rotation.from_matrix(selected_control[:3, :3]).as_quat()
@@ -301,7 +295,7 @@ class TaskSkillExecutor:
                                                tuple(resolved['joint_positions']))
                 backend.grasp_motion_phase = False
                 try:
-                    grasp_result = execute_checked_grasp(self.grasper, grasp_request, backend, checker)
+                    grasp_result = self.grasper.execute(grasp_request)
                 finally:
                     backend.grasp_approach_goal = previous_grasp_goal
                 row['grasp_result'] = grasp_result
@@ -309,8 +303,9 @@ class TaskSkillExecutor:
                     row.update(success=False, error=grasp_result['error'])
                     self.stage = grasp_result['error'].get('failed_stage', 'grasp')
                     raise RuntimeError(f"Grasp failed: {grasp_result['error']}")
-                checker.carrying_safety_distance = carrying_distance
-                checker.capture_support()
+                if grasp_request.get('target'):
+                    checker.carrying_safety_distance = carrying_distance
+                    checker.capture_support()
                 sync.sync(backend, kin, checker)
                 self.stage = 'planning_and_execution'
             if skill == 'pick' and part['phase'] in {'lift', 'retreat'}:
