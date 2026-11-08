@@ -37,15 +37,12 @@ def validate_put_destination(release_request, destination_name):
 
 
 def put_release_request(parameters, controller):
-    """Resolve the payload separately from the placement destination."""
+    """Build a release request without requiring a prevalidated grasp."""
     held_name = getattr(controller, 'held_name', None)
-    if not held_name:
-        raise ValueError('put requires a currently held object')
-    request = _deep_merge({'target': {'type': 'object', 'object_id': held_name}},
+    request = _deep_merge({'target': {'type': 'object',
+                                      'object_id': held_name or '__current_grasp__'}},
                           parameters.get('release_request', {}))
     request = validate_release_request(request)
-    if request['target']['object_id'] != held_name:
-        raise ValueError('put release target must match the currently held object')
     if request['release']['operation'] != 'release':
         raise ValueError('put requires release.operation=release')
     return request

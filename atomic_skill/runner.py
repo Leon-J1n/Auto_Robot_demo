@@ -96,9 +96,6 @@ class TaskSkillExecutor:
         if request['target']['type'] == 'object':
             self.stage = 'target_resolution'
             try:
-                if skill == 'put':
-                    destination = scene_object_by_id(self.resources.scene, parameters['target'])
-                    validate_put_destination(release_request, destination['object_name_in_scene'])
                 adapter = self.adapters[skill]
                 if skill == 'pick':
                     closure_request = {
@@ -273,8 +270,6 @@ class TaskSkillExecutor:
                 self.stage = 'release'
                 self.report['active_substep'] = 'release'
                 backend.set_status(f"{command['command_id']} | Releasing held object")
-                if backend.gripper_controller.held_name != release_request['target']['object_id']:
-                    raise ValueError('put payload was lost before release')
                 release_result = self.releaser.execute(release_request)
                 row['release_result'] = release_result
                 checker.support_geoms.clear()

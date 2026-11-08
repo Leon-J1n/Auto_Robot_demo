@@ -103,7 +103,7 @@ class DemoInteractionPick(DemoInteractionMove):
                 resolved, skill, retreat_lift_height,
                 [{'phase':'approach','request':transit}, {'phase':'contact','request':contact}])
         rejected = planned[1] if planned else []
-        if skill == 'pick':
+        if skill in {'pick', 'put'}:
             # The selected grasp pose has already passed IK/collision/closure checks.
             # Only the constrained approach failed; preserve that goal for move.
             contact = grasp_pose_move_request({**base, 'target':pose_request(goal)})
@@ -122,7 +122,7 @@ class DemoInteractionPick(DemoInteractionMove):
         # Pick is intentionally a two-step atomic composition: reach the
         # selected grasp pose, then execute the grasp action.  It does not
         # perform a lift or retreat; those are separate responsibilities.
-        if skill == 'pick':
+        if skill in {'pick', 'put'}:
             return parts, resolved
         retreat = deepcopy(contact)
         retreat['motion'].update(path_type='linear',path_constraint='hard')

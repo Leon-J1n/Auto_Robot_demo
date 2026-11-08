@@ -86,7 +86,7 @@ class DemoInteractionPick(DemoInteractionMove):
 
     def _prepare_approach(self, base, resolved, goal, requested_path, state, direction, *, skill,
                           retreat_lift_height=0.):
-        if skill == 'pick':
+        if skill in {'pick', 'put'}:
             # Picking goes directly to the selected grasp control pose. Try a
             # Cartesian move first with a relaxed per-waypoint joint step; if
             # that branch cannot be built, the runner retries the same target
@@ -150,7 +150,7 @@ class DemoInteractionPick(DemoInteractionMove):
         # Pick is intentionally a two-step atomic composition: reach the
         # selected grasp pose, then execute the grasp action.  It does not
         # perform a lift or retreat; those are separate responsibilities.
-        if skill == 'pick':
+        if skill in {'pick', 'put'}:
             return parts, resolved
         retreat = deepcopy(contact)
         retreat['motion'].update(path_type='linear',path_constraint='hard')
