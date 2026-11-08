@@ -566,8 +566,22 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             if backend is not None and 'resources' in locals() and (output / 'frames.jsonl').exists():
                 try:
                     from execution.trajectory_export import write_traj_from_jsonl
+                    trajectory_scene = resources.scene
+                    # The runtime scene fuses the attached gripper into the
+                    # robot for MuJoCo. WebEditor still has a separate
+                    # RobotAttachment object, so restore that object in the
+                    # exported scene to drive its URDF finger joint.
+                    source_scene = json.loads(Path(resources.scene_file).read_text(encoding='utf-8'))
+                    existing_ids = {int(obj['object_id_in_scene']) for obj in trajectory_scene.get('objects', ())}
+                    attachments = [obj for obj in source_scene.get('objects', ())
+                                   if any(component.get('component_type') == 'RobotAttachment'
+                                          for component in obj.get('components', ())) and
+                                   int(obj['object_id_in_scene']) not in existing_ids]
+                    if attachments:
+                        trajectory_scene = dict(trajectory_scene)
+                        trajectory_scene['objects'] = [*trajectory_scene.get('objects', ()), *attachments]
                     traj_path = write_traj_from_jsonl(
-                        output / 'trajectory.traj', resources.scene, output / 'frames.jsonl',
+                        output / 'trajectory.traj', trajectory_scene, output / 'frames.jsonl',
                         initial_joints=resources.initial_joints)
                     report['trajectory_file'] = str(traj_path)
                 except Exception as exc:

@@ -67,7 +67,18 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
         width = gripper.get("width")
         if not isinstance(width, (int, float)) or not np.isfinite(width):
             return None
-        angle = float(np.clip(0.8 * (1.0 - width / 0.085), 0.0, 0.8))
+        substep = state.get("substep")
+        if (substep in {"grasp", "release"} and
+                gripper_open_width is not None and gripper_closed_width is not None and
+                gripper_open_width > gripper_closed_width):
+            angle = float(np.clip(
+                (gripper_open_width - width) /
+                (gripper_open_width - gripper_closed_width) * 0.8,
+                0.0, 0.8))
+        elif gripper.get("holding") or gripper.get("object_present"):
+            angle = 0.8
+        else:
+            angle = 0.0
         return [angle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     item = (state.get("objects") or {}).get(name)
     if not item:
