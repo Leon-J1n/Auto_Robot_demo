@@ -239,10 +239,11 @@ class TaskSkillExecutor:
                 self.stage = 'grasp'
                 self.report['active_substep'] = 'grasp'
                 backend.set_status(f"{command['command_id']} | Closing and confirming grasp")
-                grasp_request = _deep_merge({'target': {'type': 'object',
-                    'object_id': resolved['target_name']},
+                grasp_request = {
+                    'target': {'type': 'object', 'object_id': resolved['target_name']},
                     'grasp': {'mode': 'physical'},
-                    'strategy_params': {'hold_force': parameters.get('hold_force', 10.0)}})
+                    'strategy_params': {'hold_force': parameters.get('hold_force', 10.0)},
+                }
                 if grasp_request['target'].get('object_id') != resolved['target_name']:
                     raise ValueError('pick grasp target must match its motion target')
                 grasp_request, carrying_distance = split_carrying_safety(grasp_request)
