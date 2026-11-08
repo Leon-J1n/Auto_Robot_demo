@@ -306,9 +306,9 @@ class TaskSkillExecutor:
         """Resolve approach targets; retreat uses the live end-effector pose."""
         parameters = deepcopy(command['parameters'])
         resolved = None
-        if command['skill_name'] == 'approach':
+        if command['skill_name'] in {'approach', 'retreat'}:
             if self.resolver is None:
-                raise ValueError('approach requires an object-library resolver')
+                raise ValueError(f"{command['skill_name']} requires an object-library resolver")
             target = parameters.pop('target', None)
             self.stage = 'target_resolution'
             resolved = self.resolver.resolve(target, self.resources, state)
@@ -319,12 +319,13 @@ class TaskSkillExecutor:
                 prefer_direct=False)
             pose = np.asarray(selected['selected']['world_from_control'], dtype=float)
             control_from_grasp = np.asarray(resolved['control_from_grasp'], dtype=float)
-            parameters['target_pose'] = {
-                'position': pose[:3, 3].tolist(),
-                'quaternion_xyzw': Rotation.from_matrix(pose[:3, :3]).as_quat().tolist(),
-                'frame': 'world',
-            }
             parameters['grasp_offset_local'] = control_from_grasp[:3, 3].tolist()
+            if command['skill_name'] == 'approach':
+                parameters['target_pose'] = {
+                    'position': pose[:3, 3].tolist(),
+                    'quaternion_xyzw': Rotation.from_matrix(pose[:3, :3]).as_quat().tolist(),
+                    'frame': 'world',
+                }
         executor = PoseSearchExecutor(
             resources=self.resources, backend=self.backend,
             synchronizer=self.sync, kinematics=self.kinematics,

@@ -4,46 +4,9 @@
   "scene_id": 3,
   "scene_version": 3,
   "commands": [
-    {
-      "command_id": "1",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 7
-      }
-    },
-    {
-      "command_id": "2",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 7,
-        "hold_force": 10.0
-      }
-    },
-    {
-      "command_id": "3",
-      "skill_name": "retreat",
-      "parameters": {}
-    },
-    {
-      "command_id": "4",
-      "skill_name": "put",
-      "parameters": {
-        "target": 12,
-        "planning_method": "joint",
-        "release_request": {
-          "strategy_params": {
-            "open_width": 0.085
-          }
-        }
-      }
-    },
-    {
-      "command_id": "5",
-      "skill_name": "move",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    }
+    {"command_id": "1", "skill_name": "approach", "parameters": {"target": 7}},
+    {"command_id": "2", "skill_name": "pick", "parameters": {"target": 7, "hold_force": 10.0}},
+    {"command_id": "3", "skill_name": "retreat", "parameters": {"target": 7}},
+    {"command_id": "4", "skill_name": "move", "parameters": {"target": "home", "planning_method": "joint"}}
   ]
 }

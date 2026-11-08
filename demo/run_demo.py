@@ -275,11 +275,10 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 # The preceding command establishes the contact; resolve it at execution time.
                 continue
             if skill in {'approach', 'retreat'}:
-                if skill == 'approach':
-                    if target is None or target in targets or target in {'end_effector', '__end_effector__'}:
-                        raise ValueError('approach requires an interaction object target')
-                    model_id_for(scene_object_by_id(resources.scene, target))
-                    object_commands.add(cid)
+                if target is None or target in targets or target in {'end_effector', '__end_effector__'}:
+                    raise ValueError(f'{skill} requires an interaction object target')
+                model_id_for(scene_object_by_id(resources.scene, target))
+                object_commands.add(cid)
                 continue
             if skill in {'push', 'pull'} or parameters.get('link'):
                 if skill in {'pick', 'put'}:
