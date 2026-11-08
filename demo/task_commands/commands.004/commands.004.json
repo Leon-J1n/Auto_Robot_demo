@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0",
+  "request_id": "approach-pick-cabinet-handle-004",
+  "scene_id": 4,
+  "scene_version": 3,
+  "commands": [
+    {
+      "command_id": "1",
+      "skill_name": "approach",
+      "parameters": {
+        "target": 9
+      }
+    },
+    {
+      "command_id": "2",
+      "skill_name": "pick",
+      "parameters": {
+        "target": 9,
+        "hold_force": 10.0
+      }
+    }
+  ]
+}
