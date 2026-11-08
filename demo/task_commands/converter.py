@@ -187,11 +187,14 @@ class SkillCommandConverter:
             request = {"target": self._relative_end_effector_pose(parameters, index)}
             default_path_type = "linear"
         elif scene_object_target:
-            if any(key in parameters for key in ('relation', 'distance_m', 'anchor')):
+            if move_to and any(key in parameters for key in ('relation', 'distance_m', 'anchor')):
+                request = {"target": self._object_pose(target_id, parameters, index)}
+            elif any(key in parameters for key in ('relation', 'distance_m', 'anchor')):
                 raise CommandConversionError('Object-ID interaction motion does not support relation/distance_m/anchor offsets')
-            request = {'target': {'type': 'object', 'target_id': target_id}}
-            if 'grasp_index' in parameters:
-                request['target']['grasp_index'] = parameters['grasp_index']
+            else:
+                request = {'target': {'type': 'object', 'target_id': target_id}}
+                if 'grasp_index' in parameters:
+                    request['target']['grasp_index'] = parameters['grasp_index']
             default_path_type = 'joint'
         else:
             object_key, _, _ = self._resolve_target(target_id, index)
