@@ -71,7 +71,7 @@ def serializable(value):
 
 
 SUCCESS_ACTIONS = {
-    'move': '已移动到目标', 'pick': '已抓取目标', 'put': '已放置到目标',
+    'move_to': '已移动到目标', 'pick': '已抓取目标', 'put': '已放置到目标',
     'grasp': '已抓取目标', 'release': '已释放目标',
     'push': '已推动目标', 'pull': '已拉动目标', 'pour': '已完成倒水动作',
 }
@@ -260,8 +260,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 raise ValueError('command_id is required and must be unique')
             seen.add(cid)
             skill = command.get('skill_name')
-            if skill not in {'move', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'push', 'pull', 'pour'}:
-                raise ValueError(f'This integration runner supports move/grasp/release/approach/retreat/pick/put/push/pull/pour: {skill}')
+            if skill not in {'move_to', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'push', 'pull', 'pour'}:
+                raise ValueError(f'This integration runner supports move_to/grasp/release/approach/retreat/pick/put/push/pull/pour: {skill}')
             parameters = command.get('parameters', {})
             target = parameters.get('target')
             if skill == 'pour':
@@ -288,7 +288,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 continue
             if skill in {'pick', 'put'} and (target in targets or target in {'end_effector', '__end_effector__'}):
                 raise ValueError(f'{skill} requires an interaction object target')
-            if skill in {'move', 'pick', 'put'} and target not in targets and target not in {'end_effector', '__end_effector__'}:
+            if skill in {'move_to', 'pick', 'put'} and target not in targets and target not in {'end_effector', '__end_effector__'}:
                 model_id_for(scene_object_by_id(resources.scene, target))
                 object_commands.add(cid)
             if skill in {'grasp', 'release'}:
@@ -471,7 +471,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                         result = push_pull_skill.execute(request)
                         row.update(result,request=request)
                     sync.sync(backend,kin,checker)
-                elif command['skill_name'] in {'move', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'pour'}:
+                elif command['skill_name'] in {'move_to', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'pour'}:
                     try:
                         task_executor.execute(command, index, state, row)
                     except Exception as exc:

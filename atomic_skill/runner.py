@@ -11,6 +11,7 @@ from demo.interaction.object_library import scene_object_by_id
 from atomic_skill.grasp import execute_grasp
 from atomic_skill.release import execute_release
 from atomic_skill.move import DemoInteractionMove, execute_grasp_pose_move, planning_failed_without_motion
+from atomic_skill.move_to import MoveToSkill
 from atomic_skill.approach import PoseSearchExecutor
 from atomic_skill.approach import ApproachSkill
 from atomic_skill.retreat import RetreatSkill
@@ -41,7 +42,7 @@ class TaskSkillExecutor:
         if resolver is not None:
             limits = backend.joint_limits
             self.adapters = {
-                'move': DemoInteractionMove(resolver, resources, kinematics, checker, limits),
+                'move_to': MoveToSkill(resolver, resources, kinematics, checker, limits),
                 'pick': DemoInteractionPick(resolver, resources, kinematics, checker, limits),
                 'put': DemoInteractionPut(resolver, resources, kinematics, checker, limits),
             }
@@ -69,8 +70,8 @@ class TaskSkillExecutor:
             return self._execute_closure(command, row)
         if command['skill_name'] in {'approach', 'retreat'}:
             return self._execute_pose_search(command, state, row)
-        if command['skill_name'] not in {'move', 'pick', 'put'}:
-            raise ValueError('TaskSkillExecutor supports move, pick, put, grasp, release, approach, retreat, and pour')
+        if command['skill_name'] not in {'move_to', 'pick', 'put'}:
+            raise ValueError('TaskSkillExecutor supports move_to, pick, put, grasp, release, approach, retreat, and pour')
         backend, checker, kin, sync = self.backend, self.checker, self.kinematics, self.sync
         parameters = command['parameters']
         skill = command['skill_name']

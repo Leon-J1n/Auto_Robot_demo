@@ -143,8 +143,9 @@ class SkillCommandConverter:
             if step['request']['target'].get('type') != 'object':
                 raise CommandConversionError('put requires an interaction object destination')
             return step
-        if skill_name in {"move", "pick"}:
-            return self._convert_move(parameters, index, pick=skill_name == "pick")
+        if skill_name in {"move_to", "pick"}:
+            return self._convert_move(parameters, index, pick=skill_name == "pick",
+                                       move_to=skill_name == "move_to")
         if skill_name in {"approach", "retreat"}:
             target = parameters.get("target")
             if isinstance(target, bool) or not isinstance(target, (str, int)) or target == "":
@@ -161,7 +162,8 @@ class SkillCommandConverter:
         raise CommandConversionError(f"command {index} uses unsupported skill {skill_name!r}")
 
     def _convert_move(
-        self, parameters: Mapping[str, Any], index: int, *, pick: bool = False
+        self, parameters: Mapping[str, Any], index: int, *, pick: bool = False,
+        move_to: bool = False
     ) -> dict[str, Any] | list[dict[str, Any]]:
         target_id = parameters.get("target")
         if isinstance(target_id, bool) or not isinstance(target_id, (str, int)) or target_id == "":
@@ -204,6 +206,9 @@ class SkillCommandConverter:
                 f"move command {index} has unsupported path type {path_type!r}"
             )
         request.setdefault("motion", {})["path_type"] = path_type
+        if move_to:
+            request.setdefault("planning", {}).setdefault("mode", "collision_free")
+            request.setdefault("planning", {}).setdefault("allow_replan", True)
         if "phase" in parameters:
             request["motion"]["phase"] = parameters["phase"]
         if "keep_end_effector_orientation" in parameters:
