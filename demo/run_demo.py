@@ -217,8 +217,18 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
     return f"error: {description}" + (f"（{code}）" if code else '，详情见报告')
 
 
+def _default_output_dir(command_file):
+    """Return the per-command output directory used when none is specified."""
+    command_path = Path(command_file).expanduser().resolve()
+    # Accept both the new layout (commands.xxx/commands.xxx.json) and a
+    # legacy flat command file, while always placing output in commands.xxx/output.
+    if command_path.parent.name == command_path.stem:
+        return command_path.parent / 'output'
+    return command_path.parent / command_path.stem / 'output'
+
+
 def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='mujoco',
-        output_dir=ROOT / 'tests/output/unified_scene', viewer=False, collision_probe=False,
+        output_dir=None, viewer=False, collision_probe=False,
         object_library_url=None, start_object_library=False, show_collision_geometry=False):
     from libraries.eaik import load_urdf
     from collision import SimPlatformFCLCollisionChecker
@@ -228,6 +238,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     from demo.interaction.object_library import ObjectLibraryGraspResolver, apply_ols_friction, scene_object_by_id, model_id_for
 
     task = json.loads(Path(command_file).read_text(encoding='utf-8'))
+    if output_dir is None:
+        output_dir = _default_output_dir(command_file)
     output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
     report = {'request_id': task.get('request_id'), 'success': False, 'steps': []}
     coordinator = SceneResourceCoordinator(catalog)
@@ -559,12 +571,14 @@ def main():
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--commands', type=Path, default=ROOT / 'demo/task_commands/commands.001.json')
+    parser.add_argument('--commands', type=Path,
+                        default=ROOT / 'demo/task_commands/commands.001/commands.001.json')
     parser.add_argument('--catalog', type=Path, default=ROOT / 'assets/catalog.json')
     parser.add_argument('--backend', default='mujoco')
     parser.add_argument('--library', type=Path, default=DEFAULT_SIMPLATFORM_LIBRARY,
                         help='SimPlatform native DLL (default: libraries/simplatform/bin/sim_platform_c.dll)')
-    parser.add_argument('--output', type=Path, default=ROOT / 'tests/output/unified_scene')
+    parser.add_argument('--output', type=Path, default=None,
+                        help='输出目录（默认：对应 commands.xxx/output）')
     parser.add_argument('--viewer', action='store_true')
     parser.add_argument('--show-collision-geometry', action='store_true',
                         help='显示 MuJoCo 碰撞几何（自动打开 viewer）')
