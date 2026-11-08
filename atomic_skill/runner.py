@@ -103,12 +103,37 @@ class TaskSkillExecutor:
             goal = np.asarray(selected_move['selected']['world_from_control'], dtype=float)
             target_pose = self.converter._offset_pose(
                 pose_request(goal), parameters, index)
+            # The relative offset changes the final pose, so re-solve IK for
+            # that exact pose and reject goal configurations already colliding
+            # with the table or other scene geometry before planning.
+            solutions = self.kinematics.solve_all(
+                target_pose, seed=state['joints'], max_solutions=8).solutions
+            valid_goals = []
+            current_q = np.asarray(state['joints'], dtype=float)
+            for candidate_q in solutions:
+                candidate_q = np.asarray(candidate_q, dtype=float)
+                hit = self.checker.check(
+                    candidate_q,
+                    safety_distance=float(self.resources.scene.get('move_defaults', {})
+                                          .get('constraints', {}).get('safety_distance', 0.003)))
+                if hit.in_collision:
+                    continue
+                delta = np.arctan2(np.sin(candidate_q - current_q),
+                                   np.cos(candidate_q - current_q))
+                valid_goals.append((float(np.linalg.norm(delta)), candidate_q))
+            if not valid_goals:
+                raise ValueError('No collision-free IK solution exists for the relative move_to target')
+            valid_goals.sort(key=lambda item: item[0])
+            selected_joint_goal = valid_goals[0][1]
+            path_type = parameters.get('planning_method', 'joint')
             request = _deep_merge(
                 self.resources.scene['move_defaults'],
                 {'target': target_pose,
-                 'motion': {'path_type': parameters.get('planning_method', 'joint')},
+                 'motion': {'path_type': path_type},
                  'planning': {'mode': 'collision_free', 'allow_replan': True}},
             )
+            if path_type == 'joint':
+                request['target'] = {'type': 'joint', 'joint_positions': selected_joint_goal.tolist()}
         elif parameters.get('link'):
             from demo.interaction.requests import motion_request
             request = motion_request(self.resources, backend, parameters)
