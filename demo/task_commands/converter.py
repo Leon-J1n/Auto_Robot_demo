@@ -167,8 +167,9 @@ class SkillCommandConverter:
         self, skill_name: str, parameters: Mapping[str, Any], index: int
     ) -> dict[str, Any]:
         """Build a linear world-Z displacement from the current TCP pose."""
+        default_distance = 0.02
         try:
-            distance = float(parameters.get("distance"))
+            distance = float(parameters.get("distance", default_distance))
         except (TypeError, ValueError):
             raise CommandConversionError(f"{skill_name} requires a numeric distance") from None
         if not math.isfinite(distance) or distance <= 0.0:
