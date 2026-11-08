@@ -5,9 +5,9 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from planning import PickContactPlanner, candidate_distances
-from demo.task_skills.move import DemoInteractionMove, pose_request, grasp_pose_move_request
-from demo.task_skills.approach import ApproachSkill, run_candidate_search
-from demo.task_skills.retreat import RetreatSkill
+from atomic_skill.move import DemoInteractionMove, pose_request, grasp_pose_move_request
+from atomic_skill.approach import ApproachSkill, run_candidate_search
+from atomic_skill.retreat import RetreatSkill
 
 APPROACH_DISTANCES = (.15, .12, .10, .14, .13, .11)
 
@@ -119,6 +119,11 @@ class DemoInteractionPick(DemoInteractionMove):
 
     def _post_contact_parts(self, contact, goal, approach, distance, direction,
                             resolved, skill, retreat_lift_height, parts):
+        # Pick is intentionally a two-step atomic composition: reach the
+        # selected grasp pose, then execute the grasp action.  It does not
+        # perform a lift or retreat; those are separate responsibilities.
+        if skill == 'pick':
+            return parts, resolved
         retreat = deepcopy(contact)
         retreat['motion'].update(path_type='linear',path_constraint='hard')
         retreat['constraints']['keep_end_effector_orientation'] = True

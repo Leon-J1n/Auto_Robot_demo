@@ -222,7 +222,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     from collision import SimPlatformFCLCollisionChecker
     from planning.time_parameterization import prepare_continuous_trajectory
     from services.object_library import ObjectLibraryClient, LocalObjectLibraryService, ObjectLibraryError
-    from demo.task_skills.runner import TaskSkillExecutor
+    from atomic_skill.runner import TaskSkillExecutor
     from demo.interaction.object_library import ObjectLibraryGraspResolver, apply_ols_friction, scene_object_by_id, model_id_for
 
     task = json.loads(Path(command_file).read_text(encoding='utf-8'))
@@ -275,10 +275,11 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 # The preceding command establishes the contact; resolve it at execution time.
                 continue
             if skill in {'approach', 'retreat'}:
-                if target in targets or target in {'end_effector', '__end_effector__'}:
-                    raise ValueError(f'{skill} requires an interaction object target')
-                model_id_for(scene_object_by_id(resources.scene, target))
-                object_commands.add(cid)
+                if skill == 'approach':
+                    if target is None or target in targets or target in {'end_effector', '__end_effector__'}:
+                        raise ValueError('approach requires an interaction object target')
+                    model_id_for(scene_object_by_id(resources.scene, target))
+                    object_commands.add(cid)
                 continue
             if skill in {'push', 'pull'} or parameters.get('link'):
                 if skill in {'pick', 'put'}:
@@ -370,7 +371,9 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             finally:
                 backend.set_object_pose(name, **original)
                 sync.sync(backend, kin, checker)
-        from skills.motion.move.skill import MoveSkill
+        from atomic_action.motion.move_linear.action import MoveLinearAction
+        from atomic_action.motion.move_joint.action import MoveJointAction
+        from atomic_action.motion.move_circular.action import MoveCircularAction
         if component(resources.robot_object, 'GripperModel'):
             backend.advance_gripper(1.0)
             sync.sync(backend, kin, checker)
@@ -383,15 +386,20 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             trajectory.update(timed)
             backend.set_status(f"{report['active_command_id']} | Executing / {report.get('active_substep', 'move')}")
 
-        mover = MoveSkill(robot_runtime=backend, kinematics=kin, collision_checker=checker,
-                          trajectory_callback=prepare_trajectory)
+        motion_actions = {
+            "linear": MoveLinearAction(robot_runtime=backend, kinematics=kin,
+                                       collision_checker=checker, trajectory_callback=prepare_trajectory),
+            "joint": MoveJointAction(robot_runtime=backend, kinematics=kin,
+                                     collision_checker=checker, trajectory_callback=prepare_trajectory),
+            "circular": MoveCircularAction(robot_runtime=backend, kinematics=kin,
+                                           collision_checker=checker, trajectory_callback=prepare_trajectory),
+        }
         def execute_motion(request):
-            # The execution backend is authoritative after every physical
-            # step. Refresh the planning snapshot immediately before each
-            # MoveSkill planning call; SceneStateSynchronizer makes this
-            # incremental, so an unchanged scene does not rebuild FCL state.
+            # Select the concrete motion action from the request geometry.
             sync.sync(backend, kin, checker)
-            return mover.execute(request)
+            path_type = request.get("motion", {}).get("path_type", "joint")
+            action = motion_actions.get(path_type, motion_actions["joint"])
+            return action.execute(request)
         def write_task_frame(command_id, substep, frame_state):
             nonlocal frame_index
             frames.write(json.dumps({'frame_index': frame_index, 'command_id': command_id,
@@ -421,12 +429,20 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 parameters = command['parameters']
                 mechanism = bool(parameters.get('link')) or command['skill_name'] in {'push', 'pull'}
                 backend.contact_target = None
+                backend.contact_target_object_id = None
+                backend.grasp_motion_phase = False
                 if mechanism:
                     from demo.interaction.requests import body_name
                     backend.contact_target = body_name(resources, parameters) if parameters.get('allow_contact') else None
+                elif command['skill_name'] == 'pick':
+                    # The terminal pick move is intentionally allowed to make
+                    # contact with its selected object. Other scene contacts
+                    # remain subject to the normal collision policy.
+                    backend.contact_target = active_target_name
+                    backend.contact_target_object_id = parameters.get('target')
                 if command['skill_name'] in {'push', 'pull'}:
                     from demo.interaction.requests import prepare_contact_command, push_pull_request
-                    from skills.manipulation.pull_push.skill import PullPushSkill
+                    from atomic_action.motion.move_linear.action import MoveLinearAction
                     stage = 'pull_push'
                     if command['skill_name'] == 'pull' or any(k in parameters for k in ('distance', 'angle_deg', 'target_position_m')):
                         parameters = prepare_contact_command(resources, backend, parameters, command['skill_name'])
@@ -438,10 +454,10 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                     from control.pull_push_controller import MujocoPullPushController
                     backend.pull_push_controller = MujocoPullPushController(
                         backend, kinematics=kin, collision_checker=checker)
-                    push_pull_skill = PullPushSkill(robot_runtime=backend,kinematics=kin)
+                    push_pull_skill = MoveLinearAction(robot_runtime=backend,kinematics=kin)
                     if parameters.get('orchestrate'):
-                        from demo.task_skills.pull import CommandPullExecutor
-                        from demo.task_skills.push import CommandPushExecutor
+                        from atomic_skill.pull import CommandPullExecutor
+                        from atomic_skill.push import CommandPushExecutor
                         executor_type = CommandPullExecutor if command['skill_name'] == 'pull' else CommandPushExecutor
                         orchestrator = executor_type(
                             resources=resources, backend=backend, kinematics=kin,
@@ -509,6 +525,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                                error=row.get('error') if row else getattr(exc, 'details', None),
                                stage=stage, target_name=active_target_name), flush=True)
             active_step_logged = True
+        elif active_command is None:
+            print(f'error: initialization failed at {stage}: {exc}', flush=True)
         report['error'] = {'stage': stage, 'message': str(exc), 'type': type(exc).__name__}
         if hasattr(exc, 'details'):
             report['error'].update(exc.details)

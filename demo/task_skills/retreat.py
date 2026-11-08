@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from demo.task_skills.move import planning_failed_without_motion
+from atomic_skill.move import planning_failed_without_motion
 from planning import candidate_pose, run_candidate_search, search_distances
 
 
@@ -77,49 +77,54 @@ class RetreatSkill:
         params = e.params if params is None else params
         if not isinstance(params, dict):
             return self._fail("INVALID_RETREAT_REQUEST", "retreat parameters must be an object")
-        target_pose = params.get("target_pose")
-        if not isinstance(target_pose, dict):
-            return self._fail("INVALID_RETREAT_REQUEST", "target_pose is required")
-        pose = deepcopy(target_pose.get("mechanism_pose", target_pose))
-        if "position" not in pose:
-            return self._fail("INVALID_RETREAT_REQUEST", "target_pose.position is required")
-        position = np.asarray(pose["position"], dtype=float)
+        if release_first and not e._release():
+            return False
+        try:
+            measured = e.backend.get_end_effector_pose()
+            position = np.asarray(measured["position"], dtype=float)
+            rotation = np.asarray(measured["rotation_matrix"], dtype=float)
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
+            return self._fail("INVALID_RETREAT_REQUEST", f"current end-effector pose unavailable: {exc}")
         if position.shape != (3,) or not np.all(np.isfinite(position)):
-            return self._fail("INVALID_RETREAT_REQUEST", "target_pose.position must be a finite 3-vector")
+            return self._fail("INVALID_RETREAT_REQUEST", "current end-effector position must be a finite 3-vector")
+        if rotation.shape != (3, 3) or not np.all(np.isfinite(rotation)):
+            return self._fail("INVALID_RETREAT_REQUEST", "current end-effector rotation must be a finite 3x3 matrix")
         try:
             minimum, maximum, step = self._search_parameters(params)
-            axis = self._pose_rotation(pose) @ self._axis_vector(params.get("pose_axis"))
+            offset = params.get("grasp_offset_local")
+            if offset is not None:
+                offset = np.asarray(offset, dtype=float)
+                if offset.shape != (3,) or not np.all(np.isfinite(offset)):
+                    raise ValueError("grasp_offset_local must be a finite 3-vector")
+                norm = float(np.linalg.norm(offset))
+                if norm <= 1e-9:
+                    raise ValueError("grasp_offset_local must be non-zero")
+                local_axis = offset / norm
+            else:
+                local_axis = self._axis_vector(params.get("direction"))
+            axis = rotation @ local_axis
         except (TypeError, ValueError) as exc:
             return self._fail("INVALID_RETREAT_REQUEST", str(exc))
 
-        if release_first and not e._release():
-            return False
-        world_pose = pose.get("frame") == "world" or target_pose.get("frame") == "world"
-        rotation = self._pose_rotation(pose)
         def attempt(distance):
-            candidate_pose = deepcopy(pose)
-            # Retreat reverses the execution direction of approach: the
-            # interaction pose is the start, and the reverse-derived pose is
-            # the endpoint.
-            candidate_pose["position"] = self.candidate_pose(
+            candidate_transform = self.candidate_pose(
                 np.block([[rotation, position[:, None]],
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance
-            )[:3, 3].tolist()
+            )
             before = e.backend.physics_steps
-            if world_pose:
-                moved = e._move(
-                    f"retreat_{int(round(float(distance) * 1000))}mm",
-                    position=np.asarray(candidate_pose["position"], dtype=float),
-                    rotation=rotation, linear=True, contact=True,
-                    override={"constraints": {"safety_distance": 0.003}})
-            else:
-                candidate = {
-                    "mechanism_pose": candidate_pose,
-                    "request": {"constraints": {"safety_distance": 0.003}},
-                }
-                moved = e._move(
-                    f"retreat_{int(round(float(distance) * 1000))}mm",
-                    spec=candidate, contact=True)
+            moved = e._move(
+                f"retreat_{int(round(float(distance) * 1000))}mm",
+                position=candidate_transform[:3, 3], rotation=rotation,
+                linear=True, contact=True,
+                override={
+                    "motion": {"path_type": "linear", "path_constraint": "hard"},
+                    "planning": {"mode": "direct", "allow_replan": False},
+                    "constraints": {
+                        "safety_distance": 0.003,
+                        "keep_end_effector_orientation": True,
+                    },
+                    "strategy_params": {"max_joint_step": 0.8},
+                })
             if moved:
                 clearance = getattr(e, "_retreat_clearance_met", None)
                 if not callable(clearance) or clearance():

@@ -4,8 +4,8 @@ from copy import deepcopy
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from demo.task_skills.move import planning_failed_without_motion
-from demo.task_skills.move import pose_request
+from atomic_skill.move import planning_failed_without_motion
+from atomic_skill.move import pose_request
 from demo.task_commands.converter import _deep_merge
 from planning import candidate_distances, candidate_pose, run_candidate_search, search_distances
 
@@ -70,8 +70,8 @@ class PoseSearchExecutor:
         self.params = deepcopy(params)
         self.phases = []
         self.phase = skill
-        from demo.task_skills.approach import ApproachSkill
-        from demo.task_skills.retreat import RetreatSkill
+        from atomic_skill.approach import ApproachSkill
+        from atomic_skill.retreat import RetreatSkill
         operation = ApproachSkill(self) if skill == 'approach' else RetreatSkill(self)
         success = operation.execute(params=self.params)
         failed = next((item for item in reversed(self.phases) if not item.get('success')), None)
@@ -159,23 +159,40 @@ class ApproachSkill:
             return self._fail("INVALID_APPROACH_REQUEST", "target_pose.position must be a finite 3-vector")
         try:
             minimum, maximum, step = self._search_parameters(params)
-            axis = self._pose_rotation(pose) @ self._axis_vector(params.get("pose_axis"))
+            rotation = self._pose_rotation(pose)
+            offset = params.get("grasp_offset_local")
+            if offset is not None:
+                offset = np.asarray(offset, dtype=float)
+                if offset.shape != (3,) or not np.all(np.isfinite(offset)):
+                    raise ValueError("grasp_offset_local must be a finite 3-vector")
+                norm = float(np.linalg.norm(offset))
+                if norm <= 1e-9:
+                    raise ValueError("grasp_offset_local must be non-zero")
+                local_axis = offset / norm
+            else:
+                local_axis = self._axis_vector(params.get("pose_axis"))
+            axis = rotation @ local_axis
         except (TypeError, ValueError) as exc:
             return self._fail("INVALID_APPROACH_REQUEST", str(exc))
 
         operation = operation or getattr(e, "operation", None) or "approach"
         def attempt(distance):
-            candidate_pose = deepcopy(pose)
-            # pose_axis describes the motion direction from the approach pose
-            # to the target pose.  The approach pose is derived backwards.
-            candidate_pose["position"] = self.candidate_pose(
-                np.block([[self._pose_rotation(pose), position[:, None]],
+            # Derive a complete pre-grasp transform from the final grasp pose.
+            # The rotation is part of the candidate: IK and collision planning
+            # must validate the gripper orientation together with its position.
+            candidate_transform = self.candidate_pose(
+                np.block([[rotation, position[:, None]],
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance
-            )[:3, 3].tolist()
+            )
+            candidate_pose = deepcopy(pose)
+            candidate_pose["position"] = candidate_transform[:3, 3].tolist()
+            candidate_pose["rotation_matrix"] = candidate_transform[:3, :3].tolist()
             before = e.backend.physics_steps
             if e._move(
                     f"{operation}_approach_{int(round(float(distance) * 1000))}mm",
-                    spec={"mechanism_pose": candidate_pose}, contact=False):
+                    spec={"mechanism_pose": candidate_pose}, contact=False,
+                    override={"motion": {"path_type": "joint", "path_constraint": "soft"},
+                              "planning": {"mode": "collision_free", "allow_replan": True}}):
                 return True
             failed = e.phases[-1]
             if not planning_failed_without_motion(failed, e.backend, before):
