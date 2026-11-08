@@ -10,7 +10,7 @@ from demo.task_commands.converter import SkillCommandConverter, _deep_merge
 from demo.interaction.object_library import scene_object_by_id
 from atomic_skill.grasp import execute_grasp
 from atomic_skill.release import execute_release
-from atomic_skill.move import DemoInteractionMove, execute_grasp_pose_move, planning_failed_without_motion
+from atomic_skill.move import DemoInteractionMove, execute_grasp_pose_move, planning_failed_without_motion, pose_request
 from atomic_skill.move_to import MoveToSkill
 from atomic_skill.approach import PoseSearchExecutor
 from atomic_skill.approach import ApproachSkill
@@ -86,7 +86,30 @@ class TaskSkillExecutor:
         self.converter._last_pose = {'type': 'pose', 'frame': 'world',
             'position': dict(zip('xyz', measured['position'])),
             'orientation': dict(representation='quaternion', **dict(zip('xyzw', quat)))}
-        if parameters.get('link'):
+        relative_move_to = (
+            skill == 'move_to'
+            and any(key in parameters for key in ('relation', 'distance_m'))
+            and self.resolver is not None
+            and parameters.get('target') not in self.resources.scene.get('named_targets', {})
+            and parameters.get('target') not in {'end_effector', '__end_effector__'}
+        )
+        if relative_move_to:
+            resolved_move = self.resolver.resolve(parameters['target'], self.resources, state)
+            selected_move = self.resolver.select(
+                resolved_move, self.kinematics, self.checker, state['joints'],
+                safety_distance=float(self.resources.scene.get('move_defaults', {})
+                                      .get('constraints', {}).get('safety_distance', 0.003)),
+                prefer_direct=False)
+            goal = np.asarray(selected_move['selected']['world_from_control'], dtype=float)
+            target_pose = self.converter._offset_pose(
+                pose_request(goal), parameters, index)
+            request = _deep_merge(
+                self.resources.scene['move_defaults'],
+                {'target': target_pose,
+                 'motion': {'path_type': parameters.get('planning_method', 'joint')},
+                 'planning': {'mode': 'collision_free', 'allow_replan': True}},
+            )
+        elif parameters.get('link'):
             from demo.interaction.requests import motion_request
             request = motion_request(self.resources, backend, parameters)
         else:
