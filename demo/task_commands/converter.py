@@ -146,6 +146,8 @@ class SkillCommandConverter:
         if skill_name in {"move_to", "pick"}:
             return self._convert_move(parameters, index, pick=skill_name == "pick",
                                        move_to=skill_name == "move_to")
+        if skill_name in {"lift_up", "put_down", "shift_down"}:
+            return self._convert_vertical_shift(skill_name, parameters, index)
         if skill_name in {"approach", "retreat"}:
             target = parameters.get("target")
             if isinstance(target, bool) or not isinstance(target, (str, int)) or target == "":
@@ -160,6 +162,38 @@ class SkillCommandConverter:
         if skill_name in {"grasp", "release", "press", "pull", "push"}:
             return self._convert_action(skill_name, parameters, index)
         raise CommandConversionError(f"command {index} uses unsupported skill {skill_name!r}")
+
+    def _convert_vertical_shift(
+        self, skill_name: str, parameters: Mapping[str, Any], index: int
+    ) -> dict[str, Any]:
+        """Build a linear world-Z displacement from the current TCP pose."""
+        try:
+            distance = float(parameters.get("distance"))
+        except (TypeError, ValueError):
+            raise CommandConversionError(f"{skill_name} requires a numeric distance") from None
+        if not math.isfinite(distance) or distance <= 0.0:
+            raise CommandConversionError(f"{skill_name} distance must be positive and finite")
+        if self._last_pose is None:
+            raise CommandConversionError(f"{skill_name} requires a current end-effector pose")
+        target = self._offset_pose(
+            deepcopy(self._last_pose),
+            {"relation": "above" if skill_name == "lift_up" else "below",
+             "distance_m": distance},
+            index,
+        )
+        return {
+            "name": str(parameters.get("name", skill_name)),
+            "type": skill_name,
+            "request": {
+                "target": target,
+                "motion": {"path_type": "linear", "path_constraint": "hard"},
+                "planning": {"mode": "direct", "allow_replan": False},
+                "constraints": {
+                    "avoid_collision": True,
+                    "keep_end_effector_orientation": True,
+                },
+            },
+        }
 
     def _convert_move(
         self, parameters: Mapping[str, Any], index: int, *, pick: bool = False,

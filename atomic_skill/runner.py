@@ -70,8 +70,8 @@ class TaskSkillExecutor:
             return self._execute_closure(command, row)
         if command['skill_name'] in {'approach', 'retreat'}:
             return self._execute_pose_search(command, state, row)
-        if command['skill_name'] not in {'move_to', 'pick', 'put'}:
-            raise ValueError('TaskSkillExecutor supports move_to, pick, put, grasp, release, approach, retreat, and pour')
+        if command['skill_name'] not in {'move_to', 'lift_up', 'put_down', 'shift_down', 'pick', 'put'}:
+            raise ValueError('TaskSkillExecutor supports move_to, pick, put, lift_up, put_down, shift_down, grasp, release, approach, retreat, and pour')
         backend, checker, kin, sync = self.backend, self.checker, self.kinematics, self.sync
         parameters = command['parameters']
         skill = command['skill_name']
