@@ -15,6 +15,21 @@ def _periodic_joint_delta(q, reference):
     return np.arctan2(np.sin(delta), np.cos(delta))
 
 
+def _nearest_equivalent(q, reference, limits):
+    """Choose the 2π-equivalent joint values nearest the current state."""
+    q = np.asarray(q, dtype=float)
+    reference = np.asarray(reference, dtype=float)
+    limits = np.asarray(limits, dtype=float)
+    result = q.copy()
+    for index, value in enumerate(q):
+        candidates = [float(value + turns * 2.0 * np.pi)
+                      for turns in range(-3, 4)
+                      if limits[index, 0] - 1e-9 <= value + turns * 2.0 * np.pi <= limits[index, 1] + 1e-9]
+        if candidates:
+            result[index] = min(candidates, key=lambda candidate: abs(candidate - reference[index]))
+    return result
+
+
 class JointMove:
     """Translate a normalized Move request into a joint-path specification."""
 
@@ -60,8 +75,10 @@ class JointMove:
             if not solutions:
                 raise PlanningError("No IK configuration reaches the target.", code="IK_FAILED", recoverable=True)
             candidate_goals = []
+            limits = self.kinematics.limits
             for solution in solutions:
                 for candidate in self.kinematics.equivalent_configurations(solution, start, max_variants=8):
+                    candidate = _nearest_equivalent(candidate, start, limits)
                     if not any(np.allclose(candidate, q, atol=1e-8) for q in candidate_goals):
                         candidate_goals.append(np.asarray(candidate, dtype=float))
             candidate_goals.sort(key=lambda q: float(np.sum(np.abs(_periodic_joint_delta(q, start)))))
