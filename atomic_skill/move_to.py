@@ -6,9 +6,10 @@ pose request.  Execution reuses the existing move action through
 exposed.
 """
 
-from atomic_skill.move import DemoInteractionMove
+from atomic_skill._move_common import DemoInteractionMove
 
 
 class MoveToSkill(DemoInteractionMove):
     """Move to an absolute or relation-offset target pose."""
+
 

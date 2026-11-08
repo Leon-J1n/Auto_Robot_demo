@@ -33,8 +33,8 @@ def main():
     from planning import DirectPlanner
     from services.object_library import ObjectLibraryClient, LocalObjectLibraryService
     from demo.interaction.object_library import ObjectLibraryGraspResolver
-    from demo.task_skills.move import DemoInteractionMove
-    from demo.task_skills.pick import DemoInteractionPick
+    from atomic_skill._move_common import DemoInteractionMove
+    from atomic_skill.pick import DemoInteractionPick
     from demo.run_demo import run
 
     bootstrap = time.perf_counter() - started
@@ -139,5 +139,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
