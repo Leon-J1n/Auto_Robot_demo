@@ -12,7 +12,7 @@ class RetreatSkill:
     MIN_DISTANCE = 0.03
     MAX_DISTANCE = 0.10
     STEP = 0.005
-    DEFAULT_AXIS = "+z"
+    DEFAULT_AXIS = "-z"
 
     @staticmethod
     def candidate_pose(transform, axis_world, distance):
