@@ -46,19 +46,13 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
         if value is None:
             width = gripper.get("width")
             substep = state.get("substep")
-            if (substep in {"grasp", "release"} and
-                    isinstance(width, (int, float)) and np.isfinite(width) and
-                    gripper_open_width is not None and gripper_closed_width is not None and
-                    gripper_open_width > gripper_closed_width):
-                # The physical controller may stop above zero opening when an
-                # object is held. Normalize the observed stroke to TRAJ's
-                # canonical 0.0=open, 0.72=closed range.
+            if (isinstance(width, (int, float)) and np.isfinite(width) and
+                    gripper_open_width is not None and gripper_open_width > 0):
+                # Preserve the simulated opening. A grasp can stop above the
+                # mechanical zero because the payload blocks the fingers.
                 value = float(np.clip(
-                    (gripper_open_width - width) /
-                    (gripper_open_width - gripper_closed_width) * 0.72,
+                    (gripper_open_width - width) / gripper_open_width * 0.72,
                     0.0, 0.72))
-            elif gripper.get("holding") or gripper.get("object_present"):
-                value = 0.72
             else:
                 value = 0.0
         return [*map(float, joints), float(value)]
@@ -68,15 +62,12 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
         if not isinstance(width, (int, float)) or not np.isfinite(width):
             return None
         substep = state.get("substep")
-        if (substep in {"grasp", "release"} and
-                gripper_open_width is not None and gripper_closed_width is not None and
-                gripper_open_width > gripper_closed_width):
+        if gripper_open_width is not None and gripper_open_width > 0:
+            # Match the physical finger opening rather than normalizing the
+            # smallest observed width to a fully closed pose.
             angle = float(np.clip(
-                (gripper_open_width - width) /
-                (gripper_open_width - gripper_closed_width) * 0.8,
+                (gripper_open_width - width) / gripper_open_width * 0.8,
                 0.0, 0.8))
-        elif gripper.get("holding") or gripper.get("object_present"):
-            angle = 0.8
         else:
             angle = 0.0
         return [angle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
