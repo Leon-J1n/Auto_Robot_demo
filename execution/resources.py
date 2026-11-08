@@ -100,8 +100,13 @@ def pose_matrix(obj):
     p = component(obj, 'Transform')
     q = np.asarray(p.get('quaternion_xyzw', [0, 0, 0, 1]), dtype=float)
     xyz = np.asarray(p.get('position', [0, 0, 0]), dtype=float)
-    if q.shape != (4,) or xyz.shape != (3,) or not np.all(np.isfinite(np.r_[q, xyz])) or not np.isclose(np.linalg.norm(q), 1):
+    if q.shape != (4,) or xyz.shape != (3,) or not np.all(np.isfinite(np.r_[q, xyz])):
         raise ValueError('Transform requires finite position and unit xyzw quaternion')
+    norm = np.linalg.norm(q)
+    if not np.isclose(norm, 1.0, atol=1e-3):
+        raise ValueError('Transform requires finite position and unit xyzw quaternion')
+    if norm != 1.0:
+        q = q / norm
     if p.get('parent') is not None or not np.allclose(p.get('scale', [1, 1, 1]), [1, 1, 1]):
         raise ValueError('This scene compiler currently requires world-parented objects with unit scale')
     t = np.eye(4)
@@ -138,7 +143,17 @@ class SceneResourceCoordinator:
     def resolve(self, task, backend='mujoco'):
         if task.get('schema_version') != '2.0' or not task.get('request_id'):
             raise ValueError('Task requires schema_version=2.0 and request_id')
-        record = self.catalog['scenes'].get(task.get('scene_id'))
+        # Register authoring scenes discovered under assets/scenes before
+        # resolving the requested identity. Existing runtime/backend settings
+        # in the catalog are preserved by the registrar.
+        from .scene_catalog import register_scene
+        self.catalog = register_scene(
+            self.catalog_path,
+            self.catalog_path.parent / 'scenes',
+            task.get('scene_id'),
+            task.get('scene_version'),
+        )
+        record = self.catalog['scenes'].get(str(task.get('scene_id'))) or self.catalog['scenes'].get(task.get('scene_id'))
         if record is None or record['version'] != task.get('scene_version'):
             raise ValueError('Unknown scene_id or scene_version mismatch')
         path = (self.catalog_path.parent / record['path']).resolve()
@@ -153,6 +168,26 @@ class SceneResourceCoordinator:
             runtime_path = (self.catalog_path.parent / record['runtime_config']).resolve()
             runtime_bytes = runtime_path.read_bytes()
             scene = apply_runtime_config(scene, json.loads(runtime_bytes))
+        # Assemble new OLS MetadataRef authoring scenes into executable components.
+        if not any(component(o, 'RobotModelRef') for o in scene.get('objects', [])):
+            if any(component(o, 'MetadataRef').get('type') == 'robot' for o in scene.get('objects', [])):
+                from demo.scene.assembler import SceneAssembler
+                from services.object_library import ObjectLibraryClient, LocalObjectLibraryService
+                config = scene.get('object_library', {})
+                client = ObjectLibraryClient(config.get('base_url', 'http://127.0.0.1:8000'), uid=config.get('uid', 0))
+                service = None
+                robot_id = next(int(component(o, 'MetadataRef').get('path', '').rsplit('/', 1)[-1]) for o in scene['objects'] if component(o, 'MetadataRef').get('type') == 'robot')
+                try:
+                    client.get_robot(robot_id)
+                except Exception:
+                    service = LocalObjectLibraryService()
+                    client = ObjectLibraryClient(service.url, uid=config.get('uid', 0))
+                try:
+                    root = (self.catalog_path.parent / self.catalog['asset_root']).resolve()
+                    scene = SceneAssembler(root, client).assemble(scene, task=task)
+                finally:
+                    if service is not None:
+                        service.close()
         robots = [o for o in scene['objects'] if component(o, 'RobotModelRef')]
         if len(robots) != 1:
             raise ValueError('Exactly one robot is supported by this runner')
