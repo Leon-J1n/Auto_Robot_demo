@@ -8,7 +8,7 @@ from demo.task_commands.converter import _deep_merge
 from demo.interaction.requests import body_name, motion_request, push_pull_request
 from demo.interaction.closure_validation import execute_checked_grasp
 from atomic_skill.release import release_request
-from atomic_skill._move_common import execute_grasp_pose_move, planning_failed_without_motion
+from atomic_action.motion.common.interaction import execute_grasp_pose_move, planning_failed_without_motion
 
 
 class PullMotionExecutor:
@@ -563,6 +563,7 @@ class CommandPullExecutor(PullMotionExecutor):
         if self.params.get('contact_mode', 'grasp') != 'grasp':
             return self._fail('INVALID_REQUEST', 'Pull requires contact_mode grasp')
         return self._execute_grasped_motion('pull')
+
 
 
 

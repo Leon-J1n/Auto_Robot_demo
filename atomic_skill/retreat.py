@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from atomic_skill._move_common import planning_failed_without_motion
+from atomic_action.motion.common.interaction import planning_failed_without_motion
 from planning import candidate_pose, run_candidate_search, search_distances
 
 
@@ -137,4 +137,5 @@ class RetreatSkill:
         return run_candidate_search(
             search_distances(params, minimum=minimum, maximum=maximum, step=step, label='retreat'),
             attempt)
+
 

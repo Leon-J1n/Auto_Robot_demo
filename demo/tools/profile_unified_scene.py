@@ -33,7 +33,7 @@ def main():
     from planning import DirectPlanner
     from services.object_library import ObjectLibraryClient, LocalObjectLibraryService
     from demo.interaction.object_library import ObjectLibraryGraspResolver
-    from atomic_skill._move_common import DemoInteractionMove
+    from atomic_action.motion.common.interaction import DemoInteractionMove
     from atomic_skill.pick import DemoInteractionPick
     from demo.run_demo import run
 
@@ -139,6 +139,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 

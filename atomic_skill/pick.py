@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from planning import PickContactPlanner, candidate_distances
-from atomic_skill._move_common import DemoInteractionMove, pose_request, grasp_pose_move_request
+from atomic_action.motion.common.interaction import DemoInteractionMove, pose_request, grasp_pose_move_request
 from atomic_skill.approach import ApproachSkill, run_candidate_search
 from atomic_skill.retreat import RetreatSkill
 
@@ -175,4 +175,5 @@ class DemoInteractionPick(DemoInteractionMove):
             retreat_part['translation_world'] = (-distance * direction).tolist()
         parts.append(retreat_part)
         return parts, resolved
+
 

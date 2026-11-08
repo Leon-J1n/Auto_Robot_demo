@@ -1,4 +1,4 @@
-"""Demo-only OLS target resolution and single-target motion."""
+"""Shared motion request and interaction execution helpers."""
 from copy import deepcopy
 
 import numpy as np
@@ -131,4 +131,5 @@ class DemoInteractionMove:
         if path_type == 'joint' and not base['constraints'].get('keep_end_effector_orientation'):
             base['target'] = {'type': 'joint', 'joint_positions': resolved['joint_positions']}
         return [{'phase': 'move', 'request': base}], resolved
+
 
