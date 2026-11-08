@@ -563,6 +563,15 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 np.savez_compressed(output / 'final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
                                     ctrl=backend.data.ctrl, eq_active=backend.data.eq_active,
                                     eq_data=backend.model.eq_data, time=float(backend.data.time))
+            if backend is not None and 'resources' in locals() and (output / 'frames.jsonl').exists():
+                try:
+                    from execution.trajectory_export import write_traj_from_jsonl
+                    traj_path = write_traj_from_jsonl(
+                        output / 'trajectory.traj', resources.scene, output / 'frames.jsonl',
+                        initial_joints=resources.initial_joints)
+                    report['trajectory_file'] = str(traj_path)
+                except Exception as exc:
+                    report['trajectory_export_error'] = str(exc)
             report['allowed_carrying_contacts'] = list(getattr(checker, 'carrying_contact_log', {}).values())
             (output / 'report.json').write_text(json.dumps(report, indent=2, default=serializable), encoding='utf-8')
             if (viewer or show_collision_geometry) and backend is not None and getattr(backend, 'viewer', None) is not None:
@@ -616,6 +625,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 
 
 
