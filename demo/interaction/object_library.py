@@ -7,6 +7,12 @@ from execution.resources import component
 from kinematics import IKError
 
 
+def _periodic_joint_delta(q, reference):
+    """Return the shortest per-joint angular displacement in radians."""
+    delta = np.asarray(q, dtype=float) - np.asarray(reference, dtype=float)
+    return np.arctan2(np.sin(delta), np.cos(delta))
+
+
 class GraspResolutionError(RuntimeError):
     pass
 
@@ -114,6 +120,24 @@ class ObjectLibraryGraspResolver:
             if isinstance(grasp_index, bool) or not isinstance(grasp_index, int) or not 0 <= grasp_index < len(candidates):
                 raise GraspResolutionError('grasp_index is outside the model candidate list')
             candidates = [candidates[grasp_index]]
+        else:
+            # Cheap conservative pre-pass: remove byte-identical OLS poses and
+            # try nearer control poses first. It never discards a distinct
+            # candidate, so the complete IK/collision pass retains its original
+            # coverage while repeated candidates are not checked twice.
+            unique = []
+            seen = set()
+            seed_pose = kin.forward(seed)
+            seed_position = np.asarray(seed_pose['position'], dtype=float)
+            for candidate in candidates:
+                pose = np.asarray(candidate['world_from_control'], dtype=float)
+                marker = pose.tobytes()
+                if marker in seen:
+                    continue
+                seen.add(marker)
+                unique.append(candidate)
+            candidates = sorted(unique, key=lambda item: float(np.linalg.norm(
+                np.asarray(item['world_from_control'], dtype=float)[:3, 3] - seed_position)))
         for candidate in candidates:
             t = np.asarray(candidate['world_from_control'])
             try:
@@ -126,7 +150,7 @@ class ObjectLibraryGraspResolver:
                 if hit.in_collision:
                     rejected.append({'grasp_index': candidate['grasp_index'], 'reason': 'goal_collision', 'contacts': hit.contacts})
                     continue
-                options.append((float(np.linalg.norm(q - seed)), candidate, q, result.solver))
+                options.append((float(np.linalg.norm(_periodic_joint_delta(q, seed))), candidate, q, result.solver))
         if not options:
             error = GraspResolutionError(f'No reachable collision-free grasp candidate: {rejected}')
             reasons = {item['reason'] for item in rejected}
