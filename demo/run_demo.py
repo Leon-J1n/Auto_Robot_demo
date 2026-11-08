@@ -227,6 +227,18 @@ def _default_output_dir(command_file):
     return command_path.parent / command_path.stem / 'output'
 
 
+def _resolve_command_file(command_file):
+    """Resolve a command path, including a bare commands.xxx.json filename."""
+    command_path = Path(command_file).expanduser()
+    if command_path.is_file():
+        return command_path
+    if not command_path.is_absolute() and command_path.parent == Path('.'):
+        organized = ROOT / 'demo' / 'task_commands' / command_path.stem / command_path.name
+        if organized.is_file():
+            return organized
+    return command_path
+
+
 def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='mujoco',
         output_dir=None, viewer=False, collision_probe=False,
         object_library_url=None, start_object_library=False, show_collision_geometry=False):
@@ -586,6 +598,7 @@ def main():
     parser.add_argument('--start-object-library', action='store_true', help='Start project OLS on a free loopback port for this task')
     parser.add_argument('--collision-probe', action='store_true', help='Test-only: insert and restore probe_block at the TCP before execution')
     args = parser.parse_args()
+    args.commands = _resolve_command_file(args.commands)
     if not args.commands.is_file():
         parser.error(f'commands file not found: {args.commands}')
     if not args.catalog.is_file():
