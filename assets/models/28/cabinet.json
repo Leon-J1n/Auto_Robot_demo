@@ -5,14 +5,11 @@
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "red,wooden,single"
+    "tag": "red,wooden,single",
+    "can_place": true
   },
   "geometric_properties": {
-    "AABB": [
-      0.3000192,
-      0.25050735,
-      0.4500276
-    ]
+    "AABB": [0.114000072, -0.136507278, 0.150000000, -0.150000000, 0.450000000, -0.000000072]
   },
   "physical_properties": {
     "mass_kg": 2.25,
@@ -34,17 +31,43 @@
     "pose_count": 1,
     "poses": [
       [
-        -0.12,
         -0.13,
+        0.117,
         0.23,
         3.14,
         -1.57,
-        1.57,
+        0.0,
         1,
         0,
         0,
         0.0
       ]
     ]
+  },
+  "robot_driver": {
+    "properties": {
+      "role": "passive",
+      "joint_sequence": [
+        "cabinet0132_door01"
+      ],
+      "joint_limits": {
+        "cabinet0132_door01": [
+          -0.0,
+          2.356194496154785
+        ]
+      },
+      "initial_joint_positions_rad": {
+        "cabinet0132_door01": 0.0
+      },
+      "available_connect_joints": [],
+      "available_connect_link": [],
+      "position": [],
+      "quaternion_xyzw": [],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
   }
 }

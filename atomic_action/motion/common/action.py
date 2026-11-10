@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from collision import SimPlatformFCLCollisionChecker
 from kinematics import IKError, KinematicsService
 from planning.prepared_trajectory import PreparedTrajectory, planning_state_signature
+from planning.arm_posture import ArmPosturePreference, configuration_cost, preference_for
 from planning import CollisionFreePlanner, CollisionPlanningError, DirectPlanner, PlanningError
 from atomic_action.motion.common.selector import StrategySelectionError, StrategySelector
 from atomic_action.motion.common.strategies import CircularMove, JointMove, LinearMove
@@ -39,6 +40,10 @@ class _MoveExecutor:
             robot_runtime = SceneRobotRuntime(scene_path)
         self.robot_runtime = robot_runtime
         self.kinematics = kinematics if kinematics is not None else self.robot_runtime.kinematics
+        if not hasattr(self.kinematics, 'arm_posture'):
+            import mujoco
+            if isinstance(getattr(robot_runtime, 'model', None), mujoco.MjModel):
+                self.kinematics.arm_posture = ArmPosturePreference(robot_runtime)
         # Planning collision queries are independent of the live MuJoCo model.
         # MuJoCo remains the execution/physics backend below this layer.
         self.collision_checker = collision_checker if collision_checker is not None else SimPlatformFCLCollisionChecker(self.robot_runtime)
@@ -59,6 +64,7 @@ class _MoveExecutor:
     def execute(self, request: Mapping[str, Any], *, prepared_trajectory: PreparedTrajectory | None = None) -> Dict[str, Any]:
         """Run the complete Move pipeline and always return a structured result."""
         selection: Dict[str, Any] | None = None
+        trajectory = None
         timing: Dict[str, float] = {}
         started = time.perf_counter()
         try:
@@ -98,6 +104,13 @@ class _MoveExecutor:
                 timing["planning"] = time.perf_counter() - stage_started
             if self.trajectory_callback is not None:
                 self.trajectory_callback(trajectory, normalized, selection)
+            posture = preference_for(getattr(self, 'kinematics', None))
+            if posture is not None:
+                trajectory.setdefault('diagnostics', {})['arm_posture'] = {
+                    'objective': 'elevated_arm_soft_preference',
+                    'start': posture.metrics(trajectory['waypoints'][0]),
+                    'goal': posture.metrics(trajectory['waypoints'][-1]),
+                    'path_penalty_rad': posture.path_penalty(trajectory['waypoints'])}
             stage_started = time.perf_counter()
             try:
                 execution_result = self._execute_trajectory(trajectory, normalized, context)
@@ -106,6 +119,13 @@ class _MoveExecutor:
             execution_result["planning_time"] = trajectory.get("planning_time", 0.0)
             execution_result["planned_duration"] = trajectory.get("duration", 0.0)
             timing["total"] = time.perf_counter() - started
+            if execution_result.get('grasp_error'):
+                error = execution_result['grasp_error']
+                result = failure_result('GRASP_FAILED', error['error_message'], failed_stage='execution',
+                                        recoverable=True, details=error)
+                result.update(execution_result=execution_result, trajectory=trajectory, timing=timing,
+                              selection=selection)
+                return result
             return {"success": True, "status": "completed", "selection": selection, "execution_result": execution_result, "trajectory": trajectory, "timing": timing, "motion_time": execution_result.get("execution_time", 0.0), "error": None}
         except MoveValidationError as exc:
             result = failure_result(ErrorCode.INVALID_REQUEST, str(exc), failed_stage="validation", recoverable=True, recommended_action="Correct the request fields and retry.")
@@ -126,11 +146,21 @@ class _MoveExecutor:
                 recommended_action=exc.recommended_action,
             )
         except TimeoutError as exc:
-            result = failure_result(ErrorCode.EXECUTION_TIMEOUT, str(exc), failed_stage="execution", recoverable=True, status="timeout")
+            result = failure_result(ErrorCode.EXECUTION_TIMEOUT, str(exc), failed_stage="execution", recoverable=True,
+                                    status="timeout", details=getattr(exc, 'details', None))
+            if trajectory is not None:
+                result['trajectory'] = trajectory
         except ValueError as exc:
             result = failure_result(ErrorCode.PLANNING_FAILED, str(exc), failed_stage="path_generation", recoverable=True)
         except RuntimeError as exc:
-            result = failure_result(ErrorCode.EXECUTION_FAILED, str(exc), failed_stage="execution", recoverable=True)
+            from demo.error_messages import error_from_exception
+            error = error_from_exception(exc, stage="execution")
+            result = failure_result(error.get('error_code', ErrorCode.EXECUTION_FAILED),
+                                    error['error_message'],
+                                    failed_stage=error.get('failed_stage') or 'execution',
+                                    recoverable=error.get('recoverable', True),
+                                    details=error.get('details'))
+            result['error'].update(error)
         except Exception as exc:
             result = failure_result(ErrorCode.INTERNAL_ERROR, str(exc), failed_stage="unknown", recoverable=False)
         if selection is not None:
@@ -179,47 +209,97 @@ class _MoveExecutor:
             return trajectory
 
         except CollisionPlanningError as collision_error:
-            mode = request["planning"]["mode"]
-            hard_constraint = request["motion"]["path_constraint"] == "hard"
-            fallback_allowed = mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])
-            if hard_constraint and path_request["path_type"] != "joint":
-                raise PlanningError(
-                    "Direct path collides and its hard Cartesian constraint cannot be relaxed.",
-                    code=ErrorCode.PATH_CONSTRAINT_INFEASIBLE.value, recoverable=True,
-                    details={"contacts": collision_error.details or []},
-                )
-            if not fallback_allowed:
-                raise
-            trajectory = self.collision_free_planner.plan(path_request, request, context)
-            selection["planning_mode"] = "collision_free"
-            selection["fallback_used"] = True
-            selection["selection_reason"] += "; direct path collision triggered RRT-Connect"
-            return trajectory
+            return self._plan_collision_fallback(request, context, selection, path_request, collision_error)
+
+    def _plan_collision_fallback(self, request, context, selection, path_request, collision_error):
+        """Plan around an already checked blocked segment without probing it twice."""
+        mode = request["planning"]["mode"]
+        hard_constraint = request["motion"]["path_constraint"] == "hard"
+        fallback_allowed = mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])
+        if hard_constraint and path_request["path_type"] != "joint":
+            raise PlanningError(
+                "Direct path collides and its hard Cartesian constraint cannot be relaxed.",
+                code=ErrorCode.PATH_CONSTRAINT_INFEASIBLE.value, recoverable=True,
+                details={"contacts": collision_error.details or []},
+            )
+        if not fallback_allowed:
+            raise collision_error
+        trajectory = self.collision_free_planner.plan(path_request, request, context)
+        selection["planning_mode"] = "collision_free"
+        selection["fallback_used"] = True
+        selection["selection_reason"] = selection.get("selection_reason", "") + "; direct path collision triggered RRT-Connect"
+        return trajectory
 
     def _plan_joint_candidates(self, request, context, selection, path_request):
-        """Compare direct and bypass paths using actual total joint travel."""
+        """Compare feasible paths by joint travel and elevated-arm preference."""
         started = time.perf_counter()
         deadline = started + float(request["planning"]["planning_time"])
         start = np.asarray(path_request["start"], dtype=float)
         def periodic_delta(q):
             delta = np.asarray(q, dtype=float) - start
             return np.arctan2(np.sin(delta), np.cos(delta))
-        goals = sorted(path_request["candidate_goals"], key=lambda q: float(np.sum(np.abs(periodic_delta(q)))))
+        kinematics = getattr(self, 'kinematics', None)
+        posture = preference_for(kinematics)
+        goals = sorted(path_request["candidate_goals"], key=lambda q: configuration_cost(kinematics, q, start))
         validator = path_request.get("candidate_validator")
         best = None
         pending = []
         failures = []
         evaluated = 0
         validated = pruned = rejected = 0
+        bypass_attempts = 0
+        direct_check_time = 0.0
+        untested = []
 
         def consider(trajectory, candidate_selection):
             nonlocal best
             travel = np.sum(np.abs(np.diff(np.asarray(trajectory["waypoints"]), axis=0)), axis=0)
-            score = (float(np.sum(travel)), float(np.max(travel)))
+            penalty = posture.path_penalty(trajectory['waypoints']) if posture is not None else 0.
+            score = (float(np.sum(travel)) + penalty, float(np.sum(travel)), float(np.max(travel)), penalty)
             if best is None or score < best[0]:
                 best = (score, trajectory, candidate_selection)
 
-        for goal_index, goal in enumerate(goals):
+        def bypass(entry, budget):
+            nonlocal bypass_attempts
+            _, path, collision_error = entry
+            bounded = deepcopy(request)
+            bounded["planning"].update(planning_time=budget, max_attempts=1)
+            candidate_selection = dict(selection)
+            bypass_attempts += 1
+            try:
+                consider(self._plan_collision_fallback(
+                    bounded, context, candidate_selection, path, collision_error), candidate_selection)
+            except PlanningError as exc:
+                failures.append(exc)
+
+        # Reject colliding endpoints before spending the shared budget on long
+        # segment checks. Such goals cannot be repaired by an RRT detour.
+        viable_goals = []
+        for goal in goals:
+            if request.get('constraints', {}).get('avoid_collision'):
+                hit = self.collision_checker.check(goal, safety_distance=float(
+                    request['constraints'].get('safety_distance', 0.0)),
+                    allowed_geom_ids=getattr(self.collision_checker, 'allowed_target_geom_ids', None))
+                if hit.in_collision:
+                    failures.append(PlanningError('Goal state is in collision.',
+                        code='COLLISION_DETECTED', recoverable=True,
+                        details={'location': 'goal', 'contacts': list(hit.contacts)}))
+                    continue
+            viable_goals.append(goal)
+
+        for goal_index, goal in enumerate(viable_goals):
+            remaining = deadline - time.perf_counter()
+            # One slow direct probe must not starve all known blocked paths of
+            # avoidance time. Reserve the remainder when another probe is likely
+            # to consume it, rather than finishing every direct branch first.
+            if (pending and best is None and
+                    remaining <= max(2.0 * direct_check_time,
+                                     .5 * float(request['planning']['planning_time']))):
+                untested = viable_goals[goal_index:]
+                break
+            if remaining <= 0:
+                untested = viable_goals[goal_index:]
+                break
             lower_bound = float(np.sum(np.abs(periodic_delta(goal))))
             if best is not None and lower_bound > best[0][0] + 1e-9:
                 pruned += 1
@@ -234,14 +314,26 @@ class _MoveExecutor:
             path = {key: value for key, value in path_request.items() if key not in {"candidate_goals", "candidate_validator"}}
             path.update(goal=np.asarray(goal), joint_waypoints=np.vstack((start, goal)))
             candidate_selection = dict(selection)
+            direct_started = time.perf_counter()
             try:
+                if request.get('constraints', {}).get('avoid_collision'):
+                    # Reject blocked joint segments on the 0.04 rad grid before
+                    # the expensive 0.01 rad execution validation. A survivor
+                    # still receives the full fine check in DirectPlanner.
+                    coarse = self.collision_checker.check_path(
+                        path['joint_waypoints'], resolution=.04,
+                        safety_distance=float(request['constraints'].get('safety_distance', 0.0)),
+                        allowed_geom_ids=getattr(self.collision_checker, 'allowed_target_geom_ids', None))
+                    if coarse.in_collision:
+                        raise CollisionPlanningError('Direct path collides with the robot or environment.',
+                                                     details=coarse.contacts)
                 trajectory = self.direct_planner.plan(path, request, context)
                 candidate_selection.update(planning_mode="direct", fallback_used=False)
                 consider(trajectory, candidate_selection)
             except CollisionPlanningError as exc:
                 failures.append(exc)
                 if validator is None:
-                    pending.append((lower_bound, path))
+                    pending.append((lower_bound, path, exc))
                 else:
                     # Establish a feasible bypass early so its cost can prune
                     # remaining approach configurations before IK validation.
@@ -252,42 +344,57 @@ class _MoveExecutor:
                             planning_time=min(remaining, max(0.25, remaining / (len(goals) - goal_index))),
                             max_attempts=1)
                         try:
-                            consider(self._plan_with_fallback(bounded, context, candidate_selection, path), candidate_selection)
+                            bypass_attempts += 1
+                            consider(self._plan_collision_fallback(
+                                bounded, context, candidate_selection, path, exc), candidate_selection)
                         except PlanningError as planning_error:
                             failures.append(planning_error)
                             # An early small search budget is not evidence of
                             # infeasibility. Retry competitive goals with the
                             # remaining budget after pruning other candidates.
-                            pending.append((lower_bound, path))
+                            pending.append((lower_bound, path, exc))
                     else:
-                        pending.append((lower_bound, path))
+                        pending.append((lower_bound, path, exc))
             except PlanningError as exc:
                 failures.append(exc)
+            finally:
+                direct_check_time = max(direct_check_time, time.perf_counter() - direct_started)
             evaluated += 1
-        for pending_index, (lower_bound, path) in enumerate(pending):
+        for pending_index, entry in enumerate(pending):
+            lower_bound = entry[0]
             if best is not None and lower_bound > best[0][0] + 1e-9:
                 continue
             remaining = deadline - time.perf_counter()
             if remaining <= 0:
                 break
-            bounded = deepcopy(request)
-            bounded["planning"].update(planning_time=remaining / (len(pending) - pending_index), max_attempts=1)
-            candidate_selection = dict(selection)
-            try:
-                consider(self._plan_with_fallback(bounded, context, candidate_selection, path), candidate_selection)
-            except PlanningError as exc:
-                failures.append(exc)
+            bypass(entry, remaining / (len(pending) - pending_index))
         if best is None:
-            if failures:
-                raise failures[-1]
-            raise PlanningError("No feasible joint configuration found.", code="PATH_NOT_FOUND", recoverable=True)
+            # Every failure belongs to an attempted branch. The last branch
+            # alone cannot explain failure of the whole configuration search.
+            attempts = [{'category': exc.code, 'error': {
+                'error_code': exc.code, 'error_message': str(exc), 'details': exc.details}}
+                for exc in failures]
+            attempts.extend({'category': 'contact_validation_failed'} for _ in range(rejected))
+            raise PlanningError('关节构型搜索未找到可用路径',
+                code='JOINT_CONFIGURATION_SEARCH_FAILED', recoverable=True,
+                details={'candidate_count': len(goals), 'evaluated_count': evaluated,
+                         'endpoint_rejected_count': len(goals) - len(viable_goals),
+                         'untested_direct_count': len(untested), 'bypass_attempts': bypass_attempts,
+                         'planning_time_budget_s': float(request['planning']['planning_time']),
+                         'planning_elapsed_s': time.perf_counter() - started,
+                         'budget_exhausted': time.perf_counter() >= deadline,
+                         'rejected': attempts})
         score, trajectory, chosen = best
         selection.update(chosen)
         trajectory["planning_time"] = time.perf_counter() - started
         trajectory.setdefault("diagnostics", {})["configuration_selection"] = {
-            "objective": "total_joint_travel_rad", "total_joint_travel_rad": score[0],
-            "maximum_joint_travel_rad": score[1], "candidate_count": len(goals),
+            "objective": "joint_travel_plus_arm_posture" if posture is not None else "total_joint_travel_rad",
+            "selection_cost_rad": score[0], "total_joint_travel_rad": score[1],
+            "maximum_joint_travel_rad": score[2], "arm_posture_penalty_rad": score[3],
+            "candidate_count": len(goals),
             "direct_candidates_evaluated": evaluated,
+            "endpoint_rejected_count": len(goals) - len(viable_goals),
+            "untested_direct_count": len(untested), "bypass_attempts": bypass_attempts,
             "contact_candidates_validated": validated, "contact_candidates_rejected": rejected,
             "candidates_pruned_by_lower_bound": pruned,
             "budget_exhausted": time.perf_counter() >= deadline,
@@ -299,7 +406,14 @@ class _MoveExecutor:
                 "MuJoCo controller is not ready.", code=ErrorCode.CONTROLLER_NOT_READY.value,
                 recoverable=True, recommended_action="Initialize or enable the controller, clear faults, and retry.",
             )
-        result = self.robot_runtime.execute_trajectory(trajectory, timeout=float(request["constraints"]["timeout"]))
+        execution_trajectory = dict(trajectory)
+        execution_trajectory['goal_tolerances'] = {
+            'position_tolerance': float(request['constraints']['position_tolerance']),
+            'orientation_tolerance': np.deg2rad(float(request['constraints']['orientation_tolerance'])),
+        }
+        result = self.robot_runtime.execute_trajectory(execution_trajectory, timeout=float(request["constraints"]["timeout"]))
+        if result.get('grasp_error'):
+            return result
         if result["joint_error"] > 0.02:
             raise MoveExecutionError(
                 f"Final joint tracking error {result['joint_error']:.6f} exceeds tolerance.",

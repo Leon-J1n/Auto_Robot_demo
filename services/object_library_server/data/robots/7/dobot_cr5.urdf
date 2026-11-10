@@ -12,9 +12,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/base_link.obj" />
       </geometry>
-      <material name="base_link_color">
-        <color rgba="0 0 0 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -38,9 +35,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link1.obj" />
       </geometry>
-      <material name="Link1_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -67,9 +61,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link2.obj" />
       </geometry>
-      <material name="Link2_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -96,9 +87,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link3.obj" />
       </geometry>
-      <material name="Link3_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -125,9 +113,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link4.obj" />
       </geometry>
-      <material name="Link4_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -154,9 +139,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link5.obj" />
       </geometry>
-      <material name="Link5_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -183,9 +165,6 @@
       <geometry>
         <mesh filename="dobot_cr5_meshes/Link6.obj" />
       </geometry>
-      <material name="Link6_color">
-        <color rgba="1 1 1 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />

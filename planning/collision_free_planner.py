@@ -10,6 +10,7 @@ import numpy as np
 
 from .errors import PlanningError
 from .trajopt_optimizer import TrajOptOptimizer
+from .arm_posture import preference_for, path_cost
 
 
 class CollisionFreePlanner:
@@ -83,12 +84,19 @@ class CollisionFreePlanner:
                     details={"planner": "rrt_connect", "attempts": attempts, "planning_time": float(move_request["planning"]["planning_time"])},
                 )
             shortcut_diagnostics: dict[str, Any] = {}
-            path = self._shortcut(path, rng, safety_distance, iterations=120, diagnostics=shortcut_diagnostics)
+            shortcut = self._shortcut(path, rng, safety_distance, iterations=120, diagnostics=shortcut_diagnostics)
+            if preference_for(self.kinematics) is not None and path_cost(self.kinematics, shortcut) > path_cost(self.kinematics, path) + 1e-9:
+                shortcut_diagnostics.update(arm_posture_preserved=True)
+            else:
+                path = shortcut
             trajopt_seed = _densify(np.asarray(path), 0.04)
             optimized_path, trajopt_diagnostics = self.trajopt.optimize(
                 trajopt_seed,
                 safety_distance=safety_distance,
             )
+            if preference_for(self.kinematics) is not None and path_cost(self.kinematics, optimized_path) > path_cost(self.kinematics, trajopt_seed) + 1e-9:
+                optimized_path = trajopt_seed
+                trajopt_diagnostics.update(applied=False, arm_posture_preserved=True)
         waypoints = _densify(optimized_path, 0.04)
         allowed_geom_ids = getattr(self.collision_checker, "allowed_target_geom_ids", None)
         final_check = self.collision_checker.check_path(
@@ -209,15 +217,22 @@ class CollisionFreePlanner:
         output, shortcut_diagnostics = self._shortcut_fixed_orientation(
             output, orientation, cartesian_step, safety_distance, move_request, rng,
         )
+        if preference_for(self.kinematics) is not None and path_cost(self.kinematics, output) > path_cost(self.kinematics, original) + 1e-9:
+            output = original.copy()
+            shortcut_diagnostics.update(applied=False, arm_posture_preserved=True)
         final_check = self.collision_checker.check_path(output, resolution=0.01, safety_distance=safety_distance)
         if final_check.in_collision:
             output = original
             shortcut_diagnostics.update(applied=False, fallback_to_original=True)
             if self.collision_checker.check_path(output, resolution=0.01, safety_distance=safety_distance).in_collision:
                 raise PlanningError("Fixed-orientation path failed final collision validation.", code="TRAJECTORY_INVALID", recoverable=True)
+        before_smoothing = output
         output, smoothing_diagnostics = self._smooth_fixed_orientation(
             output, orientation, safety_distance, move_request,
         )
+        if preference_for(self.kinematics) is not None and path_cost(self.kinematics, output) > path_cost(self.kinematics, before_smoothing) + 1e-9:
+            output = before_smoothing
+            smoothing_diagnostics.update(applied=False, arm_posture_preserved=True)
         trajectory = {
             "planner": self.planner_id,
             "path_type": "cartesian_fixed_orientation",
@@ -405,7 +420,7 @@ class CollisionFreePlanner:
         tree_b = _Tree(goal)
         swapped = False
         while time.perf_counter() < deadline:
-            sample = goal if rng.random() < 0.15 else rng.uniform(self.joint_limits[:, 0], self.joint_limits[:, 1])
+            sample = self._sample_joint_configuration(goal, rng)
             new_index = self._extend_once(tree_a, sample, safety_distance)
             if new_index is not None:
                 target = tree_a.nodes[new_index]
@@ -417,6 +432,18 @@ class CollisionFreePlanner:
             tree_a, tree_b = tree_b, tree_a
             swapped = not swapped
         return None
+
+    def _sample_joint_configuration(self, goal, rng):
+        if rng.random() < .15:
+            return goal
+        sample = rng.uniform(self.joint_limits[:, 0], self.joint_limits[:, 1])
+        posture = preference_for(self.kinematics)
+        if posture is not None and rng.random() < posture.config['rrt_preferred_sample_probability']:
+            # Keep ordinary random exploration; occasionally choose the most
+            # elevated of three samples. No extra collision queries or IK solves.
+            candidates = [sample] + [rng.uniform(self.joint_limits[:, 0], self.joint_limits[:, 1]) for _ in range(2)]
+            sample = min(candidates, key=posture.penalty)
+        return sample
 
     def _extend_once(self, tree: "_Tree", target: np.ndarray, safety_distance: float) -> int | None:
         distances = [np.linalg.norm(node - target) for node in tree.nodes]

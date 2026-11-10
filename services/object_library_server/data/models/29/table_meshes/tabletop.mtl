@@ -1,8 +1,6 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
 newmtl wood
-Ka 1 1 1
-Kd 1 1 1
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
 Ks 0.08 0.08 0.08
 Ns 20
 map_Kd tabletop.png

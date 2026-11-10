@@ -10,6 +10,8 @@ import mujoco
 import numpy as np
 
 from sensors.camera import CameraFrame, CameraManager, save_camera_frame
+from sensors.camera_mujoco import MujocoCamera
+from sensors.camera_mujoco.scene import load_scene_with_cameras
 
 
 UR5E_JOINT_NAMES = (
@@ -33,11 +35,12 @@ class SceneRobotRuntime:
         playback_fps: float = 60.0,
         camera_width: int = 640,
         camera_height: int = 480,
+        scene_json_path: str | Path | None = None,
     ) -> None:
         self.scene_path = Path(scene_path).expanduser().resolve()
         if not self.scene_path.is_file():
             raise FileNotFoundError(f"Scene file not found: {self.scene_path}")
-        self.model = mujoco.MjModel.from_xml_path(str(self.scene_path))
+        self.model, self._camera_resolutions = load_scene_with_cameras(self.scene_path, scene_json_path)
         self.data = mujoco.MjData(self.model)
         home_key = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_KEY, "home")
         if home_key >= 0:
@@ -112,10 +115,21 @@ class SceneRobotRuntime:
     @property
     def cameras(self) -> CameraManager:
         """Return the lazily-created global and wrist RGB-D cameras."""
-        raise RuntimeError(
-            "The legacy MuJoCo camera backend was removed with world_model/. "
-            "Configure the replacement camera backend before requesting frames."
-        )
+        if self._cameras is None:
+            names = {}
+            for camera_index in range(self.model.ncam):
+                name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_CAMERA, camera_index)
+                if name:
+                    names[name] = self._camera_resolutions.get(
+                        name, (self.camera_width, self.camera_height)
+                    )
+            if not names:
+                raise RuntimeError("No scene cameras available; provide a scene JSON with camera definitions.")
+            self._cameras = CameraManager({
+                name: MujocoCamera(self.model, self.data, name, width=width, height=height)
+                for name, (width, height) in names.items()
+            })
+        return self._cameras
 
     def get_camera_frame(self, camera_id: str) -> CameraFrame:
         """Capture RGB and metric depth from a named simulated camera."""
@@ -166,7 +180,7 @@ class SceneRobotRuntime:
         controller = getattr(self, "gripper_controller", None)
         if controller is not None:
             return float(controller.width)
-        # The gripper controller is created lazily by grasp/release skills.  A
+        # The gripper controller is created lazily by grasp/release atomic_action.  A
         # move before the first gripper action must still get a useful width.
         names = (
             "robotiq_2f85_left_driver_joint",
@@ -225,9 +239,6 @@ class SceneRobotRuntime:
                 self.data.qpos[self.qpos_indices] = waypoint
                 self.data.qvel[self.dof_indices] = 0.0
                 mujoco.mj_forward(self.model, self.data)
-                gripper_controller = getattr(self, "gripper_controller", None)
-                if gripper_controller is not None:
-                    gripper_controller.sync_held_object()
                 if self.viewer is not None:
                     self.viewer.sync()
                 if self.realtime:
@@ -278,9 +289,6 @@ class SceneRobotRuntime:
             self.data.ctrl[self.actuator_ids] = waypoint
             for _ in range(per_waypoint_steps):
                 mujoco.mj_step(self.model, self.data)
-                controller = getattr(self, "gripper_controller", None)
-                if controller is not None:
-                    controller.sync_held_object()
                 if float(self.data.time) - simulation_start >= len(frames) / self.playback_fps:
                     sample()
                 if self.viewer is not None:

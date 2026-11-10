@@ -1,0 +1,106 @@
+name: move
+version: "2.0"
+
+description: Default configuration for the executable MuJoCo Move Skill.
+
+move:
+  default_frame: base
+  default_path_type: auto
+  default_path_constraint: soft
+  default_phase: transit
+  default_optimization_goal: balanced
+
+  execution:
+    enable_state_check: true
+    wait_for_controller: true
+    stop_on_error: true
+    verify_goal_after_execution: true
+    stop_on_scene_change: true
+
+selector:
+  pose_transit_default: joint_move
+  phase_defaults:
+    transit: joint_move
+    approach: linear_move
+    retreat: linear_move
+    contact: linear_move
+  require_arc_geometry_for_circular: true
+  explicit_request_has_priority: true
+  safety_can_override_selection: true
+
+strategies:
+  joint_move:
+    enabled: true
+    schema: strategies/joint_move/joint_move.schema.yaml
+    defaults:
+      interpolation: quintic
+      ik_solution_policy: nearest
+      preserve_current_configuration: true
+
+  linear_move:
+    enabled: true
+    schema: strategies/linear_move/linear_move.schema.yaml
+    defaults:
+      cartesian_step: 0.02
+      orientation_mode: fixed
+      max_joint_step: 0.4
+      min_path_fraction: 0.98
+
+  circular_move:
+    enabled: true
+    schema: strategies/circular_move/circular_move.schema.yaml
+    defaults:
+      cartesian_step: 0.02
+      orientation_mode: tangent
+      min_path_fraction: 0.98
+
+planning:
+  default_mode: auto
+  direct:
+    enabled: true
+    validate_before_execution: true
+
+  collision_free:
+    enabled: true
+    default_planner: rrt_connect
+    planning_time: 10.0
+    max_attempts: 3
+    rrt_collision_resolution: 0.02
+    optimize_path: true
+    smooth_result: true
+    allow_path_type_relaxation_only_for_soft_constraint: true
+    trajopt:
+      enabled: true
+      max_iterations: 40
+      max_time: 0.5
+      trust_region: 0.12
+      minimum_trust_region: 0.0001
+      convergence_tolerance: 0.00001
+      smoothness_weight: 0.25
+      collision_resolution: 0.01
+
+  replanning:
+    enabled: true
+    max_replans: 2
+    scene_change_threshold: implementation_defined
+
+collision:
+  enabled: true
+  self_collision_check: true
+  environment_collision_check: true
+  continuous_collision_check: true
+  phase_safety_distance:
+    transit: 0.05
+    approach: 0.02
+    retreat: 0.02
+    contact: 0.005
+
+robot:
+  joint_limit_check: true
+  workspace_check: true
+  singularity_check: true
+  controller_ready_check: true
+  named_states:
+    home: [0.0, -1.5708, 1.5708, -1.5708, -1.5708, 0.0]
+    ready: [0.0, -1.2, 1.4, -1.75, -1.5708, 0.0]
+    park: [0.0, -1.5708, 0.0, -1.5708, 0.0, 0.0]

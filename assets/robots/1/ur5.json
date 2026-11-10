@@ -1,0 +1,160 @@
+{
+  "semantic_properties": {
+    "object_name": "ur5",
+    "object_id": 1,
+    "deformable": false,
+    "scalable": false,
+    "interactable": false,
+    "tag": "ur5"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.856347,
+      -0.075499,
+      0.232935,
+      -0.075525,
+      0.234524,
+      0.0
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 20.9949,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        1.0,
+        0.005,
+        0.0001
+      ]
+    },
+    "restitution": 0.05,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  },
+  "arm_configuration": "piper",
+  "scene_one_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.0,
+        -0.3,
+        -0.166666666667
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "scene_two_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.333333333333,
+        -0.3,
+        -0.166666666667
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        -0.333333333333,
+        -0.3,
+        -0.166666666667
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "robot_driver": {
+    "properties": {
+      "role": "arm",
+      "joint_sequence": [
+        "shoulder_pan_joint",
+        "shoulder_lift_joint",
+        "elbow_joint",
+        "wrist_1_joint",
+        "wrist_2_joint",
+        "wrist_3_joint"
+      ],
+      "joint_limits": {
+        "shoulder_pan_joint": [
+          -6.28319,
+          6.28319
+        ],
+        "shoulder_lift_joint": [
+          -6.28319,
+          6.28319
+        ],
+        "elbow_joint": [
+          -3.1415,
+          3.1415
+        ],
+        "wrist_1_joint": [
+          -6.28319,
+          6.28319
+        ],
+        "wrist_2_joint": [
+          -6.28319,
+          6.28319
+        ],
+        "wrist_3_joint": [
+          -6.28319,
+          6.28319
+        ]
+      },
+      "initial_joint_positions_rad": {
+        "shoulder_pan_joint": 0.0,
+        "shoulder_lift_joint": -2.094395,
+        "elbow_joint": 1.0,
+        "wrist_1_joint": -1,
+        "wrist_2_joint": -1.5707963,
+        "wrist_3_joint": 0.0
+      },
+      "available_connect_joints": [
+        "wrist_3_joint"
+      ],
+      "available_connect_link": [
+        "wrist_3_link"
+      ],
+      "position": [
+        [
+          2.679489213841535e-09,
+          0.0999999837652335,
+          9.719897775539721e-09
+        ]
+      ],
+      "quaternion_xyzw": [
+        [
+          -0.7071067556514947,
+          9.473426349705847e-09,
+          -9.47342713345485e-09,
+          0.7071068067215996
+        ]
+      ],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
+  }
+}

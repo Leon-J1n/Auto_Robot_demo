@@ -5,13 +5,17 @@
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "brown,small"
+    "tag": "brown,small",
+    "can_place": false
   },
   "geometric_properties": {
     "AABB": [
       0.75,
-      1.5,
-      0.6
+      -0.75,
+      0.375,
+      -0.375,
+      0.6,
+      0.0
     ]
   },
   "physical_properties": {
@@ -33,5 +37,22 @@
   "grasp_properties": {
     "pose_count": 0,
     "poses": []
+  },
+  "robot_driver": {
+    "properties": {
+      "role": "passive",
+      "joint_sequence": [],
+      "joint_limits": {},
+      "initial_joint_positions_rad": {},
+      "available_connect_joints": [],
+      "available_connect_link": [],
+      "position": [],
+      "quaternion_xyzw": [],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
   }
 }

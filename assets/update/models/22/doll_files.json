@@ -1,9 +1,0 @@
-{
-  "is_on_cos": false,
-  "metadata": "doll.json",
-  "path": "doll.obj",
-  "thumbnail": "doll_thumbnail.png",
-  "reference": [
-    "doll.mtl"
-  ]
-}

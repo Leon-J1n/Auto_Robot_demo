@@ -2,28 +2,70 @@
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
+from collections import OrderedDict
+from copy import deepcopy
+from contextlib import contextmanager
 
 from collision.simplatform_fcl import SimPlatformFCLCollisionChecker, CollisionResult
 from execution.resources import component
 
 
 class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
+    @contextmanager
+    def lift_payload_collision_scope(self):
+        """Ignore only the captured held object's collisions during one lift."""
+        old_geoms = getattr(self, '_lift_ignored_payload_geoms', frozenset())
+        old_names = getattr(self, '_lift_ignored_payload_names', frozenset())
+        b = self.backend
+        held = getattr(b.gripper_controller, 'held_name', None)
+        root = getattr(b, 'object_ids', {}).get(held) if held else None
+        bodies = set()
+        if root is not None:
+            for body in range(1, b.model.nbody):
+                ancestor = body
+                while ancestor > 0:
+                    if ancestor == int(root):
+                        bodies.add(body)
+                        break
+                    ancestor = int(b.model.body_parentid[ancestor])
+        self._lift_ignored_payload_geoms = frozenset(
+            g for g in self.geoms if int(b.model.geom_bodyid[g]) in bodies)
+        self._lift_ignored_payload_names = frozenset(self.body_names[body] for body in bodies)
+        try:
+            yield
+        finally:
+            self._lift_ignored_payload_geoms = old_geoms
+            self._lift_ignored_payload_names = old_names
+
     def on_scene_sync(self, state, *, changed_objects=(), revision=0):
         # The MuJoCo probe reads the live backend qpos on every query. Keep the
         # revision for diagnostics so planners can confirm which scene snapshot
         # was used without rebuilding unchanged FCL entities.
         self.scene_revision = int(revision)
         self.scene_changed_objects = tuple(changed_objects)
+        # Any synchronized scene update can change dynamic contacts. Keep the
+        # cache scoped to one synchronized snapshot.
+        if (getattr(self, '_query_cache_revision', None) != self.scene_revision or
+                getattr(self, '_query_cache_objects', None) != self.scene_changed_objects):
+            getattr(self, '_query_cache', {}).clear()
+            self._query_cache_revision = self.scene_revision
+            self._query_cache_objects = self.scene_changed_objects
 
     def bind_backend(self, backend):
         self.backend = backend
         self.dynamic_names = {o['object_name_in_scene'] for o in backend.resources.scene['objects']
                               if component(o, 'RigidBody').get('dynamic')
                               or bool(component(o, 'ArticulatedModel'))}
-        self.cache_enabled = False  # Finger aperture and payload transform are part of every query.
+        # The articulated query has its own state-aware cache. The native FCL
+        # cache remains disabled here because finger/payload poses are live.
+        self.cache_enabled = False
+        self._query_cache = OrderedDict()
+        self._query_cache_revision = getattr(self, 'scene_revision', 0)
+        self._query_cache_objects = getattr(self, 'scene_changed_objects', ())
         self.carrying_safety_distance = 0.0
         self.carrying_contact_log = {}
         self.allowed_proxy_target_names = set()
+        self.allow_gripper_environment_contact = False
         entries = {int(e.entity): e for e in self.world.editor_entities()}
         handles = [h for h, e in entries.items() if e.collider is not None]
         tool_handles = [h for h, link in self._collider_links.items() if link.startswith('robotiq_2f85')]
@@ -44,6 +86,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         self.probe = mujoco.MjData(model)
         self.geom_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or f'geom_{i}' for i in range(model.ngeom)]
         self.body_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or 'world' for i in range(model.nbody)]
+        self.tcp_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, 'tcp')
         self.geoms = [i for i in range(model.ngeom) if model.geom_contype[i] or model.geom_conaffinity[i]]
         self.tool_geoms = {i for i in self.geoms if self.body_names[model.geom_bodyid[i]].startswith('robotiq_2f85')}
         self.robot_bodies = set()
@@ -70,6 +113,8 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
     def _is_allowed(self, pair, allowed):
         # Fixed-open FCL tool geometry is replaced by measured articulated geometry below.
         handles = (int(pair.robot_collider), int(pair.other))
+        if any(self._names.get(h) in getattr(self, '_lift_ignored_payload_names', ()) for h in handles):
+            return True
         if any(h in getattr(self, 'dynamic_handles', set()) for h in handles):
             return True
         if any(self._collider_links.get(h, '').startswith('robotiq_2f85') for h in handles):
@@ -79,6 +124,29 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         if held and any(self._names.get(h) == held for h in handles):
             return True  # Payload/arm checks are evaluated at the candidate payload pose below.
         return super()._is_allowed(pair, allowed)
+
+    def _at_grasp_goal(self, data):
+        """Return whether the probe TCP is in the terminal grasp region."""
+        goal = getattr(getattr(self, 'backend', None), 'grasp_approach_goal', None)
+        if goal is None or not hasattr(self, 'backend'):
+            return False
+        position, _, *goal_joints = goal
+        try:
+            if goal_joints:
+                expected = np.asarray(goal_joints[0], dtype=float)
+                actual = np.asarray(data.qpos[self.backend.qpos_indices], dtype=float)
+                # The final linear sample can be slightly different from the
+                # selected IK branch after time-parameterization. Keep the
+                # exception limited to the terminal joint neighborhood.
+                if expected.shape == actual.shape and np.max(np.abs(actual - expected)) <= 0.5:
+                    return True
+            if self.tcp_site_id >= 0:
+                tcp = np.asarray(data.site_xpos[self.tcp_site_id], dtype=float)
+            else:
+                tcp = np.asarray(data.xpos[self.backend.gripper_controller.base_id], dtype=float)
+            return float(np.linalg.norm(tcp - np.asarray(position, dtype=float))) <= 0.012
+        except (AttributeError, IndexError, TypeError, ValueError):
+            return False
 
     def capture_support(self):
         """Allow existing resting contact while the initial retreat lifts away."""
@@ -93,7 +161,49 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     if b.data.geom_xpos[other][2] < b.data.xpos[held_body][2]:
                         self.support_geoms.add(int(other))
 
-    def check(self, joints, *, safety_distance=0.0, allowed_geom_ids=None):
+    def capture_lift_clearance(self, safety_distance):
+        """Capture existing tool/payload gaps, including penetration, for lift only."""
+        self._lift_clearance_pairs = {}
+        b = self.backend
+        held = getattr(b.gripper_controller, 'held_name', None)
+        if not held:
+            return
+        m, d = b.model, b.data
+        held_root = getattr(b, 'object_ids', {}).get(held)
+        payload_bodies = set()
+        if held_root is not None:
+            for body in range(1, m.nbody):
+                ancestor = body
+                while ancestor > 0:
+                    if ancestor == int(held_root):
+                        payload_bodies.add(body)
+                        break
+                    ancestor = int(m.body_parentid[ancestor])
+        moving = self.tool_geoms | {g for g in self.geoms
+                                    if int(m.geom_bodyid[g]) in payload_bodies}
+        for tool in moving:
+            for other in self.geoms:
+                body = int(m.geom_bodyid[other])
+                if other in moving or body in self.robot_bodies:
+                    continue
+                distance = float(mujoco.mj_geomDistance(
+                    m, d, tool, other, max(.005, float(safety_distance) + .001), None))
+                if distance <= max(0., float(safety_distance)):
+                    self._lift_clearance_pairs[frozenset((tool, other))] = distance
+
+    def clear_lift_clearance(self):
+        self._lift_clearance_pairs = {}
+
+    def _leaves_lift_clearance(self, a, z, distance):
+        initial_gap = getattr(self, '_lift_clearance_pairs', {}).get(frozenset((int(a), int(z))))
+        if initial_gap is None:
+            return False
+        # Keep a 1 micrometre numerical tolerance. A positive initial gap must
+        # never become penetration; existing penetration may only stay or lessen.
+        lower_bound = initial_gap - 1e-6 if initial_gap < 0 else max(0., initial_gap - 1e-6)
+        return distance >= lower_bound
+
+    def check(self, joints, *, safety_distance=0.0, allowed_geom_ids=None, gripper_width=None):
         if hasattr(self, 'backend'):
             held = getattr(self.backend.gripper_controller, 'held_name', None)
             if held != self._policy_held:
@@ -102,6 +212,28 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     payload_handles = [h for h, name in self._names.items() if name == held]
                     self.baseline_allowed_pairs.update(frozenset((a, z)) for a in payload_handles for z in self._robot_handles)
                 self._policy_held = held
+        # Include every mutable input that affects the articulated probe. This
+        # makes reuse semantics-preserving across grasp/release and target
+        # changes while eliminating identical repeated checks.
+        b = getattr(self, 'backend', None)
+        if b is None:
+            return super().check(joints, safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
+        qpos = np.asarray(b.data.qpos, dtype=float)
+        held = getattr(b.gripper_controller, 'held_name', None)
+        query_key = (getattr(self, 'scene_revision', 0), qpos.tobytes(),
+               np.asarray(joints, dtype=float).tobytes(), float(safety_distance),
+               tuple(sorted(allowed_geom_ids)) if allowed_geom_ids is not None else None,
+               held, getattr(b, 'contact_target', None),
+               getattr(b, 'contact_target_object_id', None),
+               getattr(self, '_physical_closure_target', None),
+               self.allow_gripper_environment_contact,
+               frozenset(getattr(self, '_lift_clearance_pairs', {}).items()),
+               getattr(self, '_lift_ignored_payload_geoms', frozenset()),
+               frozenset(self.support_geoms), gripper_width)
+        cached = self._query_cache.get(query_key)
+        if cached is not None:
+            self._query_cache.move_to_end(query_key)
+            return deepcopy(cached)
         base = super().check(joints, safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
         if not hasattr(self, 'backend'):
             return base
@@ -109,11 +241,18 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         d.qpos[:] = b.data.qpos
         d.qvel[:] = 0
         d.qpos[b.qpos_indices] = joints
-        mujoco.mj_forward(m, d)
+        if gripper_width is not None:
+            from demo.interaction.table_clearance import set_static_gripper_width
+            set_static_gripper_width(m, d, gripper_width)
+        # Geometry queries need transforms only. Full forward dynamics builds
+        # contact constraints for even deliberately infeasible candidate poses.
+        mujoco.mj_kinematics(m, d)
+        closure_target = getattr(self, '_physical_closure_target', None)
+        terminal_grasp_region = self._at_grasp_goal(d) or closure_target is not None
         controller = b.gripper_controller
         held = getattr(controller, 'held_name', None)
         payload_body = b.object_ids[held] if held else None
-        if held:
+        if held and m.jnt_type[m.body_jntadr[payload_body]] == mujoco.mjtJoint.mjJNT_FREE:
             t = np.eye(4); t[:3, :3] = d.xmat[controller.base_id].reshape(3, 3); t[:3, 3] = d.xpos[controller.base_id]
             # Forecast physical carrying from the measured relative pose; only the
             # separate collision probe is moved, never the live dynamic object.
@@ -122,10 +261,10 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             address = m.jnt_qposadr[m.body_jntadr[payload_body]]
             d.qpos[address:address + 3] = t[:3, 3]
             d.qpos[address + 3:address + 7] = Rotation.from_matrix(t[:3, :3]).as_quat()[[3, 0, 1, 2]]
-            mujoco.mj_forward(m, d)
+            mujoco.mj_kinematics(m, d)
         dynamic_geoms = {g for g in self.geoms if self.body_names[m.geom_bodyid[g]] in self.dynamic_names}
         moving = self.tool_geoms | dynamic_geoms
-        target = held or b.contact_target
+        target = held or b.contact_target or closure_target
         target_text = str(target) if target else ''
         target_prefix = target_text.rsplit('_', 1)[0] if target_text else ''
         # The mechanism's fixed shell and moving link can intentionally share
@@ -136,8 +275,23 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                 return False
             names = (str(contact.get('geom1', '')), str(contact.get('geom2', '')))
             return all(n.startswith(target_prefix) for n in names)
-        base_contacts = tuple(c for c in base.contacts if not target_internal_contact(c))
-        target_object_id = getattr(b, 'contact_target_object_id', None) if not held else None
+        ignored_names = getattr(self, '_lift_ignored_payload_names', frozenset())
+        base_contacts = tuple(c for c in base.contacts if not target_internal_contact(c)
+                              and not ignored_names.intersection((c.get('geom1'), c.get('geom2'))))
+        # Explicit contact targets (including pick's selected object) permit
+        # all gripper/target contacts throughout planning and live execution.
+        # Arm/target and every other environment pair remain checked below.
+        allow_target_contact = bool(target)
+        if target and allow_target_contact:
+            # FCL reports the intended gripper/object contact separately
+            # from the MuJoCo articulated probe; suppress only that exact
+            # contact for the selected target.
+            base_contacts = tuple(c for c in base_contacts
+                                  if not (str(target) in {str(c.get('geom1', '')), str(c.get('geom2', ''))}
+                                          and any(str(name).startswith('robotiq_2f85')
+                                                  for name in (c.get('geom1', ''), c.get('geom2', '')))))
+        target_object_id = ((getattr(b, 'contact_target_object_id', None) or closure_target)
+                            if not held else None)
         target_bodies = set()
         if target_object_id is not None:
             for obj in b.resources.scene['objects']:
@@ -152,8 +306,11 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                                 if int(m.body_parentid[body]) in target_bodies and body not in target_bodies:
                                     target_bodies.add(body); changed = True
                     break
-        key = (held, target, target_object_id, frozenset(target_bodies), frozenset(self.support_geoms))
-        if getattr(self, '_pair_key', None) != key:
+        pair_key = (held, target, target_object_id, frozenset(target_bodies),
+                    frozenset(self.support_geoms), self.allow_gripper_environment_contact,
+                    allow_target_contact, gripper_width is not None,
+                    getattr(self, '_lift_ignored_payload_geoms', frozenset()))
+        if getattr(self, '_pair_key', None) != pair_key:
             pairs, visited = [], set()
             for a in moving:
                 for z in self.geoms:
@@ -161,8 +318,19 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     if a == z or pair in visited:
                         continue
                     visited.add(pair)
+                    if a in getattr(self, '_lift_ignored_payload_geoms', ()) or z in getattr(self, '_lift_ignored_payload_geoms', ()):
+                        continue
+                    # A commanded fully closed shape can contain internal
+                    # finger contact. This endpoint prefilter checks the tool
+                    # against the environment, not its internal closing limit.
+                    if gripper_width is not None and a in self.tool_geoms and z in self.tool_geoms:
+                        continue
                     ba, bz = int(m.geom_bodyid[a]), int(m.geom_bodyid[z])
                     if ba not in self.robot_bodies and bz not in self.robot_bodies and payload_body not in (ba, bz):
+                        continue
+                    if self.allow_gripper_environment_contact and (
+                            (a in self.tool_geoms and bz not in self.robot_bodies) or
+                            (z in self.tool_geoms and ba not in self.robot_bodies)):
                         continue
                     rigid_pair = frozenset((int(m.body_weldid[ba]), int(m.body_weldid[bz])))
                     if ba == bz or (ba in self.robot_bodies and bz in self.robot_bodies and (
@@ -171,8 +339,8 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     names = (self.body_names[ba], self.body_names[bz])
                     # Once an object is confirmed as held, the whole articulated
                     # gripper is allowed to remain in contact with that payload.
-                    # Before grasping, target contacts are still checked normally;
-                    # contacts with every other scene object remain forbidden.
+                    # Pick also allows the whole gripper to contact its selected
+                    # object while approaching. Other scene contacts stay checked.
                     # A mechanism request names a specific articulated link,
                     # while MuJoCo contacts may report either that link or its
                     # mechanism root body. Treat both forms as the same target
@@ -191,13 +359,14 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                         # Root target -> one of its articulated links.
                         any(str(n).startswith(target_text + '_') for n in names)
                     )
-                    if target_internal_match or target_name_internal or ((target_body_match or target_match) and
-                                                 any(n.startswith('robotiq_2f85') for n in names)):
+                    if target_internal_match or target_name_internal or (allow_target_contact and
+                            (target_body_match or target_match) and
+                            any(n.startswith('robotiq_2f85') for n in names)):
                         continue
                     support = payload_body in (ba, bz) and (a in self.support_geoms or z in self.support_geoms)
                     pairs.append((a, z, support))
             self._pairs = np.asarray(pairs, dtype=int).reshape(-1, 3)
-            self._pair_key = key
+            self._pair_key = pair_key
         contacts = list(base_contacts)
         minimum = base.minimum_distance
         if len(base_contacts) != len(base.contacts) and minimum < 0:
@@ -213,6 +382,15 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                 distance = float(mujoco.mj_geomDistance(m, d, int(a), int(z), max(.005, limit + .001), None))
                 minimum = min(minimum, distance)
                 if distance <= limit + 1e-9:
+                    # Lift may retain an existing tool/payload penetration up
+                    # to its captured depth. New pairs and deeper overlap fail.
+                    if self._leaves_lift_clearance(a, z, distance):
+                        continue
                     contacts.append({'geom1': self.body_names[ba], 'geom2': self.body_names[bz], 'distance': distance,
                                      'self_collision': ba in self.robot_bodies and bz in self.robot_bodies})
-        return CollisionResult(bool(contacts), minimum, tuple(contacts))
+        result = CollisionResult(bool(contacts), minimum, tuple(contacts))
+        self._query_cache[query_key] = result
+        self._query_cache.move_to_end(query_key)
+        while len(self._query_cache) > 2048:
+            self._query_cache.popitem(last=False)
+        return deepcopy(result)

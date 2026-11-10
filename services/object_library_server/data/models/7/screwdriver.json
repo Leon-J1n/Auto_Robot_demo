@@ -5,13 +5,17 @@
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "red,black"
+    "tag": "red,black",
+    "can_place": false
   },
   "geometric_properties": {
     "AABB": [
-      0.034521,
-      0.216152,
-      0.033554
+      0.017718327,
+      -0.016802459,
+      0.056191776,
+      -0.159960002,
+      0.016714285,
+      -0.016839289
     ]
   },
   "physical_properties": {
@@ -31,15 +35,27 @@
     ]
   },
   "grasp_properties": {
-    "pose_count": 1,
+    "pose_count": 2,
     "poses": [
       [
-        0.0,
-        0.02,
-        0.0,
-        3.1415926,
+        0.0004,
+        -0.0318,
+        0.01,
+        3.1415,
         0.0,
         1.57,
+        0,
+        1,
+        0,
+        1.04
+      ],
+      [
+        0.0004,
+        -0.0318,
+        0.01,
+        3.1415,
+        0.0,
+        -1.57,
         0,
         1,
         0,

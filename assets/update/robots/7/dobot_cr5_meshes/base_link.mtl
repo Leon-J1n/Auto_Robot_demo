@@ -1,7 +1,0 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
-
-newmtl material0
-Kd 0 0 0
-Ka 0 0 0
-Ks 0.15 0.15 0.15
-Ns 32

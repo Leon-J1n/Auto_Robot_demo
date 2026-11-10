@@ -1,0 +1,40 @@
+{
+  "semantic_properties": {
+    "object_name": "white_background_plane",
+    "object_id": 14,
+    "deformable": false,
+    "scalable": false,
+    "interactable": false,
+    "tag": "white,background,plane"
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.5,
+      -0.5,
+      0.5,
+      -0.5,
+      0.002,
+      -0.002
+    ]
+  },
+  "physical_properties": {
+    "mass_kg": 0.0,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.8,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.0,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 0,
+    "poses": []
+  }
+}

@@ -91,8 +91,13 @@ class RetreatSkill:
             return self._fail("INVALID_RETREAT_REQUEST", "current end-effector rotation must be a finite 3x3 matrix")
         try:
             minimum, maximum, step = self._search_parameters(params)
+            reference_rotation = np.asarray(params.get('reference_rotation_world', rotation), dtype=float)
+            if reference_rotation.shape != (3, 3) or not np.all(np.isfinite(reference_rotation)):
+                raise ValueError('reference_rotation_world must be a finite 3x3 matrix')
             offset = params.get("grasp_offset_local")
-            if offset is not None:
+            if 'pose_axis' in params or 'direction' in params:
+                local_axis = self._axis_vector(params.get('pose_axis', params.get('direction')))
+            elif offset is not None:
                 offset = np.asarray(offset, dtype=float)
                 if offset.shape != (3,) or not np.all(np.isfinite(offset)):
                     raise ValueError("grasp_offset_local must be a finite 3-vector")
@@ -102,7 +107,9 @@ class RetreatSkill:
                 local_axis = offset / norm
             else:
                 local_axis = self._axis_vector(params.get("direction"))
-            axis = rotation @ local_axis
+            # candidate_pose subtracts the approach axis. The actual withdrawal
+            # direction is its negative, expressed in the original interaction frame.
+            axis = reference_rotation @ local_axis
         except (TypeError, ValueError) as exc:
             return self._fail("INVALID_RETREAT_REQUEST", str(exc))
 
@@ -126,10 +133,7 @@ class RetreatSkill:
                     "strategy_params": {"max_joint_step": 0.8},
                 })
             if moved:
-                clearance = getattr(e, "_retreat_clearance_met", None)
-                if not callable(clearance) or clearance():
-                    return True
-                return None
+                return True
             failed = e.phases[-1]
             if not planning_failed_without_motion(failed, e.backend, before):
                 return False

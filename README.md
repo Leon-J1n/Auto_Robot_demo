@@ -2,6 +2,9 @@
 
 本项目用于机器人原子技能的开发、组合、规划、仿真执行和结果验证。当前统一演示入口是 `demo.run_demo`，主要运行在 MuJoCo 仿真环境中，并可通过对象库服务获取场景对象和交互位姿。
 
+全局速度比例、加速度比例、轨迹采样帧率和首帧停顿在 `config/global.json` 中配置。
+显式设置优先，否则使用全局默认值；配置格式和覆盖方式见 [全局配置说明](docs/global_config.md)。
+
 ## 根目录模块职责
 
 | 目录 | 职责 |
@@ -122,14 +125,3 @@
 - [运动学接口说明](KINEMATICS_INTERFACES.md)
 - [规划接口说明](PLANNING_PIPELINE_INTERFACES.md)
 - [MuJoCo 依赖说明](MUJOCO_DEPENDENCIES.md)
-
-
-
-
-
-
-
-
-
-
-

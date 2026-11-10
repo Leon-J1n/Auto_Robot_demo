@@ -7,6 +7,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from planning.errors import PlanningError
+from planning.arm_posture import configuration_cost
 
 
 def _periodic_joint_delta(q, reference):
@@ -81,7 +82,7 @@ class JointMove:
                     candidate = _nearest_equivalent(candidate, start, limits)
                     if not any(np.allclose(candidate, q, atol=1e-8) for q in candidate_goals):
                         candidate_goals.append(np.asarray(candidate, dtype=float))
-            candidate_goals.sort(key=lambda q: float(np.sum(np.abs(_periodic_joint_delta(q, start)))))
+            candidate_goals.sort(key=lambda q: configuration_cost(self.kinematics, q, start))
             goal = candidate_goals[0]
             diagnostics["ik"] = {"candidate_count": len(candidate_goals)}
         limits = self.kinematics.limits

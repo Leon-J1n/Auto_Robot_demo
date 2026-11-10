@@ -96,24 +96,40 @@ def world_grasp_candidates(metadata, world_from_object, control_from_grasp):
 
 
 class ObjectLibraryGraspResolver:
-    def __init__(self, client):
+    def __init__(self, client, blackboard=None):
+        from execution.blackboard import TargetBlackboard
         self.client = client
+        self.blackboard = blackboard if blackboard is not None else TargetBlackboard()
+
+    def remember_selection(self, resolved):
+        self.blackboard.remember_selection(resolved)
 
     def resolve(self, target_id, resources, state):
         obj = scene_object_by_id(resources.scene, target_id)
         model_id = model_id_for(obj)
-        pose = state['objects'].get(obj['object_name_in_scene'])
+        self.blackboard.observe(state)
+        self.blackboard.register(obj['object_id_in_scene'], obj['object_name_in_scene'], model_id)
+        pose = self.blackboard.pose(obj['object_name_in_scene'])
         if pose is None:
             raise GraspResolutionError('Target has no measured world pose')
-        metadata = self.client.get_model(model_id)
+        metadata = self.blackboard.model(self.client, model_id)
         transform = control_from_grasp_frame(resources)
+        candidates = world_grasp_candidates(metadata, rigid_pose(pose['position'], pose['quaternion_xyzw']), transform)
+        for candidate in candidates:
+            candidate['pose_source'] = 'blackboard_object'
+            current = self.blackboard.grasp_pose(obj['object_name_in_scene'], candidate['grasp_index'])
+            if current is not None:
+                candidate['world_from_grasp'] = current.tolist()
+                candidate['world_from_control'] = (current @ np.linalg.inv(transform)).tolist()
+                candidate['pose_source'] = 'blackboard_contact_link'
         return {'target_id': obj['object_id_in_scene'], 'target_name': obj['object_name_in_scene'],
             'model_id': model_id, 'model_name': metadata['semantic_properties']['object_name'],
             'source_url': self.client.base_url, 'control_from_grasp': transform.tolist(),
-            'candidates': world_grasp_candidates(metadata, rigid_pose(pose['position'], pose['quaternion_xyzw']), transform)}
+            'blackboard_revision': self.blackboard.revision, 'candidates': candidates}
 
     @staticmethod
     def select(resolved, kin, checker, seed, *, safety_distance=.003, grasp_index=None, prefer_direct=False, candidate_validator=None):
+        from planning.arm_posture import configuration_cost, preference_for
         options, rejected = [], []
         candidates = resolved['candidates']
         if grasp_index is not None:
@@ -163,7 +179,7 @@ class ObjectLibraryGraspResolver:
                 'rejected': rejected,
             }
             raise error
-        options.sort(key=lambda item: item[0])
+        options.sort(key=lambda item: configuration_cost(kin, item[2], seed, norm=2))
         closure_evidence = None
         if candidate_validator is not None:
             for option in options:
@@ -174,8 +190,8 @@ class ObjectLibraryGraspResolver:
                     break
                 rejected.append({'grasp_index': option[1]['grasp_index'], 'joint_positions': option[2].tolist(), **evidence})
             else:
-                error = GraspResolutionError('No candidate passes gripper closure validation; inspect rejected candidates in the report.')
-                error.details = {'error_code': 'GRASP_CLOSURE_INFEASIBLE', 'failed_stage': 'grasp_precheck',
+                error = GraspResolutionError('候选抓取位姿的几何或接触路径检查均未通过')
+                error.details = {'error_code': 'GRASP_PRECHECK_FAILED', 'failed_stage': 'grasp_precheck',
                                  'recoverable': True, 'rejected': rejected}
                 raise error
         choice = options[0]
@@ -184,15 +200,18 @@ class ObjectLibraryGraspResolver:
                 choice = option
                 break
         travel, selected, joints, solver = choice
+        posture = preference_for(kin)
         return {**resolved, 'selected': selected, 'joint_positions': joints.tolist(),
                 'ik_solver': solver, 'joint_travel_rad': travel, 'rejected': rejected,
-                'closure_validation': closure_evidence}
+                'closure_validation': closure_evidence,
+                **({'arm_posture': posture.metrics(joints)} if posture is not None else {})}
 
 
-def apply_ols_friction(resources, client):
+def apply_ols_friction(resources, client, blackboard=None):
     """Copy validated OLS material friction into the runtime scene model."""
     def read(model_id, asset_type='model'):
-        metadata = client.get_robot(model_id) if asset_type == 'robot' else client.get_model(model_id)
+        metadata = (client.get_robot(model_id) if asset_type == 'robot' else
+                    blackboard.model(client, model_id) if blackboard is not None else client.get_model(model_id))
         friction = metadata.get('physical_properties', {}).get('friction', {})
         values = friction.get('values') if isinstance(friction, dict) else None
         if not isinstance(values, list) or len(values) != 3:

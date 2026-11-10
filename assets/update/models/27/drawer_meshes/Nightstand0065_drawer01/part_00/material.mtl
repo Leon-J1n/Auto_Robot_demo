@@ -1,7 +1,0 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
-newmtl material_0
-Kd 1 1 1
-Ka 1 1 1
-Ks 0 0 0
-map_Kd base_color.png

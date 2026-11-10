@@ -1,7 +1,7 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
-
-newmtl material0
-Kd 0.7 0.7 0.7
-Ka 0.7 0.7 0.7
-Ks 0.15 0.15 0.15
+# https://github.com/mikedh/trimesh
+
+newmtl base_material_0
+Ka 0.278 0.278 0.278
+Kd 0.278 0.278 0.278
+Ks 0.12 0.12 0.12
 Ns 32

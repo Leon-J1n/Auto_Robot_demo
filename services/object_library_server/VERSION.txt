@@ -1,2 +1,2 @@
-AppVersion 1.0.4-rel
-built at 2026-10-16T11:51:28
+AppVersion 1.0.8-5cd6db7
+built at 2026-11-08T00:22:10

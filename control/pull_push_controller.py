@@ -47,7 +47,7 @@ class MujocoPullPushController:
     def get_state(self, object_id, *, interaction_mode='mechanism', contact_mode='grasp'):
         _, joint = self._body_joint(object_id)
         gripper = getattr(self.runtime, 'gripper_controller', None)
-        holding = bool(gripper and gripper.get_state(object_id).get('holding'))
+        holding = bool(gripper and gripper.get_state().get('holding'))
         holding_any = bool(gripper and getattr(gripper, '_holding', holding))
         valid = (self.model.jnt_type[joint] == mujoco.mjtJoint.mjJNT_FREE if interaction_mode == 'free_object'
                  else self.model.jnt_type[joint] in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE))
@@ -346,12 +346,10 @@ class MujocoPullPushController:
         force, pairs = self._contacts(data, bodies, geom)
         initial_contact = bool(pairs and force >= c['contact_threshold'])
         established = initial_contact
-        if (action['contact_mode'] == 'grasp' and
-                (request.get('grasp', {}).get('mode') == 'physical' or
-                 getattr(getattr(r, 'gripper_controller', None), 'mode', None) == 'physical')):
+        if action['contact_mode'] == 'grasp':
             gripper = getattr(r, 'gripper_controller', None)
-            grasp_state = gripper.get_state(target['object_id']) if gripper else {}
-            if not grasp_state.get('holding') or grasp_state.get('bound', False):
+            grasp_state = gripper.get_state() if gripper else {}
+            if not grasp_state.get('holding'):
                 pairs = set()
                 established = False
         acquire_during_motion = action['contact_mode'] == 'push_contact' and not circular
@@ -401,11 +399,9 @@ class MujocoPullPushController:
                 if circular:
                     self._measured_delta(circular, p)
                 force, pairs = self._contacts(data, bodies, geom)
-                if (action['contact_mode'] == 'grasp' and
-                        (request.get('grasp', {}).get('mode') == 'physical' or
-                         getattr(gripper, 'mode', None) == 'physical')):
-                    grasp_state = gripper.get_state(target['object_id']) if gripper else {}
-                    if not grasp_state.get('holding') or grasp_state.get('bound', False):
+                if action['contact_mode'] == 'grasp':
+                    grasp_state = gripper.get_state() if gripper else {}
+                    if not grasp_state.get('holding'):
                         pairs = set()
                 peak = max(peak, force)
                 if c['maximum_force'] is not None and force > c['maximum_force']:
@@ -874,11 +870,9 @@ class MujocoPullPushController:
                 if circular:
                     self._measured_delta(circular, p)
                 force, pairs = self._contacts(data, bodies, geom)
-                if (action['contact_mode'] == 'grasp' and
-                        (request.get('grasp', {}).get('mode') == 'physical' or
-                         getattr(gripper, 'mode', None) == 'physical')):
-                    grasp_state = gripper.get_state(target['object_id']) if gripper else {}
-                    if not grasp_state.get('holding') or grasp_state.get('bound', False):
+                if action['contact_mode'] == 'grasp':
+                    grasp_state = gripper.get_state() if gripper else {}
+                    if not grasp_state.get('holding'):
                         pairs = set()
                 peak = max(peak, force)
                 if c['maximum_force'] is not None and force > c['maximum_force']:

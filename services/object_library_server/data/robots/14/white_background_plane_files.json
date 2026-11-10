@@ -1,0 +1,9 @@
+{
+  "is_on_cos": false,
+  "metadata": "white_background_plane.json",
+  "path": "white_background_plane.obj",
+  "thumbnail": "white_background_plane_thumbnail.png",
+  "reference": [
+    "white_background_plane.mtl"
+  ]
+}

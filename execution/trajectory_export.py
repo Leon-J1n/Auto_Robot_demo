@@ -29,13 +29,21 @@ def _pose_default(obj: Mapping[str, Any], robot_id: int, gripper_id: int | None,
         initial = driver.get("initial_joint_positions_rad", {})
         joint = driver.get("joint_sequence", [None])[0]
         return [float(initial.get(joint, 0.0)), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    driver = _component(obj, "RobotDriver")
+    if driver:
+        initial = driver.get("initial_joint_positions_rad", {})
+        initial = {**initial, **driver.get("now_joint_positions_rad", {})}
+        joints = driver.get("joint_sequence", ())
+        if len(joints) > 6:
+            raise ValueError("TRAJ supports at most six driven joints per object")
+        return [*[float(initial.get(joint, 0.0)) for joint in joints], *([0.0] * (7 - len(joints)))]
     transform = _component(obj, "Transform")
     return [*map(float, transform.get("position", (0.0, 0.0, 0.0))),
             *map(float, transform.get("quaternion_xyzw", (0.0, 0.0, 0.0, 1.0)))]
 
 
 def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: int | None,
-                object_ids: Mapping[str, int], *, gripper_open_width: float | None = None,
+                object_ids: Mapping[str, int], driver: Mapping[str, Any], *, gripper_open_width: float | None = None,
                 gripper_closed_width: float | None = None) -> list[float] | None:
     if object_ids.get(name) == robot_id:
         joints = state.get("joints") or state.get("joint_positions_rad")
@@ -71,6 +79,16 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
         else:
             angle = 0.0
         return [angle, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    if driver:
+        joints = driver.get("joint_sequence", ())
+        mechanisms = state.get("mechanisms") or {}
+        values = []
+        for joint in joints:
+            sample = mechanisms.get(f"{name}__{joint}") or mechanisms.get(joint)
+            if not sample or "joint_position" not in sample:
+                return None
+            values.append(float(sample["joint_position"]))
+        return [*values, *([0.0] * (7 - len(values)))]
     item = (state.get("objects") or {}).get(name)
     if not item:
         return None
@@ -78,20 +96,70 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
             *map(float, item.get("quaternion_xyzw", (0.0, 0.0, 0.0, 1.0)))]
 
 
+def _command_segments(rows: list[Mapping[str, Any]], total_frames: int) -> list[tuple[int, int, int]]:
+    """Share one global frame interval per recorded command across all objects.
+
+    Step zero is initialization; positive steps follow command execution order.
+    Command IDs may be arbitrary strings. Substeps never split a command.
+    """
+    boundaries = [(0, 0)]
+    current = None
+    seen = set()
+    previous_frame = -1
+    for row in rows:
+        frame = int(row.get('frame_index', 0))
+        if frame < 0 or frame >= total_frames or frame <= previous_frame:
+            raise ValueError('TRAJ frames require unique nonnegative frame_index values')
+        previous_frame = frame
+        value = row.get('command_id')
+        command = None if value in (None, '', 'setup') else str(value)
+        if command == current:
+            continue
+        if command is not None:
+            if command in seen:
+                raise ValueError(f'Command {command!r} has non-contiguous execution frames')
+            seen.add(command)
+            step = len(seen)
+        else:
+            step = 0
+        if frame == boundaries[-1][0]:
+            boundaries[-1] = (frame, step)
+        else:
+            boundaries.append((frame, step))
+        current = command
+    segments = [(start, (boundaries[i + 1][0] if i + 1 < len(boundaries) else total_frames) - start, step)
+                for i, (start, step) in enumerate(boundaries)]
+    if len(segments) > 65535:
+        raise ValueError('TRAJ segment_count exceeds the uint16 format limit')
+    return segments
+
+
 def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapping[str, Any]],
-               *, initial_joints: Iterable[float], fps: int = 60) -> Path:
-    """Serialize execution frames so WebEditor's ``parseTrajectory`` can read them."""
+               *, initial_joints: Iterable[float], fps: int | None = None,
+               pause_seconds: float | None = None) -> Path:
+    """Write one segment per command with a configurable first-sample hold.
+
+    Positive step numbers follow execution order, independently of the command
+    ID's spelling. Segments are contiguous. Before the second original sample,
+    repeat the first sample for round(fps * pause_seconds) frames for every object. A
+    single-sample segment has no second sample and needs no inserted hold.
+    """
     path = Path(path)
+    from execution.config import trajectory_settings
+    settings = trajectory_settings(scene, fps=fps, pause_seconds=pause_seconds)
+    fps = settings['fps']
+    # Quantize to the nearest complete playback frame, with halves rounded up.
+    pause_frames = int(np.floor(fps * settings['pause_seconds'] + 0.5))
     objects = list(scene.get("objects", ()))
     robots = [obj for obj in objects if _component(obj, "RobotModelRef") or
               len(_component(obj, "RobotDriver").get("joint_sequence", ())) == 6]
     if len(robots) != 1:
         raise ValueError("TRAJ export requires exactly one robot object")
     robot_id = int(robots[0]["object_id_in_scene"])
-    grippers = [obj for obj in objects if _component(obj, "RobotAttachment") or
-                len(_component(obj, "RobotDriver").get("joint_sequence", ())) == 1]
+    grippers = [obj for obj in objects if _component(obj, "RobotAttachment")]
     gripper_id = int(grippers[0]["object_id_in_scene"]) if grippers else None
     object_ids = {str(obj["object_name_in_scene"]): int(obj["object_id_in_scene"]) for obj in objects}
+    drivers = {str(obj["object_name_in_scene"]): _component(obj, "RobotDriver") for obj in objects}
     rows = list(frames)
     rows.sort(key=lambda row: int(row.get("frame_index", 0)))
     widths = [float((row.get("gripper") or {}).get("width"))
@@ -103,6 +171,8 @@ def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapp
     total_frames = max((int(row.get("frame_index", 0)) for row in rows), default=-1) + 1
     if not total_frames:
         total_frames = 1
+    segments = _command_segments(rows, total_frames)
+    playback_total_frames = total_frames + sum(pause_frames for _, count, _ in segments if count > 1)
     defaults = {int(obj["object_id_in_scene"]): _pose_default(obj, robot_id, gripper_id, initial_joints) for obj in objects}
     pose_rows: dict[int, list[list[float]]] = {oid: [list(defaults[oid]) for _ in range(total_frames)] for oid in defaults}
     # Backend samples contain world-space object poses. Do not synthesize
@@ -116,15 +186,16 @@ def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapp
         state = row
         for name, oid in object_ids.items():
             pose = _frame_pose(state, name, robot_id, gripper_id, object_ids,
+                               drivers[name],
                                gripper_open_width=gripper_open_width,
-                               gripper_closed_width=gripper_closed_width)
+                              gripper_closed_width=gripper_closed_width)
             if pose is not None:
                 pose_rows[oid][frame] = pose
     for oid, values in pose_rows.items():
         for frame in range(1, len(values)):
             if values[frame] == defaults[oid] and values[frame - 1] != defaults[oid]:
                 values[frame] = values[frame - 1]
-    index_size = sum(12 + 7 * 4 + (16 if pose_rows[oid] else 0) for oid in defaults)
+    index_size = len(objects) * (12 + 7 * 4 + 16 * len(segments))
     attach_offset = 32 + index_size
     data_offset = attach_offset
     index_parts: list[bytes] = []
@@ -134,24 +205,32 @@ def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapp
         values = pose_rows[oid]
         parent = _component(obj, "Transform").get("parent")
         parent_id = WORLD_ID if parent in (None, "", WORLD_ID) else int(parent)
-        index_parts.append(struct.pack("<IIHH", oid, parent_id, 7, 1 if values else 0))
+        index_parts.append(struct.pack("<IIHH", oid, parent_id, 7, len(segments)))
         index_parts.append(struct.pack("<7f", *defaults[oid]))
-        if values:
-            raw = np.asarray(values, dtype="<f4").tobytes()
-            index_parts.append(struct.pack("<IIII", 0, len(values), data_offset, 0))
+        source = np.asarray(values, dtype="<f4")
+        playback_start = 0
+        for start, count, step in segments:
+            samples = source[start:start + count]
+            if count > 1 and pause_frames:
+                samples = np.concatenate((samples[:1], np.repeat(samples[:1], pause_frames, axis=0), samples[1:]))
+            raw = samples.tobytes()
+            index_parts.append(struct.pack("<IIII", playback_start, len(samples), data_offset, step))
             data_parts.append(raw)
             data_offset += len(raw)
-    header = struct.pack("<8I", MAGIC, 2, int(fps), total_frames, len(objects), len(attach_events), 32, attach_offset)
+            playback_start += len(samples)
+    header = struct.pack("<8I", MAGIC, 2, fps, playback_total_frames, len(objects), len(attach_events), 32, attach_offset)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(header + b"".join(index_parts) + b"".join(struct.pack("<IIII", *event) for event in attach_events) + b"".join(data_parts))
     return path
 
 
 def write_traj_from_jsonl(path: str | Path, scene: Mapping[str, Any], frames_path: str | Path,
-                          *, initial_joints: Iterable[float], fps: int = 60) -> Path:
+                          *, initial_joints: Iterable[float], fps: int | None = None,
+                          pause_seconds: float | None = None) -> Path:
     source = Path(frames_path)
     rows = (json.loads(line) for line in source.read_text(encoding="utf-8").splitlines() if line.strip()) if source.exists() else ()
-    return write_traj(path, scene, rows, initial_joints=initial_joints, fps=fps)
+    return write_traj(path, scene, rows, initial_joints=initial_joints,
+                      fps=fps, pause_seconds=pause_seconds)
 
 
 def validate_traj(path: str | Path) -> dict[str, Any]:

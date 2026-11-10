@@ -5,12 +5,12 @@
   </mujoco>
   <link name="work_table">
     <inertial>
-      <origin xyz="0 0 0.4" rpy="0 0 0" />
+      <origin xyz="0 0 0.4" rpy="0 -0 0" />
       <mass value="22" />
-      <inertia ixx="4.0" ixy="0" ixz="0" iyy="1.3" iyz="0" izz="4.4" />
+      <inertia ixx="1.3" ixy="0" ixz="0" iyy="4" iyz="0" izz="4.4" />
     </inertial>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/metal_frame.obj" />
       </geometry>
@@ -19,21 +19,21 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/tabletop.obj" />
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 0.5845" rpy="0 0 0" />
+      <origin xyz="0 0 0.5845" rpy="0 -0 0" />
       <geometry>
-        <box size="0.744 1.494 0.027" />
+        <box size="1.494 0.744 0.027" />
       </geometry>
     </collision>
   </link>
   <link name="leg_01">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/leg.obj" />
       </geometry>
@@ -42,7 +42,7 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/feet.obj" />
       </geometry>
@@ -51,7 +51,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.285" rpy="0 0 0" />
+      <origin xyz="0 0 0.285" rpy="0 -0 0" />
       <geometry>
         <box size="0.058 0.058 0.55" />
       </geometry>
@@ -60,11 +60,11 @@
   <joint name="leg_01_fixed" type="fixed">
     <parent link="work_table" />
     <child link="leg_01" />
-    <origin xyz="-0.315 -0.69 0" rpy="0 0 0" />
+    <origin xyz="-0.69 0.315 0" rpy="0 -0 0" />
   </joint>
   <link name="leg_02">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/leg.obj" />
       </geometry>
@@ -73,7 +73,7 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/feet.obj" />
       </geometry>
@@ -82,7 +82,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.285" rpy="0 0 0" />
+      <origin xyz="0 0 0.285" rpy="0 -0 0" />
       <geometry>
         <box size="0.058 0.058 0.55" />
       </geometry>
@@ -91,11 +91,11 @@
   <joint name="leg_02_fixed" type="fixed">
     <parent link="work_table" />
     <child link="leg_02" />
-    <origin xyz="-0.315 0.69 0" rpy="0 0 0" />
+    <origin xyz="0.69 0.315 0" rpy="0 -0 0" />
   </joint>
   <link name="leg_03">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/leg.obj" />
       </geometry>
@@ -104,7 +104,7 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/feet.obj" />
       </geometry>
@@ -113,7 +113,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.285" rpy="0 0 0" />
+      <origin xyz="0 0 0.285" rpy="0 -0 0" />
       <geometry>
         <box size="0.058 0.058 0.55" />
       </geometry>
@@ -122,11 +122,11 @@
   <joint name="leg_03_fixed" type="fixed">
     <parent link="work_table" />
     <child link="leg_03" />
-    <origin xyz="0.315 -0.69 0" rpy="0 0 0" />
+    <origin xyz="-0.69 -0.315 0" rpy="0 -0 0" />
   </joint>
   <link name="leg_04">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/leg.obj" />
       </geometry>
@@ -135,7 +135,7 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 -0 0" />
       <geometry>
         <mesh filename="table_meshes/feet.obj" />
       </geometry>
@@ -144,7 +144,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.285" rpy="0 0 0" />
+      <origin xyz="0 0 0.285" rpy="0 -0 0" />
       <geometry>
         <box size="0.058 0.058 0.55" />
       </geometry>
@@ -153,6 +153,6 @@
   <joint name="leg_04_fixed" type="fixed">
     <parent link="work_table" />
     <child link="leg_04" />
-    <origin xyz="0.315 0.69 0" rpy="0 0 0" />
+    <origin xyz="0.69 -0.315 0" rpy="0 -0 0" />
   </joint>
 </robot>

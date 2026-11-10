@@ -4,6 +4,7 @@ from pathlib import Path
 import hashlib
 import json
 from copy import deepcopy
+from contextlib import contextmanager
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -21,13 +22,11 @@ DEFAULT_SCENE_SETTINGS = {
         'constraints': {
             'avoid_collision': True,
             'safety_distance': 0.003,
-            'velocity_scale': 0.4,
-            'acceleration_scale': 2.0 / 3.0,
             'timeout': 60.0,
         },
         'planning': {
             'mode': 'auto',
-            'planning_time': 5.0,
+            'planning_time': 10.0,
             'allow_replan': True,
         },
     },
@@ -39,10 +38,15 @@ DEFAULT_SCENE_SETTINGS = {
 }
 
 
-def apply_default_scene_settings(scene):
+def apply_default_scene_settings(scene, global_config=None):
     """Add portable defaults so complete scenes do not need a runtime file."""
     result = deepcopy(scene)
-    for key, value in DEFAULT_SCENE_SETTINGS.items():
+    from .config import load_global_config
+    config = global_config if global_config is not None else load_global_config()
+    defaults = deepcopy(DEFAULT_SCENE_SETTINGS)
+    defaults['move_defaults']['constraints'].update(config['motion'])
+    defaults['trajectory'] = deepcopy(config['trajectory'])
+    for key, value in defaults.items():
         current = result.get(key)
         if not isinstance(current, dict):
             result[key] = deepcopy(value)
@@ -62,7 +66,7 @@ def apply_runtime_config(scene, config):
         raise ValueError('Runtime configuration scene identity mismatch')
     result = deepcopy(scene)
     settings = config.get('scene_settings', {})
-    if set(settings) - {'named_targets', 'move_defaults', 'object_library'}:
+    if set(settings) - {'named_targets', 'move_defaults', 'object_library', 'trajectory'}:
         raise ValueError('Unsupported runtime scene settings')
     result.update(deepcopy(settings))
     objects = {str(o['object_id_in_scene']): o for o in result['objects']}
@@ -162,12 +166,21 @@ class SceneResourceCoordinator:
             raise ValueError('Supported scene_schema_version values are 1 and 2')
         if scene['scene_id'] != task['scene_id'] or scene['scene_version'] != task['scene_version']:
             raise ValueError('Scene identity disagrees with catalog/task')
-        scene = apply_default_scene_settings(scene)
+        from .config import load_global_config, validate_config, trajectory_settings
+        global_config = load_global_config()
+        scene = apply_default_scene_settings(scene, global_config)
         runtime_bytes = b''
         if record.get('runtime_config'):
             runtime_path = (self.catalog_path.parent / record['runtime_config']).resolve()
             runtime_bytes = runtime_path.read_bytes()
             scene = apply_runtime_config(scene, json.loads(runtime_bytes))
+        scene = apply_default_scene_settings(scene, global_config)
+        task_defaults = validate_config(task.get('defaults', {}), partial=True)
+        scene['move_defaults']['constraints'].update(task_defaults.get('motion', {}))
+        scene['trajectory'].update(task_defaults.get('trajectory', {}))
+        validate_config({'motion': {key: scene['move_defaults']['constraints'][key]
+                                   for key in global_config['motion']}}, partial=True)
+        scene['trajectory'] = trajectory_settings(scene)
         # Assemble new OLS MetadataRef authoring scenes into executable components.
         if not any(component(o, 'RobotModelRef') for o in scene.get('objects', [])):
             if any(component(o, 'MetadataRef').get('type') == 'robot' for o in scene.get('objects', [])):
@@ -244,6 +257,8 @@ class SceneResourceCoordinator:
             raise ValueError('Invalid initial_joints')
         ids, obj_names = set(), set()
         digest = hashlib.sha256(path.read_bytes() + runtime_bytes + urdf.read_bytes())
+        digest.update(json.dumps({'move_defaults': scene['move_defaults'],
+                                  'trajectory': scene['trajectory']}, sort_keys=True).encode('utf-8'))
         for obj in attachments:
             digest.update((root / component(obj, 'GripperModel')['urdf']).read_bytes())
         for obj in scene['objects']:
@@ -326,14 +341,29 @@ class SceneResourceCoordinator:
 
 class SceneStateSynchronizer:
     """Execution is authoritative after initialization; never teleport it from planning."""
-    def __init__(self):
+    def __init__(self, blackboard=None):
+        from execution.blackboard import TargetBlackboard
+        self.blackboard = blackboard if blackboard is not None else TargetBlackboard()
         self._poses = {}
         self._joint_states = {}
         self.revision = 0
         self.last_changed_objects = ()
 
+    @contextmanager
+    def command_state(self, backend, kin, checker):
+        """Refresh every command, including failed or newly added skills."""
+        state = self.sync(backend, kin, checker)
+        try:
+            yield state
+        finally:
+            # Observe the actual endpoint even when execution raises midway.
+            # Collision synchronization is deferred to the next planning step.
+            self.blackboard.observe(backend.get_state())
+
     def sync(self, backend, kin, checker):
         state = backend.get_state()
+        if self.blackboard is not None:
+            self.blackboard.observe(state)
         checker_key = id(checker)
         joints = np.asarray(state['joints'], dtype=float)
         previous_joints = self._joint_states.get(checker_key)

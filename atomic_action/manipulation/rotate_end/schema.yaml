@@ -1,0 +1,7 @@
+name: rotate_end
+kind: atomic_action
+parameters:
+  degree:
+    type: float
+    unit: degree
+    required: true

@@ -112,7 +112,7 @@
 | --- | --- | --- | --- |
 | `target` | integer / string | 必填 | 要抓取的场景对象 ID |
 | `link` | string | 操作机构部件时指定 | 要抓取的活动 link |
-| `grasp.mode` | string | binding | binding / physical |
+| `grasp.mode` | string | physical | 物理接触与摩擦抓取 |
 | `strategy_params` | object | 可选 | grasp_force、hold_force 等抓取参数；力单位 N |
 | `constraints` | object | 当前不开放 | 抓取验证、重试和超时等内部约束 |
 
@@ -168,7 +168,7 @@
   "parameters": {
     "target": 1,
     "search": {
-      "min_distance": 0.03,
+      "min_distance": 0.02,
       "max_distance": 0.10,
       "step": 0.005
     },
@@ -180,7 +180,7 @@
 | 参数 | 类型 | 必填 / 默认 | 含义 |
 | --- | --- | --- | --- |
 | `target` | integer / string | 必填 | 场景中的普通物体 ID；目标位姿由 OLS 解析 |
-| `search.min_distance` | number | `0.03` | 最小接近距离，m |
+| `search.min_distance` | number | `0.02` | 最小接近距离，m |
 | `search.max_distance` | number | `0.10` | 最大接近距离，m |
 | `search.step` | number | `0.005` | 搜索步长，m |
 | `pose_axis` | string / number[3] | `+z` | 目标位姿局部接近轴；支持带符号轴名或非零三维向量 |
@@ -189,9 +189,11 @@
 
 候选距离从 `max_distance` 向 `min_distance` 递减，找到第一个可执行的接近位姿后结束。只有规划失败且没有产生实际运动时才尝试下一个距离；执行异常或已发生运动时立即失败。目标位姿和运动请求由 task skill 内部生成。
 
+全部接近距离规划失败且没有实际运动时，自动以 `move_to` 方式直接规划到本次已选定的交互位姿，保留原抓取/放置语义和缓存，不重新感知。直接移动仍执行正常碰撞与路径规划检查；成功后继续后续 command，失败则返回该次移动错误。报告通过 `approach_move_to` 阶段和 `approach_search_error` 保留原搜索失败记录。目标解析或参数错误不触发此切换。
+
 ### retreat
 
-`retreat` 可作为顶层 command 独立执行，也可由 push/pull 编排内部调用。顶层使用场景对象 `target`，执行时通过 OLS 解析目标交互位姿；当前独立调用面向普通物体目标。
+`retreat` 可作为顶层 command 独立执行，也可由 push/pull 编排内部调用。顶层必须提供场景对象 `target`，读取该目标最近一次成功的 `approach`、`pick` 或 `put` 所采用的交互位姿快照，只用其朝向确定撤退方向。从当前实际末端位置沿此方向移动撤退距离，末端朝向保持当前值；不会先回到原交互点，也不会重新感知或校验原交互点的 IK。尚无成功交互记录时返回具体错误。
 
 ```json
 {
@@ -211,13 +213,13 @@
 
 | 参数 | 类型 | 必填 / 默认 | 含义 |
 | --- | --- | --- | --- |
-| `target` | integer / string | 必填 | 场景中的普通物体 ID；目标位姿由 OLS 解析 |
+| `target` | integer / string | 必填 | 场景对象 ID，用于查找最近一次成功交互的位姿快照 |
 | `search.min_distance` | number | `0.03` | 最小撤退距离，m |
 | `search.max_distance` | number | `0.10` | 最大撤退距离，m |
 | `search.step` | number | `0.005` | 搜索步长，m |
-| `pose_axis` | string / number[3] | `+z` | 目标位姿局部撤退参考轴；候选点沿该轴反向生成 |
+| `pose_axis` | string / number[3] | 工具标定轴 | 原交互位姿局部参考轴；实际撤退沿其反向，`direction` 为兼容参数 |
 
-`search` 和 `pose_axis` 均可省略；省略时使用上表中的默认值。
+`search` 和 `pose_axis` 均可省略。默认从当前实际位置依次尝试 10～3 cm，步长 5 mm；每次候选终点均为“当前末端位置 + 撤退距离 × 世界坐标撤退单位方向”，并进行正常路径规划检查。
 
 撤退候选从最长距离向最短距离搜索，执行方向为交互位姿到候选撤退位姿。
 
@@ -227,7 +229,7 @@
 | --- | --- | --- | --- |
 | `target` | integer / string | 必填 | 要抓取的场景对象 ID |
 | `planning_method` | string | joint | 接近段路径类型 |
-| `grasp.mode` | string | binding | binding / physical |
+| `grasp.mode` | string | physical | 物理接触与摩擦抓取 |
 | `grasp_request` | object | 当前不开放 | 预留的内部抓取请求覆盖，例如抓取力、保持力 |
 | `retreat_lift_height` | number | 0.01 | 抓取后沿世界 +Z 上抬的高度，m；0 表示不上抬 |
 | `request` | object | 当前不开放 | 预留的内部机械臂运动请求覆盖 |
@@ -248,9 +250,17 @@
 
 `pick` 的 `request` 和 `grasp_request` 均为内部预留配置，当前使用场景和技能默认设置。
 
+抓深几何检查的桌面底限为实际桌面高度上方 17 mm，按闭爪前张开 80 mm 构型计算夹爪最低点。常规抓深全部失败后的兜底，保持该最低点距底限 3 mm，即实际桌面上方 20 mm；碰撞和路径检查仍需通过。
+
 `pick` 的接近和撤离候选位姿复用 `approach` / `retreat` 的公共位姿生成逻辑；接触路径验证、抓取确认、抬升和携物安全由 `pick` 自身编排。
 
 ### put
+
+VLM 放置位姿从感知表面点沿世界 Z 轴依次向上搜索 0、1、…、10 cm，不叠加持物底部补偿或固定间隙。每档仅执行普通 IK 与当前夹持构型下的目标位姿碰撞/安全间距检查，选择首个通过的高度；后续路径由原有运动规划处理，不额外模拟开闭夹爪。搜索结果在同一轮 approach/put 中共享，下次 put 重新感知和选高。报告的 `placement_height_offset_m`、`placement_height_attempts` 记录最终高度与各档结果。
+
+放置兜底仅在 VLM 感知失败或原点的 11 档高度全部失败后启用：在容器自身坐标系 XY 中心附近的椭圆区域（两轴半径分别为模型长、宽的 30%）的有效 RGB-D 像素中，随机选取最多 3 个不同点，排除正中心及其极小邻域。点的高度来自当前深度图，不假定为容器底面；每个点仍按 0～10 cm、步长 1 cm 搜索，仅检查 IK 和目标位姿碰撞/安全间距，不增加闭合仿真或重复路径预检。同轮 approach/put 共用最终选点，下轮重新感知。`placement_center_fallback` 记录触发原因、尝试点及各高度结果；全部失败时保留内部诊断，对用户仅报告不可行原因，不展示兜底机制，也不复用上一轮缓存。范围和次数常量位于 `demo/interaction/placement_fallback.py`。
+
+感知在该轮 put 前最近一次对应目标的 approach 开始时进行，使用当时的 RGB-D；put 共用该轮结果。没有前置 approach 时在 put 开始时感知。提供给 VLM 的裁剪图覆盖整个目标，保留其所选像素得到的三维点，不再重选底面点，也不再根据包围盒中央区域或底部高度筛选选点。
 
 | 参数 | 类型 | 必填 / 默认 | 含义 |
 | --- | --- | --- | --- |
@@ -290,7 +300,7 @@
 | `target` | integer / string | 首次接近必填 | 场景对象 ID；已抓持注册的活动 link 时可省略 |
 | `link` | string | 目标有多个活动 link 时必填 | 选择操作部件；唯一活动 link 可自动解析 |
 | `contact_mode` | string | grasp | pull 仅支持 grasp；push 支持 grasp / contact |
-| `grasp.mode` | string | binding；省略目标时可继承已有抓持模式 | 抓持方式 binding / physical，contact 时不填写 |
+| `grasp.mode` | string | physical | 物理接触与摩擦抓取；contact 时不填写 |
 | `distance` | number | 直线运动必填 | 正数，相对末端行程，m；contact 从首次真实接触处开始计量，不含空行程 |
 | `direction` | number[3] | pull 为 [0,0,-1]；push 为 [0,0,1] | 直线运动方向，非零向量 |
 | `frame` | string | tool | direction、圆弧偏移与轴向所在坐标系：tool / world |
@@ -298,7 +308,7 @@
 | `arc_center_offset` | number[3] | 相对圆弧必填 | 相对起始 TCP 原点的轴心偏移，m |
 | `arc_axis` | number[3] | 相对圆弧必填 | 旋转轴方向，非零向量 |
 | `contact` | object | 可自动生成 | 交互目标位姿；ApproachSkill 从该位姿反向搜索接近位姿 |
-| `approach_search` | object | `3～10 cm`，步长 `5 mm` | 覆盖 ApproachSkill 的搜索区间和步长 |
+| `approach_search` | object | `2～10 cm`，步长 `5 mm` | 覆盖 ApproachSkill 的搜索区间和步长 |
 | `retreat_search` | object | `3～10 cm`，步长 `5 mm` | 覆盖 RetreatSkill 的搜索区间和步长 |
 | `pose_axis` | string / number[3] | `+z` | 目标位姿局部接近运动轴；接近点沿该轴反向推导 |
 | `grasp_request` | object | 可选，仅 grasp 方式 | 内部抓取请求覆盖 |

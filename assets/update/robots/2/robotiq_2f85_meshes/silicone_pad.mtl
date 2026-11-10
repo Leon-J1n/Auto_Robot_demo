@@ -1,6 +1,0 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
-
-newmtl silicone_pad_material
-Ka 0.08 0.08 0.09
-Kd 0.08 0.08 0.09
-Ks 0 0 0

@@ -5,13 +5,16 @@
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "d455 camera"
+    "tag": "d455camera"
   },
   "geometric_properties": {
     "AABB": [
-      0.124,
-      0.029,
-      0.026
+      0.0619972496,
+      -0.0619972496,
+      0.0144995337,
+      -0.0145,
+      0.0,
+      -0.026
     ]
   },
   "physical_properties": {

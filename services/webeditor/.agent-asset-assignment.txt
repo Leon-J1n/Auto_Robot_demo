@@ -1,0 +1,7 @@
+Owner: asset_instance_fix. Implement backend only: local_gateway.py, supporting Python modules, backend tests.
+Required: actual OBJ/STL/DAE/FBX geometry resource URLs; complete multipart entry/path/files upload preserving MTL/textures and URDF dependencies; safe dependency serving; actual URDF visual tree decomposition with XML stdlib (links and joint origins, geometry origins/scales); no first-mesh shortcut. Reuse standalone original assets.py if useful. No model placeholder boxes.
+Camera entities have NO visual/collider. Include frameId/updateRateHz. Remove fake PNG: return truthful unsupported frame endpoint. Frontend agent implements actual Three.js RGB/depth rendering locally, NOT polling this endpoint.
+Fix WebSocket scene.changed payload envelope to match main.ts event.payload.snapshot. Preserve uploaded files and rediscover old loose uploads and bundles after restart. No arbitrary deletion outside asset directories.
+Tests: actual aiohttp test client, multipart bytes/dependencies, URDF link mesh resources, Camera component, restart rediscovery, event shape. Not just status 200.
+Other agent owns editor/src/main.ts, renderer.ts, styles.css and frontend tests. Parent owns verification, docs/start script only. You are not alone: preserve concurrent changes.
+No git commits or xhigh. Binding/dispatch: asset-instance-fix; project: web-frontend. Send status via file .agent-asset-status.txt if messages unavailable.

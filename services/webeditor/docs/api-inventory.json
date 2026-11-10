@@ -1,0 +1,466 @@
+{
+  "note": "Registration inventory, not proof of behavioural parity: the gateway is a channel and the browser owns the scene (§1.1), so behaviour is audited by parity-probes.json (no browser) and browser_smoke.cjs (real browser).",
+  "caller_routes": [
+    {
+      "method": "GET",
+      "path": "/getWorld",
+      "spec": "§4.1 live world, cache fallback",
+      "registered": true
+    },
+    {
+      "method": "POST",
+      "path": "/updateWorld",
+      "spec": "§4.2 whole-world replace",
+      "registered": true
+    },
+    {
+      "method": "POST",
+      "path": "/updateItem",
+      "spec": "§4.2 one object, full replacement",
+      "registered": true
+    },
+    {
+      "method": "POST",
+      "path": "/addObject",
+      "spec": "§4.2 single object, browser allocates the id",
+      "registered": true
+    },
+    {
+      "method": "POST",
+      "path": "/removeObject",
+      "spec": "§4.2/§12.3b cascade or detach",
+      "registered": true
+    },
+    {
+      "method": "POST",
+      "path": "/updateTraj",
+      "spec": "§4.3 binary clip",
+      "registered": true
+    },
+    {
+      "method": "GET",
+      "path": "/captureScene",
+      "spec": "§4.4 rgb / rgbd pixels",
+      "registered": true
+    },
+    {
+      "method": "GET",
+      "path": "/get2DAABB",
+      "spec": "§4.5 projected box",
+      "registered": true
+    },
+    {
+      "method": "GET",
+      "path": "/events",
+      "spec": "§5.1 the request/response channel",
+      "registered": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "spec": "§5.9 kept",
+      "registered": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/runtimeConfig",
+      "spec": "§9.1 constants + features",
+      "registered": true
+    }
+  ],
+  "agent_routes_kept": [
+    {
+      "method": "GET",
+      "path": "/api/agent/conversations",
+      "line": 3445,
+      "handler": "gateway.conversations_list"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations",
+      "line": 3446,
+      "handler": "gateway.conversations_create"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/agent/conversations/{conversationId}",
+      "line": 3449,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/conversations/{conversationId}",
+      "line": 3448,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations/{conversationId}/activate",
+      "line": 3450,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations/{conversationId}/messages",
+      "line": 3447,
+      "handler": "gateway.conversation_messages"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/health",
+      "line": 3412,
+      "handler": "gateway.agent_health_cached"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/jobs",
+      "line": 3451,
+      "handler": "gateway.jobs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/jobs",
+      "line": 3452,
+      "handler": "gateway.jobs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/jobs/{jobId}",
+      "line": 3453,
+      "handler": "gateway.job"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/recover",
+      "line": 3417,
+      "handler": "gateway.recover_agent_session"
+    }
+  ],
+  "deleted_routes": [
+    {
+      "method": "POST",
+      "path": "/api/commands",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/bootstrap",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/assets",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/assets/upload",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/assets/import-remote",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/assets/remote-proxy",
+      "still_registered": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/assets/{id}",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/assets/{id}/file",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/assets/{id}/file/{path}",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/{entity_id}/frame",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/state/load-simstate",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/diagnostics",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/metrics",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/presentation",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/presentation/mode",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-control/captures",
+      "still_registered": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-control/captures/{id}",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/timelines/{id}/frames/{i}",
+      "still_registered": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/timelines/{id}/data",
+      "still_registered": false
+    }
+  ],
+  "local_routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "line": 3459,
+      "handler": "gateway.static"
+    },
+    {
+      "method": "POST",
+      "path": "/acquireSceneLease",
+      "line": 3441,
+      "handler": "gateway.acquire_scene_lease"
+    },
+    {
+      "method": "POST",
+      "path": "/addObject",
+      "line": 3432,
+      "handler": "gateway.add_object"
+    },
+    {
+      "method": "GET",
+      "path": "/allocateObjectID",
+      "line": 3424,
+      "handler": "gateway.allocate_object_id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/conversations",
+      "line": 3445,
+      "handler": "gateway.conversations_list"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations",
+      "line": 3446,
+      "handler": "gateway.conversations_create"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/agent/conversations/{conversationId}",
+      "line": 3449,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/conversations/{conversationId}",
+      "line": 3448,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations/{conversationId}/activate",
+      "line": 3450,
+      "handler": "gateway.conversation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/conversations/{conversationId}/messages",
+      "line": 3447,
+      "handler": "gateway.conversation_messages"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/health",
+      "line": 3412,
+      "handler": "gateway.agent_health_cached"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/jobs",
+      "line": 3451,
+      "handler": "gateway.jobs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/jobs",
+      "line": 3452,
+      "handler": "gateway.jobs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/jobs/{jobId}",
+      "line": 3453,
+      "handler": "gateway.job"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent/recover",
+      "line": 3417,
+      "handler": "gateway.recover_agent_session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "line": 3408,
+      "handler": "gateway.health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/runtimeConfig",
+      "line": 3414,
+      "handler": "gateway.runtime_config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessionState",
+      "line": 3416,
+      "handler": "gateway.session_state"
+    },
+    {
+      "method": "GET",
+      "path": "/brainCapabilities",
+      "line": 3422,
+      "handler": "gateway.brain_capabilities"
+    },
+    {
+      "method": "GET",
+      "path": "/captureScene",
+      "line": 3427,
+      "handler": "gateway.capture_scene"
+    },
+    {
+      "method": "POST",
+      "path": "/commitWorld",
+      "line": 3437,
+      "handler": "gateway.commit_world"
+    },
+    {
+      "method": "GET",
+      "path": "/events",
+      "line": 3458,
+      "handler": "gateway.events"
+    },
+    {
+      "method": "GET",
+      "path": "/get2DAABB",
+      "line": 3428,
+      "handler": "gateway.get_2d_aabb"
+    },
+    {
+      "method": "GET",
+      "path": "/getWorld",
+      "line": 3425,
+      "handler": "gateway.get_world"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "line": 3411,
+      "handler": "gateway.agent_health"
+    },
+    {
+      "method": "GET",
+      "path": "/queryWorldCommit",
+      "line": 3438,
+      "handler": "gateway.query_world_commit"
+    },
+    {
+      "method": "POST",
+      "path": "/releaseSceneLease",
+      "line": 3442,
+      "handler": "gateway.release_scene_lease"
+    },
+    {
+      "method": "POST",
+      "path": "/removeObject",
+      "line": 3433,
+      "handler": "gateway.remove_object"
+    },
+    {
+      "method": "POST",
+      "path": "/resolveUncertain",
+      "line": 3443,
+      "handler": "gateway.resolve_uncertain"
+    },
+    {
+      "method": "GET",
+      "path": "/sessions",
+      "line": 3419,
+      "handler": "gateway.sessions"
+    },
+    {
+      "method": "POST",
+      "path": "/sessions",
+      "line": 3420,
+      "handler": "gateway.sessions"
+    },
+    {
+      "method": "GET",
+      "path": "/tasks/{taskID}/artifacts/{name}",
+      "line": 3456,
+      "handler": "gateway.task_artifact"
+    },
+    {
+      "method": "POST",
+      "path": "/updateItem",
+      "line": 3431,
+      "handler": "gateway.update_item"
+    },
+    {
+      "method": "POST",
+      "path": "/updateTraj",
+      "line": 3444,
+      "handler": "gateway.update_traj"
+    },
+    {
+      "method": "POST",
+      "path": "/updateWorld",
+      "line": 3430,
+      "handler": "gateway.update_world"
+    },
+    {
+      "method": "GET",
+      "path": "/{route:.*}",
+      "line": 3460,
+      "handler": "gateway.static"
+    }
+  ],
+  "browser_actions": [
+    "addObject",
+    "captureScene",
+    "get2DAABB",
+    "getWorld",
+    "removeObject",
+    "updateItem",
+    "updateTraj",
+    "updateWorld"
+  ],
+  "original_routes": null,
+  "original_commands": null
+}

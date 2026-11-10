@@ -1,89 +1,30 @@
 {
   "by_name": {
-    "apple": [
-      1
-    ],
-    "banana": [
-      2
-    ],
-    "baseball": [
-      3
-    ],
-    "basket": [
-      4,
-      12
-    ],
-    "pen": [
-      5,
-      6
-    ],
-    "screwdriver": [
-      7,
-      13
-    ],
-    "gum_bottle": [
-      8
-    ],
-    "cream": [
-      9
-    ],
-    "marker": [
-      10
-    ],
-    "test_tube_rack": [
-      11,
-      20
-    ],
-    "mug": [
-      14,
-      23,
-      24
-    ],
-    "rubiks_cube": [
-      15
-    ],
-    "school_bell": [
-      16
-    ],
-    "tray": [
-      17
-    ],
-    "coffee_table": [
-      18
-    ],
-    "sugar_box": [
-      19
-    ],
-    "test_tube": [
-      21
-    ],
-    "doll": [
-      22
-    ],
-    "drawer": [
-      25,
-      26,
-      27
-    ],
-    "cabinet": [
-      28
-    ],
-    "table": [
-      29
-    ],
-    "microwave": [
-      30,
-      31
-    ],
-    "bottle": [
-      32
-    ],
-    "button": [
-      33
-    ],
-    "can": [
-      34
-    ]
+    "apple": [1],
+    "banana": [2],
+    "baseball": [3],
+    "basket": [4, 12],
+    "pen": [5, 6],
+    "screwdriver": [7, 13],
+    "gum_bottle": [8],
+    "cream": [9],
+    "marker": [10],
+    "test_tube_rack": [11, 20],
+    "mug": [14, 23, 24],
+    "rubiks_cube": [15],
+    "school_bell": [16],
+    "tray": [17],
+    "coffee_table": [18],
+    "sugar_box": [19],
+    "test_tube": [21],
+    "drawer": [25],
+    "can": [26],
+    "button": [27],
+    "cabinet": [28],
+    "table": [29],
+    "bottle": [30],
+    "microwave": [31],
+    "toy_panda": [22]
   },
   "by_id": {
     "1": "apple",
@@ -107,19 +48,16 @@
     "19": "sugar_box",
     "20": "test_tube_rack",
     "21": "test_tube",
-    "22": "doll",
+    "22": "toy_panda",
     "23": "mug",
     "24": "mug",
     "25": "drawer",
-    "26": "drawer",
-    "27": "drawer",
+    "26": "can",
+    "27": "button",
     "28": "cabinet",
     "29": "table",
-    "30": "microwave",
-    "31": "microwave",
-    "32": "bottle",
-    "33": "button",
-    "34": "can"
+    "30": "bottle",
+    "31": "microwave"
   },
   "category": {
     "1": "模型.抓取物",
@@ -147,15 +85,12 @@
     "23": "模型.抓取物",
     "24": "模型.抓取物",
     "25": "模型.放置物",
-    "26": "模型.放置物",
-    "27": "模型.放置物",
+    "26": "模型.抓取物",
+    "27": "模型.抓取物",
     "28": "模型.放置物",
     "29": "模型.放置物",
-    "30": "模型.放置物",
-    "31": "模型.放置物",
-    "32": "模型.抓取物",
-    "33": "模型.抓取物",
-    "34": "模型.抓取物"
+    "30": "模型.抓取物",
+    "31": "模型.放置物"
   },
   "thumbnail": {
     "1": "1/apple_thumbnail.png",
@@ -179,18 +114,48 @@
     "19": "19/sugar_box_thumbnail.png",
     "20": "20/test_tube_rack_thumbnail.png",
     "21": "21/test_tube_thumbnail.png",
-    "22": "22/doll_thumbnail.png",
+    "22": "22/toy_panda_thumbnail.png",
     "23": "23/mug_thumbnail.png",
     "24": "24/mug_thumbnail.png",
     "25": "25/drawer_thumbnail.png",
-    "26": "26/drawer_thumbnail.png",
-    "27": "27/drawer_thumbnail.png",
+    "26": "26/can_thumbnail.png",
+    "27": "27/button_thumbnail.png",
     "28": "28/cabinet_thumbnail.png",
     "29": "29/table_thumbnail.png",
-    "30": "30/microwave_thumbnail.png",
-    "31": "31/microwave_thumbnail.png",
-    "32": "32/bottle_thumbnail.png",
-    "33": "33/button_thumbnail.png",
-    "34": "34/can_thumbnail.png"
+    "30": "30/bottle_thumbnail.png",
+    "31": "31/microwave_thumbnail.png"
+  },
+  "no_display": {
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false,
+    "5": false,
+    "6": false,
+    "7": false,
+    "8": false,
+    "9": false,
+    "10": false,
+    "11": false,
+    "12": false,
+    "13": false,
+    "14": false,
+    "15": false,
+    "16": false,
+    "17": false,
+    "18": true,
+    "19": false,
+    "20": false,
+    "21": false,
+    "22": false,
+    "23": false,
+    "24": false,
+    "25": false,
+    "26": false,
+    "27": false,
+    "28": false,
+    "29": true,
+    "30": false,
+    "31": false
   }
 }

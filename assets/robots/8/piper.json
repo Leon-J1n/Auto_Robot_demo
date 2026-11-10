@@ -4,14 +4,17 @@
     "object_id": 8,
     "deformable": false,
     "scalable": false,
-    "interactable": true,
+    "interactable": false,
     "tag": "piper"
   },
   "geometric_properties": {
     "AABB": [
-      0.371493679846576,
-      0.0970000179753196,
-      0.2415006053716347
+      0.057652737,
+      -0.313841019,
+      0.048500003,
+      -0.048500018,
+      0.241500665,
+      0.0
     ]
   },
   "physical_properties": {
@@ -33,5 +36,107 @@
   "grasp_properties": {
     "pose_count": 0,
     "poses": []
+  },
+  "arm_configuration": "piper",
+  "scene_one_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.0,
+        0.06,
+        0.0
+      ],
+      "has_pedestal": false
+    }
+  ],
+  "scene_two_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.2,
+        0.06,
+        0.0
+      ],
+      "has_pedestal": false
+    },
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        -0.2,
+        0.06,
+        0.0
+      ],
+      "has_pedestal": false
+    }
+  ],
+  "robot_driver": {
+    "properties": {
+      "role": "arm",
+      "joint_sequence": [
+        "joint1",
+        "joint2",
+        "joint3",
+        "joint4",
+        "joint5",
+        "joint6"
+      ],
+      "joint_limits": {
+        "joint1": [
+          -2.6179938,
+          2.6179938
+        ],
+        "joint2": [
+          0.0,
+          3.1415926
+        ],
+        "joint3": [
+          -2.9670597,
+          0.0
+        ],
+        "joint4": [
+          -1.7453292,
+          1.7453292
+        ],
+        "joint5": [
+          -1.2217304,
+          1.2217304
+        ],
+        "joint6": [
+          -2.0943951,
+          2.0943951
+        ]
+      },
+      "initial_joint_positions_rad": {
+        "joint1": -1.3e-08,
+        "joint2": 0.55700016,
+        "joint3": -1.0455852782,
+        "joint4": 0.0,
+        "joint5": 1.21771517259,
+        "joint6": -1.57
+      },
+      "available_connect_joints": [
+        "joint6"
+      ],
+      "available_connect_link": [
+        "link6"
+      ],
+      "position": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quaternion_xyzw": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
   }
 }

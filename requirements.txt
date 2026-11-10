@@ -1,0 +1,12 @@
+# Python 3.10; install from the repository root.
+# EAIK is an optional source-built IK backend; see libraries/eaik/README.md.
+numpy==2.2.6
+mujoco==3.12.0
+urchin==0.0.30
+Pillow==12.3.0
+openai==3.46.0
+
+-r planning/requirements.txt
+-r collision/requirements.txt
+-r libraries/ikfast/requirements.txt
+-r services/webeditor/requirements.txt

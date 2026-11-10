@@ -1,0 +1,465 @@
+"""Use one live RGB-D estimate for a task's grasp target."""
+
+from dataclasses import replace
+from copy import deepcopy
+from itertools import product
+
+import numpy as np
+
+from atomic_action.perception.vlm_estimate import VLMPointEstimator
+from demo.interaction.object_library import (
+    GraspResolutionError, ObjectLibraryGraspResolver,
+    control_from_grasp_frame, model_id_for, rigid_pose, scene_object_by_id,
+)
+from execution.resources import component
+from demo.interaction.grasp_depth_search import (GRASP_DEPTHS_M, validate_depth_candidate,
+                                                 floor_fallback_candidates)
+from sensors.camera import CameraIntrinsics
+from demo.interaction.placement_fallback import random_center_estimates
+
+
+PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(11))
+# Rz(+90 degrees) @ Rx(180 degrees), expressed in the world frame.
+_DOWNWARD_GRASP_ROTATION = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., -1.]])
+_DOWNWARD_PLACE_ROTATION = _DOWNWARD_GRASP_ROTATION.copy()
+
+
+def _model_bounds(metadata):
+    bounds = np.asarray(metadata.get('geometric_properties', {}).get('AABB'), dtype=float)
+    if bounds.shape == (3,) and np.isfinite(bounds).all() and np.all(bounds > 0):
+        half = bounds / 2
+        return -half, half
+    if bounds.shape != (6,) or not np.isfinite(bounds).all():
+        raise GraspResolutionError('Model geometric_properties.AABB must contain six finite bounds')
+    lower, upper = bounds[1::2], bounds[::2]
+    if np.any(upper <= lower):
+        raise GraspResolutionError('Model AABB bounds must have positive extent')
+    return lower, upper
+
+
+def _downward_grasp_rotation(estimate):
+    """Use only the RGB-D surface reference direction, never model AABB axes."""
+    details = {'long_axis_aligned': False, 'orientation_source': 'fixed_downward'}
+    if estimate.get('axis_status') != 'valid':
+        details['long_axis_fallback'] = estimate.get('axis_reason') or 'VLM 未提供有效长轴'
+        return _DOWNWARD_GRASP_ROTATION.copy(), details
+    axis = np.asarray(estimate.get('long_axis_world'), dtype=float)
+    if axis.shape != (3,) or not np.isfinite(axis).all():
+        details['long_axis_fallback'] = '长轴世界坐标方向无效'
+        return _DOWNWARD_GRASP_ROTATION.copy(), details
+    axis = axis.copy()
+    axis[2] = 0.
+    norm = float(np.linalg.norm(axis))
+    if norm < 1e-6:
+        details['long_axis_fallback'] = '长轴水平投影过短'
+        return _DOWNWARD_GRASP_ROTATION.copy(), details
+    x_axis = axis / norm
+    if x_axis[0] < -1e-9 or (abs(x_axis[0]) <= 1e-9 and x_axis[1] < 0):
+        x_axis = -x_axis
+    # Existing grasp-frame calibration uses Y for jaw opening and Z for approach.
+    z_axis = np.array([0., 0., -1.])
+    y_axis = np.cross(z_axis, x_axis)
+    details.update(long_axis_aligned=True, orientation_source='vlm_rgbd_axis',
+                   long_axis_world=x_axis.tolist())
+    return np.column_stack((x_axis, y_axis, z_axis)), details
+
+
+def _target_crop(frame, object_pose, metadata):
+    lower, upper = _model_bounds(metadata)
+    world_from_object = rigid_pose(object_pose['position'], object_pose['quaternion_xyzw'])
+    corners = np.asarray(list(product(*zip(lower, upper))), dtype=float)
+    world = corners @ world_from_object[:3, :3].T + world_from_object[:3, 3]
+    camera = (world - frame.camera_pose.position) @ frame.camera_pose.rotation_matrix
+    depth = -camera[:, 2]
+    if np.any(depth <= 0):
+        raise GraspResolutionError('Target is behind the requested camera')
+    intrinsics = frame.intrinsics
+    pixels_x = intrinsics.fx * camera[:, 0] / depth + intrinsics.cx
+    pixels_y = intrinsics.cy - intrinsics.fy * camera[:, 1] / depth
+    center_x, center_y = (np.min(pixels_x) + np.max(pixels_x)) / 2, (np.min(pixels_y) + np.max(pixels_y)) / 2
+    # Show the whole destination so VLM can choose free space away from its center.
+    half_width = (np.max(pixels_x) - np.min(pixels_x)) * .5
+    half_height = (np.max(pixels_y) - np.min(pixels_y)) * .5
+    left = max(0, int(np.floor(center_x - half_width)) - 4)
+    right = min(intrinsics.width, int(np.ceil(center_x + half_width)) + 5)
+    top = max(0, int(np.floor(center_y - half_height)) - 4)
+    bottom = min(intrinsics.height, int(np.ceil(center_y + half_height)) + 5)
+    if right - left < 16 or bottom - top < 16:
+        raise GraspResolutionError('Target projects outside the requested camera image')
+    cropped_intrinsics = CameraIntrinsics(right - left, bottom - top, intrinsics.fx,
+                                          intrinsics.fy, intrinsics.cx - left, intrinsics.cy - top)
+    return replace(frame, rgb=frame.rgb[top:bottom, left:right],
+                   depth=frame.depth[top:bottom, left:right],
+                   intrinsics=cropped_intrinsics), (left, top)
+
+
+class VLMGraspResolver(ObjectLibraryGraspResolver):
+    def __init__(self, client, blackboard, backend, *, target_id=None, camera_id="global",
+                 visual_targets=None, command_point_types=None, command_place_cycles=None, estimator=None):
+        super().__init__(client, blackboard)
+        self.backend = backend
+        targets = visual_targets or [{'target_id': target_id, 'point_type': 'grasp', 'camera_id': camera_id}]
+        self.visual_targets = {(str(item['target_id']), item['point_type']): item for item in targets}
+        self.command_point_types = command_point_types or {}
+        self.command_place_cycles = command_place_cycles or {}
+        self.place_cycle_id = None
+        self.point_type = 'grasp'
+        self.estimator = estimator or VLMPointEstimator()
+        self.placement_rng = np.random.default_rng()
+        self._placement_contexts = {}
+
+    def set_command_context(self, command_id):
+        self.point_type = self.command_point_types.get(str(command_id), 'grasp')
+        self.place_cycle_id = (self.command_place_cycles.get(str(command_id), str(command_id))
+                               if self.point_type == 'place' else None)
+
+    def is_visual_place(self, target_id):
+        return (str(target_id), self.point_type) in self.visual_targets and self.point_type == 'place'
+
+    def select(self, resolved, kin, checker, seed, **kwargs):
+        target = self.visual_targets.get((str(resolved['target_id']), self.point_type))
+        if target is not None and self.point_type == 'place' and resolved.get('placement_height_search_pending'):
+            return self._select_place_height(resolved, kin, checker, seed, **kwargs)
+        if target is None or self.point_type != 'grasp':
+            return super().select(resolved, kin, checker, seed, **kwargs)
+        previous_target = getattr(self.backend, 'contact_target', None)
+        previous_id = getattr(self.backend, 'contact_target_object_id', None)
+        self.backend.contact_target = resolved['target_name']
+        self.backend.contact_target_object_id = resolved['target_id']
+        try:
+            if not resolved.get('depth_search_pending'):
+                return super().select(resolved, kin, checker, seed, **kwargs)
+            attempts = []
+            caller_validator = kwargs.get('candidate_validator')
+            def validate(q, candidate):
+                evidence = validate_depth_candidate(
+                    resolved, candidate, q, kin, checker, seed, kwargs.get('safety_distance', .003))
+                if evidence['success'] and caller_validator is not None:
+                    return caller_validator(q, candidate)
+                return evidence
+            for depth in GRASP_DEPTHS_M:
+                group = [c for c in resolved['candidates'] if c['grasp_depth_offset_m'] == depth]
+                if not group:
+                    continue
+                try:
+                    choice = super().select(
+                        {**resolved, 'candidates': group}, kin, checker, seed,
+                        **{**kwargs, 'candidate_validator': validate})
+                except GraspResolutionError as exc:
+                    details = getattr(exc, 'details', {})
+                    attempts.append({'grasp_depth_offset_m': depth, 'success': False,
+                                     'error': details or {'error_message': str(exc)}})
+                    continue
+                attempts.append({'grasp_depth_offset_m': depth, 'success': True,
+                                 'rejected': choice.get('rejected', [])})
+                choice['grasp_depth_attempts'] = attempts
+                return choice
+            fallback_candidates = floor_fallback_candidates(resolved, checker, seed)
+            fallback = {'used': True, 'success': False, 'candidates': fallback_candidates}
+            try:
+                choice = super().select({**resolved, 'candidates': fallback_candidates},
+                    kin, checker, seed, **{**kwargs, 'grasp_index': None,
+                                          'candidate_validator': validate})
+            except GraspResolutionError as exc:
+                fallback['error'] = getattr(exc, 'details', {}) or {'error_message': str(exc)}
+            else:
+                fallback.update(success=True, selected=choice['selected']['floor_fallback'],
+                                rejected=choice.get('rejected', []))
+                choice.update(grasp_depth_attempts=attempts, grasp_floor_fallback=fallback)
+                return choice
+            error = GraspResolutionError('0～30 mm 抓深候选及桌面底限兜底均不可行，未执行下探')
+            error.details = {'error_code': 'GRASP_DEPTH_SEARCH_FAILED',
+                             'error_message': str(error), 'failed_stage': 'target_resolution',
+                             'details': {'depth_attempts': attempts, 'floor_fallback': fallback},
+                             'rejected': [item for attempt in attempts
+                                          for item in attempt['error'].get('rejected', [])]
+                                         + fallback['error'].get('rejected', [])}
+            raise error
+        finally:
+            self.backend.contact_target = previous_target
+            self.backend.contact_target_object_id = previous_id
+
+    def _search_place_heights(self, resolved, kin, checker, seed, **kwargs):
+        """Try ascending Z offsets with ordinary IK/endpoint collision checks only."""
+        attempts = []
+        for height in PLACEMENT_HEIGHTS_M:
+            group = [c for c in resolved['candidates'] if c['placement_height_offset_m'] == height]
+            if not group:
+                continue
+            try:
+                choice = super().select({**resolved, 'candidates': group}, kin, checker, seed, **kwargs)
+            except GraspResolutionError as exc:
+                attempts.append({'placement_height_offset_m': height, 'success': False,
+                                 'error': getattr(exc, 'details', {}) or {'error_message': str(exc)}})
+                continue
+            attempts.append({'placement_height_offset_m': height, 'success': True,
+                             'rejected': choice.get('rejected', [])})
+            choice['placement_height_attempts'] = attempts
+            return choice, attempts
+        return None, attempts
+
+    def _center_estimates(self, target_id):
+        context = self._placement_contexts.get(str(target_id))
+        if context is None or context['cycle_id'] != self.place_cycle_id:
+            return []
+        if 'center_estimates' not in context:
+            lower, upper = _model_bounds(context['metadata'])
+            context['center_estimates'] = random_center_estimates(
+                context['frame'], context['object_pose'], lower, upper, self.placement_rng)
+        return context['center_estimates']
+
+    @staticmethod
+    def _restore_crop_pixel(estimate, crop_origin):
+        estimate = deepcopy(estimate)
+        if crop_origin is not None:
+            estimate['crop_origin_pixel'] = {'x': crop_origin[0], 'y': crop_origin[1]}
+            if 'pixel' in estimate:
+                estimate['pixel'] = {'x': estimate['pixel']['x'] + crop_origin[0],
+                                     'y': estimate['pixel']['y'] + crop_origin[1]}
+        return estimate
+
+    def _select_place_height(self, resolved, kin, checker, seed, **kwargs):
+        choice, attempts = self._search_place_heights(resolved, kin, checker, seed, **kwargs)
+        original_fallback = resolved['visual_estimate'].get('placement_center_fallback', {})
+        if choice is not None:
+            if original_fallback.get('used'):
+                original_fallback['attempts'] = [{
+                    'world_point': resolved['visual_estimate']['world_point'],
+                    'height_attempts': attempts, 'success': True}]
+            return choice
+        fallback = {'used': True, 'trigger': original_fallback.get('trigger', 'vlm_point_infeasible'),
+                    'attempts': []}
+        if original_fallback.get('vlm_error_type'):
+            fallback['vlm_error_type'] = original_fallback['vlm_error_type']
+        if original_fallback.get('used'):
+            fallback['attempts'].append({'world_point': resolved['visual_estimate']['world_point'],
+                                        'height_attempts': attempts, 'success': False})
+        try:
+            points = self._center_estimates(resolved['target_id'])
+        except (ValueError, AttributeError, GraspResolutionError) as exc:
+            points = []
+            fallback['unavailable_reason'] = str(exc)
+        if not points and not fallback['attempts']:
+            fallback.setdefault('unavailable_reason', '容器中央附近没有可用的 RGB-D 随机点')
+        while points:
+            estimate = points.pop(0)
+            context = self._placement_contexts[str(resolved['target_id'])]
+            estimate = self._restore_crop_pixel(estimate, context['crop_origin'])
+            estimate.update(held_object=resolved['visual_estimate']['held_object'],
+                            placement_cycle_id=self.place_cycle_id,
+                            placement_height_selected=False,
+                            placement_height_candidates_m=list(PLACEMENT_HEIGHTS_M))
+            estimate['placement_center_fallback'].update(trigger=fallback['trigger'])
+            if fallback.get('vlm_error_type'):
+                estimate['placement_center_fallback']['vlm_error_type'] = fallback['vlm_error_type']
+            base = deepcopy(resolved['candidates'][0])
+            pose = np.asarray(base['world_from_grasp'], dtype=float).copy()
+            pose[:3, 3] = [estimate['world_point'][axis] for axis in 'xyz']
+            transform = np.asarray(resolved['control_from_grasp'], dtype=float)
+            candidates = []
+            for height in PLACEMENT_HEIGHTS_M:
+                shifted = pose.copy()
+                shifted[2, 3] += height
+                candidates.append({**base, 'placement_height_offset_m': height,
+                    'world_from_grasp': shifted.tolist(),
+                    'world_from_control': (shifted @ np.linalg.inv(transform)).tolist()})
+            alternative = {**resolved, 'candidates': candidates, 'visual_estimate': estimate}
+            choice, alternative_attempts = self._search_place_heights(
+                alternative, kin, checker, seed, **kwargs)
+            fallback['attempts'].append({'world_point': estimate['world_point'],
+                'height_attempts': alternative_attempts, 'success': choice is not None})
+            if choice is not None:
+                estimate['placement_center_fallback'].update(
+                    attempts=deepcopy(fallback['attempts']))
+                if not original_fallback.get('used'):
+                    estimate['placement_center_fallback']['primary_height_attempts'] = attempts
+                return choice
+        error = GraspResolutionError('未找到可用放置位姿，未执行放置')
+        all_attempts = attempts + [a for point in fallback['attempts']
+                                  for a in point['height_attempts']]
+        if original_fallback.get('used'):
+            all_attempts = [a for point in fallback['attempts'] for a in point['height_attempts']]
+        error.details = {'error_code': 'PLACEMENT_HEIGHT_SEARCH_FAILED',
+                         'failed_stage': 'target_resolution', 'error_message': str(error),
+                         'details': {'height_attempts': attempts, 'center_fallback': fallback},
+                         'rejected': [item for attempt in all_attempts
+                                      for item in attempt.get('error', {}).get('rejected', [])]}
+        raise error
+
+    def remember_selection(self, resolved):
+        selected = resolved['selected']
+        evidence = resolved.get('visual_estimate')
+        if (isinstance(evidence, dict)
+                and selected.get('pose_source') == 'vlm_rgbd_grasp'):
+            # All depth/yaw variants represent the same logical grasp (index 0).
+            # Cache the selection so approach and pick use the same pose.
+            evidence = dict(evidence, yaw_selected=True, depth_selected=True,
+                            grasp_depth_offset_m=selected.get(
+                                'grasp_depth_offset_m', evidence.get('grasp_depth_offset_m', 0.)),
+                            grasp_depth_attempts=resolved.get(
+                                'grasp_depth_attempts', evidence.get('grasp_depth_attempts', [])),
+                            selected_yaw_offset_rad=selected.get(
+                                'yaw_offset_rad', evidence.get('selected_yaw_offset_rad', 0.)))
+            if resolved.get('closure_validation') is not None:
+                evidence['grasp_depth_preflight'] = resolved['closure_validation']
+            if resolved.get('grasp_floor_fallback') is not None:
+                evidence['grasp_floor_fallback'] = resolved['grasp_floor_fallback']
+            point = np.asarray(selected['world_from_grasp'])[:3, 3]
+            evidence['target_point_world'] = dict(zip('xyz', map(float, point)))
+            evidence['grasp_point_world'] = evidence['target_point_world'].copy()
+            self.blackboard.remember_visual_grasp(
+                resolved['target_name'], np.asarray(selected['world_from_grasp']), evidence)
+            resolved['visual_estimate'] = evidence
+        elif isinstance(evidence, dict) and selected.get('pose_source') == 'vlm_rgbd_place':
+            evidence = dict(evidence, placement_height_selected=True,
+                            placement_height_offset_m=selected['placement_height_offset_m'],
+                            placement_height_attempts=resolved.get(
+                                'placement_height_attempts', evidence.get('placement_height_attempts', [])))
+            point = np.asarray(selected['world_from_grasp'])[:3, 3]
+            evidence['target_point_world'] = dict(zip('xyz', map(float, point)))
+            self.blackboard.remember_visual_place(
+                resolved['target_name'], np.asarray(selected['world_from_grasp']), evidence)
+            resolved['visual_estimate'] = evidence
+        super().remember_selection(resolved)
+
+    def resolve(self, target_id, resources, state):
+        target = self.visual_targets.get((str(target_id), self.point_type))
+        if target is None:
+            return super().resolve(target_id, resources, state)
+        obj = scene_object_by_id(resources.scene, target_id)
+        name = obj['object_name_in_scene']
+        self.blackboard.observe(state)
+        model_id = model_id_for(obj)
+        self.blackboard.register(obj['object_id_in_scene'], name, model_id)
+        object_pose = self.blackboard.require_pose(name)
+        point_type = target['point_type']
+        grasp = (self.blackboard.grasp_pose(name, 0) if point_type == 'grasp' else None)
+        if grasp is None:
+            if point_type == 'grasp':
+                grasp = self.blackboard.visual_grasp(name)
+            else:
+                previous = self.blackboard.visual_place_evidence(name)
+                # A placement cache is valid only within this put's interaction
+                # cycle. A new put must see the current contents of the container.
+                if (self.place_cycle_id is not None and previous is not None
+                        and previous.get('placement_cycle_id') == self.place_cycle_id):
+                    grasp = self.blackboard.visual_place(name)
+        if grasp is None:
+            frame = self.backend.get_camera_frame(target.get('camera_id', 'global'))
+            place_metadata = self.blackboard.model(self.client, model_id) if point_type == 'place' else None
+            crop_origin = None
+            if point_type == 'place':
+                frame, crop_origin = _target_crop(frame, object_pose, place_metadata)
+                self._placement_contexts[str(target_id)] = {
+                    'cycle_id': self.place_cycle_id, 'frame': frame,
+                    'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
+                    'crop_origin': crop_origin}
+            try:
+                estimate = self.estimator.estimate_frame(frame, point_type=point_type, target=name.lower())
+            except Exception as exc:
+                if point_type != 'place':
+                    raise
+                try:
+                    points = self._center_estimates(target_id)
+                    unavailable_reason = '容器中央附近没有有效深度'
+                except (ValueError, AttributeError, GraspResolutionError) as fallback_exc:
+                    points = []
+                    unavailable_reason = str(fallback_exc)
+                if not points:
+                    error = GraspResolutionError('VLM 放置感知失败，无法获得有效放置点')
+                    error.details = {'error_code': 'PLACEMENT_PERCEPTION_FAILED',
+                        'failed_stage': 'perception', 'error_message': str(error),
+                        'details': {'vlm_error_type': type(exc).__name__, 'center_fallback': {
+                            'used': True, 'trigger': 'vlm_error', 'unavailable_reason': unavailable_reason}}}
+                    raise error from exc
+                estimate = points.pop(0)
+                estimate['placement_center_fallback'].update(trigger='vlm_error', vlm_error_type=type(exc).__name__)
+            estimate = self._restore_crop_pixel(estimate, crop_origin)
+            grasp = np.eye(4)
+            if point_type == 'grasp':
+                grasp[:3, :3], orientation = _downward_grasp_rotation(estimate)
+                estimate.update(orientation)
+            else:
+                # Placement remains vertical; only grasp yaw follows the RGB-D reference axis.
+                grasp[:3, :3] = _DOWNWARD_PLACE_ROTATION
+            surface_point = np.array([estimate['world_point'][axis] for axis in 'xyz'], dtype=float)
+            if point_type == 'grasp':
+                # Cache the surface anchor; depth is selected later by ordered feasibility checks.
+                grasp[:3, 3] = surface_point
+                estimate.update(depth_selected=False, grasp_depth_candidates_m=list(GRASP_DEPTHS_M))
+            else:
+                gripper = state.get('gripper') or {}
+                held_name = gripper.get('object_id')
+                if not gripper.get('holding') or not held_name:
+                    raise GraspResolutionError('VLM placement requires a confirmed held object')
+                # Preserve the exact VLM RGB-D point. Height selection only
+                # adds a world-Z offset; it never reselects a floor pixel.
+                grasp[:3, 3] = surface_point
+                estimate.update(held_object=held_name, placement_height_selected=False,
+                                placement_height_candidates_m=list(PLACEMENT_HEIGHTS_M))
+            estimate['target_point_world'] = {
+                axis: float(grasp[index, 3]) for index, axis in enumerate('xyz')}
+            if point_type == 'grasp':
+                estimate['grasp_point_world'] = estimate['target_point_world'].copy()
+                self.blackboard.remember_visual_grasp(name, grasp, estimate)
+            else:
+                estimate['placement_cycle_id'] = self.place_cycle_id
+                self.blackboard.remember_visual_place(name, grasp, estimate)
+        transform = control_from_grasp_frame(resources)
+        world_from_object = rigid_pose(object_pose['position'], object_pose['quaternion_xyzw'])
+        candidate = {
+            'grasp_index': 0,
+            'world_from_object': world_from_object.tolist(),
+            'world_from_grasp': grasp.tolist(),
+            'world_from_control': (grasp @ np.linalg.inv(transform)).tolist(),
+            'pose_source': 'vlm_rgbd_' + point_type,
+        }
+        if point_type == 'grasp' and self.blackboard.grasp_pose(name, 0) is not None:
+            candidate['pose_source'] = 'blackboard_contact_link'
+        evidence = (self.blackboard.visual_grasp_evidence(name) if point_type == 'grasp'
+                    else self.blackboard.visual_place_evidence(name))
+        if evidence is None:
+            raise GraspResolutionError('Visual grasp estimate was not recorded')
+        candidates = [candidate]
+        pending = (point_type == 'grasp' and not evidence.get('depth_selected')
+                   and candidate['pose_source'] != 'blackboard_contact_link')
+        if pending:
+            candidates = []
+            for depth in GRASP_DEPTHS_M:
+                shifted = grasp.copy()
+                shifted[:3, 3] += depth * shifted[:3, 2]
+                for yaw in ((0., float(np.pi)) if evidence.get('long_axis_aligned') else (0.,)):
+                    pose = shifted.copy()
+                    if yaw:
+                        pose[:3, :2] *= -1
+                    candidates.append({**candidate, 'grasp_depth_offset_m': depth,
+                        'yaw_offset_rad': yaw, 'world_from_grasp': pose.tolist(),
+                        'world_from_control': (pose @ np.linalg.inv(transform)).tolist()})
+        elif point_type == 'grasp':
+            candidate['grasp_depth_offset_m'] = evidence.get('grasp_depth_offset_m', 0.)
+            candidate['yaw_offset_rad'] = evidence.get('selected_yaw_offset_rad', 0.)
+        placement_pending = point_type == 'place' and not evidence.get('placement_height_selected')
+        if placement_pending:
+            candidates = []
+            for height in PLACEMENT_HEIGHTS_M:
+                pose = grasp.copy()
+                pose[2, 3] += height  # World Z, independent of the tool's orientation.
+                candidates.append({**candidate, 'placement_height_offset_m': height,
+                    'world_from_grasp': pose.tolist(),
+                    'world_from_control': (pose @ np.linalg.inv(transform)).tolist()})
+        elif point_type == 'place':
+            candidate['placement_height_offset_m'] = evidence['placement_height_offset_m']
+        return {
+            'target_id': obj['object_id_in_scene'],
+            'target_name': name,
+            'model_id': model_id,
+            'model_name': name,
+            'source_url': None,
+            'control_from_grasp': transform.tolist(),
+            'blackboard_revision': self.blackboard.revision,
+            'candidates': candidates,
+            'depth_search_pending': pending,
+            'placement_height_search_pending': placement_pending,
+            'depth_search_move_defaults': resources.scene.get('move_defaults', {}),
+            'visual_estimate': evidence,
+        }

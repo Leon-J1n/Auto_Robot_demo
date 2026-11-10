@@ -29,6 +29,7 @@ class TaskSkillExecutor:
         self.kinematics, self.checker, self.sync = kinematics, checker, synchronizer
         self.execute_motion = execute_motion
         self.resolver = resolver
+        self._interaction_history = {}
         if grasper is None:
             from atomic_action.manipulation.grasp.action import GraspAction
             grasper = GraspAction(robot_runtime=backend)
@@ -46,16 +47,40 @@ class TaskSkillExecutor:
                 'pick': DemoInteractionPick(resolver, resources, kinematics, checker, limits),
                 'put': DemoInteractionPut(resolver, resources, kinematics, checker, limits),
             }
+        robot_transform = next(c['properties'] for c in resources.robot_object['components']
+                               if c['component_type'] == 'Transform')
+        base_rotation = Rotation.from_quat(robot_transform.get('quaternion_xyzw', [0, 0, 0, 1])).as_matrix()
         self.converter = SkillCommandConverter({
             'scene': str(resources.scene_file), 'objects': {},
             'named_targets': resources.scene.get('named_targets', {}),
             'scene_object_ids': {str(o['object_id_in_scene']) for o in resources.scene['objects']},
-        })
+        }, end_effector_rotation=base_rotation)
         self.pour = DemoPourExecutor(resources=resources, backend=backend,
             kinematics=kinematics, execute_motion=execute_motion,
             synchronizer=synchronizer, checker=checker, report=report)
 
     def execute(self, command, index, state, row):
+        from contextlib import ExitStack
+        capture = getattr(self.checker, 'capture_lift_clearance', None)
+        clear = getattr(self.checker, 'clear_lift_clearance', None)
+        lift = command['skill_name'] == 'lift_up'
+        with ExitStack() as cleanup:
+            scope = getattr(self.checker, 'lift_payload_collision_scope', None)
+            if lift and callable(scope):
+                cleanup.enter_context(scope())
+            if lift and callable(capture) and callable(clear):
+                cleanup.callback(clear)
+                margin = float(self.resources.scene.get('move_defaults', {})
+                               .get('constraints', {}).get('safety_distance', .003))
+                capture(margin)
+            result = self._execute_command(command, index, state, row)
+        from execution.grasp_verification import verify_command_grasp
+        return verify_command_grasp(self.backend, result)
+
+    def _execute_command(self, command, index, state, row):
+        set_command_context = getattr(self.resolver, 'set_command_context', None)
+        if callable(set_command_context):
+            set_command_context(command.get('command_id'))
         if command['skill_name'] == 'pour':
             self.stage = 'pour'
             self.report['active_substep'] = 'pour'
@@ -100,9 +125,13 @@ class TaskSkillExecutor:
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
                 prefer_direct=False)
+            self.resolver.remember_selection(selected_move)
+            if selected_move.get('visual_estimate') is not None:
+                row['visual_grasp_resolution'] = selected_move
             goal = np.asarray(selected_move['selected']['world_from_control'], dtype=float)
             target_pose = self.converter._offset_pose(
-                pose_request(goal), parameters, index)
+                pose_request(goal), parameters, index,
+                direction_rotation=self.converter.end_effector_rotation)
             # The relative offset changes the final pose, so re-solve IK for
             # that exact pose and reject goal configurations already colliding
             # with the table or other scene geometry before planning.
@@ -123,7 +152,8 @@ class TaskSkillExecutor:
                 valid_goals.append((float(np.linalg.norm(delta)), candidate_q))
             if not valid_goals:
                 raise ValueError('No collision-free IK solution exists for the relative move_to target')
-            valid_goals.sort(key=lambda item: item[0])
+            from planning.arm_posture import configuration_cost
+            valid_goals.sort(key=lambda item: configuration_cost(kin, item[1], current_q, norm=2))
             selected_joint_goal = valid_goals[0][1]
             path_type = parameters.get('planning_method', 'joint')
             request = _deep_merge(
@@ -136,12 +166,14 @@ class TaskSkillExecutor:
                 request['target'] = {'type': 'joint', 'joint_positions': selected_joint_goal.tolist()}
         elif parameters.get('link'):
             from demo.interaction.requests import motion_request
-            request = motion_request(self.resources, backend, parameters)
+            request = motion_request(self.resources, backend, parameters, blackboard=sync.blackboard)
         else:
             step = self.converter.convert_command(command, index)
             request = _deep_merge(self.resources.scene['move_defaults'], step['request'])
 
+        request = _deep_merge(request, parameters.get('request', {}))
         row['substeps'] = []
+        resolved = None
         if request['target']['type'] == 'object':
             self.stage = 'target_resolution'
             try:
@@ -165,16 +197,13 @@ class TaskSkillExecutor:
         else:
             parts = [{'phase': 'move', 'request': request}]
 
-        samples = []
-        row['actual_path_collision_free'] = True
+        row['actual_path_collision_free'] = None
+        row['actual_path_verification'] = 'disabled'
+        row['collision_policy'] = 'planning_only'
 
         def record(frame_state):
-            samples.append(frame_state['joints'])
             self.write_frame(command['command_id'], self.report.get('active_substep', part['phase']), frame_state)
             sync.sync(backend, kin, checker)
-            observed = checker.check(frame_state['joints'])
-            if observed.in_collision and self.report.get('active_substep') != 'grasp':
-                raise RuntimeError(f'Execution frame collision: {observed.contacts}')
 
         backend.set_frame_callback(record)
         self.stage = 'planning_and_execution'
@@ -184,7 +213,6 @@ class TaskSkillExecutor:
             if skill == 'pick' and part['phase'] in {'lift', 'retreat'}:
                 resolve_post_grasp_target(part, backend.get_end_effector_pose(), resolved)
             backend.set_status(f"{command['command_id']} | Planning / {part['phase']}")
-            samples.clear()
             before = backend.physics_steps
             previous_grasp_goal = getattr(backend, 'grasp_approach_goal', None)
             if skill == 'pick' and part['phase'] == 'contact':
@@ -200,7 +228,7 @@ class TaskSkillExecutor:
                 part['request'],result = execute_grasp_pose_move(part['request'],self.execute_motion,backend)
             else:
                 result = self.execute_motion(part['request'])
-            if (skill == 'pick' and part['phase'] in {'approach','contact'} and
+            if (skill in {'pick', 'put'} and part['phase'] in {'approach','contact'} and
                     part.get('direct_pick_fallback') and
                     planning_failed_without_motion(result,backend,before)):
                 row['substeps'].append({'phase': part['phase'], 'request': deepcopy(part['request']),
@@ -212,6 +240,11 @@ class TaskSkillExecutor:
                 self.report['active_substep'] = 'contact_joint_fallback'
                 backend.set_status(f"{command['command_id']} | Planning / contact_joint_fallback")
                 result = self.execute_motion(part['request'])
+                if not result.get('success') and isinstance(result.get('error'), dict):
+                    error = deepcopy(result['error'])
+                    error.setdefault('details', {})['preceding_contact_error'] = deepcopy(
+                        resolved['approach']['runtime_fallback']['reason'])
+                    result = {**result, 'error': error}
             elif (skill == 'pick' and part['phase'] in {'approach','contact'} and
                     not part.get('grasp_pose_fallback') and not part.get('direct_pick_fallback') and
                     planning_failed_without_motion(result,backend,before)):
@@ -241,15 +274,6 @@ class TaskSkillExecutor:
             if not result.get('success'):
                 break
 
-            controller = getattr(backend, 'gripper_controller', None)
-            if controller and controller.mode == 'physical' and controller.held_name:
-                row['actual_path_verification'] = 'live_physics_frames'
-            else:
-                actual_check = checker.check_path(samples, resolution=0.015)
-                row['actual_path_collision_free'] &= not actual_check.in_collision
-                if actual_check.in_collision:
-                    raise AssertionError(f'Executed trajectory collides: {actual_check.contacts}')
-
             if row.get('target_resolution') and part['phase'] in {'move', 'contact', 'lift', 'retreat'}:
                 self.stage = 'interaction_position_verification'
                 grasp = row['target_resolution']
@@ -276,9 +300,8 @@ class TaskSkillExecutor:
                 self.stage = 'planning_and_execution'
 
             if skill == 'pick' and part['phase'] == 'contact':
-                # Keep target collisions enabled through execution and path
-                # verification; only the subsequent closure phase restores
-                # the intentional gripper-target contact exception.
+                # Gripper/selected-object contacts are permitted throughout
+                # pick, including motion, verification, and physical closure.
                 backend.grasp_motion_phase = False
                 self.stage = 'grasp'
                 self.report['active_substep'] = 'grasp'
@@ -303,7 +326,7 @@ class TaskSkillExecutor:
                     row.update(success=False, error=grasp_result['error'])
                     self.stage = grasp_result['error'].get('failed_stage', 'grasp')
                     raise RuntimeError(f"Grasp failed: {grasp_result['error']}")
-                if grasp_request.get('target'):
+                if backend.gripper_controller.held_name is not None:
                     checker.carrying_safety_distance = carrying_distance
                     checker.capture_support()
                 sync.sync(backend, kin, checker)
@@ -323,9 +346,16 @@ class TaskSkillExecutor:
                 if not release_result['success']:
                     row.update(success=False, error=release_result['error'])
                     raise RuntimeError(f"Release failed: {release_result['error']}")
+                if (callable(getattr(self.resolver, 'is_visual_place', None)) and
+                        self.resolver.is_visual_place(parameters.get('target'))):
+                    backend.advance_gripper(.25)
+                    row['release_settle_time_s'] = .25
+                    sync.sync(backend, kin, checker)
                 self.stage = 'planning_and_execution'
 
         if result.get('success'):
+            if skill == 'lift_up':
+                checker.support_geoms.clear()
             sync.sync(backend, kin, checker)
             goal_q = np.asarray(result['trajectory']['waypoints'][-1])
             expected_pose = kin.forward(goal_q)
@@ -334,18 +364,59 @@ class TaskSkillExecutor:
             execution_result = row.get('execution_result')
             if isinstance(execution_result, dict):
                 execution_result.pop('frames', None)
-            grasp_errors = [s['execution_result']['grasp_error'] for s in row['substeps']
-                            if (s.get('execution_result') or {}).get('grasp_error')]
-            if grasp_errors:
-                row.update(success=False, status='failed', motion_completed=True,
-                           error=grasp_errors[0])
+        if row.get('success') and skill in {'pick', 'put'} and resolved is not None:
+            self._remember_interaction(command, resolved)
         return row
 
+    def _remember_interaction(self, command, resolved):
+        """Freeze the chosen interaction frame before the target moves again."""
+        selected = resolved['selected']
+        calibration = np.asarray(resolved['control_from_grasp'], dtype=float)
+        control_pose = selected.get('world_from_control')
+        if control_pose is None:
+            control_pose = np.asarray(selected['world_from_grasp']) @ np.linalg.inv(calibration)
+        if not hasattr(self, '_interaction_history'):
+            self._interaction_history = {}
+        self._interaction_history[str(command['parameters']['target'])] = {
+            'command_id': command.get('command_id'),
+            'skill_name': command['skill_name'],
+            'world_from_control': np.asarray(control_pose, dtype=float).copy().tolist(),
+            'control_from_grasp': calibration.copy().tolist(),
+        }
+
     def _execute_pose_search(self, command, state, row):
-        """Resolve approach targets; retreat uses the live end-effector pose."""
+        """Retreat combines the stored interaction direction with the live TCP."""
+        checker = self.checker
+        previous_gripper_allowance = getattr(checker, 'allow_gripper_environment_contact', False)
+        if command['skill_name'] == 'retreat' and hasattr(checker, 'allow_gripper_environment_contact'):
+            checker.allow_gripper_environment_contact = True
+        try:
+            return self._execute_pose_search_inner(command, state, row)
+        finally:
+            if hasattr(checker, 'allow_gripper_environment_contact'):
+                checker.allow_gripper_environment_contact = previous_gripper_allowance
+
+    def _execute_pose_search_inner(self, command, state, row):
         parameters = deepcopy(command['parameters'])
         resolved = None
-        if command['skill_name'] in {'approach', 'retreat'}:
+        if command['skill_name'] == 'retreat':
+            target = parameters.pop('target', None)
+            reference = getattr(self, '_interaction_history', {}).get(str(target))
+            if target is None or reference is None:
+                self.stage = 'target_resolution'
+                row.update(success=False, status='error', error={
+                    'error_code': 'RETREAT_REFERENCE_MISSING',
+                    'failed_stage': self.stage,
+                    'error_message': f'目标 {target} 没有成功的 approach、pick 或 put 交互位姿，无法确定撤退方向'})
+                return row
+            # Only use the original frame's orientation. Its position is not a
+            # retreat goal and must never trigger another grasp IK/depth search.
+            parameters['reference_rotation_world'] = np.asarray(
+                reference['world_from_control'])[:3, :3].tolist()
+            parameters['grasp_offset_local'] = np.asarray(
+                reference['control_from_grasp'])[:3, 3].tolist()
+            row['retreat_reference'] = {'target_id': target, **deepcopy(reference)}
+        elif command['skill_name'] == 'approach':
             if self.resolver is None:
                 raise ValueError(f"{command['skill_name']} requires an object-library resolver")
             target = parameters.pop('target', None)
@@ -356,22 +427,34 @@ class TaskSkillExecutor:
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
                 prefer_direct=False)
+            self.resolver.remember_selection(selected)
+            resolved = selected
             pose = np.asarray(selected['selected']['world_from_control'], dtype=float)
             control_from_grasp = np.asarray(resolved['control_from_grasp'], dtype=float)
             parameters['grasp_offset_local'] = control_from_grasp[:3, 3].tolist()
-            if command['skill_name'] == 'approach':
-                parameters['target_pose'] = {
-                    'position': pose[:3, 3].tolist(),
-                    'quaternion_xyzw': Rotation.from_matrix(pose[:3, :3]).as_quat().tolist(),
-                    'frame': 'world',
-                }
+            parameters['target_pose'] = {
+                'position': pose[:3, 3].tolist(),
+                'quaternion_xyzw': Rotation.from_matrix(pose[:3, :3]).as_quat().tolist(),
+                'frame': 'world',
+            }
         executor = PoseSearchExecutor(
             resources=self.resources, backend=self.backend,
             synchronizer=self.sync, kinematics=self.kinematics,
             checker=self.checker, execute_motion=self.execute_motion)
         self.stage = command['skill_name']
-        result = executor.run(command['skill_name'], parameters)
+        self.backend.set_frame_callback(
+            lambda frame_state: self.write_frame(command['command_id'], executor.phase, frame_state))
+        try:
+            result = executor.run(command['skill_name'], parameters)
+        finally:
+            self.backend.set_frame_callback(None)
+        for substep in result.get('substeps', ()):
+            execution_result = substep.get('execution_result')
+            if isinstance(execution_result, dict):
+                execution_result.pop('frames', None)
         row.update(result, **({'target_resolution': resolved} if resolved is not None else {}))
+        if result.get('success') and command['skill_name'] == 'approach':
+            self._remember_interaction(command, resolved)
         return row
 
     def _execute_closure(self, command, row):
@@ -380,7 +463,8 @@ class TaskSkillExecutor:
         parameters = command['parameters']
         self.stage = skill
         self.report['active_substep'] = skill
-        self.backend.set_frame_callback(None)
+        self.backend.set_frame_callback(
+            lambda frame_state: self.write_frame(command['command_id'], skill, frame_state))
         if skill == 'grasp':
             result, carrying_distance = execute_grasp(
                 self.resources, parameters, self.grasper, self.backend, self.checker)

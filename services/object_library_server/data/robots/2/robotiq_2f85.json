@@ -4,14 +4,17 @@
     "object_id": 2,
     "deformable": false,
     "scalable": false,
-    "interactable": true,
+    "interactable": false,
     "tag": "robotiq,gripper"
   },
   "geometric_properties": {
     "AABB": [
-      0.14843006,
-      0.075,
-      0.16022
+      0.07421503,
+      -0.07421503,
+      0.0375,
+      -0.0375,
+      0.16022,
+      -3e-09
     ]
   },
   "physical_properties": {
@@ -19,7 +22,7 @@
     "friction": {
       "format": "[sliding, torsional, rolling]",
       "values": [
-        1.1,
+        0.7,
         0.01,
         0.001
       ]
@@ -33,5 +36,33 @@
   "grasp_properties": {
     "pose_count": 0,
     "poses": []
+  },
+  "robot_driver": {
+    "properties": {
+      "role": "arm",
+      "joint_sequence": [
+        "robotiq_2f85_right_driver_joint"
+      ],
+      "joint_limits": {
+        "robotiq_2f85_right_driver_joint": [
+          0.0,
+          0.8
+        ]
+      },
+      "initial_joint_positions_rad": {
+        "robotiq_2f85_right_driver_joint": 0.0
+      },
+      "available_connect_joints": [],
+      "available_connect_link": [],
+      "position": [],
+      "quaternion_xyzw": [],
+      "robot_attachment": {
+        "properties": {
+          "child_link": [
+            "robotiq_2f85_mount"
+          ]
+        }
+      }
+    }
   }
 }

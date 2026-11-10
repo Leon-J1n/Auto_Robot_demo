@@ -17,9 +17,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/base_link.obj" />
       </geometry>
-      <material name="base_link_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -39,9 +36,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link1.obj" />
       </geometry>
-      <material name="link1_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -68,9 +62,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link2.obj" />
       </geometry>
-      <material name="link2_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -97,9 +88,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link3.obj" />
       </geometry>
-      <material name="link3_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -126,9 +114,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link4.obj" />
       </geometry>
-      <material name="link4_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -155,9 +140,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link5.obj" />
       </geometry>
-      <material name="link5_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -184,9 +166,6 @@
       <geometry>
         <mesh filename="piper_meshes/visual/link6.obj" />
       </geometry>
-      <material name="link6_color">
-        <color rgba="0.6 0.63 0.68 1" />
-      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />

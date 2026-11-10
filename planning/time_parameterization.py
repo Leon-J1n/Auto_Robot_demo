@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 import numpy as np
 from .errors import PlanningError
+from execution.config import motion_settings
 
 
 def _scaled_joint_limit(config, key, scale_key, dof, *, multiplier_key=None, clip_to_base=False):
@@ -26,7 +27,7 @@ def _scaled_joint_limit(config, key, scale_key, dof, *, multiplier_key=None, cli
 
 def continuous_motion_limits(defaults, dof):
     """Resolve shared joint limits; both global scale factors participate."""
-    constraints = defaults.get('constraints', {})
+    constraints = motion_settings(defaults.get('constraints', {}))
     config = defaults.get('planning', {}).get('time_parameterization', {})
     limits = []
     constrained = dict(config)
@@ -40,13 +41,21 @@ def continuous_motion_limits(defaults, dof):
 def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker=None, timestep=0.002, kinematics=None):
     from control.continuous_trajectory import ContinuousJointPath
     result = dict(trajectory)
-    points = np.asarray(result['waypoints'], dtype=float)
+    circular = move_request.get('motion', {}).get('path_type') == 'circular'
+    points = np.asarray(result.get('cartesian_joint_waypoints', result['waypoints'])
+                        if circular else result['waypoints'], dtype=float)
     if points.ndim != 2 or len(points) < 2 or points.shape[1] == 0 or not np.all(np.isfinite(points)):
         raise ValueError('waypoints must be finite NxDOF, N >= 2')
     velocity, acceleration = continuous_motion_limits(move_request, points.shape[1])
     timing_config = move_request.get('planning', {}).get('time_parameterization', {})
     max_jerk = timing_config.get('max_jerk')
+    local_timing = circular and max_jerk is None
     corner_slowdown = timing_config.get('corner_slowdown', 0.25)
+    def sample(profile):
+        if local_timing:
+            return profile.local_samples(velocity, acceleration, timestep, slowdown=corner_slowdown)
+        return profile.samples(1., 0., None, velocity, acceleration, timestep,
+                               max_jerk=max_jerk, corner_slowdown=corner_slowdown)
     points = points[np.r_[True, np.any(np.diff(points, axis=0) != 0, axis=1)]]
     if len(points) == 1:
         references = np.repeat(points, 2, axis=0)
@@ -55,11 +64,12 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
         profile = None
     else:
         distance = np.max(np.abs(np.diff(points, axis=0)), axis=1)
-        fractions = np.r_[0., np.cumsum(distance)]
+        # Circular IK samples are equally spaced in arc angle. Do not turn
+        # collision-check densification points into extra spline constraints.
+        fractions = np.linspace(0., 1., len(points)) if circular else np.r_[0., np.cumsum(distance)]
         interpolator = timing_config.get('path_interpolator', 'cubic_c2')
         profile = ContinuousJointPath(points, fractions, interpolator=interpolator)
-        references, duration = profile.samples(1., 0., None, velocity, acceleration, timestep,
-                                               max_jerk=max_jerk, corner_slowdown=corner_slowdown)
+        references, duration = sample(profile)
         progress = np.linspace(0, 1, max(len(points)*4, int(np.ceil(profile.max_slope/0.01))+1))
         # One geometrically dense monotone path is enough: check_path's
         # resolution parameter samples each segment between these points, so
@@ -88,9 +98,7 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
             # feasible RRT path; both candidates are checked by FCL.
             if len(points) > 1 and profile.interpolator == 'cubic_c2':
                 fallback = ContinuousJointPath(points, fractions, interpolator='pchip')
-                fallback_refs, fallback_duration = fallback.samples(
-                    1., 0., None, velocity, acceleration, timestep,
-                    max_jerk=max_jerk, corner_slowdown=corner_slowdown)
+                fallback_refs, fallback_duration = sample(fallback)
                 fallback_progress = np.linspace(
                     0, 1, max(len(points)*4, int(np.ceil(fallback.max_slope/0.01))+1))
                 fallback_validation = fallback.spline(fallback_progress)
@@ -108,7 +116,28 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
             else:
                 raise PlanningError('Continuous trajectory failed collision validation', code='TRAJECTORY_INVALID',
                     recoverable=True, details={'stage': 'execution_preparation', 'contacts': list(checked.contacts)})
-    result.update(geometric_waypoints=result['waypoints'], time_parameterized_waypoints=references.tolist(),
+    if circular and kinematics is not None and profile is not None:
+        arc = result.get('diagnostics', {})
+        center, axis, angle = (np.asarray(arc['center']), np.asarray(arc['axis']), float(arc['angle']))
+        from scipy.spatial.transform import Rotation
+        start = kinematics.forward(points[0])
+        max_position_error = max_orientation_error = 0.0
+        # Validate the final interpolator, including a possible collision fallback.
+        for s in np.unique(np.r_[np.linspace(0, 1, max(501, len(points)*16)), profile.spline.x]):
+            pose = kinematics.forward(profile.spline(s))
+            rotation = Rotation.from_rotvec(axis * angle * s).as_matrix()
+            desired = center + rotation @ (np.asarray(start['position']) - center)
+            desired_rotation = (start['rotation_matrix'] if move_request.get('constraints', {}).get('keep_end_effector_orientation')
+                                else rotation @ start['rotation_matrix'])
+            max_position_error = max(max_position_error, float(np.linalg.norm(pose['position'] - desired)))
+            max_orientation_error = max(max_orientation_error, float(Rotation.from_matrix(desired_rotation.T @ pose['rotation_matrix']).magnitude()))
+        if max_position_error > 0.005 or max_orientation_error > 0.02:
+            raise PlanningError('Smoothed trajectory exceeds circular path tolerance', code='TRAJECTORY_INVALID',
+                                recoverable=True, details={'position_error_m': max_position_error,
+                                                          'orientation_error_rad': max_orientation_error})
+        result.setdefault('diagnostics', {})['circular_path_validation'] = {
+            'max_position_error_m': max_position_error, 'max_orientation_error_rad': max_orientation_error}
+    result.update(geometric_waypoints=points.tolist(), time_parameterized_waypoints=references.tolist(),
                   timestamps=np.linspace(0, duration, len(references)).tolist(), duration=float(duration))
     result.pop('velocities', None)
     result.pop('accelerations', None)
@@ -119,8 +148,21 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
         'corner_slowdown': corner_slowdown,
         'max_acceleration': acceleration.tolist(), 'max_jerk': max_jerk,
         'acceleration_limited': True, 'jerk_limited': max_jerk is not None,
+        'time_law': 'local_acceleration_bounds' if local_timing else 'global_quintic',
         'limit_source': move_request.get('planning', {}).get('time_parameterization', {}).get('limit_source'),
     }
+    if local_timing:
+        sample_dt = duration / (len(references) - 1)
+        peak_velocity = np.max(np.abs(np.diff(references, axis=0) / sample_dt), axis=0)
+        peak_acceleration = (np.max(np.abs(np.diff(references, n=2, axis=0) / sample_dt**2), axis=0)
+                             if len(references) > 2 else np.zeros(points.shape[1]))
+        if np.any(peak_velocity > velocity * (1 + 1e-6)) or np.any(peak_acceleration > acceleration * (1 + 1e-6)):
+            raise PlanningError('Locally timed references exceed joint limits', code='TRAJECTORY_INVALID',
+                                recoverable=True, details={'stage': 'execution_preparation'})
+        result['diagnostics']['time_parameterization'].update(
+            geometric_waypoint_count=len(points), input_waypoint_count=len(trajectory['waypoints']),
+            sampled_peak_velocity_rad_s=peak_velocity.tolist(),
+            sampled_peak_acceleration_rad_s2=peak_acceleration.tolist())
     return result
 
 
@@ -136,7 +178,7 @@ def prepare_interpolated_trajectory(trajectory: Mapping[str, Any], move_request:
         raise ValueError('waypoints must be finite with shape (N, DOF), N >= 2')
     constraints = move_request.get('constraints', {})
     config = move_request.get('planning', {}).get('time_parameterization', {})
-    scale = float(constraints.get('velocity_scale', 1.0))
+    scale = float(motion_settings(constraints)['velocity_scale'])
     limits = np.asarray(config.get('max_velocity', np.ones(points.shape[1])), dtype=float)
     if (not np.isfinite(scale) or scale <= 0 or limits.shape != (points.shape[1],)
             or not np.all(np.isfinite(limits)) or np.any(limits <= 0)):
@@ -182,8 +224,9 @@ def parameterize_trajectory(trajectory: Mapping[str, Any], move_request: Mapping
     config = move_request.get("planning", {}).get("time_parameterization", {})
     base_velocity = np.asarray(config.get("max_velocity", np.ones(points.shape[1])), dtype=float)
     base_acceleration = np.asarray(config.get("max_acceleration", np.ones(points.shape[1])), dtype=float)
-    velocity_scale = float(constraints.get("velocity_scale", 1.0))
-    acceleration_scale = float(constraints.get("acceleration_scale", 1.0))
+    scales = motion_settings(constraints)
+    velocity_scale = float(scales['velocity_scale'])
+    acceleration_scale = float(scales['acceleration_scale'])
     if (base_velocity.shape != (points.shape[1],) or base_acceleration.shape != (points.shape[1],)
             or not np.all(np.isfinite(base_velocity)) or not np.all(np.isfinite(base_acceleration))
             or np.any(base_velocity <= 0)

@@ -4,15 +4,11 @@
     "object_id": 13,
     "deformable": false,
     "scalable": false,
-    "interactable": true,
-    "tag": "pr2 mobile dual arm"
+    "interactable": false,
+    "tag": "pr2,mobile,dual,arm"
   },
   "geometric_properties": {
-    "AABB": [
-      0.95,
-      0.8,
-      1.65
-    ]
+    "AABB": [0.970504400, -0.342938308, 0.333375006, -0.333375006, 1.327124998, -0.005000000]
   },
   "physical_properties": {
     "mass_kg": 170.0,
@@ -33,5 +29,150 @@
   "grasp_properties": {
     "pose_count": 0,
     "poses": []
+  },
+  "arm_configuration": "piper",
+  "scene_one_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.0,
+        -0.433333333333,
+        -1.0
+      ],
+      "has_pedestal": false
+    }
+  ],
+  "robot_driver": {
+    "properties": {
+      "role": "arm",
+      "joint_sequence": [
+        "l_shoulder_pan_joint",
+        "l_shoulder_lift_joint",
+        "l_upper_arm_roll_joint",
+        "l_forearm_roll_joint",
+        "l_elbow_flex_joint",
+        "l_wrist_flex_joint",
+        "l_wrist_roll_joint",
+        "r_shoulder_pan_joint",
+        "r_shoulder_lift_joint",
+        "r_upper_arm_roll_joint",
+        "r_forearm_roll_joint",
+        "r_elbow_flex_joint",
+        "r_wrist_flex_joint",
+        "r_wrist_roll_joint"
+      ],
+      "joint_limits": {
+        "l_shoulder_pan_joint": [
+          -0.714601836603,
+          2.2853981634
+        ],
+        "l_shoulder_lift_joint": [
+          -0.5236,
+          1.3963
+        ],
+        "l_upper_arm_roll_joint": [
+          -0.8,
+          3.9
+        ],
+        "l_forearm_roll_joint": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "l_elbow_flex_joint": [
+          -2.3213,
+          0.0
+        ],
+        "l_wrist_flex_joint": [
+          -2.18,
+          0.0
+        ],
+        "l_wrist_roll_joint": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "r_shoulder_pan_joint": [
+          -2.2853981634,
+          0.714601836603
+        ],
+        "r_shoulder_lift_joint": [
+          -0.5236,
+          1.3963
+        ],
+        "r_upper_arm_roll_joint": [
+          -3.9,
+          0.8
+        ],
+        "r_forearm_roll_joint": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "r_elbow_flex_joint": [
+          -2.3213,
+          0.0
+        ],
+        "r_wrist_flex_joint": [
+          -2.18,
+          0.0
+        ],
+        "r_wrist_roll_joint": [
+          -3.141592653589793,
+          3.141592653589793
+        ]
+      },
+      "initial_joint_positions_rad": {
+        "l_shoulder_pan_joint": 0.0,
+        "l_shoulder_lift_joint": 0.0,
+        "l_upper_arm_roll_joint": 0.0,
+        "l_forearm_roll_joint": 0.0,
+        "l_elbow_flex_joint": 0.0,
+        "l_wrist_flex_joint": 0.0,
+        "l_wrist_roll_joint": 0.0,
+        "r_shoulder_pan_joint": 0.0,
+        "r_shoulder_lift_joint": 0.0,
+        "r_upper_arm_roll_joint": 0.0,
+        "r_forearm_roll_joint": 0.0,
+        "r_elbow_flex_joint": 0.0,
+        "r_wrist_flex_joint": 0.0,
+        "r_wrist_roll_joint": 0.0
+      },
+      "available_connect_joints": [
+        "l_wrist_roll_joint",
+        "r_wrist_roll_joint"
+      ],
+      "available_connect_link": [
+        "l_wrist_roll_link",
+        "r_wrist_roll_link"
+      ],
+      "position": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quaternion_xyzw": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
   }
 }

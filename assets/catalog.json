@@ -87,6 +87,76 @@
         }
       },
       "runtime_config": "../demo/config/scene.004.runtime.json"
+    },
+    "3": {
+      "version": 3,
+      "path": "scenes/3/ur5_table_sorting.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "1": {
+      "version": 3,
+      "path": "scenes/1/ur5_table_empty.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "2": {
+      "version": 3,
+      "path": "scenes/2/ur5_table_apple.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "4": {
+      "version": 3,
+      "path": "scenes/4/ur5_table_cabinet.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "5": {
+      "version": 3,
+      "path": "scenes/5/cobotmagic_table_grasp.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "6": {
+      "version": 3,
+      "path": "scenes/6/piper_table_twist.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
+    },
+    "7": {
+      "version": 3,
+      "path": "scenes/7/ur5_table_push_pull.json",
+      "backend_resources": {
+        "mujoco": {
+          "format": "generate_from_scene",
+          "options": {}
+        }
+      }
     }
   }
 }

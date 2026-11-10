@@ -107,12 +107,20 @@ class DemoInteractionMove:
         base['target'] = pose_request(np.asarray(resolved['candidates'][0]['world_from_control']))
         base = validate_move_request(base)
         validator = None
-        if closure_request is not None:
-            from demo.interaction.closure_validation import validate_closure
-            validator = lambda q, candidate: validate_closure(self.checker, q, resolved['target_name'], closure_request)
+        if closure_request is not None and not resolved.get('depth_search_pending'):
+            # A pending VLM depth search performs this static check itself.
+            from demo.interaction.table_clearance import table_floor, validate_grasp_geometry
+            def validator(q, candidate):
+                point = np.asarray(candidate['world_from_grasp'])[:3, 3]
+                floor = table_floor(self.checker.backend, point)
+                return validate_grasp_geometry(self.checker, q, floor,
+                    safety_distance=base['constraints']['safety_distance'])
         resolved = self.resolver.select(resolved, self.kinematics, self.checker, state['joints'],
             safety_distance=base['constraints']['safety_distance'], grasp_index=target.get('grasp_index'),
             prefer_direct=prefer_direct, candidate_validator=validator)
+        remember = getattr(self.resolver, 'remember_selection', None)
+        if remember is not None:
+            remember(resolved)
         goal = np.asarray(resolved['selected']['world_from_control'])
         world_grasp = np.asarray(resolved['selected']['world_from_grasp'])
         base['target'] = pose_request(goal)

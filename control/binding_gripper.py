@@ -1,4 +1,4 @@
-"""Measured bilateral grasp confirmation with binding or friction-only holding."""
+"""Measured physical grasp confirmation for the articulated gripper."""
 from collections import deque
 
 import mujoco
@@ -9,7 +9,6 @@ from scipy.spatial.transform import Rotation
 class BindingGripperController:
     maximum_width = .085
     maximum_force = 40.
-    supported_grasp_modes = {'binding', 'physical'}
 
     def __init__(self, runtime):
         self.runtime, self.model, self.data = runtime, runtime.model, runtime.data
@@ -22,20 +21,19 @@ class BindingGripperController:
             body = self._id(mujoco.mjtObj.mjOBJ_BODY, f'robotiq_2f85_{side}_pad')
             self.pad_geoms[side] = {g for g in range(self.model.ngeom) if self.model.geom_bodyid[g] == body
                                     and (self.model.geom_contype[g] or self.model.geom_conaffinity[g])}
-        self.target_name = self.held_name = None
-        self.weld_id = None
+        self.held_name = None
         self.relative_pose = None
         self.confirmed = False
         self.evidence = {}
         self._holding = False
-        self.mode = 'binding'
+        self.mode = 'physical'
         self.hold_force_target = None
         self.filtered_hold_force = None
 
     def _id(self, kind, name):
         value = mujoco.mj_name2id(self.model, kind, name)
         if value < 0:
-            raise NotImplementedError(f'Binding grasp requires the articulated gripper backend: missing {name}')
+            raise NotImplementedError(f'Physical grasp requires the articulated gripper backend: missing {name}')
         return value
 
     @property
@@ -56,24 +54,41 @@ class BindingGripperController:
         t[:3, 3] = base_rotation.T @ (self.data.xpos[body] - self.data.xpos[self.base_id])
         return t
 
-    def _forces(self, body):
-        forces = {'left': 0., 'right': 0.}
+    def _movable_body(self, body):
+        if self.model.body_jntnum[body] != 1:
+            return False
+        joint = int(self.model.body_jntadr[body])
+        return self.model.jnt_type[joint] in (mujoco.mjtJoint.mjJNT_FREE,
+                                               mujoco.mjtJoint.mjJNT_HINGE,
+                                               mujoco.mjtJoint.mjJNT_SLIDE)
+
+    def _contact_forces(self):
+        forces = {}
         for i in range(self.data.ncon):
             c = self.data.contact[i]
             for pad, other in ((int(c.geom1), int(c.geom2)), (int(c.geom2), int(c.geom1))):
-                if int(self.model.geom_bodyid[other]) != body:
-                    continue
                 for side, geoms in self.pad_geoms.items():
                     if pad in geoms:
+                        body = int(self.model.geom_bodyid[other])
+                        ancestor = body
+                        while ancestor and ancestor != self.base_id:
+                            ancestor = int(self.model.body_parentid[ancestor])
+                        if ancestor == self.base_id:
+                            # Internal finger contacts are not object contact force.
+                            continue
+                        body_forces = forces.setdefault(body, {'left': 0., 'right': 0.})
                         wrench = np.zeros(6)
                         mujoco.mj_contactForce(self.model, self.data, i, wrench)
-                        forces[side] += max(0., float(wrench[0]))
+                        body_forces[side] += max(0., float(wrench[0]))
         return forces
+
+    def _forces(self, body):
+        return self._contact_forces().get(int(body), {'left': 0., 'right': 0.})
 
     def open(self, width, *, speed=.5, timeout=5.):
         self.detach()
         self.confirmed = False
-        self.runtime.contact_target = self.target_name
+        self.runtime.contact_target = None
         start = float(self.data.time)
         goal = float(np.clip(.8 * (1 - width / self.maximum_width), 0, .8))
         try:
@@ -87,31 +102,51 @@ class BindingGripperController:
         finally:
             self.runtime.contact_target = None
 
-    def close(self, width, *, speed=.5, force=20., timeout=5., target_object_id=None,
-              mode='binding', confirmation_time=.1, contact_threshold=2.,
+    def close(self, width, *, speed=.5, force=20., timeout=5.,
+              confirmation_time=.1, contact_threshold=2.,
               width_stability_tolerance=.0005, position_stability_tolerance=.001,
               orientation_stability_tolerance=.035, maximum_force=40.):
-        if mode not in self.supported_grasp_modes:
-            raise NotImplementedError(f'Unsupported grasp mode: {mode}')
         if self.held_name is not None:
             raise ValueError('Release the held object before acquiring another grasp')
-        if target_object_id is None:
-            return self.close_untracked(width, speed=speed, force=force, timeout=timeout)
-        body = self.validate_target(target_object_id, mode=mode)
-        self.target_name, self.confirmed = target_object_id, False
-        self.mode = mode
-        self.runtime.contact_target = target_object_id
+        self.confirmed = False
+        self.evidence = {}
+        self.mode = 'physical'
+        self.runtime.contact_target = None
         self.model.actuator_forcerange[self.actuator_id] = [-force * .04, force * .04]
         start = float(self.data.time)
         window = deque()
+        empty_closed_since = None
+        no_contact_threshold = .1  # N; ignore numerical contact-force noise.
         goal = float(np.clip(.8 * (1 - width / self.maximum_width), 0, .8))
         try:
             while self.data.time - start < timeout:
                 self.data.ctrl[self.actuator_id] = min(goal, self.data.ctrl[self.actuator_id] + .8 * speed * .01)
                 self.runtime.advance_gripper(.01)
-                forces = self._forces(body)
-                current_width, pose = self.width, self._relative(body)
-                valid = min(forces.values()) >= contact_threshold and current_width > .002
+                contacts = self._contact_forces()
+                measured = {side: sum(f[side] for f in contacts.values())
+                            for side in ('left', 'right')}
+                current_width = self.width
+                command_reached = abs(self.data.ctrl[self.actuator_id] - goal) < 1e-8
+                driver_reached = abs(self.data.qpos[self.driver_address] - goal) < .005
+                # Articulated fingers may meet their physical closed stop before
+                # the approximate width-to-driver mapping reaches its angle.
+                # Use measured pad separation too, so an empty closed gripper
+                # does not wait for an unreachable driver position until timeout.
+                width_reached = current_width <= max(0., float(width)) + width_stability_tolerance
+                closure_completed = command_reached and (driver_reached or width_reached)
+                no_contact = sum(measured.values()) <= no_contact_threshold
+                if closure_completed and no_contact:
+                    if empty_closed_since is None:
+                        empty_closed_since = float(self.data.time)
+                else:
+                    empty_closed_since = None
+                empty_closed_s = (float(self.data.time - empty_closed_since)
+                                  if empty_closed_since is not None else 0.)
+                candidates = [(sum(f.values()), body, f) for body, f in contacts.items()
+                              if min(f.values()) >= contact_threshold and self._movable_body(body)]
+                _, body, forces = max(candidates, default=(0., None, {'left': 0., 'right': 0.}))
+                valid = body is not None and current_width > .002
+                pose = self._relative(body) if valid else None
                 total_force = sum(forces.values())
                 if total_force > maximum_force:
                     valid = False
@@ -121,25 +156,42 @@ class BindingGripperController:
                 if not valid:
                     window.clear()
                 else:
-                    window.append((float(self.data.time), current_width, pose))
+                    window.append((float(self.data.time), current_width, pose, body))
                     while len(window) > 1 and self.data.time - window[1][0] >= confirmation_time:
                         window.popleft()
                 stable_s = float(self.data.time - window[0][0]) if window else 0.
                 width_range = float(np.ptp([v[1] for v in window])) if window else 0.
-                position_range = max((float(np.linalg.norm(v[2][:3, 3] - pose[:3, 3])) for v in window), default=0.)
-                rotation_range = max((float(Rotation.from_matrix(v[2][:3, :3].T @ pose[:3, :3]).magnitude()) for v in window), default=0.)
-                stable = width_range <= width_stability_tolerance and position_range <= position_stability_tolerance and rotation_range <= orientation_stability_tolerance
+                position_range = max((float(np.linalg.norm(v[2][:3, 3] - pose[:3, 3])) for v in window), default=0.) if valid else 0.
+                rotation_range = max((float(Rotation.from_matrix(v[2][:3, :3].T @ pose[:3, :3]).magnitude()) for v in window), default=0.) if valid else 0.
+                same_body = bool(window) and all(v[3] == body for v in window)
+                stable = same_body and width_range <= width_stability_tolerance and position_range <= position_stability_tolerance and rotation_range <= orientation_stability_tolerance
                 self.evidence = {'left_force_n': forces['left'], 'right_force_n': forces['right'],
+                    'measured_left_force_n': measured['left'], 'measured_right_force_n': measured['right'],
+                    'closure_completed': closure_completed, 'no_contact_time_s': empty_closed_s,
+                    'command_reached': command_reached, 'driver_reached': driver_reached,
+                    'width_reached': width_reached, 'measured_width_m': current_width,
+                    'requested_width_m': float(width),
+                    'no_contact_threshold_n': no_contact_threshold,
                     'stable_time_s': stable_s, 'width_range_m': width_range, 'position_range_m': position_range,
                     'orientation_range_rad': rotation_range, 'bilateral_contact': valid,
                     'confirmed': valid and stable and stable_s + 1e-9 >= confirmation_time,
-                    'reason': reason, 'mode': mode}
+                    'reason': reason, 'mode': 'physical'}
                 if self.evidence['confirmed']:
                     self.confirmed = True
+                    self.held_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body)
+                    self.relative_pose = pose.copy()
+                    self._holding = True
                     self.evidence['reason'] = 'stable_bilateral_grasp'
                     break
                 if total_force > maximum_force:
                     break
+                if empty_closed_since is not None and empty_closed_s + 1e-9 >= confirmation_time:
+                    self.evidence['reason'] = 'no_contact_force'
+                    break
+            else:
+                if self.evidence and sum((self.evidence['measured_left_force_n'],
+                                          self.evidence['measured_right_force_n'])) <= no_contact_threshold:
+                    self.evidence['reason'] = 'closure_timeout_no_contact_force'
             # Stop further squeezing while retaining the force just established.
             self.data.ctrl[self.actuator_id] = min(self.data.ctrl[self.actuator_id], goal)
             return {'contact_detected': self.confirmed, 'final_width': self.width, 'evidence': dict(self.evidence)}
@@ -148,84 +200,24 @@ class BindingGripperController:
             if not self.confirmed:
                 self.data.ctrl[self.actuator_id] = float(self.data.qpos[self.driver_address])
 
-    def close_untracked(self, width, *, speed=.5, force=20., timeout=5.):
-        """Close the fingers without resolving or retaining a target body."""
-        self.mode = 'physical'
-        self.target_name = None
-        self.confirmed = False
-        self.runtime.contact_target = None
-        self.model.actuator_forcerange[self.actuator_id] = [-force * .04, force * .04]
-        start = float(self.data.time)
-        goal = float(np.clip(.8 * (1 - width / self.maximum_width), 0, .8))
-        try:
-            while self.data.time - start < timeout:
-                self.data.ctrl[self.actuator_id] = min(goal, self.data.ctrl[self.actuator_id] + .8 * speed * .01)
-                self.runtime.advance_gripper(.01)
-                if abs(self.data.qpos[self.driver_address] - goal) < .005 and abs(self.data.ctrl[self.actuator_id] - goal) < 1e-8:
-                    break
-            self.data.ctrl[self.actuator_id] = min(self.data.ctrl[self.actuator_id], goal)
-            self.evidence = {'mode': 'physical', 'confirmed': False,
-                             'reason': 'direct_close_without_target'}
-            return {'contact_detected': False, 'final_width': self.width,
-                    'evidence': dict(self.evidence)}
-        finally:
-            self.runtime.contact_target = None
-
-    def bind(self, target):
-        if not self.confirmed or target != self.target_name:
-            raise ValueError('Binding requires a confirmed grasp of this target')
-        body = self._id(mujoco.mjtObj.mjOBJ_BODY, target)
-        self.weld_id = self._id(mujoco.mjtObj.mjOBJ_EQUALITY, 'grasp_weld_' + target)
-        relative = self._relative(body)
-        # MuJoCo weld data: anchor(3), relative position(3), relative quaternion(4), torque scale.
-        self.model.eq_data[self.weld_id, :3] = 0
-        self.model.eq_data[self.weld_id, 3:6] = relative[:3, 3]
-        self.model.eq_data[self.weld_id, 6:10] = Rotation.from_matrix(relative[:3, :3]).as_quat()[[3, 0, 1, 2]]
-        self.data.eq_active[self.weld_id] = True
-        self.relative_pose, self.held_name = relative.copy(), target
-        self._holding = True
-        self.confirmed = False
-        mujoco.mj_forward(self.model, self.data)
-
-    def validate_target(self, target, *, mode=None):
-        body = self._id(mujoco.mjtObj.mjOBJ_BODY, target)
-        if mode == 'binding':
-            self._id(mujoco.mjtObj.mjOBJ_EQUALITY, 'grasp_weld_' + target)
-        j = int(self.model.body_jntadr[body])
-        if self.model.body_jntnum[body] != 1 or self.model.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE, mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE):
-            raise ValueError('Grasp requires one free, hinge or slide joint on the target body')
-        return body
-
-    def retain_physical(self, target):
-        """Track a confirmed payload without changing constraints or object state."""
-        if self.mode != 'physical' or not self.confirmed or target != self.target_name:
-            raise ValueError('Physical holding requires a confirmed grasp of this target')
-        body = self.validate_target(target)
-        self.relative_pose, self.held_name = self._relative(body).copy(), target
-        self._holding, self.confirmed = True, False
-
     def detach(self):
         self.hold_force_target = None
         self.filtered_hold_force = None
-        if self.weld_id is not None:
-            self.data.eq_active[self.weld_id] = False
-        self.held_name = self.weld_id = self.relative_pose = None
+        self.held_name = self.relative_pose = None
         self._holding = False
         self.confirmed = False
 
     def hold(self, force):
-        if self.mode == 'physical':
-            if not np.isfinite(force) or not 0 < force <= self.maximum_force:
-                raise ValueError('Physical hold force must be in (0, 40] N')
-            self.hold_force_target = float(force)
-            self.filtered_hold_force = None
-            # Independent actuator protection, not a conversion from contact force.
-            self.model.actuator_forcerange[self.actuator_id] = [-2., 2.]
+        if not np.isfinite(force) or not 0 < force <= self.maximum_force:
+            raise ValueError('Physical hold force must be in (0, 40] N')
+        self.hold_force_target = float(force)
+        self.filtered_hold_force = None
+        self.model.actuator_forcerange[self.actuator_id] = [-2., 2.]
         self._holding = True
 
     def update_hold_force(self):
         """Regulate total pad normal force before each physics step."""
-        if self.mode != 'physical' or not self._holding or not self.held_name or self.hold_force_target is None:
+        if not self._holding or not self.held_name or self.hold_force_target is None:
             return
         body = self._id(mujoco.mjtObj.mjOBJ_BODY, self.held_name)
         forces = self._forces(body)
@@ -247,24 +239,21 @@ class BindingGripperController:
         lo, hi = self.model.actuator_ctrlrange[self.actuator_id]
         self.data.ctrl[self.actuator_id] = np.clip(current + delta, max(lo, joint - .2), min(hi, joint + .2))
 
-    def get_state(self, target_object_id=None):
-        body = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, target_object_id or '')
-        forces = self._forces(body) if body >= 0 else {'left': 0., 'right': 0.}
-        tracked = self.held_name is not None and target_object_id == self.held_name
-        bound = tracked and self.weld_id is not None and bool(self.data.eq_active[self.weld_id])
-        physical = tracked and self.mode == 'physical'
+    def get_state(self):
+        tracked = self.held_name is not None
+        body = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, self.held_name or '')
+        forces = self._forces(body) if body >= 0 and tracked else {'left': 0., 'right': 0.}
         bilateral = min(forces.values()) > 0.1
         position_error = orientation_error = 0.
         if tracked:
             actual = self._relative(body)
             position_error = float(np.linalg.norm(actual[:3, 3] - self.relative_pose[:3, 3]))
             orientation_error = float(Rotation.from_matrix(actual[:3, :3].T @ self.relative_pose[:3, :3]).magnitude())
-        confirmed = self.confirmed and target_object_id == self.target_name
-        contact_lost = physical and max(forces.values()) <= .1
+        contact_lost = tracked and not bilateral
         return {'known': True, 'initialized': True, 'width': self.width, 'force': sum(forces.values()),
-            'contact_detected': confirmed or bound or (physical and bilateral), 'object_present': confirmed or bound or (physical and bilateral),
-            'holding': (bound or (physical and bilateral)) and self._holding, 'bound': bound, 'mode': self.mode,
-            'slip_detected': contact_lost if physical else bound and (position_error > .002 or orientation_error > .035),
+            'contact_detected': tracked and bilateral, 'object_present': tracked and bilateral,
+            'holding': tracked and bilateral and self._holding, 'mode': 'physical',
+            'slip_detected': contact_lost,
             'bilateral_contact': bilateral, 'contact_lost': contact_lost,
             'left_force_n': forces['left'], 'right_force_n': forces['right'],
             'hold_force_target_n': self.hold_force_target,
@@ -272,5 +261,4 @@ class BindingGripperController:
             'hold_force_torque_saturated': bool(self.hold_force_target is not None and
                 abs(self.data.actuator_force[self.actuator_id]) >= 1.99),
             'relative_position_error_m': position_error, 'relative_orientation_error_rad': orientation_error,
-            'binding_position_error_m': position_error, 'binding_orientation_error_rad': orientation_error,
             'confirmation': dict(self.evidence)}

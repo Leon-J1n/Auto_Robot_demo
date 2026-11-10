@@ -59,6 +59,7 @@ class SkillCommandConverter:
         *,
         collision_checker: Callable[[Mapping[str, Any], Mapping[str, Any], str], bool] | None = None,
         pose_provider: PoseProvider | None = None,
+        end_effector_rotation: Sequence[Sequence[float]] | None = None,
     ) -> None:
         self.registry = deepcopy(dict(registry))
         self.objects = self.registry.get("objects")
@@ -70,6 +71,7 @@ class SkillCommandConverter:
         self._last_pose: dict[str, Any] | None = None
         self.collision_checker = collision_checker
         self.pose_provider = pose_provider
+        self.end_effector_rotation = end_effector_rotation
 
     @classmethod
     def from_file(
@@ -482,16 +484,21 @@ class SkillCommandConverter:
             raise CommandConversionError(
                 f"move command {index} targets the end effector before any pose target is known"
             )
-        return self._offset_pose(deepcopy(self._last_pose), parameters, index)
+        return self._offset_pose(deepcopy(self._last_pose), parameters, index,
+                                 direction_rotation=self.end_effector_rotation)
 
     def _offset_pose(
-        self, pose: Mapping[str, Any], parameters: Mapping[str, Any], index: int
+        self, pose: Mapping[str, Any], parameters: Mapping[str, Any], index: int,
+        *, direction_rotation: Sequence[Sequence[float]] | None = None,
     ) -> dict[str, Any]:
-        """Apply a world-frame relative relation to any resolved pose target."""
+        """Apply a relative relation in the requested direction frame."""
         relation = str(parameters.get("relation", "at"))
         direction = END_EFFECTOR_DIRECTIONS.get(relation)
         if direction is None:
             raise CommandConversionError(f"move command {index} has unknown relation {relation!r}")
+        if direction_rotation is not None and relation in {'front', 'behind', 'left', 'right'}:
+            direction = [sum(row[axis] * direction[axis] for axis in range(3))
+                         for row in direction_rotation]
         try:
             distance = float(parameters.get("distance_m", 0.0))
         except (TypeError, ValueError):

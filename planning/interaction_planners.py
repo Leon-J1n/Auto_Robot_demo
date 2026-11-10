@@ -13,7 +13,8 @@ import numpy as np
 from kinematics import IKError
 from planning.direct_planner import DirectPlanner
 from planning.errors import PlanningError
-from skills.motion.move.strategies import LinearMove
+from planning.arm_posture import configuration_cost
+from atomic_action.motion.common.strategies import LinearMove
 
 
 def search_distances(params, *, minimum=0.03, maximum=0.10, step=0.005, label="pose"):
@@ -88,7 +89,7 @@ class PickContactPlanner:
             except IKError as exc:
                 rejected.append({"distance_m": distance, "category": "prepoint_ik", "reason": str(exc)})
                 continue
-            for q in sorted(solutions.solutions, key=lambda value: np.linalg.norm(value - state["joints"])):
+            for q in sorted(solutions.solutions, key=lambda value: configuration_cost(self.kinematics, value, state['joints'], norm=2)):
                 hit = self.collision_checker.check(q, safety_distance=base_request["constraints"]["safety_distance"])
                 if hit.in_collision:
                     rejected.append({"distance_m": distance, "category": "prepoint_collision", "contacts": hit.contacts})

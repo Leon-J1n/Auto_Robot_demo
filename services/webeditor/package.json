@@ -1,0 +1,23 @@
+{
+  "name": "robot-sim-web-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config editor/vite.config.ts",
+    "build": "tsc -p editor/tsconfig.json && vite build --config editor/vite.config.ts",
+    "test": "vitest run --config editor/vitest.config.ts",
+    "gateway": "python local_gateway.py"
+  },
+  "dependencies": {
+    "lucide": "^0.468.0",
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/three": "^0.171.0",
+    "happy-dom": "^20.14.6",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}

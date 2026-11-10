@@ -12,9 +12,9 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0,
-              -1,
-              2
+              -2.1,
+              -1.0,
+              2.0
             ],
             "quaternion_xyzw": [
               0,
@@ -34,7 +34,7 @@
           "component_type": "Light",
           "properties": {
             "type": "Ambient",
-            "intensity": 0.5,
+            "intensity": 3.0,
             "color": "#FFFFFF"
           }
         }
@@ -48,8 +48,8 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.525,
-              0,
+              0.0,
+              0.0,
               3.0
             ],
             "quaternion_xyzw": [
@@ -70,7 +70,7 @@
           "component_type": "Light",
           "properties": {
             "type": "Directional",
-            "intensity": 0.7,
+            "intensity": 3.0,
             "color": "#FFFFFF"
           }
         }
@@ -84,15 +84,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.525,
-              0,
-              0
+              0.0,
+              0.0,
+              0.0
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.0,
+              1.0
             ],
             "scale": [
               1,
@@ -114,11 +114,31 @@
           "properties": {}
         },
         {
+          "component_type": "RobotDriver",
+          "properties": {
+            "role": "passive",
+            "joint_sequence": [],
+            "joint_limits": {}
+          }
+        },
+        {
           "component_type": "Semantic",
           "properties": {
             "semantic_name": "work_table",
             "category": "surface",
             "support": null
+          }
+        },
+        {
+          "component_type": "LocalAxes",
+          "properties": {
+            "length": 0.3,
+            "offset": [
+              0.0,
+              0.0,
+              0.6
+            ],
+            "show_labels": false
           }
         }
       ]
@@ -131,15 +151,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.18,
               -0.3,
+              -0.33,
               0.6
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              -1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -152,7 +172,7 @@
         {
           "component_type": "MetadataRef",
           "properties": {
-            "path": "$LIBRARY_SERVER/14",
+            "path": "$LIBRARY_SERVER/8",
             "type": "robot"
           }
         },
@@ -165,8 +185,18 @@
               "joint3",
               "joint4",
               "joint5",
-              "joint6",
-              "gripper_right_driver_joint"
+              "joint6"
+            ],
+            "initial_joint_positions_rad": {
+                "joint1": -1.3e-08,
+        "joint2": 0.55700016,
+        "joint3": -1.0455852782,
+        "joint4": 0.0,
+        "joint5": 1.21771517259,
+        "joint6": -1.57
+            },
+            "available_connect_joints": [
+              "joint6"
             ],
             "joint_limits": {
               "joint1": [
@@ -192,24 +222,8 @@
               "joint6": [
                 -2.0943951,
                 2.0943951
-              ],
-              "gripper_right_driver_joint": [
-                0.0,
-                0.8
               ]
-            },
-            "initial_joint_positions_rad": {
-              "joint1": 0.0,
-              "joint2": 0.0,
-              "joint3": 0.0,
-              "joint4": 0.0,
-              "joint5": 0.0,
-              "joint6": 0.0,
-              "gripper_right_driver_joint": 0.0
-            },
-            "available_connect_joints": [
-              "joint6"
-            ]
+            }
           }
         },
         {
@@ -218,6 +232,93 @@
             "semantic_name": "CobotMagicLeft",
             "category": "robot",
             "support": 1
+          }
+        },
+        {
+          "component_type": "LocalAxes",
+          "properties": {
+            "length": 0.3,
+            "show_labels": false
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 13,
+      "object_name_in_scene": "LeftRobotiq2F85Gripper",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": 2
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "path": "$LIBRARY_SERVER/2",
+            "type": "robot"
+          }
+        },
+        {
+          "component_type": "RobotDriver",
+          "properties": {
+            "joint_sequence": [
+              "robotiq_2f85_right_driver_joint"
+            ],
+            "available_connect_joints": [
+              "robotiq_2f85_base_joint"
+            ],
+            "joint_limits": {
+              "robotiq_2f85_right_driver_joint": [
+                0.0,
+                0.8
+              ]
+            }
+          }
+        },
+        {
+          "component_type": "RobotAttachment",
+          "properties": {
+            "parent_object_id": 2,
+            "parent_joint": "joint6",
+            "parent_link": "link6",
+            "child_link": "robotiq_2f85_mount",
+            "connection_type": "fixed",
+            "transform": {
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "reference_frame": "parent_link"
+            }
+          }
+        },
+        {
+          "component_type": "Semantic",
+          "properties": {
+            "semantic_name": "LeftRobotiq2F85Gripper",
+            "category": "end_effector",
+            "support": null
+          }
+        },
+        {
+          "component_type": "LocalAxes",
+          "properties": {
+            "length": 0.3,
+            "show_labels": false
           }
         }
       ]
@@ -230,15 +331,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.18,
               0.3,
+              -0.33,
               0.6
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              -1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -251,7 +352,7 @@
         {
           "component_type": "MetadataRef",
           "properties": {
-            "path": "$LIBRARY_SERVER/14",
+            "path": "$LIBRARY_SERVER/8",
             "type": "robot"
           }
         },
@@ -264,8 +365,18 @@
               "joint3",
               "joint4",
               "joint5",
-              "joint6",
-              "gripper_right_driver_joint"
+              "joint6"
+            ],
+            "initial_joint_positions_rad": {
+                "joint1": -1.3e-08,
+        "joint2": 0.55700016,
+        "joint3": -1.0455852782,
+        "joint4": 0.0,
+        "joint5": 1.21771517259,
+        "joint6": -1.57
+            },
+            "available_connect_joints": [
+              "joint6"
             ],
             "joint_limits": {
               "joint1": [
@@ -291,24 +402,8 @@
               "joint6": [
                 -2.0943951,
                 2.0943951
-              ],
-              "gripper_right_driver_joint": [
-                0.0,
-                0.8
               ]
-            },
-            "initial_joint_positions_rad": {
-              "joint1": 0.0,
-              "joint2": 0.0,
-              "joint3": 0.0,
-              "joint4": 0.0,
-              "joint5": 0.0,
-              "joint6": 0.0,
-              "gripper_right_driver_joint": 0.0
-            },
-            "available_connect_joints": [
-              "joint6"
-            ]
+            }
           }
         },
         {
@@ -317,6 +412,93 @@
             "semantic_name": "CobotMagicRight",
             "category": "robot",
             "support": 1
+          }
+        },
+        {
+          "component_type": "LocalAxes",
+          "properties": {
+            "length": 0.3,
+            "show_labels": false
+          }
+        }
+      ]
+    },
+    {
+      "object_id_in_scene": 14,
+      "object_name_in_scene": "RightRobotiq2F85Gripper",
+      "components": [
+        {
+          "component_type": "Transform",
+          "properties": {
+            "scale": [
+              1,
+              1,
+              1
+            ],
+            "parent": 3
+          }
+        },
+        {
+          "component_type": "MetadataRef",
+          "properties": {
+            "path": "$LIBRARY_SERVER/2",
+            "type": "robot"
+          }
+        },
+        {
+          "component_type": "RobotDriver",
+          "properties": {
+            "joint_sequence": [
+              "robotiq_2f85_right_driver_joint"
+            ],
+            "available_connect_joints": [
+              "robotiq_2f85_base_joint"
+            ],
+            "joint_limits": {
+              "robotiq_2f85_right_driver_joint": [
+                0.0,
+                0.8
+              ]
+            }
+          }
+        },
+        {
+          "component_type": "RobotAttachment",
+          "properties": {
+            "parent_object_id": 3,
+            "parent_joint": "joint6",
+            "parent_link": "link6",
+            "child_link": "robotiq_2f85_mount",
+            "connection_type": "fixed",
+            "transform": {
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "reference_frame": "parent_link"
+            }
+          }
+        },
+        {
+          "component_type": "Semantic",
+          "properties": {
+            "semantic_name": "RightRobotiq2F85Gripper",
+            "category": "end_effector",
+            "support": null
+          }
+        },
+        {
+          "component_type": "LocalAxes",
+          "properties": {
+            "length": 0.3,
+            "show_labels": false
           }
         }
       ]
@@ -328,12 +510,23 @@
         {
           "component_type": "Transform",
           "properties": {
+            "position": [
+              0,
+              -0.045,
+              0.03
+            ],
+            "quaternion_xyzw": [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
             "scale": [
               1,
               1,
               1
             ],
-            "parent": 2
+            "parent": 13
           }
         },
         {
@@ -361,30 +554,6 @@
           }
         },
         {
-          "component_type": "RobotAttachment",
-          "properties": {
-            "parent_object_id": 2,
-            "parent_joint": "joint6",
-            "parent_link": "link6",
-            "child_link": "camera_link",
-            "connection_type": "fixed",
-            "transform": {
-              "position": [
-                0.00026523190832916654,
-                0.0499999978041575,
-                0.023932755441713485
-              ],
-              "quaternion_xyzw": [
-                -3.6853401650436625e-08,
-                0.017385085222528598,
-                1.6044002050689855e-08,
-                -0.999848867985459
-              ],
-              "reference_frame": "parent_link"
-            }
-          }
-        },
-        {
           "component_type": "Semantic",
           "properties": {
             "semantic_name": "LeftWristCameraD435i",
@@ -402,14 +571,14 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.65,
-              0,
-              2.1
+              0.0,
+              -0.2,
+              1.62
             ],
             "quaternion_xyzw": [
-              0.7071067811865476,
-              0.7071067811865476,
               0.0,
+              -0.996195,
+              -0.087156,
               0.0
             ],
             "scale": [
@@ -454,6 +623,7 @@
         }
       ]
     },
+
     {
       "object_id_in_scene": 6,
       "object_name_in_scene": "RightWristCameraD435i",
@@ -461,12 +631,23 @@
         {
           "component_type": "Transform",
           "properties": {
+            "position": [
+              0,
+              -0.045,
+              0.03
+            ],
+            "quaternion_xyzw": [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
             "scale": [
               1,
               1,
               1
             ],
-            "parent": 3
+            "parent": 14
           }
         },
         {
@@ -494,30 +675,6 @@
           }
         },
         {
-          "component_type": "RobotAttachment",
-          "properties": {
-            "parent_object_id": 3,
-            "parent_joint": "joint6",
-            "parent_link": "link6",
-            "child_link": "camera_link",
-            "connection_type": "fixed",
-            "transform": {
-              "position": [
-                0.00026523190832916654,
-                0.0499999978041575,
-                0.023932755441713485
-              ],
-              "quaternion_xyzw": [
-                -3.6853401650436625e-08,
-                0.017385085222528598,
-                1.6044002050689855e-08,
-                -0.999848867985459
-              ],
-              "reference_frame": "parent_link"
-            }
-          }
-        },
-        {
           "component_type": "Semantic",
           "properties": {
             "semantic_name": "RightWristCameraD435i",
@@ -535,15 +692,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.36,
-              -0.2,
+              0.2000000000000001,
+              -0.165,
               0.637373
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -582,15 +739,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.5,
-              -0.2,
+              0.20000000000000007,
+              -0.024999999999999984,
               0.617377
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -629,15 +786,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.64,
-              -0.2,
+              0.20000000000000004,
+              0.11500000000000006,
               0.629009
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -676,15 +833,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.42,
-              0.18,
-              0.686417
+              -0.18,
+              -0.10500000000000011,
+              0.6000
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,
@@ -723,15 +880,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.6,
-              0.18,
+              -0.18000000000000005,
+              0.07499999999999993,
               0.617321
             ],
             "quaternion_xyzw": [
-              0,
-              0,
-              0,
-              1
+              0.0,
+              0.0,
+              0.7071067811865476,
+              0.7071067811865476
             ],
             "scale": [
               1,

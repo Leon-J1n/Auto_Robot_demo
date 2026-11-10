@@ -64,7 +64,7 @@
 
 - 新 DLL 内相同 60 个姿态：原接口平均 86.45 ms，优化接口平均 16.76 ms，约 5.2 倍加速。60/60 个接触结果相同，其中 33 个姿态碰撞；与用户原 DLL 的接触对也一致，距离比较容差为 1e-9 m。
 - `commands.001.json` 完整执行成功，非执行耗时 14.59 s，总耗时 14.90 s。回退两项策略后，上次同场景记录的非执行耗时为 35.48 s。此次接近与接触两段路点完全一致；返回 home 仍走 RRT-Connect + TrajOpt，输出路径不保证与历史运行完全相同。
-- 原生 CTest 2/2 通过（含新增接触过滤与安全距离测试）；Python 29 项回归测试通过（包含实际 DLL、场景同步、插入障碍物、实际夹持中心误差、MuJoCo 执行和返回 home）。`skills/` 哈希与回退基线一致。
+- 原生 CTest 2/2 通过（含新增接触过滤与安全距离测试）；Python 29 项回归测试通过（包含实际 DLL、场景同步、插入障碍物、实际夹持中心误差、MuJoCo 执行和返回 home）。`atomic_action/` 哈希与回退基线一致。
 - 详细计时和报告：`tests/output/response_profile/native_tight_bounds.json`、`tests/output/response_profile/native_tight_pipeline/`。归档、源码与 DLL 的 SHA256 见 `build_manifest.json`。
 
 

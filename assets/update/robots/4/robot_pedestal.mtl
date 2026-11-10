@@ -1,6 +1,0 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
-
-newmtl robot_pedestal_material
-Ka 0.062745098 0.0779607843 0.102901961
-Kd 0.062745098 0.0779607843 0.102901961
-Ks 0.05 0.05 0.05

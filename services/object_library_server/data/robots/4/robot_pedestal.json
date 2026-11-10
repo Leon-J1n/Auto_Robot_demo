@@ -3,15 +3,18 @@
     "object_name": "robot_pedestal",
     "object_id": 4,
     "deformable": false,
-    "scalable": false,
+    "scalable": true,
     "interactable": false,
     "tag": "gray,fixed,cylindrical"
   },
   "geometric_properties": {
     "AABB": [
-      0.28,
-      0.28,
-      0.5
+      0.1,
+      -0.1,
+      0.1,
+      -0.1,
+      0.25,
+      -0.25
     ]
   },
   "physical_properties": {

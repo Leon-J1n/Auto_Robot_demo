@@ -1,8 +1,0 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
-newmtl d455_body
-Ka 1 1 1
-Kd 1 1 1
-Ks 0.06 0.06 0.06
-Ns 20.0
-map_Kd d455.png

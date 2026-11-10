@@ -5,13 +5,17 @@
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "golden,small"
+    "tag": "golden,small",
+    "can_place": false
   },
   "geometric_properties": {
     "AABB": [
-      0.082999,
-      0.083011,
-      0.159649
+      0.041491,
+      -0.041508,
+      0.041499,
+      -0.041512,
+      0.159633,
+      -1.6E-05
     ]
   },
   "physical_properties": {
@@ -31,39 +35,27 @@
     ]
   },
   "grasp_properties": {
-    "pose_count": 3,
+    "pose_count": 2,
     "poses": [
       [
-        0.01,
-        0,
-        0,
+        -0.002,
+        -0.003,
+        0.0798,
         3.14,
         -1.57,
-        0,
+        1.57,
         1,
         0,
         0,
         0.0
       ],
       [
-        0,
-        -0.01,
-        0,
+        -0.005,
+        0.0,
+        0.0798,
         1.57,
         -1.57,
-        0,
-        1,
-        0,
-        0,
-        0.0
-      ],
-      [
-        0,
-        0.01,
-        0,
-        -1.57,
-        -1.57,
-        0,
+        1.57,
         1,
         0,
         0,

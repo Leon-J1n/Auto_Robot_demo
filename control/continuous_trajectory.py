@@ -48,6 +48,64 @@ class ContinuousJointPath:
         self.curvatures = np.max(np.abs(np.stack([2*b, 6*a*widths + 2*b])), axis=0)
         self.max_slope = float(np.max(self.slopes))
 
+    def local_samples(self, max_speed, max_acceleration, timestep, *, slowdown=0.0):
+        """Locally bound q'(s)s_dot and q''(s)s_dot² + q'(s)s_ddot.
+
+        Half the acceleration budget goes to curvature and half to tangential
+        acceleration. Exact cubic derivative bounds on each interval make this
+        conservative without stretching the entire path for a local bend.
+        Jerk limits are intentionally handled by the existing quintic sampler.
+        """
+        velocity = np.asarray(max_speed, dtype=float)
+        acceleration = np.asarray(max_acceleration, dtype=float)
+        if (velocity.shape != self.spline.c.shape[2:] or acceleration.shape != velocity.shape
+                or not np.all(np.isfinite(velocity)) or np.any(velocity <= 0)
+                or not np.all(np.isfinite(acceleration)) or np.any(acceleration <= 0)
+                or not np.isfinite(timestep) or timestep <= 0
+                or not np.isfinite(slowdown) or slowdown < 0):
+            raise ValueError('Local timing requires finite positive joint limits and timestep')
+        grid = np.unique(np.concatenate([np.linspace(a, b, 9) for a, b in
+                                        zip(self.spline.x[:-1], self.spline.x[1:])]))
+        left, right = grid[:-1], grid[1:]
+        indices = np.clip(np.searchsorted(self.spline.x, left, side='right') - 1,
+                          0, len(self.spline.x) - 2)
+        a, b, c, _ = self.spline.c[:, indices, :]
+        lo = (left - self.spline.x[indices])[:, None]
+        hi = (right - self.spline.x[indices])[:, None]
+        vertex = np.zeros_like(a)
+        np.divide(-b, 3 * a, out=vertex, where=a != 0)
+        vertex = np.clip(vertex, lo, hi)
+        slope = np.maximum.reduce([np.abs(3*a*z*z + 2*b*z + c) for z in (lo, hi, vertex)])
+        curvature = np.maximum(np.abs(6*a*lo + 2*b), np.abs(6*a*hi + 2*b))
+        slope = np.maximum(slope, 1e-12)
+        curvature = np.maximum(curvature, 1e-12)
+        caps = np.minimum(np.min((velocity / slope)**2, axis=1),
+                          np.min(0.5 * acceleration / curvature, axis=1))
+        tangential = np.min(0.5 * acceleration / slope, axis=1)
+        squared_speed = np.r_[caps[0], np.minimum(caps[:-1], caps[1:]), caps[-1]]
+        squared_speed[0] = squared_speed[-1] = 0.0
+        ds = np.diff(grid)
+        for i in range(len(ds)):
+            squared_speed[i + 1] = min(squared_speed[i + 1],
+                                      squared_speed[i] + 2 * tangential[i] * ds[i])
+        for i in range(len(ds) - 1, -1, -1):
+            squared_speed[i] = min(squared_speed[i],
+                                   squared_speed[i + 1] + 2 * tangential[i] * ds[i])
+        path_speed = np.sqrt(squared_speed)
+        times = np.r_[0., np.cumsum(2 * ds / (path_speed[:-1] + path_speed[1:]))]
+        duration = float(times[-1]) * (1 + slowdown)
+        steps = max(1, int(np.ceil(duration / timestep)))
+        duration = steps * timestep
+        sample_times = np.linspace(0, times[-1], steps + 1)
+        segment = np.clip(np.searchsorted(times, sample_times, side='right') - 1, 0, len(ds) - 1)
+        tau = sample_times - times[segment]
+        path_acceleration = np.diff(squared_speed) / (2 * ds)
+        progress = (grid[segment] + path_speed[segment] * tau
+                    + 0.5 * path_acceleration[segment] * tau**2)
+        progress = np.clip(progress, grid[0], grid[-1])
+        progress[0], progress[-1] = grid[0], grid[-1]
+        return self.spline(progress), duration
+
     def samples(self, limit, travel, speed, max_speed, max_acceleration, timestep, max_jerk=None,
                 corner_slowdown=0.0):
         velocity_limits = np.asarray(max_speed, dtype=float)

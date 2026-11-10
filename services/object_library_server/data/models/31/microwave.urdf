@@ -1,5 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot name="microwave">
+  <link name="model_frame" />
+  <joint name="model_frame_rotation" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 -1.5707963267948966" />
+    <parent link="model_frame" />
+    <child link="base_link" />
+  </joint>
   <link name="base_link">
     <visual>
       <geometry>
@@ -106,7 +112,7 @@
         <mesh filename="microwave_meshes/visuals/graspable_handle.obj" />
       </geometry>
       <material name="graspable_handle_color">
-        <color rgba="0.16 0.16 0.16 1" />
+        <color rgba="0.65 0.68 0.72 1" />
       </material>
     </visual>
     <collision name="panel_1">

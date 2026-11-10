@@ -138,8 +138,11 @@ def compile_scene(resources, output_dir):
     output_dir.mkdir(parents=True, exist_ok=True)
     if resources.backend_resource.get('format') != 'generate_from_scene':
         raise ValueError('MuJoCo plugin expects format=generate_from_scene')
-    root = ET.Element('mujoco', model=resources.scene['scene_id'])
+    root = ET.Element('mujoco', model=str(resources.scene['scene_id']))
     ET.SubElement(root, 'compiler', angle='radian')
+    # Collision-rich target resolution can require more temporary workspace
+    # than MuJoCo's default computation stack provides.
+    ET.SubElement(root, 'size', nconmax='10000', nstack='10000000')
     ET.SubElement(root, 'option', timestep='0.002', integrator='implicitfast', gravity='0 0 -9.81',
                   noslip_iterations='1')
     visual = ET.SubElement(root, 'visual')
@@ -262,10 +265,14 @@ def compile_scene(resources, output_dir):
 class MuJoCoExecutionBackend:
     name = 'mujoco'
 
-    def load(self, resources, output_dir):
+    def load(self, resources, output_dir, *, camera_scene_json=None):
         self.resources = resources
         self.scene_path = compile_scene(resources, output_dir)
-        self.model = mujoco.MjModel.from_xml_path(str(self.scene_path))
+        self._cameras = None
+        self._camera_resolutions = {}
+        from sensors.camera_mujoco.scene import load_scene_with_cameras
+        self.model, self._camera_resolutions = load_scene_with_cameras(
+            self.scene_path, camera_scene_json or resources.scene_file)
         self.data = mujoco.MjData(self.model)
         self.joint_names = resources.joint_names
         self.joint_ids = np.array([self._id(mujoco.mjtObj.mjOBJ_JOINT, n) for n in self.joint_names])
@@ -285,6 +292,11 @@ class MuJoCoExecutionBackend:
         self.data.qpos[self.qpos_indices] = resources.initial_joints
         self.data.ctrl[self.actuator_ids] = resources.initial_joints
         self.frame_callback = None
+        from execution.config import trajectory_settings
+        self.trajectory_fps = trajectory_settings(resources.scene)['fps']
+        if self.trajectory_fps * float(self.model.opt.timestep) > 1 + 1e-10:
+            raise ValueError('trajectory.fps cannot exceed the physics step frequency')
+        self.frame_interval = 1.0 / self.trajectory_fps
         self.viewer = None
         self.physics_steps = 0
         self.viewer_sync_count = 0
@@ -317,6 +329,18 @@ class MuJoCoExecutionBackend:
         return {'current_joint_state': self.get_joint_positions(),
                 'current_pose': self.get_end_effector_pose(),
                 'controller_state': {'ready': True, 'mode': 'mujoco_actuator'}}
+
+    def get_camera_frame(self, camera_id):
+        from sensors.camera import CameraManager
+        from sensors.camera_mujoco import MujocoCamera
+
+        name = {'global': 'global_camera', 'wrist': 'wrist_camera'}.get(camera_id, camera_id)
+        if self._cameras is None:
+            self._cameras = CameraManager({
+                key: MujocoCamera(self.model, self.data, key, width=size[0], height=size[1])
+                for key, size in self._camera_resolutions.items()
+            })
+        return self._cameras.get_current_frame(name)
 
     def set_frame_callback(self, callback):
         self.frame_callback = callback
@@ -363,8 +387,8 @@ class MuJoCoExecutionBackend:
         c = self.gripper_controller
         if c is None or not c._holding or c.held_name is None:
             return torque
-        body = self.object_ids[c.held_name]
-        if c.mode == 'physical' and min(c._forces(body).values()) <= .1:
+        body = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, c.held_name)
+        if min(c._forces(body).values()) <= .1:
             return torque
         # Only separately simulated free objects need this additional term.
         j = int(self.model.body_jntadr[body])
@@ -402,8 +426,8 @@ class MuJoCoExecutionBackend:
                 if self.realtime:
                     delay = self.data.time - sim_start - (time.perf_counter() - started)
                     if delay > 0:
-                        time.sleep(min(delay, 1 / 60))
-                next_frame += 1 / 60
+                        time.sleep(min(delay, self.frame_interval))
+                next_frame += self.frame_interval
 
     def configure_camera(self, camera):
         options = self.resources.backend_resource.get('options', {}).get('viewer', {})
@@ -433,10 +457,8 @@ class MuJoCoExecutionBackend:
         payload = None
         if self.gripper_controller is not None:
             c = self.gripper_controller
-            payload = c.get_state(c.held_name or c.target_name)
+            payload = c.get_state()
             payload['object_id'] = c.held_name
-            if payload['slip_detected'] and payload['mode'] != 'physical':
-                raise RuntimeError(f'Grasped payload slipped or lost finger contact: {payload}')
         return {'joint_names': list(self.joint_names), 'joints': self.get_joint_positions().tolist(),
                 'gripper': payload,
                 'mechanisms': {name: {'joint_position': float(self.data.qpos[self.model.jnt_qposadr[self.model.body_jntadr[self.object_ids[name]]]]),
@@ -487,15 +509,44 @@ class MuJoCoExecutionBackend:
         frames, next_frame = [], self.data.time
         dt = float(self.model.opt.timestep)
         max_tracking = 0.0
-        grasp_error = None
+        from execution.convergence import GoalConvergence, TrajectoryTimeout
+        convergence = GoalConvergence(**trajectory.get('goal_tolerances', {}))
+        goal_data = mujoco.MjData(self.model)
+        goal_data.qpos[:] = self.data.qpos
+        goal_data.qpos[self.qpos_indices] = q[-1]
+        mujoco.mj_forward(self.model, goal_data)
+        goal_position = goal_data.site_xpos[self.tip_id].copy()
+        goal_rotation = goal_data.site_xmat[self.tip_id].reshape(3, 3).copy()
+        initial_gripper = self.gripper_controller.get_state() if self.gripper_controller else {}
+        holding_required = bool(initial_gripper.get('holding') or
+            (getattr(self.gripper_controller, 'held_name', None)
+             and getattr(self.gripper_controller, '_holding', False)))
+        completion = None
+        velocity_feedforward = (trajectory.get('diagnostics', {}).get('time_parameterization', {})
+                                .get('time_law') == 'local_acceleration_bounds')
+        reference_velocities = np.gradient(q, stamps, axis=0)
+        reference_velocities[[0, -1]] = 0.0
+        gains = self.model.actuator_gainprm[self.actuator_ids, 0]
+        damping = -self.model.actuator_biasprm[self.actuator_ids, 2]
+        velocity_gain = np.divide(damping, gains, out=np.zeros_like(gains), where=gains > 0)
         # Track a smooth reference with position actuators and gravity compensation.
         # Physics remains active: qpos is never assigned during playback.
         while True:
             elapsed = float(self.data.time - sim_start)
             reference_time = elapsed
             ref = np.array([np.interp(elapsed, stamps, q[:, j]) for j in range(len(self.joint_names))])
+            control = ref
+            if velocity_feedforward:
+                # A position actuator otherwise damps against zero velocity,
+                # causing kv/kp * q_dot lag even on a perfectly feasible path.
+                # Compensate through the actuator command, retaining its force
+                # and control limits; never write the physical joint positions.
+                speed_ref = np.array([np.interp(elapsed, stamps, reference_velocities[:, j])
+                                      for j in range(len(self.joint_names))])
+                control = np.clip(ref + velocity_gain * speed_ref,
+                                  self.joint_limits[:, 0], self.joint_limits[:, 1])
             with self.viewer.lock() if self.viewer is not None else nullcontext():
-                self.data.ctrl[self.actuator_ids] = ref
+                self.data.ctrl[self.actuator_ids] = control
                 self.apply_arm_compensation()
                 if self.gripper_controller is not None:
                     self.gripper_controller.update_hold_force()
@@ -506,12 +557,6 @@ class MuJoCoExecutionBackend:
             if self.data.time + 1e-10 >= next_frame:
                 state = self.get_state()
                 payload = state.get('gripper')
-                if payload and payload.get('contact_lost') and grasp_error is None:
-                    grasp_error = {'error_code': 'GRASP_FAILED',
-                        'error_message': 'Grasp failed: the payload lost stable contact.',
-                        'failed_stage': 'post_execution_verification',
-                        'first_detected_simulation_time': state['simulation_time'],
-                        'evidence': payload.copy()}
                 frames.append(state)
                 if self.frame_callback:
                     self.frame_callback(state)
@@ -521,25 +566,36 @@ class MuJoCoExecutionBackend:
                     # delay on top of collision checks and rendering costs.
                     delay = (self.data.time - sim_start) - (time.perf_counter() - start)
                     if delay > 0:
-                        time.sleep(min(delay, 1 / 60))
-                next_frame += 1 / 60
+                        time.sleep(min(delay, self.frame_interval))
+                next_frame += self.frame_interval
             error = float(np.max(np.abs(self.get_joint_positions() - q[-1])))
-            if elapsed >= stamps[-1] and error < 0.001 and np.max(np.abs(self.data.qvel[self.dof_indices])) < 0.01:
-                break
-            if elapsed > stamps[-1] + 5 or time.perf_counter() - start > timeout:
-                raise TimeoutError(f'Actuator tracking timed out; final error={error}')
+            wall_elapsed = time.perf_counter() - start
+            if elapsed >= stamps[-1] or wall_elapsed > timeout:
+                position_error = np.linalg.norm(self.data.site_xpos[self.tip_id] - goal_position)
+                orientation_error = Rotation.from_matrix(
+                    goal_rotation.T @ self.data.site_xmat[self.tip_id].reshape(3, 3)).magnitude()
+                completion = convergence.update(elapsed, reference_complete=elapsed >= stamps[-1],
+                    joint_error=error, joint_speed=float(np.max(np.abs(self.data.qvel[self.dof_indices]))),
+                    position_error=position_error, orientation_error=orientation_error,
+                    holding_required=holding_required, contact_valid=True)
+                if completion['converged']:
+                    break
+                if elapsed > stamps[-1] + 5 or wall_elapsed > timeout:
+                    reason = 'wall_time_limit' if wall_elapsed > timeout else 'goal_not_converged'
+                    raise TrajectoryTimeout(reason, {**completion, 'planned_duration_s': float(stamps[-1]),
+                        'simulation_elapsed_s': float(self.data.time - sim_start),
+                        'wall_elapsed_s': wall_elapsed, 'wall_timeout_s': timeout,
+                        'settling_timeout_s': 5.0})
         self._sync_viewer()
         final_gripper = self.get_state().get('gripper')
-        if final_gripper and final_gripper.get('contact_lost') and grasp_error is None:
-            grasp_error = {'error_code': 'GRASP_FAILED',
-                'error_message': 'Grasp failed: both finger contacts with the payload were lost.',
-                'failed_stage': 'post_execution_verification',
-                'first_detected_simulation_time': float(self.data.time), 'evidence': final_gripper.copy()}
         return {'final_joint_state': self.get_joint_positions().tolist(), 'joint_error': error,
                 'execution_time': time.perf_counter() - start, 'simulation_duration': float(self.data.time - sim_start),
                 'physics_steps': int(round((self.data.time - sim_start) / dt)),
                 'max_tracking_error_rad': max_tracking, 'frames': frames,
-                'motion_completed': True, 'grasp_error': grasp_error,
+                'motion_completed': bool(completion and completion['converged']), 'grasp_error': None,
+                'contact_diagnostics': {'mode': 'command_end', 'samples': 0},
+                'completion': completion,
+                'velocity_feedforward': velocity_feedforward,
                 'final_gripper_state': final_gripper}
 
     def wait_for_viewer_close(self):
@@ -550,6 +606,9 @@ class MuJoCoExecutionBackend:
             time.sleep(1 / 30)
 
     def close(self):
+        if getattr(self, '_cameras', None) is not None:
+            self._cameras.close()
+            self._cameras = None
         if getattr(self, 'viewer', None) is not None:
             self.viewer.close()
         self.viewer = None

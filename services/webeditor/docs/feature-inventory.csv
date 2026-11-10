@@ -1,0 +1,89 @@
+﻿feature,local_config,original_config,editor_reach,group,audit_status
+agent,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.conversation,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.debug,False,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.header,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.history,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.history.list,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.input,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.input.send,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.input.speechStatus,True,absent,unreferenced,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.input.text,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.input.voiceInput,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.messages,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.messages.emptyState,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.operations,False,absent,unreferenced,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+agent.status,True,absent,literal,"Agent (kept as a placeholder, §5.9)",PLACEHOLDER_KEPT
+diagnostics,False,absent,literal,Chrome and status,WIRED
+diagnostics.entries,True,absent,literal,Chrome and status,WIRED
+diagnostics.toggle,True,absent,literal,Chrome and status,WIRED
+navigation,True,absent,literal,Left rail,WIRED
+navigation.assets,True,absent,literal,Left rail,WIRED
+navigation.assets.prefabs,True,absent,interpolated,Left rail,WIRED
+navigation.assets.presets,True,absent,interpolated,Left rail,WIRED
+navigation.assets.robots,True,absent,interpolated,Left rail,WIRED
+navigation.details,False,absent,literal,Left rail,WIRED
+navigation.scene,False,absent,literal,Left rail,WIRED
+panels.assets,True,absent,literal,Asset panel over OLS (§4.6),WIRED
+panels.assets.list,True,absent,literal,Asset panel over OLS (§4.6),WIRED
+panels.assets.metadata,True,absent,literal,Asset panel over OLS (§4.6),WIRED
+panels.assets.name,True,absent,literal,Asset panel over OLS (§4.6),WIRED
+panels.context,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.camera,True,absent,literal,Camera details (§4.4),WIRED
+panels.details.camera.preview,True,absent,literal,Camera details (§4.4),WIRED
+panels.details.emptyState,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.identity,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.identity.entityId,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.identity.flags,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.identity.parent,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.robot,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.transform,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.details.transform.notice,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.heading,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.heading.count,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.scene,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.scene.hierarchy,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.scene.search,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+panels.scene.selectEntity,True,absent,literal,"Panels, read-only (§4.7)",WIRED
+playback.attachMarkers,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.bar,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.ghostPose,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.loop,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.play,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.rate,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.seek,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.stepMarkers,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.trajSelector,True,absent,literal,TRAJ playback (§4.3),WIRED
+playback.trajWaypoints,True,absent,literal,TRAJ playback (§4.3),WIRED
+statusBar,True,absent,literal,Chrome and status,WIRED
+statusBar.performance,True,absent,literal,Chrome and status,WIRED
+statusBar.primary,False,absent,literal,Chrome and status,WIRED
+statusBar.revision,False,absent,literal,Chrome and status,WIRED
+viewport.boundingBoxes,True,absent,literal,Viewport,WIRED
+viewport.cameraFrustumAlways,False,absent,literal,Viewport,WIRED
+viewport.cameraPreview,True,absent,gate_ancestor,Viewport,GATE_ANCESTOR
+viewport.cameraPreview.modes,True,absent,interpolated,Viewport,WIRED
+viewport.cameraPreview.modes.depth,True,absent,literal,Viewport,WIRED
+viewport.cameraPreview.modes.rgb,True,absent,literal,Viewport,WIRED
+viewport.cameraWall,True,absent,literal,Viewport,WIRED
+viewport.canvas,True,absent,literal,Viewport,WIRED
+viewport.exportScene,True,absent,literal,Viewport,WIRED
+viewport.focusSelection,True,absent,literal,Viewport,WIRED
+viewport.frameScene,True,absent,literal,Viewport,WIRED
+viewport.grid,True,absent,literal,Viewport,WIRED
+viewport.lightMarkerAlways,False,absent,literal,Viewport,WIRED
+viewport.lightingPreset,True,absent,literal,Viewport,WIRED
+viewport.loadScene,True,absent,literal,Manual load from disk (§4.1/§4.3),WIRED
+viewport.loadTraj,True,absent,literal,Manual load from disk (§4.1/§4.3),WIRED
+viewport.localAxesToggle,True,absent,literal,Viewport,WIRED
+viewport.notifications,True,absent,literal,Viewport,WIRED
+viewport.orbit,True,absent,literal,Viewport,WIRED
+viewport.record,True,absent,literal,Viewport,WIRED
+viewport.selectEntity,True,absent,literal,Viewport,WIRED
+viewport.selectionLabel,False,absent,literal,Viewport,WIRED
+viewport.shadows,True,absent,literal,Viewport,WIRED
+viewport.snapshot,True,absent,literal,Viewport,WIRED
+viewport.toolbar,True,absent,literal,Viewport,WIRED
+viewport.tools,True,absent,literal,Viewport,WIRED
+viewport.worldAxes,True,absent,literal,Viewport,WIRED

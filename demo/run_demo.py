@@ -1,7 +1,6 @@
 """Same-scene motion with OLS object interaction targets."""
 from __future__ import annotations
 import argparse
-from collections import Counter
 import json
 import os
 import sys
@@ -9,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
+from demo.error_messages import describe_error, error_from_exception
 from collision.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
@@ -78,7 +78,19 @@ SUCCESS_ACTIONS = {
     'push': '已推动目标', 'pull': '已拉动目标', 'pour': '已完成倒水动作',
 }
 ERROR_DESCRIPTIONS = {
-    'PATH_CONSTRAINT_INFEASIBLE': '无法继续满足路径约束',
+    'GRASP_FAILED': '未能维持稳定抓持',
+    'IK_FAILED': '目标位姿没有可用逆解',
+    'TARGET_UNREACHABLE': '目标超出机械臂可达范围',
+    'PATH_NOT_FOUND': '未找到满足约束的运动路径',
+    'PLANNING_FAILED': '未能生成满足约束的轨迹',
+    'EXECUTION_TIMEOUT': '执行超时，未在规定时间内到达目标',
+    'EXECUTION_FAILED': '轨迹执行失败',
+    'TRAJECTORY_INVALID': '轨迹数据不满足执行要求',
+    'JOINT_LIMIT_VIOLATION': '关节位置超出允许范围',
+    'INVALID_REQUEST': '请求参数不符合要求',
+    'CONTROLLER_NOT_READY': '控制器尚未就绪',
+    'SCENE_CHANGED': '场景状态已变化，当前规划失效',
+    'STOPPED_BY_SAFETY': '运动被安全检查中止',
     'COLLISION_DETECTED': '运动受到碰撞限制',
     'ROBOT_JOINT_LIMIT': '机械臂达到关节限位',
     'JOINT_LIMIT': '目标机构达到关节限位',
@@ -104,6 +116,9 @@ ERROR_DESCRIPTIONS = {
     'TARGET_POSE_COLLISION': '目标交互位姿发生碰撞',
     'NO_VALID_TARGET_POSE': '目标交互位姿候选均不可用',
     'GRASP_CLOSURE_INFEASIBLE': '没有可完成夹爪闭合的抓取位姿',
+    'GRASP_PRECHECK_FAILED': '抓取候选几何或接触路径检查全部失败',
+    'JOINT_CONFIGURATION_SEARCH_FAILED': '关节构型搜索未找到可用路径',
+    'GRASP_DEPTH_SEARCH_FAILED': '0～30 mm 抓深搜索及桌面底限兜底均失败',
     'GRASP_CLOSURE_COLLISION': '夹爪闭合时发生碰撞',
     'GRASP_OPENING_COLLISION': '夹爪张开时发生碰撞',
     'POSE_VERIFICATION_FAILED': '执行后的位姿超出允许误差',
@@ -122,6 +137,8 @@ STAGE_DESCRIPTIONS = {
 def command_target_name(command, scene):
     """Show the scene object's name while retaining named targets such as home."""
     parameters = command['parameters']
+    if command['skill_name'] in {'push', 'pull'}:
+        return 'end_effector'
     target = parameters.get('target')
     if command.get('skill_name') == 'pour':
         target = f"{parameters.get('source')}→{parameters.get('target')}"
@@ -145,76 +162,11 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
     description = ERROR_DESCRIPTIONS.get(error.get('error_code'))
     if description is None:
         description = STAGE_DESCRIPTIONS.get(error.get('failed_stage') or stage, '步骤执行失败')
-    if error.get('error_code') in {'NO_VALID_APPROACH', 'NO_VALID_TARGET_POSE'}:
-        labels = {
-            'prepoint_ik': '预接近位姿无逆解',
-            'prepoint_collision': '预接近位姿碰撞',
-            'contact_ik': '接触直线路径无逆解',
-            'contact_collision': '接触直线路径碰撞',
-            'contact_planning': '接触直线路径规划失败',
-            'ik_failed': '目标位姿无逆解',
-            'goal_collision': '目标位姿碰撞',
-        }
-        counts = Counter(item.get('category') or item.get('reason') for item in error.get('rejected', ()))
-        reasons = [f'{labels[key]} {count} 次' for key, count in counts.items() if key in labels]
-        if reasons:
-            description += '：' + '，'.join(reasons)
-    if error.get('error_code') in {'PREPOINT_COLLISION', 'CONTACT_PATH_COLLISION',
-                                   'TARGET_POSE_COLLISION', 'PATH_CONSTRAINT_INFEASIBLE'}:
-        contacts = error.get('details', {}).get('contacts', ()) if isinstance(error.get('details'), dict) else ()
-        if not contacts:
-            contacts = next((item['contacts'] for item in error.get('rejected', ()) if item.get('contacts')), ())
-        if contacts:
-            pair = contacts[0]
-            description += f"：{pair['geom1']} 与 {pair['geom2']}"
-    details = error.get('details') if isinstance(error.get('details'), dict) else {}
+    description = describe_error(error, description)
     code = error.get('error_code')
-    if code == 'COLLISION_DETECTED':
-        contacts = details.get('contacts', ())
-        if contacts:
-            pairs = []
-            seen = set()
-            for contact in contacts:
-                if not isinstance(contact, dict):
-                    continue
-                first = contact.get('geom1', contact.get('body1', '?'))
-                second = contact.get('geom2', contact.get('body2', '?'))
-                key = tuple(sorted((str(first), str(second))))
-                if key in seen:
-                    continue
-                seen.add(key)
-                distance = contact.get('distance')
-                suffix = f"，距离 {float(distance) * 1000:.3f} mm" if isinstance(distance, (int, float)) else ''
-                pairs.append(f"{first} ↔ {second}{suffix}")
-                if len(pairs) >= 3:
-                    break
-            if pairs:
-                more = f"，另有 {len(contacts) - len(seen)} 个接触" if len(contacts) > len(seen) else ''
-                description += '：' + '；'.join(pairs) + more
-        else:
-            description += '：未返回碰撞对象，详见 report.json'
-    elif code == 'ROBOT_JOINT_LIMIT':
-        joints = details.get('joints', ())
-        if joints:
-            description += '：' + '；'.join(
-                f"{item.get('joint', '?')}={float(item.get('value', 0)):.4f} rad，范围 "
-                f"[{float(item.get('lower', 0)):.4f}, {float(item.get('upper', 0)):.4f}]"
-                for item in joints[:3])
-    elif code == 'JOINT_LIMIT':
-        if details.get('joint'):
-            description += (f"：{details['joint']} 当前 {float(details.get('current', details.get('value', 0))):.4f} rad，"
-                            f"范围 [{float(details.get('lower', 0)):.4f}, {float(details.get('upper', 0)):.4f}]")
-    elif code == 'TRAVEL_LIMIT':
-        if details.get('requested') is not None:
-            unit = details.get('unit', '')
-            description += (f"：请求 {float(details['requested']):.4f} {unit}，"
-                            f"允许 {float(details.get('limit', 0)):.4f} {unit}")
-    elif code == 'PATH_CONSTRAINT_INFEASIBLE' and details.get('joint'):
-        description += (f"：{details['joint']} 单步变化 {float(details.get('step', 0)):.4f} rad，"
-                        f"超过 {float(details.get('maximum_step', 0)):.4f} rad")
     if status == 'suspend':
         return f"suspend: 任务中止，{target} 未完成目标；{description}" + (f"（{code}）" if code else '')
-    return f"error: {description}" + (f"（{code}）" if code else '，详情见报告')
+    return f"error: {description}" + (f"（{code}）" if code else '')
 
 
 def _default_output_dir(command_file):
@@ -250,13 +202,24 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     from demo.interaction.object_library import ObjectLibraryGraspResolver, apply_ols_friction, scene_object_by_id, model_id_for
 
     task = json.loads(Path(command_file).read_text(encoding='utf-8'))
+    from demo.interaction.visual_targets import (
+        infer_command_point_types, infer_command_place_cycles, infer_visual_targets)
+    commands = task.get('commands')
+    if not isinstance(commands, list) or not commands:
+        raise ValueError('commands must be a non-empty array')
+    visual_estimates = infer_visual_targets(commands)
+    visual_command_point_types = infer_command_point_types(commands)
+    visual_place_cycles = infer_command_place_cycles(commands)
     if output_dir is None:
         output_dir = _default_output_dir(command_file)
     output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
-    report = {'request_id': task.get('request_id'), 'success': False, 'steps': []}
+    report = {'request_id': task.get('request_id'), 'success': False, 'steps': [],
+              'collision_policy': 'planning_only'}
     coordinator = SceneResourceCoordinator(catalog)
     backend = checker = None
-    sync = SceneStateSynchronizer()
+    from execution.blackboard import TargetBlackboard
+    blackboard = TargetBlackboard()
+    sync = SceneStateSynchronizer(blackboard=blackboard)
     local_service = resolver = None
     stage = 'validation'
     frame_index = 0
@@ -266,6 +229,14 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     row = None
     try:
         resources = coordinator.resolve(task, backend_name)
+        for item in visual_estimates:
+            scene_object_by_id(resources.scene, item['target_id'])
+        report['effective_defaults'] = {
+            'motion': {key: resources.scene['move_defaults']['constraints'][key]
+                       for key in ('velocity_scale', 'acceleration_scale')},
+            'trajectory': dict(resources.scene['trajectory']),
+        }
+        blackboard.register_scene(resources.scene)
         commands = task.get('commands')
         if not isinstance(commands, list) or not commands:
             raise ValueError('commands must be a non-empty array')
@@ -297,8 +268,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 if source_name not in names or target_name not in names:
                     raise ValueError('pour source and target must be scene object names')
                 continue
-            if skill in {'push', 'pull'} and target is None and any(k in parameters for k in ('distance', 'angle_deg')):
-                # The preceding command establishes the contact; resolve it at execution time.
+            if skill in {'push', 'pull'}:
+                # Both commands move the held tool without a scene-object target.
                 continue
             if skill in {'approach', 'retreat'}:
                 if target is None or target in targets or target in {'end_effector', '__end_effector__'}:
@@ -330,9 +301,9 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 # Keep the demo progress display limited to command outcomes.
                 local_service.server.RequestHandlerClass.log_message = lambda *_args: None
             resolver = ObjectLibraryGraspResolver(ObjectLibraryClient(
-                object_library_url or config.get('base_url', 'http://127.0.0.1:8000'), uid=config.get('uid', 0)))
+                object_library_url or config.get('base_url', 'http://127.0.0.1:8000'), uid=config.get('uid', 0)), blackboard=blackboard)
             try:
-                apply_ols_friction(resources, resolver.client)
+                apply_ols_friction(resources, resolver.client, blackboard)
             except ObjectLibraryError as exc:
                 # A scene's default loopback URL is a convenience, not an
                 # external-service requirement. If no URL was explicitly
@@ -347,8 +318,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 object_library_url = local_service.url
                 local_service.server.RequestHandlerClass.log_message = lambda *_args: None
                 resolver = ObjectLibraryGraspResolver(ObjectLibraryClient(
-                    object_library_url, uid=config.get('uid', 0)))
-                apply_ols_friction(resources, resolver.client)
+                    object_library_url, uid=config.get('uid', 0)), blackboard=blackboard)
+                apply_ols_friction(resources, resolver.client, blackboard)
         ref = component(resources.robot_object, 'RobotModelRef')
         stage = 'planning_initialization'
         # Created without importing/constructing MuJoCo; planning does not need runtime geometry.
@@ -366,7 +337,19 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         if start_check.in_collision:
             raise ValueError(f'Initial state collides: {start_check.contacts}')
         stage = 'execution_initialization'
-        backend.load(resources, output / backend_name)
+        if visual_estimates:
+            if backend_name != 'mujoco':
+                raise ValueError('Visual estimates require the MuJoCo backend')
+            backend.load(resources, output / backend_name, camera_scene_json=resources.scene_file)
+            from demo.interaction.vlm_grasp import VLMGraspResolver
+            resolver = VLMGraspResolver(
+                resolver.client, blackboard, backend,
+                visual_targets=visual_estimates,
+                command_point_types=visual_command_point_types,
+                command_place_cycles=visual_place_cycles,
+            )
+        else:
+            backend.load(resources, output / backend_name)
         report['consistency'] = coordinator.validate_consistency(resources, kin, checker, backend)
         if isinstance(checker, GraspCollisionChecker):
             checker.bind_backend(backend)
@@ -399,8 +382,13 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         from atomic_action.motion.move_linear.action import MoveLinearAction
         from atomic_action.motion.move_joint.action import MoveJointAction
         from atomic_action.motion.move_circular.action import MoveCircularAction
+        startup_frames = [backend.get_state()]
         if component(resources.robot_object, 'GripperModel'):
-            backend.advance_gripper(1.0)
+            backend.set_frame_callback(startup_frames.append)
+            try:
+                backend.advance_gripper(1.0)
+            finally:
+                backend.set_frame_callback(None)
             sync.sync(backend, kin, checker)
 
         def prepare_trajectory(trajectory, request, selection):
@@ -421,12 +409,16 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         }
         def execute_motion(request):
             # Select the concrete motion action from the request geometry.
+            # Merge before action validation inserts its own missing defaults.
+            from demo.task_commands.converter import _deep_merge
+            request = _deep_merge(resources.scene['move_defaults'], request)
             sync.sync(backend, kin, checker)
             path_type = request.get("motion", {}).get("path_type", "joint")
             action = motion_actions.get(path_type, motion_actions["joint"])
             return action.execute(request)
         def write_task_frame(command_id, substep, frame_state):
             nonlocal frame_index
+            blackboard.observe(frame_state)
             frames.write(json.dumps({'frame_index': frame_index, 'command_id': command_id,
                                       'substep': substep, **frame_state}, default=serializable) + '\n')
             frame_index += 1
@@ -436,83 +428,70 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             synchronizer=sync, resolver=resolver, execute_motion=execute_motion,
             report=report, write_frame=write_task_frame)
         with (output / 'frames.jsonl').open('w', encoding='utf-8') as frames:
+            for frame_state in startup_frames:
+                write_task_frame('setup', 'initial_state', frame_state)
             for index, command in enumerate(commands, 1):
                 active_command = command
                 active_step_logged = False
                 row = None
                 active_target_name = None
-                if command['skill_name'] in {'push', 'pull'}:
-                    from demo.interaction.requests import resolve_held_contact
-                    command = {**command, 'parameters':resolve_held_contact(resources, backend, command['parameters'])}
                 active_target_name = command_target_name(command, resources.scene)
                 report['active_command_id'] = command['command_id']
                 print(f"[{index}/{len(commands)}] {command['skill_name']}({active_target_name})", flush=True)
                 backend.set_status(f"{command['command_id']} | Planning / {command['skill_name']}")
                 stage = 'state_sync'
-                state = sync.sync(backend, kin, checker)
-                row = {'command_id': command['command_id'], 'skill_name': command['skill_name']}
-                parameters = command['parameters']
-                mechanism = bool(parameters.get('link')) or command['skill_name'] in {'push', 'pull'}
-                backend.contact_target = None
-                backend.contact_target_object_id = None
-                backend.grasp_motion_phase = False
-                if mechanism:
-                    from demo.interaction.requests import body_name
-                    backend.contact_target = body_name(resources, parameters) if parameters.get('allow_contact') else None
-                elif command['skill_name'] == 'pick':
-                    # The terminal pick move is intentionally allowed to make
-                    # contact with its selected object. Other scene contacts
-                    # remain subject to the normal collision policy.
-                    backend.contact_target = active_target_name
-                    backend.contact_target_object_id = parameters.get('target')
-                if command['skill_name'] in {'push', 'pull'}:
-                    from demo.interaction.requests import prepare_contact_command, push_pull_request
-                    from atomic_action.motion.move_linear.action import MoveLinearAction
-                    stage = 'pull_push'
-                    if command['skill_name'] == 'pull' or any(k in parameters for k in ('distance', 'angle_deg', 'target_position_m')):
-                        parameters = prepare_contact_command(resources, backend, parameters, command['skill_name'])
-                    def record_mechanism(state):
-                        nonlocal frame_index
-                        frames.write(json.dumps({'frame_index': frame_index, 'command_id': command['command_id'], **state},default=serializable)+'\n')
-                        frame_index += 1
-                    backend.set_frame_callback(record_mechanism)
-                    from control.pull_push_controller import MujocoPullPushController
-                    backend.pull_push_controller = MujocoPullPushController(
-                        backend, kinematics=kin, collision_checker=checker)
-                    push_pull_skill = MoveLinearAction(robot_runtime=backend,kinematics=kin)
-                    if parameters.get('orchestrate'):
+                with sync.command_state(backend, kin, checker) as state:
+                    # Every command has a recorder, even when a new skill does
+                    # not install its own phase-specific callback.
+                    report['active_substep'] = command['skill_name']
+                    backend.set_frame_callback(lambda frame_state: write_task_frame(
+                        command['command_id'], report['active_substep'], frame_state))
+                    row = {'command_id': command['command_id'], 'skill_name': command['skill_name']}
+                    parameters = command['parameters']
+                    mechanism = command['skill_name'] not in {'push', 'pull'} and bool(parameters.get('link'))
+                    backend.contact_target = None
+                    backend.contact_target_object_id = None
+                    backend.grasp_motion_phase = False
+                    if mechanism:
+                        from demo.interaction.requests import body_name
+                        backend.contact_target = body_name(resources, parameters) if parameters.get('allow_contact') else None
+                    elif command['skill_name'] == 'pick':
+                        # Pick permits gripper contact with its selected object
+                        # throughout motion and closure. Other scene contacts
+                        # remain subject to the normal collision policy.
+                        backend.contact_target = active_target_name
+                        backend.contact_target_object_id = parameters.get('target')
+                    if command['skill_name'] in {'push', 'pull'}:
+                        stage = 'pull_push'
                         from atomic_skill.pull import CommandPullExecutor
                         from atomic_skill.push import CommandPushExecutor
                         executor_type = CommandPullExecutor if command['skill_name'] == 'pull' else CommandPushExecutor
                         orchestrator = executor_type(
                             resources=resources, backend=backend, kinematics=kin,
                             synchronizer=sync, checker=checker,
-                            execute_motion=execute_motion, push_pull_skill=push_pull_skill,
+                            execute_motion=execute_motion, push_pull_skill=None,
                             grasper=task_executor.grasper, releaser=task_executor.releaser)
                         result = orchestrator.execute(parameters)
                         row.update(result)
-                    else:
-                        request = push_pull_request(resources, backend, parameters, command['skill_name'])
-                        backend.contact_target = request['target']['object_id']
-                        result = push_pull_skill.execute(request)
-                        row.update(result,request=request)
-                    sync.sync(backend,kin,checker)
-                elif command['skill_name'] in {'move_to', 'lift_up', 'put_down', 'shift_down', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'pour'}:
-                    try:
-                        task_executor.execute(command, index, state, row)
-                    except Exception as exc:
+                        sync.sync(backend,kin,checker)
+                        from execution.grasp_verification import verify_command_grasp
+                        verify_command_grasp(backend, row)
+                    elif command['skill_name'] in {'move_to', 'lift_up', 'put_down', 'shift_down', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'pour'}:
+                        try:
+                            task_executor.execute(command, index, state, row)
+                        except Exception as exc:
+                            clear_detach = getattr(checker, 'clear_detach_contacts', None)
+                            if callable(clear_detach):
+                                clear_detach()
+                            stage = task_executor.stage
+                            row.setdefault('success', False)
+                            row['error'] = error_from_exception(exc, stage=stage, existing=row.get('error'))
+                            report['steps'].append(row)
+                            raise
                         clear_detach = getattr(checker, 'clear_detach_contacts', None)
                         if callable(clear_detach):
                             clear_detach()
                         stage = task_executor.stage
-                        row.setdefault('success', False)
-                        row.setdefault('error', {'failed_stage': stage, 'error_message': str(exc)})
-                        report['steps'].append(row)
-                        raise
-                    clear_detach = getattr(checker, 'clear_detach_contacts', None)
-                    if callable(clear_detach):
-                        clear_detach()
-                    stage = task_executor.stage
                 display_status = row.get('status')
                 display_error = row.get('error')
                 # Temporary best-effort mode: preserve the original suspend
@@ -547,19 +526,21 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         report.update(success=False, status='error')
         if active_command is not None and not active_step_logged:
             print(step_message(active_command, success=False,
-                               error=row.get('error') if row else getattr(exc, 'details', None),
+                               error=error_from_exception(exc, stage=stage, existing=row.get('error') if row else None),
                                stage=stage, target_name=active_target_name), flush=True)
             active_step_logged = True
         elif active_command is None:
-            print(f'error: initialization failed at {stage}: {exc}', flush=True)
+            initial_error = error_from_exception(exc, stage=stage)
+            cause = describe_error(initial_error, '初始化失败')
+            code = initial_error.get('error_code')
+            print(f'error: 初始化失败：{cause}' + (f'（{code}）' if code else ''), flush=True)
         report['error'] = {'stage': stage, 'message': str(exc), 'type': type(exc).__name__}
-        if hasattr(exc, 'details'):
-            report['error'].update(exc.details)
-        elif stage in {'grasp_closure', 'grasp_opening'}:
-            report['error'].update(row.get('error', {}))
+        report['error'].update(error_from_exception(
+            exc, stage=stage, existing=row.get('error') if row else None))
     finally:
         try:
             if backend is not None and hasattr(backend, 'data'):
+                blackboard.observe(backend.get_state())
                 np.savez_compressed(output / 'final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
                                     ctrl=backend.data.ctrl, eq_active=backend.data.eq_active,
                                     eq_data=backend.model.eq_data, time=float(backend.data.time))
@@ -586,6 +567,9 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                     report['trajectory_file'] = str(traj_path)
                 except Exception as exc:
                     report['trajectory_export_error'] = str(exc)
+            blackboard_path = output / 'blackboard.json'
+            blackboard_path.write_text(json.dumps(blackboard.snapshot(), indent=2, default=serializable), encoding='utf-8')
+            report['blackboard_file'] = str(blackboard_path)
             report['allowed_carrying_contacts'] = list(getattr(checker, 'carrying_contact_log', {}).values())
             (output / 'report.json').write_text(json.dumps(report, indent=2, default=serializable), encoding='utf-8')
             if (viewer or show_collision_geometry) and backend is not None and getattr(backend, 'viewer', None) is not None:
@@ -639,9 +623,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-

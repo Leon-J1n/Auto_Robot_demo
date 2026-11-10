@@ -18,12 +18,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from skills.motion.move.skill import MoveSkill
-from skills.manipulation.grasp.skill import GraspSkill
-from skills.manipulation.press.skill import PressSkill
-from skills.manipulation.pull_push.skill import PullPushSkill
-from skills.manipulation.release.skill import ReleaseSkill
-from skills.perception.location.skill import LocateSkill
+from atomic_action.motion.common.action import _MoveExecutor
+from atomic_action.manipulation.grasp.action import GraspAction
+from atomic_action.motion.move_linear.action import MoveLinearAction
+from atomic_action.motion.move_linear.action import MoveLinearAction
+from atomic_action.manipulation.release.action import ReleaseAction
+from atomic_action.perception.location.skill import LocateAction
 from utils import SceneRobotRuntime
 
 
@@ -68,12 +68,12 @@ def run_visual_test(config_path: Path = DEFAULT_CONFIG) -> list[dict[str, Any]]:
         playback_speed=runtime_config.get("playback_speed", 1.0),
         minimum_playback_duration=runtime_config.get("minimum_playback_duration", 4.0),
     )
-    skill = MoveSkill(robot_runtime=runtime)
-    grasp_skill = GraspSkill(robot_runtime=runtime)
-    press_skill = PressSkill(robot_runtime=runtime)
-    push_pull_skill = PullPushSkill(robot_runtime=runtime)
-    release_skill = ReleaseSkill(robot_runtime=runtime)
-    locate_skill = LocateSkill(robot_runtime=runtime)
+    skill = _MoveExecutor(robot_runtime=runtime)
+    grasp_skill = GraspAction(robot_runtime=runtime)
+    press_skill = MoveLinearAction(robot_runtime=runtime)
+    push_pull_skill = MoveLinearAction(robot_runtime=runtime)
+    release_skill = ReleaseAction(robot_runtime=runtime)
+    locate_skill = LocateAction(robot_runtime=runtime)
     continue_event = threading.Event()
     allowed_keys = {KEY_CODES[name] for name in viewer_config.get("continue_keys", ["SPACE", "ENTER"])}
 
@@ -104,7 +104,7 @@ def run_visual_test(config_path: Path = DEFAULT_CONFIG) -> list[dict[str, Any]]:
                 result = _execute_action(step, runtime, grasp_skill, release_skill, press_skill, push_pull_skill, locate_skill)
                 _print_action_result(step, result)
                 if result["success"] and step_type in {"grasp", "release"}:
-                    skill = MoveSkill(robot_runtime=runtime)
+                    skill = _MoveExecutor(robot_runtime=runtime)
             results.append(result)
             if not result["success"]:
                 print("测试失败，保留当前画面。关闭窗口结束测试。")
@@ -172,11 +172,11 @@ def _print_result(result: Mapping[str, Any]) -> None:
 def _execute_action(
     action: Mapping[str, Any],
     runtime: SceneRobotRuntime,
-    grasp_skill: GraspSkill,
-    release_skill: ReleaseSkill,
-    press_skill: PressSkill,
-    push_pull_skill: PullPushSkill,
-    locate_skill: LocateSkill,
+    grasp_skill: GraspAction,
+    release_skill: ReleaseAction,
+    press_skill: MoveLinearAction,
+    push_pull_skill: MoveLinearAction,
+    locate_skill: LocateAction,
 ) -> dict[str, Any]:
     action_type = action.get("type")
     if action_type == "grasp":

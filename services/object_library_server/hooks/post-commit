@@ -1,0 +1,13 @@
+#!/bin/sh
+# OLS post-commit hook: refresh VERSION.txt files in a follow-up commit
+# (logic in refresh_version.py).
+# Installed via hooks/install_hooks.bat / install_hooks.sh (core.hooksPath=hooks).
+[ -n "$OLS_VERSION_HOOK_RUNNING" ] && exit 0
+hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+if command -v python >/dev/null 2>&1; then
+    exec python "$hook_dir/refresh_version.py"
+elif command -v python3 >/dev/null 2>&1; then
+    exec python3 "$hook_dir/refresh_version.py"
+fi
+echo "[ols-hooks] python not found; skip version refresh" >&2
+exit 0

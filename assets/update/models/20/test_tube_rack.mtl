@@ -1,6 +1,0 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
-newmtl source_material
-Kd 1 1 1
-map_Kd test_tube_rack.png
-Ka 1 1 1

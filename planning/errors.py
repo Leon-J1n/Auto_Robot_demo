@@ -1,4 +1,4 @@
-"""Typed planning errors consumed by MoveSkill."""
+"""Typed planning errors consumed by _MoveExecutor."""
 
 
 class PlanningError(RuntimeError):

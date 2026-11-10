@@ -3,7 +3,7 @@ from typing import Protocol, Callable
 
 
 class ExecutionBackend(Protocol):
-    """Minimum runtime surface consumed by the existing MoveSkill."""
+    """Minimum runtime surface consumed by the existing _MoveExecutor."""
     def load(self, resources, output_dir): ...
     def get_state(self) -> dict: ...
     @property

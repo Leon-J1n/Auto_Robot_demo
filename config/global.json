@@ -1,0 +1,10 @@
+{
+  "motion": {
+    "velocity_scale": 0.6,
+    "acceleration_scale": 1.0
+  },
+  "trajectory": {
+    "fps": 60,
+    "pause_seconds": 1.0
+  }
+}

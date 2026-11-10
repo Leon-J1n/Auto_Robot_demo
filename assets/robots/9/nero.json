@@ -4,14 +4,17 @@
     "object_id": 9,
     "deformable": false,
     "scalable": false,
-    "interactable": true,
+    "interactable": false,
     "tag": "nero"
   },
   "geometric_properties": {
     "AABB": [
-      0.10899996,
-      0.09305738073644076,
-      0.7401345211490893
+      0.069,
+      -0.039999999,
+      0.046528749,
+      -0.04652875,
+      0.74013456,
+      0.0
     ]
   },
   "physical_properties": {
@@ -33,5 +36,131 @@
   "grasp_properties": {
     "pose_count": 0,
     "poses": []
+  },
+  "arm_configuration": "piper",
+  "scene_one_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.0,
+        -0.166666666,
+        -0.05
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1.14
+      ]
+    }
+  ],
+  "scene_two_arm": [
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        0.166666666667,
+        -0.16666666666,
+        -0.05
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1.14
+      ]
+    },
+    {
+      "robot_pose_percent_compared_to_table_length_center": [
+        -0.166666666667,
+        -0.166666666666,
+        -0.05
+      ],
+      "has_pedestal": true,
+      "pedestal_id": 4,
+      "pedestal_scale": [
+        1,
+        1,
+        1.14
+      ]
+    }
+  ],
+  "robot_driver": {
+    "properties": {
+      "role": "arm",
+      "joint_sequence": [
+        "joint1",
+        "joint2",
+        "joint3",
+        "joint4",
+        "joint5",
+        "joint6",
+        "joint7"
+      ],
+      "joint_limits": {
+        "joint1": [
+          -2.70526,
+          2.70526
+        ],
+        "joint2": [
+          -1.74,
+          1.74
+        ],
+        "joint3": [
+          -2.75,
+          2.75
+        ],
+        "joint4": [
+          -1.01,
+          2.14
+        ],
+        "joint5": [
+          -2.75,
+          2.75
+        ],
+        "joint6": [
+          -0.73,
+          0.95
+        ],
+        "joint7": [
+          -1.5707963,
+          1.5707963
+        ]
+      },
+      "initial_joint_positions_rad": {
+         "joint1": 0.0,
+              "joint2": -0.8,
+              "joint3": 0.0,
+              "joint4": 1.5,
+              "joint5": -1.57,
+              "joint6": 0.0,
+              "joint7": 1.57
+      },
+      "available_connect_joints": [
+        "joint7"
+      ],
+      "available_connect_link": [
+        "link7"
+      ],
+      "position": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quaternion_xyzw": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "robot_attachment": {
+        "properties": {
+          "child_link": []
+        }
+      }
+    }
   }
 }

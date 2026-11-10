@@ -1,37 +1,44 @@
 [
   {
     "id": 1,
-    "name": "ur5e_table_empty",
-    "task_category": "空白"
+    "name": "ur5_table_empty",
+    "task_category": "空白",
+    "no_display": false
   },
   {
     "id": 2,
-    "name": "ur5e_table_apple",
-    "task_category": "抓取"
+    "name": "ur5_table_apple",
+    "task_category": "抓取",
+    "no_display": false
   },
   {
     "id": 3,
-    "name": "ur5e_table_sorting",
-    "task_category": "抓取"
+    "name": "ur5_table_sorting",
+    "task_category": "抓取",
+    "no_display": false
   },
   {
     "id": 4,
-    "name": "ur5e_table_cabinet",
-    "task_category": "开柜"
+    "name": "ur5_table_cabinet",
+    "task_category": "开柜",
+    "no_display": false
   },
   {
     "id": 5,
     "name": "cobotmagic_table_grasp",
-    "task_category": "抓取"
+    "task_category": "抓取",
+    "no_display": false
   },
   {
     "id": 6,
-    "name": "ur5e_table_twist",
-    "task_category": "旋转扭动"
+    "name": "piper_table_twist",
+    "task_category": "旋转扭动",
+    "no_display": false
   },
   {
     "id": 7,
-    "name": "ur5e_table_push_pull",
-    "task_category": "推拉"
+    "name": "ur5_table_push_pull",
+    "task_category": "推拉",
+    "no_display": false
   }
 ]

@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "toy_panda.json",
+  "path": "toy_panda.obj",
+  "thumbnail": "toy_panda_thumbnail.png",
+  "reference": [
+    "toy_panda.mtl",
+    "toy_panda.png"
+  ]
+}

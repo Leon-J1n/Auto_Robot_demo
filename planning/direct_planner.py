@@ -66,7 +66,7 @@ class DirectPlanner:
             "planner": self.planner_id,
             "path_type": path_request["path_type"],
             "waypoints": waypoints.tolist(),
-            **({"cartesian_joint_waypoints": source.tolist()} if path_request["path_type"] == "linear" else {}),
+            **({"cartesian_joint_waypoints": source.tolist()} if path_request["path_type"] in {"linear", "circular"} else {}),
             "duration": duration,
             "planning_time": time.perf_counter() - started,
             "diagnostics": path_request.get("diagnostics", {}),

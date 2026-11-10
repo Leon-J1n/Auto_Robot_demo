@@ -61,14 +61,3 @@ def add_gripper(root, resources):
     actuators = root.find('actuator')
     ET.SubElement(actuators, 'position', name='grasp_servo', joint=master, kp='10', kv='0.3',
                   ctrlrange='0 0.8', forcerange='-2 2')
-    for obj in resources.scene['objects']:
-        if component(obj, 'RigidBody').get('dynamic'):
-            ET.SubElement(equality, 'weld', name='grasp_weld_' + obj['object_name_in_scene'],
-                          body1='robotiq_2f85_base', body2=obj['object_name_in_scene'],
-                          active='false', solref='0.005 1')
-
-    for obj in resources.scene['objects']:
-        for link in component(obj, 'ArticulatedModel').get('links', []):
-            name = obj['object_name_in_scene'] + '__' + link
-            ET.SubElement(equality, 'weld', name='grasp_weld_' + name,
-                          body1='robotiq_2f85_base', body2=name, active='false', solref='0.005 1')

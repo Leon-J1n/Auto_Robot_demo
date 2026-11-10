@@ -3,15 +3,19 @@
     "object_name": "pen",
     "object_id": 5,
     "deformable": false,
-    "scalable": false,
+    "scalable": true,
     "interactable": true,
-    "tag": "orange,slim"
+    "tag": "orange,slim",
+    "can_place": false
   },
   "geometric_properties": {
     "AABB": [
-      0.161027,
-      0.009048,
-      0.010347
+      0.074500255,
+      -0.086526364,
+      0.004523906,
+      -0.004523826,
+      0.005743476,
+      -0.004603183
     ]
   },
   "physical_properties": {
@@ -31,15 +35,27 @@
     ]
   },
   "grasp_properties": {
-    "pose_count": 1,
+    "pose_count": 2,
     "poses": [
       [
-        -0.0060130544,
-        4.0045e-08,
-        0.020570146365,
-        3.1415926,
+        -0.0060,
+        0.0,
+        0.0160,
+        3.1415,
         0.0,
         0.0,
+        0,
+        1,
+        0,
+        1.04
+      ],
+      [
+        -0.0060,
+        0.00,
+        0.0160,
+        3.1415,
+        0.0,
+        3.14,
         0,
         1,
         0,

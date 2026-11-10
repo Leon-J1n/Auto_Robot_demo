@@ -27,7 +27,7 @@ def resolve_held_contact(resources, backend, parameters):
         return result
     gripper = getattr(backend, 'gripper_controller', None)
     name = getattr(gripper, 'held_name', None)
-    state = gripper.get_state(name) if gripper and name else {}
+    state = gripper.get_state() if gripper else {}
     if not state.get('holding'):
         raise ValueError('A target-free push/pull requires an existing grasp')
     for obj in resources.scene['objects']:
@@ -68,7 +68,14 @@ def relative_tool_motion(backend, parameters, operation):
     angle = parameters['angle_deg']
     if isinstance(angle, bool) or not isinstance(angle, (int, float)) or not np.isfinite(angle) or angle == 0:
         raise ValueError('angle_deg must be a finite nonzero increment')
-    center = np.asarray(pose['position']) + vector(parameters.get('arc_center_offset'), 'arc_center_offset')
+    if 'arc_center' in parameters:
+        if 'arc_center_offset' in parameters:
+            raise ValueError('Specify arc_center or arc_center_offset, not both')
+        center = np.asarray(parameters['arc_center'], dtype=float)
+        if center.shape != (3,) or not np.all(np.isfinite(center)):
+            raise ValueError('arc_center must be a finite world xyz point')
+    else:
+        center = np.asarray(pose['position']) + vector(parameters.get('arc_center_offset'), 'arc_center_offset')
     axis = vector(parameters.get('arc_axis'), 'arc_axis')
     if np.linalg.norm(axis) < 1e-12:
         raise ValueError('arc_axis must not be zero')
@@ -121,11 +128,9 @@ def prepare_contact_command(resources, backend, parameters, operation='pull'):
         if result.get('grasp') or result.get('grasp_request') or result.get('request', {}).get('grasp'):
             raise ValueError('contact mode cannot include grasp configuration')
     else:
-        grasp_request = _deep_merge({'grasp': result.get('grasp', {'mode': 'binding'})}, result.get('grasp_request'))
-        mode = grasp_request.get('grasp', {}).get('mode', 'binding')
-        if mode not in {'binding', 'physical'}:
-            raise ValueError('grasp.mode must be binding or physical')
-        result['grasp'] = {'mode': mode}
+        grasp_request = _deep_merge({'grasp': {'mode': 'physical'}}, result.get('grasp_request'))
+        grasp_request['grasp']['mode'] = 'physical'
+        result['grasp'] = {'mode': 'physical'}
         result['grasp_request'] = grasp_request
     result['contact_mode'] = contact_mode
     name = body_name(resources, result)
@@ -141,7 +146,7 @@ def prepare_contact_command(resources, backend, parameters, operation='pull'):
     gripper = getattr(backend, 'gripper_controller', None)
     if contact_mode == 'contact' and gripper and getattr(gripper,'held_name',None):
         raise ValueError('Release the held object before using contact push')
-    if relative and gripper and gripper.get_state(name).get('holding'):
+    if relative and gripper and gripper.get_state().get('holding'):
         result['request'] = _deep_merge({'constraints':{'maximum_force':60,'timeout':90}}, result['request'])
         return result
     pose_keys = ('contact',) if contact_mode == 'contact' else ('contact', 'contact_normal_local')
@@ -172,15 +177,19 @@ def prepare_pull_command(resources, backend, parameters):
     return prepare_contact_command(resources, backend, parameters)
 
 
-def motion_request(resources, backend, parameters):
+def motion_request(resources, backend, parameters, *, blackboard=None):
     name = body_name(resources, parameters)
     if parameters.get('planning_method', 'joint') not in {'joint', 'linear'}:
         raise ValueError('Mechanism approach/retreat supports joint or linear move; use push/pull for arcs')
-    body = backend.object_ids[name]
+    if blackboard is None:
+        from execution.blackboard import TargetBlackboard
+        blackboard = TargetBlackboard()
+    blackboard.observe(backend.get_state())
+    measured_pose = blackboard.require_pose(name)
     pose = parameters['mechanism_pose']
-    rotation = backend.data.xmat[body].reshape(3,3)
+    rotation = Rotation.from_quat(measured_pose['quaternion_xyzw']).as_matrix()
     world = np.eye(4)
-    world[:3,3] = backend.data.xpos[body] + rotation @ np.asarray(pose['position'])
+    world[:3,3] = np.asarray(measured_pose['position']) + rotation @ np.asarray(pose['position'])
     local_rotation = (Rotation.from_quat(pose['quaternion_xyzw']) if 'quaternion_xyzw' in pose
                       else Rotation.from_euler('xyz', pose['rpy']))
     world[:3,:3] = rotation @ local_rotation.as_matrix()
@@ -210,7 +219,8 @@ def motion_request(resources, backend, parameters):
 def apply_global_motion_timing(resources, request):
     """Use the same scene joint velocity limits as move, unless explicitly capped."""
     request = deepcopy(request)
-    defaults = resources.scene['move_defaults']
+    from demo.task_commands.converter import _deep_merge
+    defaults = _deep_merge(resources.scene['move_defaults'], request)
     from planning.time_parameterization import continuous_motion_limits
     count = len(resources.joint_names)
     velocity, acceleration = continuous_motion_limits(defaults, count)

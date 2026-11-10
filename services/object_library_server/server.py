@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS assets (
     name VARCHAR(64) NOT NULL,
     upload_user_id INTEGER NOT NULL DEFAULT 0,
     category VARCHAR(32) NOT NULL,
-    is_deleted BOOL NOT NULL DEFAULT 0
+    is_deleted BOOL NOT NULL DEFAULT 0,
+    no_display BOOL NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_assets_name ON assets(name);
 """
@@ -149,8 +150,15 @@ def read_version_file(path):
 
 def ensure_schema(data_dir):
     for typ in ASSET_TYPES:
-        with get_conn(data_dir, typ) as con:
+        con = get_conn(data_dir, typ)
+        try:
             con.executescript(SCHEMA)
+            columns = {row["name"] for row in con.execute("PRAGMA table_info(assets)")}
+            if "no_display" not in columns:
+                con.execute("ALTER TABLE assets ADD COLUMN no_display BOOL NOT NULL DEFAULT 0")
+            con.commit()
+        finally:
+            con.close()
 
 
 def get_conn(data_dir, typ):
@@ -328,12 +336,12 @@ class OLSHandler(BaseHTTPRequestHandler):
         if category:
             rows = fetch_all(self.data_dir(), typ,
                              "SELECT id, name, category FROM assets "
-                             "WHERE is_deleted = 0 AND upload_user_id IN (0, ?) AND category = ? ORDER BY id",
+                             "WHERE is_deleted = 0 AND no_display = 0 AND upload_user_id IN (0, ?) AND category = ? ORDER BY id",
                              (uid, category))
         else:
             rows = fetch_all(self.data_dir(), typ,
                              "SELECT id, name, category FROM assets "
-                             "WHERE is_deleted = 0 AND upload_user_id IN (0, ?) ORDER BY id",
+                             "WHERE is_deleted = 0 AND no_display = 0 AND upload_user_id IN (0, ?) ORDER BY id",
                              (uid,))
         self._send_json({"type": typ,
                          "items": [{"id": r["id"], "name": r["name"], "category": r["category"]} for r in rows]})

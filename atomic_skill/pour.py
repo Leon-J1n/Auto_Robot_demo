@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.spatial.transform import Rotation
+from copy import deepcopy
+from demo.task_commands.converter import _deep_merge
 
 
 def _transform(record):
@@ -37,6 +39,7 @@ class DemoPourExecutor:
         self.sync = synchronizer
         self.checker = checker
         self.report = report
+        self.motion_overrides = {}
 
     def _tool_world(self):
         fk = self.kinematics.forward(self.backend.get_joint_positions())
@@ -46,7 +49,8 @@ class DemoPourExecutor:
         return t
 
     def _execute_pose(self, pose, phase, angle, row, *, request_phase=None):
-        result = self.execute_motion(_pose_request(pose, phase=request_phase or phase))
+        request = _deep_merge(self.motion_overrides, _pose_request(pose, phase=request_phase or phase))
+        result = self.execute_motion(request)
         row["substeps"].append({"phase": phase, "tilt_deg": float(angle), "result": result})
         if not result.get("success"):
             row.update(success=False, status="error", error=result.get("error", {
@@ -57,6 +61,7 @@ class DemoPourExecutor:
         return True
 
     def execute(self, parameters, row):
+        self.motion_overrides = deepcopy(parameters.get('request', {}))
         source = str(parameters.get("source", ""))
         target = str(parameters.get("target", ""))
         held = getattr(self.backend.gripper_controller, "held_name", None)
@@ -64,9 +69,10 @@ class DemoPourExecutor:
             raise ValueError("pour requires source and target")
         if held != source:
             raise ValueError(f"pour requires {source!r} to be held; currently held={held!r}")
-        state = self.backend.get_state()
-        if source not in state["objects"] or target not in state["objects"]:
-            raise ValueError(f"pour objects not found in runtime state: {source}, {target}")
+        self.sync.sync(self.backend, self.kinematics, self.checker)
+        board = self.sync.blackboard
+        source_pose = board.require_pose(source)
+        target_pose = board.require_pose(target)
 
         outlet = np.asarray(parameters.get("outlet_offset_object", [0.0, 0.0, 0.15]), dtype=float)
         opening_axis = np.asarray(parameters.get("opening_axis_object", [0.0, 0.0, 1.0]), dtype=float)
@@ -80,7 +86,7 @@ class DemoPourExecutor:
         tilt_axis /= np.linalg.norm(tilt_axis)
 
         target_offset = np.asarray(parameters.get("target_offset_object", [0.0, 0.0, 0.08]), dtype=float)
-        target_world = _transform(state["objects"][target])
+        target_world = _transform(target_pose)
         target_point = target_world @ np.r_[target_offset, 1.0]
         target_point[2] += float(parameters.get("clearance_m", 0.08))
         xy_tolerance = float(parameters.get("outlet_xy_tolerance_m", 0.025))
@@ -91,7 +97,7 @@ class DemoPourExecutor:
         if not (0.0 <= start_deg < end_deg <= 180.0 and step_deg > 0.0):
             raise ValueError("invalid pour tilt parameters")
 
-        source_world = _transform(state["objects"][source])
+        source_world = _transform(source_pose)
         tool_world = self._tool_world()
         tool_from_source = np.linalg.inv(tool_world) @ source_world
         base_rotation = source_world[:3, :3]
@@ -119,8 +125,8 @@ class DemoPourExecutor:
             return row
 
         # Re-measure the fixed grasp transform after approach.
-        state = self.backend.get_state()
-        source_world = _transform(state["objects"][source])
+        self.sync.sync(self.backend, self.kinematics, self.checker)
+        source_world = _transform(board.require_pose(source))
         tool_from_source = np.linalg.inv(self._tool_world()) @ source_world
         row["tilt_angles_deg"] = []
 

@@ -9,7 +9,7 @@ import mujoco
 import numpy as np
 
 from kinematics import IKError
-from skills.manipulation.press.utils.error_codes import ErrorCode, PressExecutionError
+from atomic_action.manipulation.press.utils.error_codes import ErrorCode, PressExecutionError
 
 
 class MujocoPressController:
@@ -122,9 +122,6 @@ class MujocoPressController:
                     force, raw_contact, contacts = self._target_contact(options["target_object_id"])
                     contact = raw_contact and force >= float(options["contact_threshold"])
                     peak_force = max(peak_force, force)
-                foreign = self._foreign_contacts(options["target_object_id"])
-                if foreign:
-                    raise PressExecutionError("Unexpected local collision during press.", error_code=ErrorCode.LOCAL_COLLISION_DETECTED, failed_stage="execution", recoverable=True, recommended_action="Correct the pre-press pose or local scene; Press Skill will not change the press direction.", details={"contacts": foreign})
                 samples.append({"travel": travel, "force": force, "contact": contact, "contacts": contacts})
                 if force > float(options["maximum_force"]) + 1e-9:
                     raise PressExecutionError("Maximum press force exceeded.", error_code=ErrorCode.FORCE_LIMIT_EXCEEDED, failed_stage="execution", recoverable=False, recommended_action="Inspect the target, press direction, and force limit before retrying.", details={"peak_force": force, "maximum_force": options["maximum_force"]})

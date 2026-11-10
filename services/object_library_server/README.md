@@ -4,7 +4,7 @@
 
 - 零第三方依赖，仅需 Python 3.8+
 - SQLite（`data/{scene,model,robot}_index.db`）作为资产索引
-- 多用户隔离（uid）、软删除、路径安全校验
+- 多用户隔离（uid）、软删除、列表隐藏（`no_display`）、路径安全校验
 
 ## 目录结构
 
@@ -17,16 +17,44 @@ ObjectLibraryServer/
 ├── launch_server.bat    # Windows 启动脚本
 ├── pack.py              # 打包脚本：python pack.py <代码版本> [资源版本] -> dist/<版本>/
 ├── VERSION.txt          # 代码版本（AppVersion x.y.z[-附加] + built at 构建时间）
-├── tests/               # 端到端测试（47 个用例）+ 版本规则单元测试（7 个）
+├── hooks/               # Git 钩子与安装脚本（克隆后需运行安装脚本，见下文）
+│   ├── post-commit      # 提交后自动刷新版本，作为单独的一次提交
+│   ├── refresh_version.py  # 钩子逻辑：data 变更刷新资源版本，代码变更刷新代码版本
+│   └── install_hooks.bat / install_hooks.sh  # 应用钩子到本仓库
+├── tests/               # 端到端测试、索引迁移测试、版本规则与钩子单元测试
 ├── docs/OLS接口.md      # 接口规格文档
 └── data/                # 资产数据（服务只读，写接口产物也落在此处）
     ├── VERSION.txt      # 资源版本（ResVersion x.y.z[-附加] + built at 构建时间）
     ├── scene_index.db / model_index.db / robot_index.db
     ├── scenes/<id>/  models/<id>/  robots/<id>/
-    └── *_index.json   # 旧版 JSON 索引（迁移来源，保留存档）
+    └── {scenes,models,robots}/*_index.json  # 旧版 JSON 索引（迁移来源）
 ```
 
 ## 快速开始
+
+### 0. 应用 Git 钩子（每个克隆必做一次）
+
+钩子不随克隆自动生效，**每个仓库克隆下来后都要先运行一次安装脚本**：
+
+```bash
+hooks\install_hooks.bat        # Windows（cmd）
+sh hooks/install_hooks.sh      # Linux / macOS / Git Bash
+```
+
+脚本只做一件事：`git config core.hooksPath hooks`（本仓库本地配置，不影响其他仓库）。
+之后每次 `git commit` 完成时，`post-commit` 钩子检查本次提交改动的文件：
+
+- `data/` 内容有更改（不含 `data/VERSION.txt` 本身）→ 刷新 `data/VERSION.txt`；
+- 代码文件有更改（`.py` `.bat` `.sh` `.cmd` `.ps1` `.js` `.ts` `.c` `.cpp` `.h` `.go` `.rs` 等，
+  不含 `data/`、`dist/` 下的文件）→ 刷新根目录 `VERSION.txt`；
+- 两者都无更改（如只改文档）→ 什么都不做。
+
+刷新规则：保留 `主版本号.子版本号.小版本号`，附加字符串替换为本次提交的短哈希
+（没有附加字符串或没有 `-` 时补上 `-短哈希`），`built at` 更新为当前时间，然后
+`git add` + `git commit` 生成**一次单独的刷新提交**（提交信息为
+`chore: refresh VERSION.txt (triggered by <短哈希>)`）。触发提交原样保留，
+附加字符串对应的记录可以直接在 `git log` 中查到。刷新提交只改 `VERSION.txt`，
+两条规则都不命中，因此不会再次刷新；环境变量 `OLS_VERSION_HOOK_RUNNING` 兜底防重复执行。
 
 ### 1. 初始化索引（首次运行）
 
@@ -37,7 +65,7 @@ python init_index.py --data-dir ./data
 ```
 
 输出示例：`scene: wrote 5 records`、`model: wrote 29 records`、`robot: wrote 14 records`。
-所有导入记录的 `upload_user_id=0`（系统资产）、`is_deleted=0`。脚本可重复执行（每次重建 .db）。
+所有导入记录的 `upload_user_id=0`（系统资产）、`is_deleted=0`；`no_display` 从旧 JSON 索引读取，缺省为 `false`。脚本会重建 .db；已有数据库只需启动服务器，启动时自动添加缺失的 `no_display` 列并保留原记录。
 
 ### 2. 配置
 
@@ -95,6 +123,17 @@ python pack.py 1.0.2 --no-data        # 精简包：只需要一个版本号，�
 - 每个 uid 只能看到：系统上传资产（`upload_user_id=0`）+ 自己上传的资产。
 - 他人资产一律返回 404（与不存在一致，不泄露存在性）。
 - 软删除的记录对所有 uid 不可见，但 id 永不复用。
+- `no_display=true` 的记录不出现在 `/list` 中；按 id 查询、按 name 查询、文件下载与缩略图仍遵循原有 uid 和软删除规则。`/listCategory` 不受此字段影响。
+
+### 列表隐藏（`no_display`）
+
+三个 SQLite 索引表的 `assets.no_display` 均为布尔列，默认 `false`。例如将模型 22 从列表隐藏，但仍允许知道 id 的客户端访问：
+
+```sql
+UPDATE assets SET no_display = 1 WHERE id = 22; -- 在 data/model_index.db 中执行
+```
+
+要重新显示，将其设为 `0`。若日后使用 `init_index.py` 从 JSON 重建数据库，也要同步修改相应 `*_index.json`：场景索引为每个条目的 `"no_display": true/false`；模型和机器人索引为顶层 `"no_display": {"22": true, ...}`，键是字符串 id。现有索引全部为 `false`。不要对已有数据重复运行 `init_index.py`，因为该脚本会重建数据库。
 
 ### 查询类（GET）
 
@@ -166,14 +205,17 @@ curl -X POST "$BASE/deleteAsset?type=model&id=30&uid=7"
 
 ### 自动化端到端测试（推荐先跑这个）
 
-测试会在临时目录构造一套小型资产库（scene/model/robot 各含系统资产），启动真实 HTTP 服务后通过 urllib 逐接口验证，包括 47 个用例：查询与合并返回、id/name 解析、category 过滤、路径安全（`..`、绝对路径、空字节、扩展名白名单、package:// 前缀）、缩略图、uid 隔离（跨用户 404 / 上传 403）、完整上传流程与清单登记、软删除与 id 不复用、管理员删除、id 分区规则（用户 10000 起 / 系统 10000 以下 / 用尽回退）。
+测试会在临时目录构造一套小型资产库（scene/model/robot 各含系统资产），启动真实 HTTP 服务后通过 urllib 逐接口验证，包括查询与合并返回、id/name 解析、category 过滤、`no_display` 列表隐藏和数据库迁移、路径安全、缩略图、uid 隔离、上传、软删除与 id 分区规则。
 
 ```bash
 python tests/test_api.py          # 或 python -m unittest tests.test_api -v
-# 期望：Ran 47 tests ... OK
+# 期望：全部测试通过
 
 python tests/test_version.py      # 版本文件解析 + pack 版本格式/自动 +1 规则（7 个用例）
 # 期望：Ran 7 tests ... OK
+
+python tests/test_hooks.py        # 钩子分类/刷新规则 + 临时仓库真实钩子运行（10 个用例）
+# 期望：Ran 10 tests ... OK
 ```
 
 测试完全在临时目录进行，不会触碰 `data/`。

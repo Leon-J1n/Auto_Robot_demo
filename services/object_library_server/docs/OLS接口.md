@@ -9,13 +9,14 @@
 3. 所有查询接口（/list、/listCategory、/scene、/sceneByName、/model、/modelByName、/robot、/robotByName、/file、/fileByName、/thumbnail）只在可见范围内解析和返回数据。若 id 或 name 在索引中存在但对当前 uid 不可见，返回 404（与不存在一致，避免泄露他人资产的存在性）。
 4. /presignUploadID 新建的记录 `upload_user_id = uid`；/uploadFile 校验目标记录的 `upload_user_id` 与请求 uid 一致，不一致返回 403。
 5. 所有查询接口只返回 `is_deleted = false` 的记录；/deleteAsset 通过置 `is_deleted = true` 实现软删除（详见接口表）。
+6. `no_display = true` 仅从 `/list` 结果中排除该记录；按 id、按 name、文件与缩略图接口仍按上述 uid 与 `is_deleted` 规则访问。`/listCategory` 不受此标记影响。
 
 具有以下接口：
 
 | 类型 | 接口             | 参数                       | 说明                                                         |
 | ---- | ---------------- | -------------------------- | ------------------------------------------------------------ |
-| GET  | /list            | type,uid,category          | type只能为scene或model或robot，该接口用于列出当前uid可见的所有相应类型的数据列表；`category` 为可选过滤参数，提供时只返回该类别的可见资产（类别字符串与索引中的 category 精确匹配）。返回 JSON类似：`{"type":"model","items":[{"id":1,"name":"apple","category":"模型.抓取物"}]}` |
-| GET  | /listCategory    | type,uid                   | 列出当前指定type下、当前uid可见资产的所有可能类别，返回JSON类似：{"type":"model", "category":["模型.抓取物", "模型.容器"]} |
+| GET  | /list            | type,uid,category          | type只能为scene或model或robot，列出当前uid可见、未删除且 `no_display=false` 的资产；`category` 为可选精确匹配过滤参数。`no_display` 不出现在响应条目中。返回 JSON类似：`{"type":"model","items":[{"id":1,"name":"apple","category":"模型.抓取物"}]}` |
+| GET  | /listCategory    | type,uid                   | 列出当前指定type下、当前uid可见资产的所有可能类别（不按 `no_display` 筛选），返回JSON类似：{"type":"model", "category":["模型.抓取物", "模型.容器"]} |
 | GET  | /scene           | id,uid                     | 获取指定id的场景数据。根据id从scene\_index.db中找到场景名，返回 `data/scenes/id/{scene_name}.json` 的 JSON 内容。 |
 | GET  | /sceneByName     | name,uid                   | 获取指定name的场景数据，根据name从scene\_index.db中找到场景id，然后返回 `data/scenes/id/{scene_name}.json` 的 JSON 内容。`name` 必须存在于对应的索引中，不能直接拼接用户输入。若不存在（或对该uid不可见），返回 404。如果有多个，返回第一个。 |
 | GET  | /model           | id,uid                     | 获取指定id的模型数据，返回 `data/models/id/name.json` 的 JSON 内容+data/models/id/{$name}_files.json的内容，将两组json拼接成一个返回。 |
@@ -26,7 +27,7 @@
 | GET  | /fileByName      | type,name,path,uid         | type必须为model或robot（可通过config调整），name必须是当前uid可见的有效名字，`path` 是相对于模型或机械臂目录的任意相对路径，但扩展名必须在 `allowed_extensions` 中，且最终路径必须位于 `data/<type>s/<id>/` 内。本接口用于获取指定路径的文件（通常用于客户端下载模型），返回./data/{type}s/id/path 的文件，由于数据中当is_on_cos=true时，path总是一个相对路径，因此可以放心拼接。通过config来指定哪些类型可以通过该接口下载。如果有多个id，返回第一个。 |
 | GET  | /thumbnail       | type,id,uid                | 获取指定类型指定id的缩略图，type=scene\|model\|robot，thumbnail路径存在于对应物体的文件清单（`{name}_files.json`）的 `thumbnail` 字段中（三种类型均有文件清单）。 |
 | POST | /deleteAsset     | type,id,uid                | type为scene\|model\|robot，软删除指定资产：仅将该type索引中对应记录的 `is_deleted` 置为 true，磁盘上的数据目录和文件保留不动。删除后，所有查询接口不再返回该资产（含 /list、/listCategory、/scene、/model、/robot、/file、/fileByName、/thumbnail 及按 name 的解析），但已分配的 id 不会被复用（新上传仍按第7条分区规则取号，含已删除记录）。仅允许删除 `upload_user_id = uid` 的资产（即用户只能删除自己上传的）：目标记录存在但对当前 uid 可见范围内属于系统上传或他人上传时返回 403；记录不存在、已删除或对当前 uid 不可见时返回 404。uid=0 视为系统管理员，可删除任意记录。成功返回 JSON：{"deleted": true, "type": "model", "id": 30}。 |
-| POST | /presignUploadID | type,name,entranceFilePath,uid,category | type为scene\|model\|robot，当用户准备开始上传文件之前，先获取一个预注册的ID用于后续上传。name是新资产的名字，entranceFilePath表示该资产的入口文件路径，将会填入{$name}_files.json中的path字段。category为新资产的类别字符串（如"模型.抓取物"、"场景.抓取"），未提供时默认为"{类型前缀}.自定义"，类型前缀按type取 模型/机械臂/场景（即默认"模型.自定义"、"机械臂.自定义"、"场景.自定义"）。服务端在对应类型的索引中新建记录：id按第7条分区规则分配（uid>0 时从 10000 起累加；uid=0 时在 10000 以下累加，用尽后回退全表最大+1；均在该type全部记录上取值，避免与任何人已占用的id冲突），upload_user_id=uid，is_deleted=false，并在 `data/<type>s/<id>/` 下建立目录和一份仅含 `is_on_cos:false` 与 `path:entranceFilePath` 的{$name}_files.json（metadata/thumbnail/reference字段由后续 /uploadFile 的role参数逐步补全）。返回 JSON：{"type":"model","id":30,"name":"apple"}。注意：在当前版本,is_on_cos字段总为false. |
+| POST | /presignUploadID | type,name,entranceFilePath,uid,category | type为scene\|model\|robot，当用户准备开始上传文件之前，先获取一个预注册的ID用于后续上传。name是新资产的名字，entranceFilePath表示该资产的入口文件路径，将会填入{$name}_files.json中的path字段。category为新资产的类别字符串（如"模型.抓取物"、"场景.抓取"），未提供时默认为"{类型前缀}.自定义"，类型前缀按type取 模型/机械臂/场景（即默认"模型.自定义"、"机械臂.自定义"、"场景.自定义"）。服务端在对应类型的索引中新建记录：id按第7条分区规则分配（uid>0 时从 10000 起累加；uid=0 时在 10000 以下累加，用尽后回退全表最大+1；均在该type全部记录上取值，避免与任何人已占用的id冲突），upload_user_id=uid，is_deleted=false，no_display=false，并在 `data/<type>s/<id>/` 下建立目录和一份仅含 `is_on_cos:false` 与 `path:entranceFilePath` 的{$name}_files.json（metadata/thumbnail/reference字段由后续 /uploadFile 的role参数逐步补全）。返回 JSON：{"type":"model","id":30,"name":"apple"}。注意：在当前版本,is_on_cos字段总为false. |
 | POST | /uploadFile      | type,id,path,content,uid,role | type为scene\|model\|robot，id为从/presignUploadID获取的预签名ID，path是一个相对路径，表示上传后此文件应当位于目录中的哪里，content是文件内容（type/id/path/uid/role 通过查询字符串传递，content 为 POST 请求体的原始字节，不做 encoding）。服务端校验该记录的upload_user_id与请求uid一致（不一致返回403）。`role` 为可选参数，取值 metadata\|thumbnail\|reference，缺省为 reference：role=reference 且 path 非 entranceFilePath 时，路径填入清单的 reference 数组；role=metadata 时写入清单的 metadata 字段（仅model/robot，场景清单无此字段，返回400）；role=thumbnail 时写入清单的 thumbnail 字段。文件一律写入 `data/<type>s/<id>/<path>`（路径安全规则同 /file）。 |
 
 建议的项目结构如下：
@@ -201,8 +202,11 @@
 | upload_user_id | int         | 上传用户id，如果是系统上传，默认为0，绝不为null |
 | category       | varchar(32) | 类别，需要支持UTF-8，绝不为null                 |
 | is_deleted     | bool        | 是否被删除，默认是false                         |
+| no_display     | bool        | 是否从 `/list` 隐藏，默认是false；不影响按 id 访问 |
 
 category使用分层字符串，按类型分别以`模型.`、`机械臂.`、`场景.`为前缀，例如"模型.抓取物"、"机械臂.夹爪"、"场景.抓取"、"场景.开柜"、"场景.空白"。
+
+旧 JSON 索引中也保留 `no_display`：`scenes/scene_index.json` 的每个场景条目使用布尔字段 `"no_display": false`；`models/model_index.json` 与 `robots/robot_index.json` 使用顶层 `"no_display": {"1": false, ...}`，以字符串 id 为键。`init_index.py` 从这些字段导入数据库，缺省为 `false`。已有 SQLite 索引在服务器启动时自动添加该列，保留原数据。`init_index.py` 会重建数据库，因此不能用它迁移已有上传记录。设置为 `true` 的资产仍能按 id 访问；若需持久保留隐藏设置，在数据库与旧 JSON 索引中同步修改对应值。
 
 
 

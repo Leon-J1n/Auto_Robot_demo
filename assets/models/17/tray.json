@@ -5,13 +5,17 @@
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "brown,green,rectangular"
+    "tag": "brown,green,rectangular",
+    "can_place": true
   },
   "geometric_properties": {
     "AABB": [
-      0.32,
-      0.46,
-      0.075
+      0.16,
+      -0.16,
+      0.23,
+      -0.23,
+      0.075,
+      0.0
     ]
   },
   "physical_properties": {
@@ -36,7 +40,7 @@
       [
         0.0,
         0.0,
-        0.0875,
+        0.0975,
         3.14,
         0.0,
         1.57,
@@ -48,7 +52,7 @@
       [
         0.0,
         0.0,
-        0.0875,
+        0.0975,
         3.14,
         0.0,
         0.0,

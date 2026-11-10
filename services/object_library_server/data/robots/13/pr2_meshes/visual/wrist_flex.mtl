@@ -1,7 +1,8 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
+# https://github.com/mikedh/trimesh
 
-newmtl material_0
-Ka 0.6 0.63 0.67
-Kd 0.6 0.63 0.67
-Ks 0.05 0.05 0.05
-Ns 20
+newmtl wrist_flex_material_0
+Ka 0.40000000 0.40000000 0.40000000
+Kd 1.00000000 1.00000000 1.00000000
+Ks 0.40000000 0.40000000 0.40000000
+Ns 1.00000000
+map_Kd wrist_flex_color_0.png

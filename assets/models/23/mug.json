@@ -3,15 +3,19 @@
     "object_name": "mug",
     "object_id": 23,
     "deformable": false,
-    "scalable": false,
+    "scalable": true,
     "interactable": true,
-    "tag": "white,textured"
+    "tag": "white,textured",
+    "can_place": true
   },
   "geometric_properties": {
     "AABB": [
-      0.13074,
-      0.096522,
-      0.114624
+      0.046532,
+      -0.04999,
+      0.065627,
+      -0.065113,
+      0.114619,
+      -5E-06
     ]
   },
   "physical_properties": {
@@ -34,12 +38,12 @@
     "pose_count": 1,
     "poses": [
       [
-        -0.000257,
-        0.048271,
-        0.067307,
+        -0.05,
+        -0.0182,
+        0.073,
         3.14,
         0,
-        0,
+        1.57,
         1,
         0,
         0,

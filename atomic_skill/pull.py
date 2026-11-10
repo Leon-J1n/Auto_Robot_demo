@@ -1,13 +1,12 @@
-"""Pull task skill with local contact preparation, execution, and reporting."""
+"""Pull task skill for moving an already-held object and releasing it."""
 from copy import deepcopy
 import math
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 from demo.task_commands.converter import _deep_merge
-from demo.interaction.requests import body_name, motion_request, push_pull_request
+from demo.interaction.requests import body_name, motion_request, push_pull_request, relative_tool_motion, apply_global_motion_timing
 from demo.interaction.closure_validation import execute_checked_grasp
-from atomic_skill.release import release_request
 from atomic_action.motion.common.interaction import execute_grasp_pose_move, planning_failed_without_motion
 
 
@@ -116,16 +115,13 @@ class PullMotionExecutor:
             req=deepcopy(resolved_request)
         elif spec:
             spec={'target':self.params['target'],'link':self.params.get('link'),**deepcopy(spec)}
-            req=motion_request(self.resources,self.backend,spec)
+            req=motion_request(self.resources,self.backend,spec,blackboard=self.sync.blackboard)
         else:
             req=self._control_request(np.asarray(position),np.asarray(rotation),linear,override)
-        def checked(state):
+        def record(state):
             if self.callback:self.callback(state)
             self.sync.sync(self.backend,self.kinematics,self.checker)
-            if not self._demo_ignore_fallback_collisions:
-                hit=self.checker.check(state['joints'])
-                if hit.in_collision:raise RuntimeError(f'Execution frame collision: {hit.contacts}')
-        self.backend.set_frame_callback(checked)
+        self.backend.set_frame_callback(record)
         try:
             if grasp_pose_fallback:
                 req,result=execute_grasp_pose_move(req,self.execute_motion,self.backend)
@@ -141,7 +137,7 @@ class PullMotionExecutor:
 
     def _release(self):
         self._phase('release')
-        req=release_request(self.resources,{'target':self.params['target'],'link':self.params.get('link'),**self.params.get('release_request',{})})
+        req=deepcopy(self.params.get('release_request',{}))
         result=self.releaser.execute(req)
         self.checker.support_geoms.clear();self.checker.carrying_safety_distance=0.
         return self._record('release',result)
@@ -175,23 +171,6 @@ class PullMotionExecutor:
                 retreat_params['pose_axis'] = (rot.T @ (-direction / np.linalg.norm(direction))).tolist()
         retreat_params['target_pose'] = target_pose
         return RetreatSkill(self).execute(retreat_params, release_first=release_first)
-
-    def _retreat_clearance_met(self, safety_distance=0.003):
-        """Measure retreat clearance while treating the target as an ordinary pair."""
-        previous_target = getattr(self.backend, 'contact_target', None)
-        try:
-            self.backend.contact_target = None
-            previous_target_id = getattr(self.backend, 'contact_target_object_id', None)
-            self.backend.contact_target_object_id = None
-            self.sync.sync(self.backend, self.kinematics, self.checker)
-            hit = self.checker.check(self.backend.get_joint_positions(),
-                                     safety_distance=float(safety_distance))
-            return not hit.in_collision
-        finally:
-            self.backend.contact_target = previous_target
-            self.backend.contact_target_object_id = previous_target_id
-            self.sync.sync(self.backend, self.kinematics, self.checker)
-
 
     def _low(self, name, request, record_history=False):
         from demo.interaction.requests import apply_global_motion_timing
@@ -263,7 +242,7 @@ class PullMotionExecutor:
         self._demo_ignore_fallback_collisions=bool(self.params.get('demo_ignore_fallback_collisions',False))
         set_demo_ignore=getattr(self.checker,'set_demo_ignore_collisions',None)
         if callable(set_demo_ignore):set_demo_ignore(False)
-        self.name=body_name(self.resources,parameters)
+        self.name = None  # Push/pull move the held tool without resolving an object.
         self.callback=self.backend.frame_callback
         self.phase=operation
         try:
@@ -330,7 +309,8 @@ class PullMotionExecutor:
             # resolve the selected handle pose without moving to that pre-point.
             request = (failed['request'] if phase == 'contact' else
                 motion_request(self.resources,self.backend,{
-                    'target':p['target'],'link':p.get('link'),**deepcopy(p['contact'])}))
+                    'target':p['target'],'link':p.get('link'),**deepcopy(p['contact'])},
+                    blackboard=self.sync.blackboard))
             if phase == 'contact' and interaction_joints is not None:
                 request = self._joint_anchor_request(
                     interaction_joints, 'contact', request)
@@ -366,17 +346,15 @@ class PullMotionExecutor:
 
     def _prepare_grasp(self, operation, *, prepare_approach=True):
         p=self.params
-        state = self.backend.gripper_controller.get_state(self.name)
-        if state.get('holding') and state.get('mode') != p.get('grasp', {}).get('mode', 'binding'):
-            return self._fail('GRASP_MODE_MISMATCH', 'Release the current grasp before changing binding/physical mode')
+        state = self.backend.gripper_controller.get_state()
         # A sequential close reuses the existing grasp at the measured open pose.
         if not state.get('holding') and prepare_approach:
             if not self._prepare_contact_approach(operation):
                 return False
-        if not self.backend.gripper_controller.get_state(self.name).get('holding'):
+        if not self.backend.gripper_controller.get_state().get('holding'):
             self._phase('grasp')
-            req=_deep_merge({'target':{'type':'object','object_id':self.name},'grasp':p.get('grasp', {'mode':'binding'})},p.get('grasp_request',{}))
-            if req['target']['object_id']!=self.name:return self._fail('INVALID_REQUEST','Grasp target mismatch')
+            req=_deep_merge({'grasp':{'mode':'physical'}},p.get('grasp_request',{}))
+            req['grasp']['mode'] = 'physical'
             result=execute_checked_grasp(self.grasper,req,self.backend,self.checker)
             if not self._record('grasp',result):return False
         return True
@@ -385,7 +363,7 @@ class PullMotionExecutor:
         spec = self.params.get('contact')
         if spec:
             resolved = {'target': self.params['target'], 'link': self.params.get('link'), **deepcopy(spec)}
-            request = motion_request(self.resources, self.backend, resolved)
+            request = motion_request(self.resources, self.backend, resolved, blackboard=self.sync.blackboard)
             target = request['target']
             position = np.asarray([target['position'][key] for key in 'xyz'], dtype=float)
             orientation = target['orientation']
@@ -411,7 +389,7 @@ class PullMotionExecutor:
             'trajectory': 'linear' if 'distance' in p else 'circular',
             'contact_mode': 'grasp',
         }
-        request['grasp'] = deepcopy(p.get('grasp', {'mode': 'binding'}))
+        request['grasp'] = {'mode': 'physical'}
         if 'distance' in p:
             frame = p.get('frame', 'tool')
             basis = interaction_pose['rotation_matrix'] if frame == 'tool' else np.eye(3)
@@ -464,75 +442,74 @@ class PullMotionExecutor:
         return None
 
     def _execute_grasped_motion(self, operation):
+        """Move an object that is already held, then release it.
+
+        Pull is deliberately a small task-level composition here: it does not
+        approach, grasp, retreat, or run a second grasp planner.  The motion
+        action plans from the robot's current state, and selects its concrete
+        path from ``distance``/``angle_deg``.
+        """
         self.details['contact_mode'] = 'grasp'
-        if not hasattr(self, 'skill') or not hasattr(self, 'resources'):
-            if not self._prepare_grasp(operation):
-                return False
-            request = push_pull_request(self.resources, self.backend, self.params, operation)
-            start, rotation = self._grasp_pose()
-            arc = request['strategy_params']
-            if request.get('motion', {}).get('path_type', 'circular') == 'linear':
-                b = start + np.asarray(arc['direction']) * arc['distance']
-            else:
-                b = np.asarray(arc['arc_center']) + Rotation.from_rotvec(
-                    np.asarray(arc['arc_axis']) * arc['arc_angle']).apply(
-                        start - np.asarray(arc['arc_center']))
-            self.history = [start.tolist()]
-            result = self._low(operation, request, True)
-            a, _ = self._grasp_pose()
-            self.details.update(a=a.tolist(), b=b.tolist(), history=self.history)
-            if not result['success'] and not self._suspended_motion_executed(result):
-                self._record_suspended_motion(result)
-                return False
-            if hasattr(self, 'sync'):
-                if not self._post_contact_retreat(request, release_first=bool(result['success']), operation=operation):
-                    return False
-            if not result['success']:
-                self._record_suspended_motion(result)
-                return False
-            verified = self._verify_goal()
-            if verified:
-                return True
-            self._record_suspended_motion(result)
-            return False
-        if not self._prepare_contact_approach(operation):
-            return False
-        planned = self._plan_interaction_motion(operation)
-        if planned is None:
-            return False
-        request, prepared = planned
-        if not self._prepare_grasp(operation, prepare_approach=False):
-            return False
-        self.skill.rebase_prepared_object_state(request, prepared)
-        start,rotation=self._grasp_pose()
-        arc=request['strategy_params']
-        if request.get('motion', {}).get('path_type', 'circular') == 'linear':
-            b=start+np.asarray(arc['direction'])*arc['distance']
+        state = self.backend.gripper_controller.get_state()
+        if not state.get('holding'):
+            return self._fail('OBJECT_NOT_HELD', f'{operation.capitalize()} requires the target to be grasped first')
+
+        has_distance = 'distance' in self.params
+        has_angle = 'angle_deg' in self.params
+        if has_distance == has_angle:
+            return self._fail(
+                'INVALID_REQUEST',
+                f'{operation.capitalize()} requires exactly one of distance or angle_deg',
+            )
+        if has_distance and 'direction' not in self.params:
+            return self._fail('INVALID_REQUEST', f'Linear {operation} requires direction')
+        if has_angle and ('arc_center' not in self.params or 'arc_axis' not in self.params):
+            return self._fail('INVALID_REQUEST', f'Circular {operation} requires arc_center and arc_axis')
+
+        try:
+            path, motion_params = relative_tool_motion(self.backend, self.params, operation)
+            request = _deep_merge(self.resources.scene['move_defaults'], self.params.get('request', {}))
+            request['motion'] = {'path_type': path}
+            request.setdefault('strategy_params', {}).update(motion_params)
+            request = apply_global_motion_timing(self.resources, request)
+        except (KeyError, ValueError, TypeError) as exc:
+            return self._fail('INVALID_REQUEST', str(exc))
+
+        pose = self.backend.get_end_effector_pose()
+        position = np.asarray(pose['position'], dtype=float)
+        rotation = np.asarray(pose['rotation_matrix'], dtype=float)
+        params = request['strategy_params']
+        if has_distance:
+            goal_position = position + np.asarray(params['direction']) * params['distance']
+            goal_rotation = rotation
         else:
-            axis=np.asarray(arc['arc_axis']);center=np.asarray(arc['arc_center'])
-            b=center+Rotation.from_rotvec(axis*arc['arc_angle']).apply(start-center)
-        self.history=[start.tolist()]
-        result=self._low_prepared(operation,request,prepared,True)
-        a,_=self._grasp_pose()
-        self.details.update(a=a.tolist(),b=b.tolist(),history=self.history)
-        if not result['success'] and not self._suspended_motion_executed(result):
-            self._record_suspended_motion(result)
+            arc_rotation = Rotation.from_rotvec(np.asarray(params['arc_axis']) * params['arc_angle'])
+            center = np.asarray(params['arc_center'])
+            goal_position = center + arc_rotation.apply(position - center)
+            goal_rotation = arc_rotation.as_matrix() @ rotation
+        quaternion = Rotation.from_matrix(goal_rotation).as_quat()
+        request['target'] = {
+            'type': 'pose', 'frame': 'world',
+            'position': dict(zip('xyz', goal_position.tolist())),
+            'orientation': {'representation': 'quaternion', **dict(zip('xyzw', quaternion.tolist()))},
+        }
+        request['motion'].update(path_constraint='hard', phase='contact')
+        request.setdefault('planning', {}).update(mode='direct', allow_replan=False, planning_time=5)
+
+        # The request is resolved from the measured runtime pose.  The action
+        # then performs the normal planning and collision checks for the
+        # selected path type: linear for distance+direction, circular for
+        # angle_deg.
+        self.backend.contact_target = None
+        self.backend.contact_target_object_id = None
+        self.sync.sync(self.backend, self.kinematics, self.checker)
+        self._phase(f'{operation}_motion')
+        result = self.execute_motion(request)
+        if not self._record(f'{operation}_motion', {'request': request, **result}):
             return False
-        # A completed grasp releases before retreat.  After a suspended
-        # physical motion the gripper may already have lost its logical hold,
-        # so retrying release can produce OBJECT_NOT_HELD and mask the original
-        # collision; the partial motion still needs its geometric retreat.
-        if not self._post_contact_retreat(
-                request, release_first=bool(result['success']), operation=operation):
-            return False
-        if not result['success']:
-            self._record_suspended_motion(result)
-            return False
-        verified=self._verify_goal()
-        if verified:
-            return True
-        self._record_suspended_motion(result)
-        return False
+
+        # Release is only attempted after the motion action reports success.
+        return self._release()
 
 
     def _verify_goal(self):

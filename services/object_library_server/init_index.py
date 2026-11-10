@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """One-off migration: build SQLite {scene,model,robot}_index.db from legacy *_index.json.
 
-Usage: python init_index.py [--data-dir ./data] [--force]
+Usage: python init_index.py [--data-dir ./data]
 Records imported from legacy data are system assets (upload_user_id=0, is_deleted=0).
+The optional no_display flag defaults to false.
 """
 import argparse
 import json
@@ -24,10 +25,13 @@ def rows_from_legacy(typ, data_dir):
     data = json.loads(json_path.read_text("utf-8"))
     default_cat = LEGACY[typ][1]
     if isinstance(data, list):  # scenes: [{id, name, category}, ...]
-        return [(int(e["id"]), e["name"], 0, e.get("category") or default_cat) for e in data]
+        return [(int(e["id"]), e["name"], 0, e.get("category") or default_cat,
+                 int(e.get("no_display", False))) for e in data]
     by_id = data.get("by_id", {})
     category = data.get("category", {})
-    return [(int(k), by_id[k], 0, category.get(k) or default_cat) for k in sorted(by_id, key=int)]
+    no_display = data.get("no_display", {})
+    return [(int(k), by_id[k], 0, category.get(k) or default_cat,
+             int(no_display.get(k, False))) for k in sorted(by_id, key=int)]
 
 
 def write_db(typ, data_dir, rows):
@@ -42,12 +46,14 @@ def write_db(typ, data_dir, rows):
                 name VARCHAR(64) NOT NULL,
                 upload_user_id INTEGER NOT NULL DEFAULT 0,
                 category VARCHAR(32) NOT NULL,
-                is_deleted BOOL NOT NULL DEFAULT 0
+                is_deleted BOOL NOT NULL DEFAULT 0,
+                no_display BOOL NOT NULL DEFAULT 0
             );
             CREATE INDEX idx_assets_name ON assets(name);
         """)
         con.executemany(
-            "INSERT INTO assets (id, name, upload_user_id, category, is_deleted) VALUES (?, ?, ?, ?, 0)", rows)
+            "INSERT INTO assets (id, name, upload_user_id, category, is_deleted, no_display) "
+            "VALUES (?, ?, ?, ?, 0, ?)", rows)
         con.commit()
     finally:
         con.close()

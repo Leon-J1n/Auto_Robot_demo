@@ -13,18 +13,18 @@
 | `TrajOptOptimizer` | 固定起终点，优化已有可行关节路径 | 优化失败保留输入路径 |
 | `CollisionFreePlanner` | 当前执行层使用的避障规划器 | 采用项目内 RRT-Connect、路径简化与平滑 |
 | `PlanningError`、`CollisionPlanningError` | 传递失败代码、可恢复标记及细节 | 上层决定如何报告或改用其他方案 |
-| `prepared_trajectory.py` | 预规划结果及场景状态签名 | MoveSkill 负责复用条件和最终验证 |
+| `prepared_trajectory.py` | 预规划结果及场景状态签名 | _MoveExecutor 负责复用条件和最终验证 |
 
 与相邻模块的边界：
 
 - Move 策略解析目标、求 IK 并生成 `path_request`；[kinematics](C:/Users/21474/Desktop/robot-agent/kinematics/README.md) 提供 FK/Jacobian/IK 和候选校验。
-- MoveSkill 决定直接规划到避障规划的回退，以及多构型路径之间的行程比较。
+- _MoveExecutor 决定直接规划到避障规划的回退，以及多构型路径之间的行程比较。
 - 碰撞检测器负责机器人、障碍物、夹持物体与允许接触规则。planner 算法自身不直接调用 MuJoCo。
 - 运行时负责实时状态、轨迹执行、控制器和仿真。`duration` 是规划层估计值，不是完整时间参数化。
 
 ## 文件与公开接口
 
-所有接口可从 `planning` 导入。旧 `skills/motion/move/planners/` 和未使用的 `libraries/motion_planning/` 已移除。
+所有接口可从 `planning` 导入。旧 `atomic_action/motion/common/planners/` 和未使用的 `libraries/motion_planning/` 已移除。
 
 | 文件 | 构造接口 | 调用接口 |
 | --- | --- | --- |
@@ -45,12 +45,22 @@
 | `path_request` | `path_type`；直接规划使用 `joint_waypoints`，避障使用 `start`、`goal` |
 | 保持姿态请求 | `orientation_constraint={"enabled": True, "orientation": ...}` |
 | `move_request.motion` | `path_constraint`：hard/soft；hard 的非 joint 路径不能放宽 |
-| `move_request.planning` | `planning_time`、`max_attempts`；mode/allow_replan 由 MoveSkill 调度 |
+| `move_request.planning` | `planning_time`、`max_attempts`；mode/allow_replan 由 _MoveExecutor 调度 |
 | `move_request.constraints` | `avoid_collision`、`safety_distance`（米）、`velocity_scale` |
 | `move_request.strategy_params` | `ik_method`、`cartesian_step`（米）、`max_joint_step`（弧度，默认 0.4） |
 | `context` | 保持姿态分支读取 `current_pose.position` |
 
-关节路点/限位单位为弧度，末端位置和安全距离为米。`candidate_goals` 由 MoveSkill 展开成多个单目标请求，比较累计关节行程后选取结果。
+关节路点/限位单位为弧度，末端位置和安全距离为米。`candidate_goals` 由 _MoveExecutor 展开成多个单目标请求，比较累计关节行程后选取结果。
+
+## 手臂抬高偏好
+
+`config/arm_posture.json` 当前设为 `enabled=false`，规划按关节行程选择构型，不再考虑手臂高度，RRT 也不再偏向抬高手臂的采样。关节限位和规划碰撞规则继续生效。
+
+以下为重新启用时的可选软偏好：综合关节行程与上臂/肘部/前臂高度选择构型。参考高度取肩关节与已识别静态桌面顶面中的较高者；肘部期望高于参考面 25 cm，长臂段采样点扣除 5 cm 半径后期望高于参考面 15 cm。这些是评分目标，不是必须达到的高度限制。手腕末端与夹爪不参与抬高评分，可以接近桌面。
+
+`weight_rad_per_m` 控制高度不足的惩罚（默认 12），增大后更偏向抬高，减小后更偏向缩短运动；`enabled=false` 恢复原有行程优先规则。关节解/路径比较、接触预接近分支和 RRT 采样共用该偏好。RRT 保留普通随机探索；简化和平滑若使综合代价变差，会保留此前的路径。
+
+指定的关节目标不会被更换，直线接触路径保留末端路径及关节连续性约束，不为抬肘强制翻转构型。评分采用隔离的运动学工作区，只调用 `mj_kinematics`，不推进物理仿真，不增加执行碰撞检查，不修改资产文件。轨迹报告 `diagnostics.arm_posture` 记录起终点肘高、长臂段近似最低高度与整条路径的偏好惩罚；它们是规划评分指标，精确碰撞可行性仍由原规划检查器判定。
 
 ## 输出与异常
 
@@ -61,7 +71,7 @@
 ## 当前调用流程
 
 ```text
-MoveSkill → 策略生成 path_request → DirectPlanner.plan()
+_MoveExecutor → 策略生成 path_request → DirectPlanner.plan()
     ├─ 成功 → 运行时执行
     └─ 碰撞且允许回退 → CollisionFreePlanner.plan()
         ├─ 普通：关节空间 RRT-Connect → Shortcut → TrajOpt 优化 → 最终复核
@@ -101,7 +111,7 @@ except CollisionPlanningError:
 
 目前采用普通类和依赖注入，没有动态规划器插件注册表。保留 `plan(...)` / `optimize(...)` 边界即可；未来接入其他规划算法时增加适配器。以下划线方法属于内部实现，不是稳定公共接口：`_rrt_connect`、`_shortcut`、`_plan_fixed_orientation`、`_fixed_orientation_edge`、`_shortcut_fixed_orientation`、`_smooth_fixed_orientation`。
 
-相关接口：[MoveSkill](C:/Users/21474/Desktop/robot-agent/skills/motion/move/skill.py)、[Skill 接口](C:/Users/21474/Desktop/robot-agent/SKILL_INTERFACES.md)、[MuJoCo 依赖清单](C:/Users/21474/Desktop/robot-agent/MUJOCO_DEPENDENCIES.md)。
+相关接口：[_MoveExecutor](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/skill.py)、[Skill 接口](C:/Users/21474/Desktop/robot-agent/SKILL_INTERFACES.md)、[MuJoCo 依赖清单](C:/Users/21474/Desktop/robot-agent/MUJOCO_DEPENDENCIES.md)。
 
 ## 时间参数化
 

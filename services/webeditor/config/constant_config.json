@@ -1,0 +1,26 @@
+{
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 8099
+  },
+  "library_server_url": "http://127.0.0.1:8000",
+  "cos_base_url": "",
+  "max_payload_bytes": 104857600,
+  "browser_request_timeout_seconds": 10,
+  "capture_timeout_seconds": 15,
+  "max_pending_requests": 8,
+  "camera_preview": {
+    "max_width": 640,
+    "max_height": 480,
+    "max_hz": 30
+  },
+  "ghost_pose_opacity": 0.5,
+  "traj_waypoint_radius": 0.02,
+  "traj_waypoint_stride_frames": 10,
+  "shadows_enabled": true,
+  "urdf_bounding_box_per_link": false,
+  "viewport_background_color": "#000000",
+  "agent_service_url": "http://127.0.0.1:8500",
+  "agent_poll_interval_seconds": 5,
+  "agent_request_timeout_seconds": 10
+}

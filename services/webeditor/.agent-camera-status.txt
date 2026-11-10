@@ -1,0 +1,12 @@
+status=complete
+dispatch_id=camera-preview-fix
+binding_id=camera-preview-fix
+subagent_id=/root/camera_preview_fix
+project_id=web-frontend
+domain=frontend asset ingestion and browser mesh loading
+assigned_scope=editor/src/main.ts; editor/src/renderer.ts; focused frontend tests; .agent-camera-status.txt
+touched_paths=editor/src/main.ts; editor/src/renderer.ts; editor/src/renderer.test.ts; .agent-camera-status.txt
+verification_profile_ids=frontend-renderer-tests; frontend-typecheck; scoped-diff-check
+findings=DAE now accepted as upload entry. All selected secondary files preserved for OBJ/DAE/FBX/STL and URDF, including folder bundle transitive MTL/textures. URDF direct-reference aliases retained alongside original files. File chooser permits material/image dependencies. DAE texture references can request dependency-folder selection. FBX/DAE loader resource paths use /api/assets/id/file/. OBJ uses the same resource-base helper, including nested paths and remote URLs. Collada inverse rotation only applies to Z_UP metadata; Y_UP/absent metadata remains unchanged. Diagnostics contain format/count/axis only. Parent styles.css clipping changes untouched.
+verification=npm test -- --run src/renderer.test.ts: 19 passed. npx tsc -p editor/tsconfig.json --noEmit: passed. git diff --check scoped files: passed.
+next_step=Parent integration browser check for real DAE/FBX plus URDF bundles; build current frontend before serving production dist. No commits or xhigh performed.

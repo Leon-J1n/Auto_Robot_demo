@@ -1,0 +1,20 @@
+{
+  "schema_version": "2.0",
+  "request_id": "open-close-drawer-007",
+  "scene_id": 7,
+  "scene_version": 3,
+  "commands": [
+    {"command_id": "1", "skill_name": "approach", "parameters": {"target": 9}},
+    {"command_id": "2", "skill_name": "pick", "parameters": {"target": 9, "grasp_index": 0, "hold_force": 10.0}},
+    {"command_id": "3", "skill_name": "pull", "parameters": {"frame": "world", "direction": [0.53687588, -0.84366124, 0], "distance": 0.16}},
+    {"command_id": "4", "skill_name": "retreat", "parameters": {"target": 9}},
+    {"command_id": "5", "skill_name": "approach", "parameters": {"target": 10}},
+    {"command_id": "6", "skill_name": "move_to", "parameters": {"target": 10}, "planning_method": "linear"},
+    {"command_id": "7", "skill_name": "retreat", "parameters": {"target": 10}},
+    {"command_id": "8", "skill_name": "approach", "parameters": {"target": 9}},
+    {"command_id": "9", "skill_name": "pick", "parameters": {"target": 9, "grasp_index": 0, "hold_force": 10.0}},
+    {"command_id": "10", "skill_name": "push", "parameters": {"frame": "world", "direction": [-0.53687588, 0.84366124, 0], "distance": 0.16}},
+    {"command_id": "11", "skill_name": "retreat", "parameters": {"target": 9}},
+    {"command_id": "12", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}}
+  ]
+}

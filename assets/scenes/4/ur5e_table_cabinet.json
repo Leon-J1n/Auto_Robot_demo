@@ -458,8 +458,8 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.43,
-              -0.18,
+              0.46,
+              -0.38,
               0.637373
             ],
             "quaternion_xyzw": [

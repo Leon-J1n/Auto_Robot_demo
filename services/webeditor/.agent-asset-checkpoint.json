@@ -1,0 +1,46 @@
+{
+  "dispatch_id": "asset-instance-fix",
+  "binding_id": "asset-instance-fix",
+  "subagent_id": "/root/asset_instance_fix",
+  "project_id": "web-frontend",
+  "domain": "standalone-gateway-assets",
+  "assigned_scope": [
+    "local_gateway.py",
+    "supporting Python modules",
+    "backend tests"
+  ],
+  "touched_paths": [
+    "local_gateway.py",
+    "local_assets.py",
+    "local_urdf.py",
+    "tests/test_local_assets.py"
+  ],
+  "verification_profile_ids": [
+    "backend-aiohttp-assets-camera",
+    "python-syntax"
+  ],
+  "updated_at": "2026-09-29T09:10:11.505697+00:00",
+  "status": "implemented_verified_followup_2",
+  "findings": [
+    "Real OBJ/STL/DAE/FBX mesh URLs replace box entities.",
+    "Multipart entry/path/files preserved using standalone AssetService.",
+    "URDF all links/visuals, joint/visual origins, rotations, scales, primitive dimensions and bundle resources supported at zero joint pose.",
+    "Camera has no visual/collider; frameId/updateRateHz included; fake PNG removed.",
+    "Sensor endpoint truthfully returns BROWSER_RENDER_REQUIRED; frontend owns camera rendering.",
+    "WebSocket scene.changed has payload.snapshot.",
+    "7 aiohttp unittest cases pass; py_compile and create_app smoke pass.",
+    "Loose uploads and manifest bundles rediscovered after restart; in-use assets cannot be deleted.",
+    "No git commit or xhigh.",
+    "Agent job submission/status/cancel, capture controls, and timeline playback now return explicit 501 unavailable responses; no fake success.",
+    "World transforms are composed hierarchically with quaternion rotation, scale, cycle/missing-parent validation.",
+    "Downloaded remote assets always resolve through local bundles for offline debugging and dependency serving.",
+    "8 aiohttp unittest cases pass after follow-up.",
+    "Hierarchical world transform, cycle rollback, explicit unavailable Agent/capture/timeline, and offline remote bundle tests added; 10 aiohttp tests now pass."
+  ],
+  "limitations": [
+    "No physical simulation/Agent service requested.",
+    "URDF static zero joint pose; no articulation controller.",
+    "Browser mesh appearance and RGB/depth checks delegated to coordinator/frontend agent."
+  ],
+  "next_step": "Coordinator validates browser integration and final frontend behavior."
+}

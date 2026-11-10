@@ -1,0 +1,12 @@
+__pycache__/
+node_modules/
+dist/
+distribute/
+tests/fixtures/ols_data/
+# §5/§6: the gateway's persistent state (binding, phase, object-id water mark) is runtime data.
+var/
+# Agent-local skill copies. The tracked authority is docs/skills/; these are discovery paths for
+# the tools that read them, regenerated per machine, so they never enter the version library.
+.qoder/
+.codex/
+openspec/

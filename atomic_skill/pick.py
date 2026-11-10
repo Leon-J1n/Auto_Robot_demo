@@ -87,10 +87,10 @@ class DemoInteractionPick(DemoInteractionMove):
     def _prepare_approach(self, base, resolved, goal, requested_path, state, direction, *, skill,
                           retreat_lift_height=0.):
         if skill in {'pick', 'put'}:
-            # Picking goes directly to the selected grasp control pose. Try a
+            # Pick/put go directly to the selected interaction control pose. Try a
             # Cartesian move first with a relaxed per-waypoint joint step; if
             # that branch cannot be built, the runner retries the same target
-            # through a direct joint move before closing the gripper.
+            # through a joint move before closing/opening the gripper.
             linear = deepcopy(base)
             linear['motion'].update(path_type='linear', path_constraint='soft', phase='contact')
             linear.setdefault('planning', {}).update(mode='direct', allow_replan=False)
@@ -101,8 +101,10 @@ class DemoInteractionPick(DemoInteractionMove):
             # The fallback is the recovery route: let MoveJoint switch to the
             # collision-free planner when a direct joint segment is blocked.
             joint.setdefault('planning', {}).update(mode='collision_free', allow_replan=True)
-            if not linear['constraints'].get('keep_end_effector_orientation'):
+            if skill == 'pick' and not linear['constraints'].get('keep_end_effector_orientation'):
                 joint['target'] = {'type': 'joint', 'joint_positions': resolved['joint_positions']}
+            # Put retains the world pose target so JointMove enumerates other
+            # IK configurations instead of locking recovery to a single branch.
             resolved['approach'] = {
                 'used': False, 'mode': 'direct_grasp_move',
                 'path_type': 'linear', 'fallback_path_type': 'joint',

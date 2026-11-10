@@ -1,87 +1,14 @@
 {
   "schema_version": "2.0",
-  "request_id": "drawer-open-put-close-002",
-  "scene_id": "scene.002",
-  "scene_version": 1,
+  "request_id": "approach-pick-apple-002",
+  "scene_id": 2,
+  "scene_version": 3,
   "commands": [
-    {
-      "command_id": "1r",
-      "skill_name": "pull",
-      "parameters": {
-        "target": 9,
-        "link": "Nightstand0061_drawer01",
-        "grasp": {
-          "mode": "physical"
-        },
-        "distance": 0.12
-      }
-    },
-    {
-      "command_id": "2",
-      "skill_name": "move",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "3",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 7,
-        "planning_method": "joint",
-        "grasp": {
-          "mode": "physical"
-        },
-        "grasp_request": {
-          "strategy_params": {
-            "hold_force": 10.0,
-            "safety_distance": 0.01
-          }
-        },
-        "retreat_lift_height": 0.02,
-        "request": {
-          "constraints": {
-            "safety_distance": 0.0
-          }
-        }
-      }
-    },
-    {
-      "command_id": "4",
-      "skill_name": "release",
-      "parameters": {
-        "target": 7,
-        "strategy_params": {
-          "settle_time": 0.5
-        }
-      }
-    },
-    {
-      "command_id": "5",
-      "skill_name": "move",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "6",
-      "skill_name": "push",
-      "parameters": {
-        "target": 9,
-        "link": "Nightstand0061_drawer01",
-        "distance": 0.12,
-        "contact_mode": "contact"
-      }
-    },
-    {
-      "command_id": "7",
-      "skill_name": "move",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    }
+    {"command_id": "1", "skill_name": "move_to", "parameters": {"target": 7, "relation": "behind", "distance_m": 0.15}},
+    {"command_id": "2", "skill_name": "move_to", "parameters": {"target": 7, "relation": "left", "distance_m": 0.15}},
+    {"command_id": "3", "skill_name": "approach", "parameters": {"target": 7}},
+    {"command_id": "4", "skill_name": "pick", "parameters": {"target": 7, "hold_force": 10.0}},
+    {"command_id": "5", "skill_name": "lift_up", "parameters": {"distance": 0.02}},
+    {"command_id": "6", "skill_name": "move_to", "parameters": {"target": "home"}}
   ]
 }

@@ -1,0 +1,1 @@
+Follow-up complete. Agent/capture/timeline unavailable responses are explicit; world TRS composition/cycle validation and local-only remote bundles are implemented. 10 aiohttp tests + py_compile pass. No commit/xhigh.

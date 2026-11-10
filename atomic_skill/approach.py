@@ -39,7 +39,8 @@ class PoseSearchExecutor:
         rotation = np.asarray(rotation, dtype=float)
         transform = np.eye(4)
         transform[:3, :3], transform[:3, 3] = rotation, position
-        request = _deep_merge(self.resources.scene.get('move_defaults', {}), override or {})
+        request = _deep_merge(self.resources.scene.get('move_defaults', {}), self.params.get('request', {}))
+        request = _deep_merge(request, override or {})
         request['target'] = pose_request(transform)
         request.setdefault('motion', {}).update(
             path_type='linear' if linear else self.params.get('planning_method', 'joint'),
@@ -81,7 +82,7 @@ class PoseSearchExecutor:
 
 
 class ApproachSkill:
-    MIN_DISTANCE = 0.03
+    MIN_DISTANCE = 0.02
     MAX_DISTANCE = 0.10
     STEP = 0.005
     DEFAULT_AXIS = "+z"
@@ -198,9 +199,23 @@ class ApproachSkill:
             if not planning_failed_without_motion(failed, e.backend, before):
                 return False
             return None
-        return run_candidate_search(
+        before_search = e.backend.physics_steps
+        if run_candidate_search(
             search_distances(params, minimum=minimum, maximum=maximum, step=step, label='approach'),
-            attempt)
+            attempt):
+            return True
+        failed = e.phases[-1] if e.phases else {}
+        if not planning_failed_without_motion(failed, e.backend, before_search):
+            return False
+        # Reuse the already resolved grasp/place pose. Resolving a new move_to
+        # command could change its semantic point type or repeat perception.
+        previous_error = deepcopy(failed.get('error'))
+        moved = e._move(
+            f'{operation}_move_to', position=position, rotation=rotation, contact=False,
+            override={'motion': {'path_type': 'joint', 'path_constraint': 'soft'},
+                      'planning': {'mode': 'collision_free', 'allow_replan': True}})
+        e.phases[-1].update(fallback_from='approach', approach_search_error=previous_error)
+        return moved
 
 
 

@@ -1,4 +1,9 @@
 .cache/collision/
+.venv/
+.idea/
+.pnpm-store/
+MUJOCO_LOG.TXT
+*.before_*
 /demo/**/__pycache__/
 /demo/**/*.py[cod]
 .cache/
@@ -6,6 +11,9 @@ backups/
 bqlog_mmap/
 logs/
 tests/output/
+demo/task_commands/**/output/
+demo/task_commands/**/blackboard_check/
+demo/task_commands/**/push_check/
 tests/generated_config_*.json
 *.pyc
 __pycache__/

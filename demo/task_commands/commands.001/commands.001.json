@@ -4,12 +4,13 @@
   "scene_id": 1,
   "scene_version": 3,
   "commands": [
-    {"command_id": "1", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}},
-    {"command_id": "2", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "above", "distance_m": 0.05, "planning_method": "joint"}},
-    {"command_id": "3", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "below", "distance_m": 0.05, "planning_method": "joint"}},
-    {"command_id": "4", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "left", "distance_m": 0.05, "planning_method": "joint"}},
-    {"command_id": "5", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "right", "distance_m": 0.05, "planning_method": "joint"}},
-    {"command_id": "6", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "front", "distance_m": 0.05, "planning_method": "joint"}},
-    {"command_id": "7", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "behind", "distance_m": 0.05, "planning_method": "joint"}}
+    {"command_id": "1", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "below", "distance_m": 0.15}},
+    {"command_id": "2", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "left", "distance_m": 0.1}},
+    {"command_id": "3", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "right", "distance_m": 0.1}},
+    {"command_id": "4", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "front", "distance_m": 0.1}},
+    {"command_id": "5", "skill_name": "move_to", "parameters": {"target": "end_effector", "relation": "behind", "distance_m": 0.1}},
+    {"command_id": "6", "skill_name": "move_to", "parameters": {"target": "home"}}
   ]
 }
+
+

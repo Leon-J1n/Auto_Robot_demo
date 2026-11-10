@@ -1,0 +1,498 @@
+{
+  "generatedAt": "2026-10-28T12:31:45.002726+00:00",
+  "scope": "§5.9 caller surface, §10.1 deleted routes and the gateway's own gating, probed without a browser answer; not a full browser acceptance suite (see tools/browser_smoke.cjs for that)",
+  "checks": [
+    {
+      "check": "surface GET /getWorld",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface GET /captureScene?id=2&type=rgbd",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface GET /get2DAABB?id=3&camera_id=2",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface POST /updateWorld",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface POST /updateItem?id=3",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface POST /addObject",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface POST /removeObject?id=3",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface POST /updateTraj",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface GET /api/sessionState",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "body": "{\"session_phase\": \"setup\", \"lease\": null, \"quarantine\": null, \"browser_id\": null, \"next_object_id\": 0, \"scene_id\": null,"
+      }
+    },
+    {
+      "check": "surface GET /sessions",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "body": "{\"sessionID\": null, \"session_phase\": \"setup\", \"browserID\": null, \"camera_id\": null, \"lease\": null, \"quarantine\": null, \""
+      }
+    },
+    {
+      "check": "surface GET /brainCapabilities",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "body": "{\"protocol\": \"brain-web/2\", \"browserID\": null, \"capabilities\": [\"atomic_commit\", \"sub_versioned_scene_identity\", \"setup_"
+      }
+    },
+    {
+      "check": "surface GET /allocateObjectID?browserID=browser-1",
+      "status": "PASS",
+      "actual": {
+        "status": 503,
+        "code": "NO_BROWSER_CONNECTED"
+      }
+    },
+    {
+      "check": "surface GET /api/health",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "body": "{\"status\": \"ok\", \"mode\": \"local\", \"uptimeSeconds\": 2.044, \"agent_service\": {\"status\": \"unreachable\", \"detail\": \"agent_se"
+      }
+    },
+    {
+      "check": "surface GET /api/runtimeConfig",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "body": "{\"gateway\": {\"host\": \"127.0.0.1\", \"port\": 8099}, \"library_server_url\": \"http://127.0.0.1:8000\", \"cos_base_url\": \"\", \"max"
+      }
+    },
+    {
+      "check": "agent routes still registered",
+      "status": "PASS",
+      "actual": 200
+    },
+    {
+      "check": "deleted POST /api/commands",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted GET /api/bootstrap",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted GET /api/assets",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted POST /api/assets/upload",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted POST /api/assets/import-remote",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted GET /api/assets/remote-proxy",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted DELETE /api/assets/1",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted GET /api/assets/1/file",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted GET /api/sensors/1/frame",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted POST /api/state/load-simstate",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted GET /api/diagnostics",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted GET /api/metrics",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted GET /api/presentation",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted POST /api/presentation/mode",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted POST /api/agent-control/captures",
+      "status": "PASS",
+      "actual": {
+        "status": 405,
+        "contentType": "text/plain; charset=utf-8",
+        "starts": "405: Method Not Allowed"
+      }
+    },
+    {
+      "check": "deleted GET /api/timelines/1/frames/0",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "deleted GET /api/timelines/1/data",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "contentType": "text/html",
+        "starts": "<!doctype html>\r\n<html l"
+      }
+    },
+    {
+      "check": "gate GET /captureScene?type=rgb",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /captureScene?id=2",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /captureScene?id=2&type=depth",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /captureScene?id=-2&type=rgb",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /get2DAABB?id=3",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /get2DAABB?camera_id=2",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /get2DAABB?id=3&camera_id=x",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /removeObject",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /removeObject?id=3&detach_children=maybe",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate GET /allocateObjectID",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /sessions",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "MISSING_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /sessions",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /sessions",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_PARAM"
+      }
+    },
+    {
+      "check": "gate POST /sessions",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "web_uint32_required"
+      }
+    },
+    {
+      "check": "gate POST /updateItem?id=3",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "BODY_ID_MISMATCH"
+      }
+    },
+    {
+      "check": "gate POST /updateWorld",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_WORLD_SCHEMA"
+      }
+    },
+    {
+      "check": "gate POST /updateWorld",
+      "status": "PASS",
+      "actual": {
+        "status": 400,
+        "code": "INVALID_WORLD_SCHEMA"
+      }
+    },
+    {
+      "check": "updateTraj rejects a non-multipart body",
+      "status": "PASS",
+      "actual": 400
+    },
+    {
+      "check": "updateTraj refuses a body with no readable parts",
+      "status": "PASS",
+      "actual": 400
+    },
+    {
+      "check": "updateTraj rejects a part not named trajs",
+      "status": "PASS",
+      "actual": 400
+    },
+    {
+      "check": "updateWorld requires application/json",
+      "status": "PASS",
+      "actual": 400
+    },
+    {
+      "check": "payload cap answers 413",
+      "status": "PASS",
+      "actual": 413
+    },
+    {
+      "check": "a socket without browser.hello is not a browser",
+      "status": "PASS",
+      "actual": 503
+    },
+    {
+      "check": "a silent browser means 504, not a silent success",
+      "status": "PASS",
+      "actual": 504
+    },
+    {
+      "check": "the browser is asked with the original envelope",
+      "status": "PASS",
+      "actual": [
+        "action",
+        "payload",
+        "request_id",
+        "type"
+      ]
+    },
+    {
+      "check": "a directed request to an absent browser is 503",
+      "status": "PASS",
+      "actual": 503
+    },
+    {
+      "check": "updateTraj is relayed, not answered",
+      "status": "PASS",
+      "actual": 504
+    },
+    {
+      "check": "a batch rides as one binary frame after its request frame",
+      "status": "PASS",
+      "actual": {
+        "payload": {
+          "count": 2,
+          "byte_lengths": [
+            260,
+            70
+          ],
+          "byte_length": 330
+        },
+        "frame": "BINARY"
+      }
+    },
+    {
+      "check": "the cached world serves callers with no browser",
+      "status": "PASS",
+      "actual": {
+        "status": 200,
+        "source": "cache"
+      }
+    },
+    {
+      "check": "runtimeConfig carries the whole §9.1 contract",
+      "status": "PASS",
+      "actual": {
+        "keys": 16,
+        "features": 88
+      }
+    }
+  ]
+}

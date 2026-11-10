@@ -1,0 +1,13 @@
+name: VLMEstimate
+version: "1.0"
+description: Estimate a grasp or placement point from an RGB-D camera frame.
+input:
+  target_description:
+    type: string
+    description: Optional override of target.object or target.category.
+  camera_id:
+    type: string
+    default: global
+validation_rules:
+  - require: [locate.target.type]
+  - require_any: [target_description, locate.target.object, locate.target.category]

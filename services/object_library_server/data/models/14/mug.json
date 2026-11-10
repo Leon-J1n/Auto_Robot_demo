@@ -3,15 +3,19 @@
     "object_name": "mug",
     "object_id": 14,
     "deformable": false,
-    "scalable": false,
+    "scalable": true,
     "interactable": true,
-    "tag": "red patterned"
+    "tag": "red patterned",
+    "can_place": true
   },
   "geometric_properties": {
     "AABB": [
-      0.126322,
-      0.090624,
-      0.134936
+      0.04417,
+      -0.046454,
+      0.063069,
+      -0.063253,
+      0.134908,
+      -2.8E-05
     ]
   },
   "physical_properties": {
@@ -31,15 +35,39 @@
     ]
   },
   "grasp_properties": {
-    "pose_count": 1,
+    "pose_count": 3,
     "poses": [
       [
-        -0.017,
-        0,
-        0,
-        -1.57,
+        0.0169,
+        0.0174,
+        0.0674,
         1.57,
+        1.57,
+        1.57,
+        1,
         0,
+        0,
+        0.0
+      ],
+      [
+        -0.0409,
+        0.0174,
+        0.1074,
+        3.14,
+        0.0,
+        1.57,
+        1,
+        0,
+        0,
+        0.0
+      ],
+      [
+        0.0409,
+        0.0174,
+        0.1074,
+        3.14,
+        0.0,
+        1.57,
         1,
         0,
         0,

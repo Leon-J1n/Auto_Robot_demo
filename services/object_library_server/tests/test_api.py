@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from contextlib import closing
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -19,6 +20,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
+import init_index  # noqa: E402
 
 
 def http(method, url, body=None):
@@ -153,6 +155,30 @@ class TestQueryEndpoints(APITestCase):
     def test_list_category_filter(self):
         _, data, __ = self.get_json("/list", type="model", category="模型.容器")
         self.assertEqual([i["id"] for i in data["items"]], [2])
+
+    def test_no_display_hides_only_from_list(self):
+        cases = (("scene", "/scene", "ur5e_table_empty", "/sceneByName"),
+                 ("model", "/model", "apple", "/modelByName"),
+                 ("robot", "/robot", "ur5e_arm", "/robotByName"))
+        for typ, by_id, name, by_name in cases:
+            with self.subTest(type=typ):
+                with closing(server.get_conn(self.data, typ)) as con, con:
+                    con.execute("UPDATE assets SET no_display = 1 WHERE id = 1")
+                try:
+                    self.assertNotIn(1, [item["id"] for item in
+                                     self.get_json("/list", type=typ)[1]["items"]])
+                    self.assertNotIn(1, [item["id"] for item in
+                                     self.get_json("/list", type=typ,
+                                                   category=self._category(typ))[1]["items"]])
+                    self.assertEqual(self.get_json(by_id, id=1)[0], 200)
+                    self.assertEqual(self.get_json(by_name, name=name)[0], 200)
+                finally:
+                    with closing(server.get_conn(self.data, typ)) as con, con:
+                        con.execute("UPDATE assets SET no_display = 0 WHERE id = 1")
+
+    @staticmethod
+    def _category(typ):
+        return {"scene": "场景.空白", "model": "模型.抓取物", "robot": "机械臂.UR5"}[typ]
 
     def test_list_bad_type(self):
         status, data, _ = self.get_json("/list", type="car")
@@ -512,6 +538,40 @@ class TestDeleteAsset(APITestCase):
         self.assertEqual(self.post("/deleteAsset", type="model", id=rid, uid=3)[0], 200)
         st, _ = self.post("/deleteAsset", type="model", id=rid, uid=3)[:2]
         self.assertEqual(st, 404)
+
+
+class TestIndexSchema(unittest.TestCase):
+    def test_existing_database_is_migrated_without_losing_records(self):
+        with tempfile.TemporaryDirectory(prefix="ols_schema_") as tmp:
+            db = Path(tmp) / "model_index.db"
+            with closing(sqlite3.connect(db)) as con, con:
+                con.execute("CREATE TABLE assets (id INTEGER PRIMARY KEY, name VARCHAR(64) NOT NULL, "
+                            "upload_user_id INTEGER NOT NULL DEFAULT 0, category VARCHAR(32) NOT NULL, "
+                            "is_deleted BOOL NOT NULL DEFAULT 0)")
+                con.execute("INSERT INTO assets VALUES (1, 'apple', 0, '模型.抓取物', 0)")
+            server.ensure_schema(tmp)
+            server.ensure_schema(tmp)
+            with closing(sqlite3.connect(db)) as con, con:
+                self.assertEqual(con.execute("SELECT id, name, no_display FROM assets").fetchall(),
+                                 [(1, "apple", 0)])
+
+    def test_legacy_json_no_display_is_imported(self):
+        with tempfile.TemporaryDirectory(prefix="ols_index_") as tmp:
+            data = Path(tmp)
+            (data / "scenes").mkdir()
+            (data / "models").mkdir()
+            (data / "scenes" / "scene_index.json").write_text(
+                json.dumps([{"id": 1, "name": "shown"},
+                            {"id": 2, "name": "hidden", "no_display": True}]), "utf-8")
+            (data / "models" / "model_index.json").write_text(
+                json.dumps({"by_id": {"1": "shown", "2": "hidden"},
+                            "no_display": {"1": False, "2": True}}), "utf-8")
+            for typ in ("scene", "model"):
+                rows = init_index.rows_from_legacy(typ, data)
+                init_index.write_db(typ, data, rows)
+                with closing(sqlite3.connect(data / f"{typ}_index.db")) as con, con:
+                    self.assertEqual(con.execute("SELECT id, no_display FROM assets ORDER BY id").fetchall(),
+                                     [(1, 0), (2, 1)])
 
 
 if __name__ == "__main__":

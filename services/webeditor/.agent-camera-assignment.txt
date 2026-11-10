@@ -1,0 +1,6 @@
+Owner camera_preview_fix. Own editor/src/main.ts, renderer.ts, styles.css, focused frontend tests.
+Crucial: do NOT poll /api/sensors frame: it currently returns fake 1x1 PNG. Implement actual RGB and depth scene rendering from selected Camera world transform/FOV/near/far/resolution using existing Three.js WebGLRenderer and render target. Display live canvas in Details. Render actual imported models and lights. No physics/backend needed.
+Hide grid/axes/selection/transform gizmos/light markers/frusta/collider overlays/loading markers in camera captures. Restore renderer scene state after capture; reuse/dispose render targets. Correct Z-up conversion and optical -Z axis. RGBD depth must depict actual scene depth (state normalization).
+Update preview lifecycle on selection, panel switch, camera edit, scene changes; stop when panel hidden; avoid overlapping requests. No Camera cube even legacy snapshots with visual/collider.
+Backend agent owns local_gateway.py, assets/URDF modules and Python tests: implements real geometry URLs and removes fake sensor PNG. Parent owns browser/integration verification, docs/start script only. No renderer changes by parent until you finish.
+No commits/xhigh. binding/dispatch: camera-preview-fix project: web-frontend. Send status via .agent-camera-status.txt if messages unavailable.

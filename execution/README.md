@@ -1,6 +1,6 @@
 # 执行后端与同场景验证
 
-本目录将轨迹执行和物理仿真封装为插件。FK / Jacobian、Kinematics、SimPlatform FCL 和 Planning 继续使用现有实现；`MoveSkill` 通过注入接口调用它们。
+本目录将轨迹执行和物理仿真封装为插件。FK / Jacobian、Kinematics、SimPlatform FCL 和 Planning 继续使用现有实现；`_MoveExecutor` 通过注入接口调用它们。
 
 ## 数据流与资源管理
 
@@ -8,7 +8,7 @@
 commands.json：scene_id + scene_version + robot
     ↓ SceneResourceCoordinator.resolve()
 assets/catalog.json → 场景 JSON + URDF + Mesh
-    ├→ URDF Kinematics → MoveSkill / 现有 Planning → SimPlatform FCL → q(t)
+    ├→ URDF Kinematics → _MoveExecutor / 现有 Planning → SimPlatform FCL → q(t)
     └→ backend_resources["mujoco"] → MuJoCoExecutionBackend.load()
                                       ↓ 从同一 JSON / URDF 生成 MJCF
                                 execute_trajectory(q(t))
@@ -34,7 +34,7 @@ assets/catalog.json → 场景 JSON + URDF + Mesh
 | `backend.joint_limits` | 与 `joint_names` 同序的 `(DOF, 2)` 关节上下限，单位 rad |
 | `backend.get_joint_positions()` | 返回实际关节向量 |
 | `backend.get_end_effector_pose()` | 返回世界系 TCP 的 `position`、`rotation_matrix`、`quaternion_wxyz` |
-| `backend.get_context(request=None)` | 给现有 MoveSkill 提供当前关节、末端位姿和控制器状态 |
+| `backend.get_context(request=None)` | 给现有 _MoveExecutor 提供当前关节、末端位姿和控制器状态 |
 | `backend.execute_trajectory(trajectory, timeout=30.0)` | 执行时间参数化关节轨迹，返回实际终态、误差、物理步数和采样帧 |
 | `backend.set_frame_callback(callback)` | 注册 `callback(state)`；每个约 60 Hz 的仿真采样帧调用，`None` 取消 |
 | `backend.open_viewer()` / `close()` | 打开可选查看器 / 释放后端资源 |
@@ -53,7 +53,7 @@ MuJoCo 使用位置执行器、偏置力补偿和 `mj_step`，步长 0.002 s。�
 
 ## 测试场景与指令
 
-新增 ObjectLibraryServer 交互定位示例：`demo/skill_command/ols_grasp.commands.json` 配合 `--start-object-library`。命令为 `move 101 → move home`；demo 通过场景实例 ID 查询模型的 `grasp_properties` 交互位姿，换算夹持中心与控制 TCP，并尝试生成“到接近点 → 保持姿态直线到目标”两段请求，再通过原有 MoveSkill 接口执行。详细配置见 [服务接入说明](../services/README.md)。底层技能不查询服务，夹爪仍固定张开。
+新增 ObjectLibraryServer 交互定位示例：`demo/skill_command/ols_grasp.commands.json` 配合 `--start-object-library`。命令为 `move 101 → move home`；demo 通过场景实例 ID 查询模型的 `grasp_properties` 交互位姿，换算夹持中心与控制 TCP，并尝试生成“到接近点 → 保持姿态直线到目标”两段请求，再通过原有 _MoveExecutor 接口执行。详细配置见 [服务接入说明](../services/README.md)。底层技能不查询服务，夹爪仍固定张开。
 
 项目里技能清单实际文件名为 `demo/SKILLS.md`。本次测试按其 `locate` / `move` 命令结构编写：
 
@@ -109,7 +109,7 @@ $env:SIM_PLATFORM_LIBRARY = "libraries\simplatform\bin\sim_platform_c.dll"
 .\.venv\Scripts\python.exe -B -m unittest tests.test_unified_execution tests.test_eaik_urdf tests.test_eaik_backend tests.test_kinematics_plugins
 ```
 
-测试覆盖任务与资源匹配、禁止 MuJoCo 导入时加载独立运动学和 MoveSkill、插件注册、真实 FCL 碰撞反例、初始环境碰撞拒绝、五步任务执行、实际采样轨迹检查、关节和 TCP 到达误差，以及动态方块落地。FCL 仅忽略 URDF 同一连杆及相邻连杆之间的结构接触，不把初始化时的环境碰撞加入允许名单。
+测试覆盖任务与资源匹配、禁止 MuJoCo 导入时加载独立运动学和 _MoveExecutor、插件注册、真实 FCL 碰撞反例、初始环境碰撞拒绝、五步任务执行、实际采样轨迹检查、关节和 TCP 到达误差，以及动态方块落地。FCL 仅忽略 URDF 同一连杆及相邻连杆之间的结构接触，不把初始化时的环境碰撞加入允许名单。
 
 本轮场景使用六轴 UR5e 固定基座机械臂和固定张开的夹爪。支持世界坐标下的单位缩放物体、箱体、圆柱及静态 URDF / OBJ / STL 环境资产。箱体 `size` 为完整三维尺寸，圆柱 `size` 为 `[半径, 半径, 完整高度]`。有铰链的环境 URDF、移动基座、可驱动夹爪和抓取附着关系需要后续适配。尚未实现暂停、恢复、取消和完整 TaskOrchestrator。
 

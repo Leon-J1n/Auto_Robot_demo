@@ -1,8 +1,12 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
+newmtl d455_aluminum_shell
+Ka 0.65 0.66 0.67
+Kd 0.65 0.66 0.67
+Ks 0.5 0.5 0.5
+Ns 60
 
-newmtl d455_body
+newmtl d455_front_photo
 Ka 1 1 1
 Kd 1 1 1
-Ks 0.06 0.06 0.06
-Ns 20.0
+Ks 0 0 0
+Ns 1
 map_Kd d455.png

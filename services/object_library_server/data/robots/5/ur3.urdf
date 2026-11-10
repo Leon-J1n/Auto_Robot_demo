@@ -61,9 +61,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/base.obj" />
       </geometry>
-      <material name="base_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 3.141592653589793" xyz="0 0 0" />
@@ -83,9 +80,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/shoulder.obj" />
       </geometry>
-      <material name="shoulder_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 3.141592653589793" xyz="0 0 0" />
@@ -105,9 +99,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/upperarm.obj" />
       </geometry>
-      <material name="upperarm_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 -1.5707963267948966" xyz="0 0 0.1198" />
@@ -127,9 +118,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/forearm.obj" />
       </geometry>
-      <material name="forearm_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 -1.5707963267948966" xyz="0 0 0.0275" />
@@ -149,9 +137,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/wrist1.obj" />
       </geometry>
-      <material name="wrist1_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 -0.085" />
@@ -171,9 +156,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/wrist2.obj" />
       </geometry>
-      <material name="wrist2_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 -0.085" />
@@ -193,9 +175,6 @@
       <geometry>
         <mesh filename="ur3_meshes/visual/wrist3.obj" />
       </geometry>
-      <material name="wrist3_color">
-        <color rgba="0.7 0.7 0.7 1" />
-      </material>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 -0.082" />

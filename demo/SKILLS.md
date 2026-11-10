@@ -19,7 +19,7 @@
 
 携带安全距离由 `pick.parameters.grasp_request.strategy_params.safety_distance` 指定，单位为米，例如 `0.01` 表示 10 mm；独立 `grasp` 命令使用 `parameters.strategy_params.safety_distance`。值必须是有限非负数，省略或设为 0 表示不增加额外余量。此参数由 demo 解析和校验，底层 grasp 技能接口保持原样。
 
-抓取成功后，demo 在使用正安全距离的规划检查中，对“携带物与外部环境”取命令原有距离与该参数的较大值（binding、physical 均适用），覆盖 retreat、后续目标选解和运动规划。机械臂、夹爪内部及夹爪与非持物之间保持原有规则；夹爪与已确认持物的接触按下文规则处理，初始支撑面接触仍使用原有抬离豁免。release 解除携带后取消额外余量，恢复后续命令原有距离（当前场景默认 `0.003 m`）；下一次抓取重新读取自己的参数，不继承上一次设置。执行时零余量的碰撞判定保持不变。报告子步骤的 `payload_safety_distance_m` 记录有效规划距离。
+抓取成功后，demo 在使用正安全距离的规划检查中，对“携带物与外部环境”取命令原有距离与该参数的较大值，覆盖 retreat、后续目标选解和运动规划。机械臂、夹爪内部及夹爪与非持物之间保持原有规则；夹爪与已确认持物的接触按下文规则处理，初始支撑面接触仍使用原有抬离豁免。release 解除携带后取消额外余量，恢复后续命令原有距离（当前场景默认 `0.003 m`）；下一次抓取重新读取自己的参数，不继承上一次设置。执行时零余量的碰撞判定保持不变。报告子步骤的 `payload_safety_distance_m` 记录有效规划距离。
 
 ```json
 "grasp_request": {
@@ -198,14 +198,7 @@
 
 ### grasp
 
-在当前位置闭合夹爪并确认抓取，不负责移动机械臂。`grasp.mode` 默认 `binding`：
-
-| 模式 | 确认抓取后的携物方式 |
-| --- | --- |
-| `binding` | 稳定双侧接触确认且结果校验通过后，启用临时 weld |
-| `physical` | 仅依靠夹爪电机和接触摩擦，不启用 weld，也不自动回退到绑定 |
-
-两种模式都要求明确的动态目标和 `hold_on_success=true`。确认阶段默认每侧法向力至少 2 N，连续稳定 0.1 秒仿真时间；夹宽变化不超过 0.5 mm，相对位置变化不超过 1 mm，相对转角变化不超过 0.035 rad。重新抓取前应先释放。
+在当前位置闭合夹爪并确认抓取，不负责移动机械臂。抓取由双侧指垫的真实接触和摩擦决定，不使用绑定约束。确认阶段默认每侧法向力至少 2 N，连续稳定 0.1 秒仿真时间；夹宽变化不超过 0.5 mm，相对位置变化不超过 1 mm，相对转角变化不超过 0.035 rad。重新抓取前应先释放。
 
 ```json
 {
@@ -239,7 +232,7 @@
 | `contact_threshold` | 2.0 | 确认抓取时每侧最低法向接触力，单位 N |
 | `confirmation_time` | 0.1 | 连续稳定确认时间，单位 s |
 
-物理模式的 `hold_force` 是左右指垫接触法向力之和的目标（不是每侧目标）。保持期间每个物理步读取接触力，经 20 ms 低通滤波后小幅调整闭合位置；死区 0.2 N、调整速度上限 0.2 rad/s，驱动器独立限制为 ±2 N·m。实际力会有瞬态误差，也可能因机构或力矩饱和无法达到目标。缺少任一侧接触时暂停调节，释放时关闭反馈；原有执行结束后的接触丢失反馈规则不变。状态记录 `hold_force_target_n`、`filtered_hold_force_n` 和 `hold_force_torque_saturated`（是否达到驱动力矩上限），实际力看 `left_force_n`、`right_force_n`。闭合阶段的 `grasp_force` 仍按原方式乘以 `0.04` 映射为力矩上限。力度参数受 `constraints.maximum_force` 和控制器上限校验，当前默认上限为 40。绑定模式的 `hold_force` 不改变 weld 强度。
+`hold_force` 是左右指垫接触法向力之和的目标（不是每侧目标）。保持期间每个物理步读取接触力，经 20 ms 低通滤波后小幅调整闭合位置；死区 0.2 N、调整速度上限 0.2 rad/s，驱动器独立限制为 ±2 N·m。实际力会有瞬态误差，也可能因机构或力矩饱和无法达到目标。缺少任一侧接触时暂停调节，释放时关闭反馈；执行期间的接触丢失会停止运动并返回抓取失败。状态记录 `hold_force_target_n`、`filtered_hold_force_n` 和 `hold_force_torque_saturated`（是否达到驱动力矩上限），实际力看 `left_force_n`、`right_force_n`。闭合阶段的 `grasp_force` 仍按原方式乘以 `0.04` 映射为力矩上限。力度参数受 `constraints.maximum_force` 和控制器上限校验，当前默认上限为 40。
 
 #### 物理模式执行反馈
 
@@ -255,7 +248,7 @@
 
 ### release
 
-无需 `mode` 参数。绑定抓取先解除 weld 再张开夹爪；物理抓取直接张开夹爪释放接触。之后验证夹爪开度和释放状态。
+无需 `mode` 参数。张开夹爪后由物理接触解除持物状态，再验证夹爪开度和释放状态。
 
 ```json
 {
@@ -376,7 +369,7 @@
 
 物理抓取仅在控制器 `close()` 调用期间允许全部夹爪碰撞几何与当前抓取目标接触；试闭合与实际闭合使用同一规则。MuJoCo 接触响应和摩擦保持启用。接触记录在 `allowed_closure_contacts`，按部件对汇总最小距离和观测次数；该次数不代表独立接触事件。抓取成功仍要求原有双侧指垫力与稳定性确认。
 
-张开、接近和未确认抓取时保持原碰撞规则。binding 成功确认且绑定仍有效后，以及 physical 成功确认并登记持物后，退回和搬运期间允许夹爪全部结构件与当前持物接触；释放清除持物登记后取消放行。physical 双侧指垫接触均消失时也取消放行，单侧接触丢失不改变原有双侧丢失判据。夹爪与其他物体、机械臂与目标、被抓物与环境的碰撞和安全距离仍检查，物理接触力仍生效。闭合抛出异常时恢复原策略。报告 `allowed_carrying_contacts` 汇总持物阶段规划检查与执行检查中放行的接触/安全间距记录，不等于全部是真实执行中发生的碰撞。
+张开、接近和未确认抓取时保持原碰撞规则。物理抓取成功后，退回和搬运期间允许夹爪全部结构件与当前持物接触；释放清除持物登记后取消放行。双侧指垫接触丢失时取消放行并报告抓取丢失。夹爪与其他物体、机械臂与目标、被抓物与环境的碰撞和安全距离仍检查，物理接触力仍生效。闭合抛出异常时恢复原策略。报告 `allowed_carrying_contacts` 汇总持物阶段规划检查与执行检查中放行的接触/安全间距记录，不等于全部是真实执行中发生的碰撞。
 
 
 ### pick 抓取后竖直抬升再回撤
@@ -396,7 +389,7 @@
 
 ## 活动机构与分阶段开柜门
 
-底层技能名称为 `pull_push`（`PullPushSkill`）。抓持式推拉命令与 pick 一样使用 `parameters.grasp.mode: binding|physical`；pull 默认 binding，physical 闭合确认后仅通过接触与摩擦保持，不启用 weld，抓持丢失时停止。`grasp_request` 覆盖规则与 pick 相同。模式会传递给抓取及推拉阶段，已有抓持模式不匹配时拒绝继续，不自动转换。标准反馈为 `pull_push_result`。
+底层技能名称为 `pull_push`（`MoveLinearAction`）。抓持式推拉命令与 pick 一样通过真实接触和摩擦保持，抓持丢失时停止。`grasp_request` 覆盖规则与 pick 相同。标准反馈为 `pull_push_result`。
 
 所有机械臂阶段共用从机器人 URDF 读取的每关节速度与加速度基准，并使用连续轨迹时间参数化；夹爪开合独立控制。速度读取 `<joint><limit velocity>`，加速度优先读取同一 limit 的 `acceleration` 属性；缺失时按约定采用该关节速度上限的数值作为加速度基准，并记录 `velocity_numeric_fallback`。缺失速度或显式限值无效时直接报错，不使用固定数值兜底。scene.001/002 的速度比例为 0.5、加速度比例为 1.0；`joint_velocity_multipliers` 为 `[1,1,1,2,2,2]`，因此当前 UR5e 的 J1–J3 实际限值为 1.5 rad/s，J4–J6 为 3.0 rad/s（URDF 上限为 3 rad/s），加速度均为 3 rad/s²。报告 `time_parameterization.limit_source` 记录 URDF 路径、关节顺序和每关节加速度来源。
 
@@ -408,7 +401,7 @@
 - 编排式 pull 在省略 `contact` 和 `contact_normal_local` 时，从活动 link 上唯一的把手横杆及支座几何推导交互位姿、外法向和抓取姿态。ApproachSkill 以该交互位姿为目标，沿目标位姿局部 `+Z` 的反方向搜索接近点；搜索范围默认 `3～10 cm`、步长 `5 mm`。把手几何缺失或不唯一时返回错误。
 - 显式 move 的 `mechanism_pose.position/rpy` 或 `quaternion_xyzw`：活动 link 局部坐标中的米和姿态，每次调用根据实际 link 姿态换算。默认 frame=grasp，通过已加载模型的控制点—抓取点标定转换为 TCP；frame=control 表示直接指定 TCP。
 - 自由换点 motion 使用 joint 规划并允许绕障；接触/撤离的 linear 路径保持直线约束。`allow_contact=true` 仅在该命令中允许指垫接触目标 link，不允许机械臂或夹爪结构撞柜体。
-- grasp/release 的 target+link 定位门板，绑定抓取仍必须先通过双侧接触确认。活动关节不转换成 freejoint，释放会关闭门板 weld。
+- grasp/release 的 target+link 定位门板；抓取依靠活动 link 与双侧指垫之间的物理接触，释放后门板继续由自身活动关节约束。
 - push/pull 的 `request.manipulation.contact_mode` 为 grasp 或 push_contact。非抓持推送可用 `contact_geom` 指定接触表面；省略时接受所选 link 的真实指垫接触。直线 push_contact 可以先前进、在途中建立接触；grasp 和既有圆弧接触运动仍要求起步前已建立接触。
 - `contact_normal_local` 可显式覆盖自动推导的门板局部向外法向，demo 将其转换到世界坐标；`pose_axis` 可覆盖 ApproachSkill 使用的目标位姿局部轴。圆弧轴线的 arc_center / arc_axis 默认从当前铰链读取。
 - `target_angle_deg` 仍作为兼容接口保留，用于需要绝对机构角度的调用；当前 scene.002 抽屉命令使用相对 `distance`，不依赖绝对开度。
@@ -422,10 +415,10 @@
 
 ## 推、拉编排模块
 
-统一运行器按命令选择 `task_skills/pull.py::CommandPullExecutor` 或 `task_skills/push.py::CommandPushExecutor`，不再通过一个混合类分支调度。pull 和 push 各自内置所需执行设施；旧共享基类已移除。底层仍共用 `PullPushSkill`。
+统一运行器按命令选择 `atomic_skill/pull.py::CommandPullExecutor` 或 `atomic_skill/push.py::CommandPushExecutor`，不再通过一个混合类分支调度。pull 和 push 各自内置所需执行设施；旧共享基类已移除。底层仍共用 `MoveLinearAction`。
 
-- **pull**：解析交互位姿 → 求解交互位姿 IK 并静态规划完整推拉轨迹 → 规划并执行 approach；approach 失败时用 MoveSkill 直接到交互位姿 → 未抓持时闭合确认 → 执行已准备好的轨迹 → release → retreat。默认直线方向为交互位姿工具 -Z，拉动必须抓持；已有匹配抓持时跳过抓取准备。
-- **push（grasp 模式）**：解析交互位姿 → 求解交互位姿 IK 并静态规划完整 push 轨迹 → 规划并执行 approach；approach 失败时用 MoveSkill 直接到交互位姿 → 可选 grasp → 执行已准备好的轨迹 → grasp 成功时执行对应 release → retreat。默认直线方向为交互位姿工具 +Z。
+- **pull**：解析交互位姿 → 求解交互位姿 IK 并静态规划完整推拉轨迹 → 规划并执行 approach；approach 失败时用 _MoveExecutor 直接到交互位姿 → 未抓持时闭合确认 → 执行已准备好的轨迹 → release → retreat。默认直线方向为交互位姿工具 -Z，拉动必须抓持；已有匹配抓持时跳过抓取准备。
+- **push（grasp 模式）**：解析交互位姿 → 求解交互位姿 IK 并静态规划完整 push 轨迹 → 规划并执行 approach；approach 失败时用 _MoveExecutor 直接到交互位姿 → 可选 grasp → 执行已准备好的轨迹 → grasp 成功时执行对应 release → retreat。默认直线方向为交互位姿工具 +Z。
 - **push 的既有接触推动分支**：目标点方式的旧调用仍可不抓取，执行接近、逐步搜索真实指垫接触、直线推动及原有撤离/验证流程。旧 c 点回退辅助代码仍在 push 模块中，但常规 pull 不调用它，不自动从拉切换为推。
 
 当前相对推拉完成后不自动释放或回 home；这些是 command 中独立的 release/move 步骤。
@@ -433,11 +426,11 @@
 
 ## 抓取前的避障降级
 
-pick 保留自己的候选抓取位姿与多距离预接近搜索；pull / 抓持式 push 保留自己的把手接近编排。它们只复用 `task_skills/move.py` 的已解析位姿移动能力，不重新查询对象或重新选择抓取点。
+pick 保留自己的候选抓取位姿与多距离预接近搜索；pull / 抓持式 push 保留自己的把手接近编排。它们只复用 `atomic_skill/move.py` 的已解析位姿移动能力，不重新查询对象或重新选择抓取点。
 
 - pick 已选抓取位姿有效，但所有预接近点 / 直线接触路径都不可行时，使用 collision_free move 直接到该抓取位姿。后续仍执行原来的抓取、抬升和撤离。put 不自动采用这项抓取降级。
 - pick、pull、抓持式 push 的 approach/contact 实际规划失败时，只有失败阶段是 planning/kinematics/path_generation 且本次尝试没有任何真实物理步，才允许降级。已经执行部分运动、执行异常、超时或位姿验证失败都不自动重试。
-- 降级沿用原目标位置和姿态，以及原有安全距离、全局速度与加速度限制；路径改为关节空间软约束，开启 collision_free 和 allow_replan。MoveSkill 使用当前实测状态规划。
+- 降级沿用原目标位置和姿态，以及原有安全距离、全局速度与加速度限制；路径改为关节空间软约束，开启 collision_free 和 allow_replan。_MoveExecutor 使用当前实测状态规划。
 - 到达后单独检查实际 TCP 位姿，位置误差不超过 2 mm、姿态误差不超过 0.02 rad 才允许闭合抓取。仍通过既有闭合与真实接触确认流程。
 - 把手接近过程中，原指垫接触放行收窄为：TCP 距目标不超过 1 cm 且姿态误差不超过 0.05 rad，才允许指垫与已命名把手横杆的有限接触；超过 3 mm 穿透仍判碰撞。掌部、腕部、其他环境物体保持碰撞检查。普通 pick 沿用原有的目标碰撞检查，不额外放行整件物体。
 - 报告保留原失败尝试、降级原因、实际 move 请求以及 `grasp_pose_verification`。降级失败不抓取；成功后才继续 pick / pull / push，后续运动仍可能正常返回 suspend。
@@ -445,9 +438,9 @@ pick 保留自己的候选抓取位姿与多距离预接近搜索；pull / 抓�
 
 ### push 的 grasp / contact 编排方式
 
-`parameters.contact_mode` 可选 `grasp`（默认）或 `contact`。它与 `grasp.mode: binding|physical` 分属不同层次：前者决定是否抓住，后者仅决定抓住时是否绑定。
+`parameters.contact_mode` 可选 `grasp`（默认）或 `contact`，分别表示先通过物理接触抓持或直接接触推送。
 
-- `grasp`：避障接近 → 直线接触（失败可降级避障到位）→ 抓取确认 → 相对推动。支持 binding 与 physical。
+- `grasp`：避障接近 → 直线接触（失败可降级避障到位）→ 物理抓取确认 → 相对推动。
 - `contact`：保持现有夹爪开度 → 避障接近 → 直线接近（失败可降级避障到位）→ 连续向前推进，在途中建立真实指垫接触并继续推动。不调用 grasp，不建立绑定，不执行末尾 release。建立接触后若丢失接触则停止。
 
 003 的 push 使用如下参数（双抽屉需要 link 明确选择上层）：
