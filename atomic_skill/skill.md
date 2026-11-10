@@ -69,6 +69,20 @@
 | 参数 | 必填 / 默认 | 含义 |
 | --- | --- | --- |
 | `target` | 必填 | 放置目的地的场景对象 ID，例如篮子或托盘 |
+| `relation` | `at` | `at` 表示原有内部放置；`front`、`behind`、`left`、`right` 表示放在目标外侧 |
+| `distance_m` | `0` | 从目标对应方向的包围盒边界向外偏移的距离，必须为大于或等于 0 的有限数值 |
+
+例如，放到托盘 12 前面 10 cm，只需在 `put` 上设置相对参数；前面的 `approach` 自动继承：
+
+```json
+[
+  {"command_id": "6", "skill_name": "approach", "parameters": {"target": 12}},
+  {"command_id": "7", "skill_name": "put", "parameters": {"target": 12, "relation": "front", "distance_m": 0.10}},
+  {"command_id": "8", "skill_name": "retreat", "parameters": {"target": 12}}
+]
+```
+
+前后左右采用机器人基座方向在桌面平面的投影，与对象相对 `move_to` 的方向约定一致：前为基座 +X、左为基座 +Y，后和右取反向。先将目标自身包围盒变换到世界坐标，求对应方向的边界，再向外偏移指定距离。VLM 在该位置附近半径 2 cm 的区域选择支撑表面，深度取自当前 RGB-D；因此 10 cm 表示区域中心距边界的距离，最终选点允许在该区域内变化。仍沿世界 Z 轴搜索 0～10 cm 放置高度，同轮 approach/put 共用结果。相对区域不可见、深度无效或无可行位姿时返回具体错误。当前 `put` 的相对关系限于上述四个水平方向；`above`、`below` 不在此接口中。
 
 ### approach：移动到交互前的接近位姿
 

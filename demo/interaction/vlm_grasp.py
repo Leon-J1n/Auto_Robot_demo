@@ -16,6 +16,9 @@ from demo.interaction.grasp_depth_search import (GRASP_DEPTHS_M, validate_depth_
                                                  floor_fallback_candidates)
 from sensors.camera import CameraIntrinsics
 from demo.interaction.placement_fallback import random_center_estimates
+from demo.interaction.relative_placement import (
+    placement_parameters, relative_region, crop_relative_region, relative_instruction,
+    validate_relative_point, random_region_estimates)
 
 
 PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(11))
@@ -95,13 +98,16 @@ def _target_crop(frame, object_pose, metadata):
 
 class VLMGraspResolver(ObjectLibraryGraspResolver):
     def __init__(self, client, blackboard, backend, *, target_id=None, camera_id="global",
-                 visual_targets=None, command_point_types=None, command_place_cycles=None, estimator=None):
+                 visual_targets=None, command_point_types=None, command_place_cycles=None,
+                 command_place_parameters=None, estimator=None):
         super().__init__(client, blackboard)
         self.backend = backend
         targets = visual_targets or [{'target_id': target_id, 'point_type': 'grasp', 'camera_id': camera_id}]
         self.visual_targets = {(str(item['target_id']), item['point_type']): item for item in targets}
         self.command_point_types = command_point_types or {}
         self.command_place_cycles = command_place_cycles or {}
+        self.command_place_parameters = command_place_parameters or {}
+        self.place_parameters = placement_parameters({})
         self.place_cycle_id = None
         self.point_type = 'grasp'
         self.estimator = estimator or VLMPointEstimator()
@@ -112,6 +118,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         self.point_type = self.command_point_types.get(str(command_id), 'grasp')
         self.place_cycle_id = (self.command_place_cycles.get(str(command_id), str(command_id))
                                if self.point_type == 'place' else None)
+        self.place_parameters = placement_parameters(self.command_place_parameters.get(str(command_id), {}))
 
     def is_visual_place(self, target_id):
         return (str(target_id), self.point_type) in self.visual_targets and self.point_type == 'place'
@@ -203,9 +210,13 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         if context is None or context['cycle_id'] != self.place_cycle_id:
             return []
         if 'center_estimates' not in context:
-            lower, upper = _model_bounds(context['metadata'])
-            context['center_estimates'] = random_center_estimates(
-                context['frame'], context['object_pose'], lower, upper, self.placement_rng)
+            if context.get('relative_region') is not None:
+                context['center_estimates'] = random_region_estimates(
+                    context['frame'], context['relative_region'], self.placement_rng)
+            else:
+                lower, upper = _model_bounds(context['metadata'])
+                context['center_estimates'] = random_center_estimates(
+                    context['frame'], context['object_pose'], lower, upper, self.placement_rng)
         return context['center_estimates']
 
     @staticmethod
@@ -249,6 +260,10 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                             placement_cycle_id=self.place_cycle_id,
                             placement_height_selected=False,
                             placement_height_candidates_m=list(PLACEMENT_HEIGHTS_M))
+            if 'relative_placement' in resolved['visual_estimate']:
+                estimate['relative_placement'] = deepcopy(resolved['visual_estimate']['relative_placement'])
+            estimate['placement_request'] = deepcopy(resolved['visual_estimate'].get(
+                'placement_request', placement_parameters({})))
             estimate['placement_center_fallback'].update(trigger=fallback['trigger'])
             if fallback.get('vlm_error_type'):
                 estimate['placement_center_fallback']['vlm_error_type'] = fallback['vlm_error_type']
@@ -342,20 +357,32 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 # A placement cache is valid only within this put's interaction
                 # cycle. A new put must see the current contents of the container.
                 if (self.place_cycle_id is not None and previous is not None
-                        and previous.get('placement_cycle_id') == self.place_cycle_id):
+                        and previous.get('placement_cycle_id') == self.place_cycle_id
+                        and previous.get('placement_request', placement_parameters({})) == self.place_parameters):
                     grasp = self.blackboard.visual_place(name)
         if grasp is None:
             frame = self.backend.get_camera_frame(target.get('camera_id', 'global'))
             place_metadata = self.blackboard.model(self.client, model_id) if point_type == 'place' else None
             crop_origin = None
+            region = None
             if point_type == 'place':
-                frame, crop_origin = _target_crop(frame, object_pose, place_metadata)
+                if self.place_parameters['relation'] != 'at':
+                    lower, upper = _model_bounds(place_metadata)
+                    region = relative_region(self.place_parameters, object_pose, lower, upper, resources)
+                    frame, crop_origin = crop_relative_region(frame, region)
+                else:
+                    frame, crop_origin = _target_crop(frame, object_pose, place_metadata)
                 self._placement_contexts[str(target_id)] = {
                     'cycle_id': self.place_cycle_id, 'frame': frame,
                     'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
-                    'crop_origin': crop_origin}
+                    'crop_origin': crop_origin, 'relative_region': region}
             try:
-                estimate = self.estimator.estimate_frame(frame, point_type=point_type, target=name.lower())
+                if region is not None:
+                    estimate = self.estimator.estimate_frame(frame, point_type=point_type,
+                        target='指定外侧区域的支撑表面', instruction=relative_instruction(region))
+                    validate_relative_point(estimate, region)
+                else:
+                    estimate = self.estimator.estimate_frame(frame, point_type=point_type, target=name.lower())
             except Exception as exc:
                 if point_type != 'place':
                     raise
@@ -375,6 +402,10 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 estimate = points.pop(0)
                 estimate['placement_center_fallback'].update(trigger='vlm_error', vlm_error_type=type(exc).__name__)
             estimate = self._restore_crop_pixel(estimate, crop_origin)
+            if point_type == 'place':
+                estimate['placement_request'] = dict(self.place_parameters)
+                if region is not None:
+                    estimate['relative_placement'] = deepcopy(region)
             grasp = np.eye(4)
             if point_type == 'grasp':
                 grasp[:3, :3], orientation = _downward_grasp_rotation(estimate)

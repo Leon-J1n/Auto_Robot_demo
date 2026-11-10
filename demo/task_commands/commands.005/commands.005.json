@@ -1,0 +1,17 @@
+{
+  "schema_version": "2.0",
+  "request_id": "place-apple-right-of-tray-005",
+  "description": "把苹果放到托盘的右边（距右边界向外 10 cm）",
+  "scene_id": 3,
+  "scene_version": 3,
+  "commands": [
+    {"command_id": "1", "skill_name": "approach", "parameters": {"target": 8}},
+    {"command_id": "2", "skill_name": "pick", "parameters": {"target": 8, "hold_force": 15.0}},
+    {"command_id": "3", "skill_name": "lift_up", "parameters": {"distance": 0.02}},
+    {"command_id": "4", "skill_name": "retreat", "parameters": {"target": 8}},
+    {"command_id": "5", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}},
+    {"command_id": "6", "skill_name": "approach", "parameters": {"target": 13}},
+    {"command_id": "7", "skill_name": "put", "parameters": {"target": 13, "relation": "behind", "distance_m": 0.10}},
+    {"command_id": "8", "skill_name": "retreat", "parameters": {"target": 13}}
+  ]
+}

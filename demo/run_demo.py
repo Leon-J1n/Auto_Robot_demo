@@ -203,13 +203,15 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
 
     task = json.loads(Path(command_file).read_text(encoding='utf-8'))
     from demo.interaction.visual_targets import (
-        infer_command_point_types, infer_command_place_cycles, infer_visual_targets)
+        infer_command_point_types, infer_command_place_cycles, infer_command_place_parameters,
+        infer_visual_targets)
     commands = task.get('commands')
     if not isinstance(commands, list) or not commands:
         raise ValueError('commands must be a non-empty array')
     visual_estimates = infer_visual_targets(commands)
     visual_command_point_types = infer_command_point_types(commands)
     visual_place_cycles = infer_command_place_cycles(commands)
+    visual_place_parameters = infer_command_place_parameters(commands)
     if output_dir is None:
         output_dir = _default_output_dir(command_file)
     output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
@@ -347,6 +349,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 visual_targets=visual_estimates,
                 command_point_types=visual_command_point_types,
                 command_place_cycles=visual_place_cycles,
+                command_place_parameters=visual_place_parameters,
             )
         else:
             backend.load(resources, output / backend_name)

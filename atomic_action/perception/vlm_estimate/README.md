@@ -62,6 +62,19 @@ unchanged. `placement_cycle_id` in blackboard placement evidence identifies
 which put owns the current cache. Calls without a command/cycle context do
 not reuse a placement cache across requests.
 
+`put` also accepts horizontal `relation` (`front`, `behind`, `left`, `right`)
+and nonnegative `distance_m`. The put owns these parameters; command binding
+passes them to its nearest matching approach, which perceives once for both.
+Directions follow robot-base horizontal axes, as for object-relative move_to.
+The resolver projects the destination's oriented model bounds onto that
+direction, offsets outward from its boundary, then crops the live RGB-D to
+a 2 cm radius around the requested position. The Chinese supplemental prompt
+is stored in `prompts/relative_place.json`. Surface depth comes from that
+external region; the existing world-Z height search still applies. Any random
+recovery candidates remain inside the requested region. An unobserved region
+returns `PLACEMENT_REGION_UNOBSERVED`; it never reuses an interior destination
+point. Omitted relation (or `at`) keeps ordinary internal placement.
+
 Placement perception errors, or failure of all 11 height candidates at the
 VLM point, enable a bounded fallback in `demo/interaction/placement_fallback.py`.
 It samples at most three distinct valid RGB-D pixels in the destination's

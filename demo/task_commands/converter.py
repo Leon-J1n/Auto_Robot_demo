@@ -138,10 +138,16 @@ class SkillCommandConverter:
             raise CommandConversionError(f"command {index} parameters must be an object")
 
         if skill_name == "put":
+            from demo.interaction.relative_placement import placement_parameters
+            placement_parameters(parameters)
             target = parameters.get('target')
             if isinstance(target, bool) or str(target) not in {str(v) for v in self.registry.get('scene_object_ids', [])}:
                 raise CommandConversionError('put requires a scene object destination in demo.run_demo')
-            step = self._convert_move(parameters, index)
+            # The perception resolver applies relative placement to the destination
+            # boundary and live RGB-D surface, not to its legacy interaction pose.
+            move_parameters = {key: value for key, value in parameters.items()
+                               if key not in {'relation', 'distance_m'}}
+            step = self._convert_move(move_parameters, index)
             if step['request']['target'].get('type') != 'object':
                 raise CommandConversionError('put requires an interaction object destination')
             return step

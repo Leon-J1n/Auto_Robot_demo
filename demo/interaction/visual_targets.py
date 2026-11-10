@@ -27,6 +27,15 @@ def infer_command_place_cycles(commands):
     return _infer_command_bindings(commands)[1]
 
 
+def infer_command_place_parameters(commands):
+    """A put owns relative-placement parameters for its entire interaction cycle."""
+    from demo.interaction.relative_placement import placement_parameters
+    cycles = infer_command_place_cycles(commands)
+    requests = {str(command.get('command_id', index)): placement_parameters(command.get('parameters', {}))
+                for index, command in enumerate(commands) if command.get('skill_name') == 'put'}
+    return {command_id: dict(requests[cycle]) for command_id, cycle in cycles.items()}
+
+
 def _infer_command_bindings(commands):
     interactions = []
     for index, command in enumerate(commands):
