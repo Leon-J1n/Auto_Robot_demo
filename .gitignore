@@ -15,5 +15,6 @@ demo/task_commands/**/output/
 demo/task_commands/**/blackboard_check/
 demo/task_commands/**/push_check/
 tests/generated_config_*.json
+config/vlm.json
 *.pyc
 __pycache__/

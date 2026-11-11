@@ -183,9 +183,12 @@ class VLMAxisSelectionTests(unittest.TestCase):
                'components': [{'component_type': 'MetadataRef', 'properties': {
                    'type': 'model', 'path': '$LIBRARY_SERVER/1'}}]}
         resources = SimpleNamespace(scene={'objects': [obj]})
-        client = SimpleNamespace(base_url='http://unused', get_model=Mock(return_value={}))
-        backend = SimpleNamespace(get_camera_frame=Mock(return_value=SimpleNamespace(
-            camera_pose=SimpleNamespace(position=np.array([0., 0., 1.6])))),
+        client = SimpleNamespace(base_url='http://unused', get_model=Mock(return_value={
+            'geometric_properties': {'AABB': [.08, .08, .08]}}))
+        frame = CameraFrame('global', 1., 1, np.zeros((101, 101, 3), dtype=np.uint8),
+            np.ones((101, 101)), CameraIntrinsics(101, 101, 500., 500., 50., 50.),
+            CameraPose(np.array([0., 0., 1.6]), np.eye(3), np.array([1., 0., 0., 0.])))
+        backend = SimpleNamespace(get_camera_frame=Mock(return_value=frame),
             contact_target=None, contact_target_object_id=None)
         estimator = SimpleNamespace(estimate_frame=Mock(return_value={
             'world_point': {'x': 0., 'y': 0., 'z': .7},

@@ -94,6 +94,9 @@ class WristRefinementTests(unittest.TestCase):
         with (patch('demo.interaction.wrist_refinement.refine_surface', return_value=(estimate, {})) as detect,
               patch.object(resolver, 'select', side_effect=select)):
             refined = resolver.refine_after_approach(resolved, resources, state, None, None)
+        self.assertLess(detect.call_args.args[1].intrinsics.width, 161)
+        self.assertEqual(refined['visual_estimate']['wrist_refinement']['image_region'],
+                         'target_aabb_crop')
         np.testing.assert_allclose(detect.call_args.args[2], old_surface)
         self.assertFalse(detect.call_args.kwargs['vertical'])
         resolver.backend.get_camera_frame.reset_mock()

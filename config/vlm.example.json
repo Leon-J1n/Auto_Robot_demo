@@ -1,0 +1,7 @@
+{
+  "api_key": "",
+  "base_url": "https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1",
+  "model": "qwen3.8-flash",
+  "timeout_seconds": 45.0,
+  "max_retries": 0
+}

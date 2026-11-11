@@ -21,9 +21,7 @@ _PROMPT_FILES = {
     "place": "vlm_put.json",
 }
 
-DEFAULT_DASHSCOPE_API_KEY = "sk-f23599005eff477dbeeec1f542803139"
-
-
+from .config import load_vlm_config
 from .depth import InvalidPointDepth, sample_depth
 
 
@@ -32,7 +30,8 @@ class VLMPointEstimator:
 
     def __init__(self, client: Any = None, *, model: str | None = None) -> None:
         self._client = client
-        self.model = model or os.getenv("QWEN_MODEL", "qwen3.8-flash")
+        self._settings = load_vlm_config()
+        self.model = model or os.getenv("QWEN_MODEL") or self._settings["model"]
 
     def estimate_frame(
         self,
@@ -202,14 +201,16 @@ class VLMPointEstimator:
 
     def _get_client(self) -> Any:
         if self._client is None:
-            api_key = os.getenv("DASHSCOPE_API_KEY") or DEFAULT_DASHSCOPE_API_KEY
+            api_key = os.getenv("DASHSCOPE_API_KEY") or self._settings["api_key"]
+            if not api_key.strip():
+                raise ValueError("VLM api_key is missing; set config/vlm.json or DASHSCOPE_API_KEY")
             from openai import OpenAI
 
             self._client = OpenAI(
                 api_key=api_key,
-                base_url="https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1",
-                timeout=45.0,
-                max_retries=0,
+                base_url=self._settings["base_url"],
+                timeout=self._settings["timeout_seconds"],
+                max_retries=self._settings["max_retries"],
             )
         return self._client
 

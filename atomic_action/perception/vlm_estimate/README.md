@@ -21,6 +21,14 @@ grasp/place requests return a point estimate. Handle requests additionally
 recover an orientation from local depth geometry; feasibility is checked by
 the task resolver and motion planners.
 
+For ordinary object grasps, the resolver finds the requested scene ID, projects
+its current model AABB into the camera image, and sends only that RGB-D crop to
+the VLM. The same crop is used for ordinary wrist refinement after approach.
+Crop intrinsics are shifted before depth back-projection, and the reported pixel
+is restored to full-image coordinates. This narrows the candidate region when
+several objects share a name or appearance; overlapping projections may still
+contain another instance. Handle grasps retain their existing full-frame view.
+
 ## Drawer handle grasping
 
 当前抽屉使用**垂面抓取估计**，`pick` 参数保持原样：
@@ -53,8 +61,9 @@ the task resolver and motion planners.
 不改变抓取深度。缓存复用时不重复偏移。平面抓取继续使用原有深度搜索。
 `grasp_shallow_offset_m` 记录 15 mm 保守距离，`depth_search_enabled` 为 false。
 
-平面和垂面视觉抓取的 `approach` 运动成功后，自动获取当前完整腕部 RGB-D，
-让 VLM 重新定位同一目标的可见抓取点，不投影原抓取点、不裁剪局部区域。
+平面和垂面视觉抓取的 `approach` 运动成功后，自动获取当前腕部 RGB-D，
+让 VLM 重新定位同一目标的可见抓取点。平面抓取按目标当前 AABB 投影裁剪图像，
+垂面把手抓取仍使用完整图像；两者均不按原抓取点裁剪。
 两种方案均保留已选夹爪朝向。
 垂面新表面点仍沿原朝外法向偏移 1.5 cm，不进行抓深搜索。
 平面从缓存闭合中心减去已选抓深，恢复原表面点用于偏移检查；在精定位后的
@@ -68,7 +77,7 @@ the task resolver and motion planners.
 后续 `pick`；若采图或感知失败，保留粗定位缓存，报告记录
 `wrist_refinement.status: fallback_to_coarse` 及失败原因。
 此策略同时适用于平面和垂面抓取。无需新增命令参数。
-报告保存 `coarse_target_resolution` 及 `wrist_refinement` 的相机、完整图像模式和偏移信息。
+报告保存 `coarse_target_resolution` 及 `wrist_refinement` 的相机、图像区域和偏移信息。
 默认 VLM 客户端网络超时为 45 秒，关闭 SDK 自动重试；这不是整个精定位流程的总时限。
 终端不输出精定位阶段日志；界面状态显示采图、VLM 定位、IK/碰撞/接近路径验证阶段；报告记录
 `timing_s` 和 `elapsed_s`，失败详情包含 `substage`，用于区分网络等待与规划耗时。
@@ -117,8 +126,8 @@ by 180 degrees to the existing IK/collision/joint-travel selector. Both denote
 the same logical grasp (index 0); the selected variant is cached so approach
 and pick reuse it. Cached poses continue to follow target motion. Fixed grasp
 and place orientations both use Rz(+90 degrees) @ Rx(180 degrees), keeping
-grasp-frame Z vertically downward. Model AABB remains in use for placement
-calculations, but not for grasp-point acceptance, yaw or grasp-depth selection.
+grasp-frame Z vertically downward. Model AABB supplies the ordinary grasp crop
+and placement calculations, but not grasp-point acceptance, yaw or depth selection.
 The resolver accepts the selected RGB-D grasp point without model-bound or
 visible-surface checks and without a point-reselection retry. Basic normalized
 coordinate and valid metric depth checks remain necessary for back-projection.
@@ -200,9 +209,13 @@ all depths raise `GRASP_DEPTH_SEARCH_FAILED` and retain per-depth diagnostics.
 Blackboard estimate evidence records `depth_selected`, `grasp_depth_offset_m`,
 `grasp_depth_candidates_m`, and `grasp_depth_attempts`.
 
-The estimator has a default DashScope API key configured in `estimator.py`.
-`DASHSCOPE_API_KEY` overrides it, and `QWEN_MODEL` optionally overrides the
-default `qwen3.8-flash` model. Treat the source file as credential-bearing.
+VLM connection settings live in the project-root `config/vlm.json` (ignored by
+Git). Copy `config/vlm.example.json` to that path and set `api_key`, `base_url`,
+`model`, `timeout_seconds`, and `max_retries`. The example supplies non-secret
+defaults when the local file is absent; a real request still requires a key.
+`DASHSCOPE_API_KEY` and `QWEN_MODEL` override the corresponding file values.
+Settings are loaded when the estimator is created, independently of the current
+working directory. Restart the task after changing the config file.
 
 Chinese task prompts are loaded from `prompts/vlm_pick.json` and
 `prompts/vlm_put.json`. Each file defines `target`, `description`, and

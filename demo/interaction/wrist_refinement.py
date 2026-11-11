@@ -11,8 +11,8 @@ def refinement_error(message, **details):
 
 
 def refine_surface(estimator, frame, surface, target, *, vertical=True):
-    """Locate the target in the complete current wrist frame."""
-    instruction = ('这是接近完成后的完整腕部图像。重新定位指定的同一目标物体的可见抓取点。'
+    """Locate the target in the current wrist frame or its selected region."""
+    instruction = ('这是接近完成后的腕部图像。重新定位指定的同一目标物体的可见抓取点。'
         '本次只修正位置，朝向已确定，无需长轴参考点，返回 is_elongated=false、axis_points=null。'
         '目标被遮挡或无法确认时返回 confidence=0。')
     estimate = estimator.estimate_frame(frame, point_type='vertical' if vertical else 'grasp',

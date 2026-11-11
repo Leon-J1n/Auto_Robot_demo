@@ -258,6 +258,10 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             if 'pixel' in estimate:
                 estimate['pixel'] = {'x': estimate['pixel']['x'] + crop_origin[0],
                                      'y': estimate['pixel']['y'] + crop_origin[1]}
+            for reference in estimate.get('axis_points') or []:
+                if 'pixel' in reference:
+                    reference['pixel'] = {'x': reference['pixel']['x'] + crop_origin[0],
+                                          'y': reference['pixel']['y'] + crop_origin[1]}
         return estimate
 
     def _select_place_height(self, resolved, kin, checker, seed, **kwargs):
@@ -419,9 +423,18 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             progress('capture', 'Wrist camera / capturing RGB-D')
             frame = self.backend.get_camera_frame('wrist')
             target = self.visual_targets[(str(resolved['target_id']), 'grasp')]
-            progress('vlm', 'Wrist camera / VLM localization (network timeout 45s, no automatic retries)')
+            crop_origin = None
+            if not vertical:
+                object_pose = self.blackboard.require_pose(name)
+                metadata = self.blackboard.model(self.client, resolved['model_id'])
+                frame, crop_origin = _target_crop(frame, object_pose, metadata)
+            progress('vlm', 'Wrist camera / VLM localization')
             estimate, diagnostics = refine_surface(self.estimator, frame, surface,
                 target.get('target_description', name.lower()), vertical=vertical)
+            estimate = self._restore_crop_pixel(estimate, crop_origin)
+            if crop_origin is not None:
+                diagnostics.update(image_region='target_aabb_crop',
+                                   crop_origin_pixel={'x': crop_origin[0], 'y': crop_origin[1]})
             progress('validation', 'Wrist camera / validating IK, collision and contact path')
             refined = deepcopy(resolved)
             new_surface = np.array([estimate['world_point'][key] for key in 'xyz'])
@@ -529,6 +542,9 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                         'cycle_id': self.place_cycle_id, 'frame': frame,
                         'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
                         'crop_origin': crop_origin, 'relative_region': region}
+            elif not handle:
+                metadata = self.blackboard.model(self.client, model_id)
+                frame, crop_origin = _target_crop(frame, object_pose, metadata)
             try:
                 if vertical_place:
                     estimate = {'point_type': 'place',
