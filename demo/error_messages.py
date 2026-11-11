@@ -278,6 +278,8 @@ def describe_error(error, fallback):
             return 'VLM 返回失败：' + (cause if len(cause) <= 220 else cause[:217] + '…')
     if code == 'PLACEMENT_PERCEPTION_FAILED':
         return '放置感知失败，无法获得有效放置点'
+    if code == 'PLACEMENT_HEIGHT_SEARCH_FAILED' and details.get('relative_region', {}).get('relation') in {'above', 'below'}:
+        return message or '指定上下相对放置位姿不可行'
     if code == 'PATH_NOT_FOUND':
         planner = details.get('planner')
         budget = details.get('planning_time')

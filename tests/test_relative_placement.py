@@ -42,12 +42,26 @@ class RelativePlacementGeometryTests(unittest.TestCase):
             region = relative_region(placement_parameters({'relation': relation, 'distance_m': .1}),
                 pose, np.array([-.1, -.2, -.05]), np.array([.1, .2, .05]), SimpleNamespace())
             np.testing.assert_allclose(region['region_center_world'], expected)
-        for params in ({'distance_m': .1}, {'relation': 'above'}, {'relation': 'front', 'distance_m': -.1},
+        for params in ({'distance_m': .1}, {'relation': 'diagonal'}, {'relation': 'front', 'distance_m': -.1},
                        {'relation': 'front', 'distance_m': True}, {'relation': 'front', 'distance_m': float('nan')},
                        {'relation': 'front', 'distance_m': '0.1'}, {'relation': []}):
             with self.subTest(params=params), self.assertRaises(ValueError):
                 placement_parameters(params)
         self.assertEqual(placement_parameters({}), {'relation': 'at', 'distance_m': 0.})
+
+    def test_vertical_directions_use_oriented_top_and_bottom_in_world_z(self):
+        pose = {'position': [0., 0., .7],
+                'quaternion_xyzw': Rotation.from_euler('y', 90, degrees=True).as_quat()}
+        resources = SimpleNamespace(robot_object={'components': [{'component_type': 'Transform',
+            'properties': {'quaternion_xyzw': Rotation.from_euler('x', 30, degrees=True).as_quat().tolist()}}]})
+        for relation, expected_z, direction in (('above', 1., [0., 0., 1.]),
+                                                ('below', .4, [0., 0., -1.])):
+            with self.subTest(relation=relation):
+                region = relative_region(placement_parameters({'relation': relation, 'distance_m': .1}),
+                    pose, np.array([-.2, -.1, -.05]), np.array([.2, .1, .05]), resources)
+                np.testing.assert_allclose(region['direction_world'], direction)
+                np.testing.assert_allclose(region['region_center_world'], [0., 0., expected_z])
+                self.assertEqual(region['direction_frame'], 'world_vertical')
 
     def test_put_owns_parameters_only_in_its_own_bound_cycle(self):
         commands = [command(1, 'approach'), command(2, 'put', relation='front', distance_m=.1),
@@ -66,8 +80,18 @@ class RelativePlacementGeometryTests(unittest.TestCase):
         converter = SkillCommandConverter({'scene': 'unused.json', 'objects': {}, 'scene_object_ids': ['12']})
         step = converter.convert_command(command(1, 'put', relation='front', distance_m=.1))
         self.assertEqual(step['request']['target'], {'type': 'object', 'target_id': 12})
+        for relation in ('above', 'below'):
+            with self.subTest(relation=relation):
+                step = converter.convert_command(command(1, 'put', relation=relation, distance_m=.1))
+                self.assertEqual(step['request']['target'], {'type': 'object', 'target_id': 12})
         with self.assertRaises(ValueError):
             converter.convert_command(command(2, 'put', distance_m=.1))
+
+    def test_vertical_put_parameters_bind_to_its_approach(self):
+        commands = [command(1, 'approach'), command(2, 'put', relation='above', distance_m=.1)]
+        bindings = infer_command_place_parameters(commands)
+        self.assertEqual(bindings['1'], {'relation': 'above', 'distance_m': .1})
+        self.assertEqual(bindings['2'], bindings['1'])
 
 
 class RelativePlacementCycleTests(unittest.TestCase):
@@ -178,6 +202,39 @@ class RelativePlacementCycleTests(unittest.TestCase):
         self.assertEqual(direct['visual_estimate']['placement_request'],
                          {'relation': 'front', 'distance_m': .1})
         self.backend.get_camera_frame.assert_called_once_with('global')
+
+    def test_vertical_put_uses_exact_boundary_offset_without_vlm_or_height_search(self):
+        for relation, expected_z in (('above', .85), ('below', .55)):
+            with self.subTest(relation=relation):
+                self.setUp()
+                request = placement_parameters({'relation': relation, 'distance_m': .1})
+                self.resolver.command_place_parameters['1'] = request
+                self.resolver.command_place_parameters['2'] = request
+                approach = self.resolve(1)
+                self.assertEqual(len(approach['candidates']), 1)
+                self.assertEqual(approach['visual_estimate']['placement_height_candidates_m'], [0.])
+                self.assertEqual(approach['visual_estimate']['position_source'], 'target_boundary')
+                self.assertAlmostEqual(approach['visual_estimate']['world_point']['z'], expected_z)
+                self.backend.get_camera_frame.assert_not_called()
+                self.estimator.estimate_frame.assert_not_called()
+                chosen = self.select(approach, reject=lambda q: False)
+                self.resolver.remember_selection(chosen)
+                put = self.resolve(2)
+                self.assertAlmostEqual(put['candidates'][0]['world_from_grasp'][2][3], expected_z)
+                self.backend.get_camera_frame.assert_not_called()
+
+    def test_unreachable_vertical_put_does_not_fall_back_to_another_point(self):
+        self.resolver.command_place_parameters['2'] = placement_parameters(
+            {'relation': 'above', 'distance_m': .1})
+        resolved = self.resolve(2)
+        with self.assertRaises(GraspResolutionError) as caught:
+            self.select(resolved, reject=lambda q: True)
+        self.assertEqual(caught.exception.details['error_code'], 'PLACEMENT_HEIGHT_SEARCH_FAILED')
+        self.assertEqual(len(caught.exception.details['details']['height_attempts']), 1)
+        from demo.error_messages import describe_error
+        self.assertIn('指定上下相对放置位姿不可行', describe_error(caught.exception.details, '放置失败'))
+        self.assertNotIn('11 档', describe_error(caught.exception.details, '放置失败'))
+        self.backend.get_camera_frame.assert_not_called()
 
     def test_real_estimator_uses_chinese_relative_prompt_and_cropped_depth(self):
         from atomic_action.perception.vlm_estimate import VLMPointEstimator

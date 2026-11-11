@@ -60,13 +60,14 @@ the task resolver and motion planners.
 平面从缓存闭合中心减去已选抓深，恢复原表面点用于偏移检查；在精定位后的
 表面点上重新执行原有抓深搜索及桌面净空检查（包含原桌面底限兜底），不重复叠加旧抓深。
 平面二次感知不要求长轴参考点，首次估计的朝向继续使用。
-置信度须至少 0.5，三维修正不得超过 10 cm，世界高度修正
-不得超过 5 cm；遮挡、视野外或偏移超限均报 `WRIST_GRASP_REFINEMENT_FAILED`。
-这些范围约束降低选错部件的概率，不能保证 VLM 一定识别同一把手。
+置信度须至少 0.5，三维坐标必须有效。精定位点与粗定位点的偏移记录在
+`wrist_refinement.correction_world_m` 中，但不再用固定距离阈值否决精定位点。
+遮挡或无法确认目标时，精定位仍可能失败；置信度不能保证 VLM 一定识别同一把手。
 修正位姿必须通过基于当前关节状态的 IK、张开夹爪碰撞及接近路径检查，
-通过后才替换缓存。精定位失败时保留已验证的粗定位位姿及缓存，后续 pick
-继续使用粗定位结果。报告记录 `wrist_refinement.status: fallback_to_coarse`
-及失败原因；此策略同时适用于平面和垂面抓取。无需新增命令参数。
+通过后才替换缓存。若取得精定位点但运动可行性检查失败，`approach` 报错并停止
+后续 `pick`；若采图或感知失败，保留粗定位缓存，报告记录
+`wrist_refinement.status: fallback_to_coarse` 及失败原因。
+此策略同时适用于平面和垂面抓取。无需新增命令参数。
 报告保存 `coarse_target_resolution` 及 `wrist_refinement` 的相机、完整图像模式和偏移信息。
 默认 VLM 客户端网络超时为 45 秒，关闭 SDK 自动重试；这不是整个精定位流程的总时限。
 终端不输出精定位阶段日志；界面状态显示采图、VLM 定位、IK/碰撞/接近路径验证阶段；报告记录
@@ -150,6 +151,11 @@ external region; the existing world-Z height search still applies. Any random
 recovery candidates remain inside the requested region. An unobserved region
 returns `PLACEMENT_REGION_UNOBSERVED`; it never reuses an interior destination
 point. Omitted relation (or `at`) keeps ordinary internal placement.
+`above` and `below` instead use world Z and the destination's oriented top or
+bottom model boundary. They produce an exact spatial release target at the
+requested offset, including unsupported positions in free space. They do not
+request VLM perception or run the 0-10 cm placement height search; ordinary
+IK, collision, and motion planning checks still apply.
 
 Placement perception errors, or failure of all 11 height candidates at the
 VLM point, enable a bounded fallback in `demo/interaction/placement_fallback.py`.

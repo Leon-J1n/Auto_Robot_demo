@@ -1,4 +1,4 @@
-"""Resolve horizontal placement regions outside a measured destination boundary."""
+"""Resolve placement targets outside a measured destination boundary."""
 from dataclasses import replace
 
 import numpy as np
@@ -11,38 +11,44 @@ from sensors.camera import CameraIntrinsics
 
 
 REGION_RADIUS_M = .02
-_RELATIONS = {'front', 'behind', 'left', 'right'}
+_RELATIONS = {'front', 'behind', 'left', 'right', 'above', 'below'}
+_VERTICAL_RELATIONS = {'above', 'below'}
 
 
 def placement_parameters(parameters):
     relation = parameters.get('relation', 'at')
     distance = parameters.get('distance_m', 0.)
     if not isinstance(relation, str) or relation not in _RELATIONS | {'at'}:
-        raise ValueError('put.relation 仅支持 at、front、behind、left、right')
+        raise ValueError('put.relation 仅支持 at、front、behind、left、right、above、below')
     if isinstance(distance, bool) or not isinstance(distance, (int, float)) or not np.isfinite(distance) or distance < 0:
         raise ValueError('put.distance_m 必须为大于或等于 0 的有限数值，单位 m')
     if relation == 'at' and distance != 0:
-        raise ValueError('put 指定 distance_m 时必须同时指定前后左右的 relation')
+        raise ValueError('put 指定 distance_m 时必须同时指定非 at 的 relation')
     return {'relation': relation, 'distance_m': float(distance)}
 
 
 def relative_region(request, object_pose, lower, upper, resources):
-    """Project the oriented model box onto a robot-base horizontal direction."""
+    """Project the oriented model box onto the requested world direction."""
     transform = rigid_pose(object_pose['position'], object_pose['quaternion_xyzw'])
-    robot = getattr(resources, 'robot_object', {})
-    base = next((c.get('properties', {}) for c in robot.get('components', [])
-                 if c['component_type'] == 'Transform'), {})
-    rotation = Rotation.from_quat(base.get('quaternion_xyzw', [0., 0., 0., 1.])).as_matrix()
-    direction = rotation @ np.asarray(END_EFFECTOR_DIRECTIONS[request['relation']])
-    direction[2] = 0.
-    if np.linalg.norm(direction) < 1e-6:
-        raise ValueError('机器人基座方向在桌面平面的投影无效，无法计算相对放置位置')
-    direction /= np.linalg.norm(direction)
+    vertical = request['relation'] in _VERTICAL_RELATIONS
+    if vertical:
+        direction = np.array([0., 0., 1. if request['relation'] == 'above' else -1.])
+    else:
+        robot = getattr(resources, 'robot_object', {})
+        base = next((c.get('properties', {}) for c in robot.get('components', [])
+                     if c['component_type'] == 'Transform'), {})
+        rotation = Rotation.from_quat(base.get('quaternion_xyzw', [0., 0., 0., 1.])).as_matrix()
+        direction = rotation @ np.asarray(END_EFFECTOR_DIRECTIONS[request['relation']])
+        direction[2] = 0.
+        if np.linalg.norm(direction) < 1e-6:
+            raise ValueError('机器人基座方向在桌面平面的投影无效，无法计算相对放置位置')
+        direction /= np.linalg.norm(direction)
     center = transform[:3, :3] @ ((lower + upper) / 2.) + transform[:3, 3]
     support = float(np.sum(np.abs(direction @ transform[:3, :3]) * (upper - lower) / 2.))
     boundary = center + direction * support
     point = boundary + direction * request['distance_m']
-    return {**request, 'reference': 'target_boundary', 'direction_frame': 'robot_base_horizontal',
+    return {**request, 'reference': 'target_boundary',
+            'direction_frame': 'world_vertical' if vertical else 'robot_base_horizontal',
             'direction_world': direction.tolist(), 'boundary_point_world': boundary.tolist(),
             'region_center_world': point.tolist(), 'region_radius_m': REGION_RADIUS_M}
 
@@ -67,7 +73,10 @@ def region_points(frame, region):
     # Explicit spatial requests must never turn into a point inside the target.
     boundary = np.asarray(region['boundary_point_world'])
     outside = (world - boundary) @ np.asarray(region['direction_world']) >= -1e-6
-    valid &= (np.linalg.norm(world[..., :2] - center[:2], axis=-1) <= radius) & outside
+    offset = world - center
+    distance = (np.linalg.norm(offset, axis=-1) if region['relation'] in _VERTICAL_RELATIONS
+                else np.linalg.norm(offset[..., :2], axis=-1))
+    valid &= (distance <= radius) & outside
     return world, np.argwhere(valid)
 
 
@@ -88,14 +97,18 @@ def validate_relative_point(estimate, region):
     point = np.array([estimate['world_point'][a] for a in 'xyz'])
     center = np.asarray(region['region_center_world'])
     boundary = np.asarray(region['boundary_point_world'])
+    offset = point - center
+    distance = (np.linalg.norm(offset) if region['relation'] in _VERTICAL_RELATIONS
+                else np.linalg.norm(offset[:2]))
     if (not np.isfinite(point).all()
-            or np.linalg.norm(point[:2] - center[:2]) > region['region_radius_m'] + 1e-6
+            or distance > region['region_radius_m'] + 1e-6
             or np.dot(point - boundary, region['direction_world']) < -1e-6):
         raise region_error('感知放置点未落在指定相对放置区域内')
 
 
 def relative_instruction(region):
-    relation = {'front': '前侧', 'behind': '后侧', 'left': '左侧', 'right': '右侧'}[region['relation']]
+    relation = {'front': '前侧', 'behind': '后侧', 'left': '左侧', 'right': '右侧',
+                'above': '上侧', 'below': '下侧'}[region['relation']]
     return (f"放置区域：参考物体{relation}边界向外 {region['distance_m'] * 100:g} cm；"
             '输入图像已裁剪到该外侧区域。')
 

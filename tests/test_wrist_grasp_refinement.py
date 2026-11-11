@@ -34,10 +34,10 @@ class WristRefinementTests(unittest.TestCase):
         self.assertEqual(diagnostics['image_region'], 'full_frame')
         self.assertNotIn('crop_origin_pixel', estimate)
 
-    def test_uncertain_or_distant_detection_is_rejected(self):
+    def test_uncertain_or_invalid_detection_is_rejected(self):
         frame, _, _ = fixtures.observation()
         surface = frame.camera_pose.position - frame.camera_pose.rotation_matrix[:, 2]
-        for confidence, delta in ((.2, [0, 0, 0]), (.9, [.11, 0, 0]), (.9, [0, 0, .06])):
+        for confidence, delta in ((.2, [0, 0, 0]), (.9, [np.nan, 0, 0])):
             point = surface + delta
             estimator = Mock()
             estimator.estimate_frame.return_value = {'confidence': confidence,
@@ -45,16 +45,16 @@ class WristRefinementTests(unittest.TestCase):
             with self.assertRaises(GraspResolutionError):
                 refine_surface(estimator, frame, surface, 'handle')
 
-    def test_relaxed_correction_accepts_eight_cm_and_four_cm_height(self):
+    def test_refined_point_can_correct_coarse_pose_beyond_previous_limits(self):
         frame, _, _ = fixtures.observation()
         surface = frame.camera_pose.position - frame.camera_pose.rotation_matrix[:, 2]
-        point = surface + [.08, 0, .04]
+        point = surface + [.0379, .0247, .0705]
         estimator = Mock()
         estimator.estimate_frame.return_value = {'confidence': .9,
             'world_point': dict(zip('xyz', point)), 'pixel': {'x': 1, 'y': 1}}
         estimate, diagnostics = refine_surface(estimator, frame, surface, 'handle')
         np.testing.assert_allclose(list(estimate['world_point'].values()), point)
-        self.assertAlmostEqual(diagnostics['correction_distance_m'], np.linalg.norm([.08, 0, .04]))
+        self.assertAlmostEqual(diagnostics['correction_distance_m'], np.linalg.norm([.0379, .0247, .0705]))
 
     def test_planar_prompt_uses_grasp_without_handle_instruction(self):
         frame, response, _ = fixtures.observation()
@@ -114,7 +114,7 @@ class WristRefinementTests(unittest.TestCase):
     def test_validated_position_preserves_rotation_offset_and_pick_cache(self):
         resolver, resources, state, resolved = self.prepare()
         old = np.asarray(resolved['selected']['world_from_grasp'])
-        surface = old[:3, 3] + .015 * old[:3, 2] + [0, .005, 0]
+        surface = old[:3, 3] + .015 * old[:3, 2] + [0, .005, .07]
         estimate = {'world_point': dict(zip('xyz', surface)), 'confidence': .9}
         def select(candidate, *args, **kwargs):
             self.assertTrue(candidate['fixed_grasp_validation_pending'])
@@ -134,24 +134,22 @@ class WristRefinementTests(unittest.TestCase):
         np.testing.assert_allclose(cached['candidates'][0]['world_from_grasp'], pose)
         resolver.backend.get_camera_frame.assert_not_called()
 
-    def test_failed_validation_keeps_cache_for_pick(self):
+    def test_failed_refined_validation_stops_before_pick(self):
         resolver, resources, state, resolved = self.prepare()
         before = resolver.blackboard.visual_grasp('Drawer').copy()
         estimate = {'world_point': dict(zip('xyz', before[:3, 3])), 'confidence': .9}
         with (patch('demo.interaction.wrist_refinement.refine_surface', return_value=(estimate, {})),
               patch.object(resolver, 'select', side_effect=ValueError('collision'))):
-            fallback = resolver.refine_after_approach(resolved, resources, state, None, None)
+            with self.assertRaises(GraspResolutionError) as caught:
+                resolver.refine_after_approach(resolved, resources, state, None, None)
         np.testing.assert_allclose(resolver.blackboard.visual_grasp('Drawer'), before)
-        with patch('demo.interaction.vlm_grasp.control_from_grasp_frame', return_value=np.eye(4)):
-            cached = resolver.resolve(9, resources, state)
-        np.testing.assert_allclose(cached['candidates'][0]['world_from_grasp'], before)
-        self.assertEqual(fallback['visual_estimate']['wrist_refinement']['status'], 'fallback_to_coarse')
-        failure = fallback['visual_estimate']['wrist_refinement']['error']['details']
+        failure = caught.exception.details['details']
         self.assertEqual(failure['substage'], 'validation')
         self.assertIn('vlm', failure['timing_s'])
+        self.assertEqual(failure['refined_estimate'], estimate)
 
     def test_perception_failure_returns_original_pose_without_validation(self):
-        for error in (refinement_error('偏移过大'), TimeoutError('Request timed out.')):
+        for error in (refinement_error('置信度不足'), TimeoutError('Request timed out.')):
             resolver, resources, state, resolved = self.prepare()
             before = resolver.blackboard.visual_grasp('Drawer').copy()
             with (patch('demo.interaction.wrist_refinement.refine_surface', side_effect=error),

@@ -269,6 +269,15 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                     'world_point': resolved['visual_estimate']['world_point'],
                     'height_attempts': attempts, 'success': True}]
             return choice
+        relative = resolved['visual_estimate'].get('relative_placement', {})
+        if relative.get('relation') in {'above', 'below'}:
+            error = GraspResolutionError('指定上下相对放置位姿不可行，未执行放置')
+            error.details = {'error_code': 'PLACEMENT_HEIGHT_SEARCH_FAILED',
+                             'failed_stage': 'target_resolution', 'error_message': str(error),
+                             'details': {'height_attempts': attempts, 'relative_region': relative},
+                             'rejected': [item for attempt in attempts
+                                          for item in attempt.get('error', {}).get('rejected', [])]}
+            raise error
         fallback = {'used': True, 'trigger': original_fallback.get('trigger', 'vlm_point_infeasible'),
                     'attempts': []}
         if original_fallback.get('vlm_error_type'):
@@ -458,7 +467,11 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             error = refinement_error('腕部抓取精定位失败：' + str(exc),
                 cause=getattr(exc, 'details', {'type': type(exc).__name__}),
                 target_id=resolved['target_id'], substage=stage, timing_s=timings,
-                elapsed_s=perf_counter() - started)
+                elapsed_s=perf_counter() - started,
+                **({'refined_estimate': estimate, 'refinement_diagnostics': diagnostics}
+                   if stage in {'validation', 'cache'} else {}))
+            if stage in {'validation', 'cache'}:
+                raise error from exc
             fallback = deepcopy(resolved)
             fallback['visual_estimate']['wrist_refinement'] = {
                 'status': 'fallback_to_coarse', 'error': error.details,
@@ -498,7 +511,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                         and previous.get('placement_request', placement_parameters({})) == self.place_parameters):
                     grasp = self.blackboard.visual_place(name)
         if grasp is None:
-            frame = self.backend.get_camera_frame(target.get('camera_id', 'global'))
+            vertical_place = point_type == 'place' and self.place_parameters['relation'] in {'above', 'below'}
+            frame = None if vertical_place else self.backend.get_camera_frame(target.get('camera_id', 'global'))
             place_metadata = self.blackboard.model(self.client, model_id) if point_type == 'place' else None
             crop_origin = None
             region = None
@@ -506,15 +520,21 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 if self.place_parameters['relation'] != 'at':
                     lower, upper = _model_bounds(place_metadata)
                     region = relative_region(self.place_parameters, object_pose, lower, upper, resources)
-                    frame, crop_origin = crop_relative_region(frame, region)
+                    if not vertical_place:
+                        frame, crop_origin = crop_relative_region(frame, region)
                 else:
                     frame, crop_origin = _target_crop(frame, object_pose, place_metadata)
-                self._placement_contexts[str(target_id)] = {
-                    'cycle_id': self.place_cycle_id, 'frame': frame,
-                    'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
-                    'crop_origin': crop_origin, 'relative_region': region}
+                if not vertical_place:
+                    self._placement_contexts[str(target_id)] = {
+                        'cycle_id': self.place_cycle_id, 'frame': frame,
+                        'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
+                        'crop_origin': crop_origin, 'relative_region': region}
             try:
-                if region is not None:
+                if vertical_place:
+                    estimate = {'point_type': 'place',
+                        'world_point': dict(zip('xyz', region['region_center_world'])),
+                        'frame': 'world', 'confidence': None, 'position_source': 'target_boundary'}
+                elif region is not None:
                     estimate = self.estimator.estimate_frame(frame, point_type=point_type,
                         target='指定外侧区域的支撑表面', instruction=relative_instruction(region))
                     validate_relative_point(estimate, region)
@@ -523,7 +543,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                         point_type='vertical' if handle else point_type,
                         target=target.get('target_description', name.lower()))
             except Exception as exc:
-                if point_type != 'place':
+                if point_type != 'place' or vertical_place:
                     raise
                 try:
                     points = self._center_estimates(target_id)
@@ -578,7 +598,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 # adds a world-Z offset; it never reselects a floor pixel.
                 grasp[:3, 3] = surface_point
                 estimate.update(held_object=held_name, placement_height_selected=False,
-                                placement_height_candidates_m=list(PLACEMENT_HEIGHTS_M))
+                                placement_height_candidates_m=[0.] if vertical_place else list(PLACEMENT_HEIGHTS_M))
             estimate['target_point_world'] = {
                 axis: float(grasp[index, 3]) for index, axis in enumerate('xyz')}
             if point_type == 'grasp':
@@ -625,7 +645,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         placement_pending = point_type == 'place' and not evidence.get('placement_height_selected')
         if placement_pending:
             candidates = []
-            for height in PLACEMENT_HEIGHTS_M:
+            for height in evidence.get('placement_height_candidates_m', PLACEMENT_HEIGHTS_M):
                 pose = grasp.copy()
                 pose[2, 3] += height  # World Z, independent of the tool's orientation.
                 candidates.append({**candidate, 'placement_height_offset_m': height,
