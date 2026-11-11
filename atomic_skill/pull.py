@@ -461,8 +461,6 @@ class PullMotionExecutor:
                 'INVALID_REQUEST',
                 f'{operation.capitalize()} requires exactly one of distance or angle_deg',
             )
-        if has_distance and 'direction' not in self.params:
-            return self._fail('INVALID_REQUEST', f'Linear {operation} requires direction')
         if has_angle and ('arc_center' not in self.params or 'arc_axis' not in self.params):
             return self._fail('INVALID_REQUEST', f'Circular {operation} requires arc_center and arc_axis')
 

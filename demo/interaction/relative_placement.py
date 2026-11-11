@@ -1,12 +1,11 @@
 """Resolve horizontal placement regions outside a measured destination boundary."""
 from dataclasses import replace
-import json
-from pathlib import Path
 
 import numpy as np
 from scipy.spatial.transform import Rotation
 
 from demo.interaction.object_library import GraspResolutionError, rigid_pose
+from demo.interaction.placement_fallback import MAX_CENTER_POINTS
 from demo.task_commands.converter import END_EFFECTOR_DIRECTIONS
 from sensors.camera import CameraIntrinsics
 
@@ -96,17 +95,16 @@ def validate_relative_point(estimate, region):
 
 
 def relative_instruction(region):
-    path = Path(__file__).resolve().parents[2] / 'atomic_action/perception/vlm_estimate/prompts/relative_place.json'
-    prompt = json.loads(path.read_text(encoding='utf-8'))
-    return prompt['description'].format(relation=prompt['relations'][region['relation']],
-                                        distance_cm=region['distance_m'] * 100)
+    relation = {'front': '前侧', 'behind': '后侧', 'left': '左侧', 'right': '右侧'}[region['relation']]
+    return (f"放置区域：参考物体{relation}边界向外 {region['distance_m'] * 100:g} cm；"
+            '输入图像已裁剪到该外侧区域。')
 
 
 def random_region_estimates(frame, region, rng):
     world, pixels = region_points(frame, region)
     if not len(pixels):
         return []
-    indices = rng.choice(len(pixels), size=min(3, len(pixels)), replace=False)
+    indices = rng.choice(len(pixels), size=min(MAX_CENTER_POINTS, len(pixels)), replace=False)
     estimates = []
     for index in indices:
         v, u = map(int, pixels[index])
@@ -114,5 +112,5 @@ def random_region_estimates(frame, region, rng):
             'world_point': dict(zip('xyz', map(float, world[v, u]))), 'depth_m': float(frame.depth[v, u]),
             'frame': 'world', 'timestamp': frame.timestamp, 'sequence': frame.sequence,
             'placement_center_fallback': {'used': True, 'region': 'requested_relative_region',
-                                          'max_points': 3, 'sample_index': len(estimates)}})
+                                          'max_points': MAX_CENTER_POINTS, 'sample_index': len(estimates)}})
     return estimates

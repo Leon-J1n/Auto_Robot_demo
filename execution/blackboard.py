@@ -107,6 +107,10 @@ class TargetBlackboard:
             return None
         return _matrix(self.objects[anchor['body']]) @ np.asarray(anchor['body_from_grasp'])
 
+    def clear_grasp_anchor(self, name, index=0):
+        """Replace an old contact anchor after a newly validated visual refinement."""
+        self._anchors.pop((name, index), None)
+
     def remember_visual_grasp(self, name, world_from_grasp, estimate, *, anchor_frame=None):
         anchor_frame = anchor_frame or name
         anchor_pose = self.require_pose(anchor_frame)

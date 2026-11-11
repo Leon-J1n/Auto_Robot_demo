@@ -26,6 +26,15 @@ class FakeResponses:
 
 
 class VLMEstimateTests(unittest.TestCase):
+    def test_only_two_prompt_files_with_uniform_schema(self):
+        folder = Path(__file__).resolve().parents[1] / 'atomic_action/perception/vlm_estimate/prompts'
+        self.assertEqual({p.name for p in folder.glob('*.json')}, {'vlm_pick.json', 'vlm_put.json'})
+        for mode in ('grasp', 'vertical', 'handle', 'place'):
+            prompt = VLMPointEstimator._load_prompt(mode)
+            self.assertEqual(set(prompt), {'target', 'description', 'respond'})
+        self.assertEqual(VLMPointEstimator._load_prompt('grasp'), VLMPointEstimator._load_prompt('vertical'))
+        self.assertEqual(VLMPointEstimator._load_prompt('grasp'), VLMPointEstimator._load_prompt('handle'))
+
     def setUp(self):
         self.responses = FakeResponses('{"x": 0.5, "y": 0.5, "confidence": 0.8}')
         self.estimator = VLMPointEstimator(SimpleNamespace(responses=self.responses))
@@ -50,7 +59,7 @@ class VLMEstimateTests(unittest.TestCase):
         prompt = self.responses.request["input"][0]["content"][0]["text"]
         task = json.loads((Path(__file__).resolve().parents[1] /
                            'atomic_action/perception/vlm_estimate/prompts/vlm_pick.json').read_text(encoding='utf-8'))
-        self.assertIn('目标物体：苹果', prompt)
+        self.assertIn('目标物体：apple', prompt)
         self.assertIn(task['description'], prompt)
         self.assertIn(f"输出结构：{task['respond']}", prompt)
 
@@ -59,7 +68,7 @@ class VLMEstimateTests(unittest.TestCase):
         result = self.estimator.estimate_frame(self.frame, point_type="place", target="tray")
         self.assertEqual(result["world_point"], {"x": 2.0, "y": 3.0, "z": 1.0})
         prompt = self.responses.request["input"][0]["content"][0]["text"]
-        self.assertIn('目标物体：托盘', prompt)
+        self.assertIn('目标物体：tray', prompt)
         self.assertIn('内部可见底面', prompt)
         self.assertIn('只返回 JSON', prompt)
 
@@ -137,6 +146,28 @@ class VLMEstimateTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, reason):
                     self.estimator.estimate_frame(self.frame, point_type='grasp', target='banana')
                 self.assertEqual(self.responses.create.call_count, 1)
+
+    def test_vlm_request_failures_are_tagged_for_error_reporting(self):
+        class APIStatusError(Exception):
+            pass
+
+        cases = ((TimeoutError('request timed out'), 'VLM_REQUEST_TIMEOUT'),
+                 (RuntimeError('connection refused'), 'VLM_REQUEST_FAILED'),
+                 (APIStatusError('service returned 503'), 'VLM_RESPONSE_FAILED'))
+        for failure, expected_code in cases:
+            with self.subTest(error=type(failure).__name__):
+                self.responses.create = Mock(side_effect=failure)
+                with self.assertRaises(type(failure)) as caught:
+                    self.estimator.estimate_frame(self.frame, point_type='grasp', target='banana')
+                self.assertEqual(caught.exception.details['error_code'], expected_code)
+                self.assertEqual(caught.exception.details['failed_stage'], 'vlm_request')
+
+    def test_invalid_vlm_response_is_tagged_for_error_reporting(self):
+        self.responses.create = Mock(return_value=SimpleNamespace(output_text='not JSON'))
+        with self.assertRaisesRegex(ValueError, 'JSON') as caught:
+            self.estimator.estimate_frame(self.frame, point_type='grasp', target='banana')
+        self.assertEqual(caught.exception.details['error_code'], 'VLM_RESPONSE_FAILED')
+        self.assertEqual(caught.exception.details['failed_stage'], 'vlm_response')
 
     def test_locate_strategy_uses_requested_camera_and_point_type(self):
         class Runtime:

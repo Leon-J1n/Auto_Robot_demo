@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import numpy as np
+import mujoco
 
 from atomic_skill.push import CommandPushExecutor
 from atomic_skill.pull import CommandPullExecutor
@@ -49,9 +50,36 @@ class HeldMotionTest(unittest.TestCase):
         self.assertEqual([s['phase'] for s in result['substeps']], ['push_motion', 'release'])
         release.assert_called_once()
 
+    def test_omitted_direction_uses_operation_default_in_selected_frame(self):
+        for kind, sign in ((CommandPushExecutor, 1), (CommandPullExecutor, -1)):
+            for frame in ('tool', 'world', 'grasp'):
+                with self.subTest(kind=kind, frame=frame):
+                    executor, motion, release = self.make_executor(kind)
+                    rotation = np.array([[1., 0., 0.], [0., 0., -1.], [0., 1., 0.]])
+                    executor.backend.get_end_effector_pose = lambda: {
+                        'position': [1, 0, 0], 'rotation_matrix': rotation}
+                    model = mujoco.MjModel.from_xml_string(
+                        '<mujoco><worldbody><site name="grasp_center" euler="90 0 0"/></worldbody></mujoco>')
+                    data = mujoco.MjData(model)
+                    mujoco.mj_forward(model, data)
+                    executor.backend.model, executor.backend.data = model, data
+                    parameters = {'distance': .1}
+                    if frame != 'tool':
+                        parameters['frame'] = frame
+                    result = executor.execute(parameters)
+                    self.assertTrue(result['success'])
+                    request = motion.call_args.args[0]
+                    direction = np.array([0., 0., sign])
+                    if frame != 'world':
+                        direction = rotation @ direction
+                    np.testing.assert_allclose(request['strategy_params']['direction'], direction, atol=1e-12)
+                    np.testing.assert_allclose(list(request['target']['position'].values()),
+                                               np.array([1, 0, 0]) + .1 * direction, atol=1e-12)
+                    release.assert_called_once()
+
     def test_not_held_or_invalid_request_cannot_move_or_release(self):
         cases = [(False, {'distance': .1, 'direction': [1, 0, 0]}, 'OBJECT_NOT_HELD'),
-                 (True, {'distance': .1}, 'INVALID_REQUEST'),
+                 (True, {'distance': .1, 'direction': [0, 0, 0]}, 'INVALID_REQUEST'),
                  (True, {'distance': .1, 'angle_deg': 90}, 'INVALID_REQUEST'),
                  (True, {'angle_deg': 90, 'arc_axis': [0, 0, 1]}, 'INVALID_REQUEST'),
                  (True, {'contact_mode': 'contact', 'distance': .1}, 'INVALID_REQUEST')]

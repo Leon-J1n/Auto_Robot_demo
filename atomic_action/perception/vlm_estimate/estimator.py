@@ -16,6 +16,8 @@ from sensors.camera import CameraFrame, CameraIntrinsics, CameraPose
 
 _PROMPT_FILES = {
     "grasp": "vlm_pick.json",
+    "handle": "vlm_pick.json",
+    "vertical": "vlm_pick.json",
     "place": "vlm_put.json",
 }
 
@@ -77,7 +79,7 @@ class VLMPointEstimator:
         instruction: str | None = None,
     ) -> dict[str, Any]:
         if point_type not in _PROMPT_FILES:
-            raise ValueError("point_type must be 'grasp' or 'place'.")
+            raise ValueError("point_type must be 'grasp', 'handle', 'vertical' or 'place'.")
         if not isinstance(target, str) or not target.strip():
             raise ValueError("A nonempty target description is required.")
         rgb = np.asarray(rgb)
@@ -102,25 +104,49 @@ class VLMPointEstimator:
         Image.fromarray(rgb, mode="RGB").save(image, format="PNG")
         image_url = "data:image/png;base64," + base64.b64encode(image.getvalue()).decode("ascii")
         task = self._load_prompt(point_type)
-        target_name = task.get('target_names', {}).get(target.strip().lower(), target.strip())
+        target_name = target.strip()
         prompt = (f"目标物体：{task['target'].replace('{target}', target_name)}\n"
                   f"感知需求：{task['description']}\n"
                   f"输出结构：{task['respond']}\n")
         if instruction:
             prompt += f"补充要求：{instruction.strip()}\n"
         prompt += "请严格按照输出结构返回结果，只返回 JSON，不要 Markdown 或其他说明。"
-        response = self._get_client().responses.create(
-            model=self.model,
-            input=[{"role": "user", "content": [
-                {"type": "input_text", "text": prompt},
-                {"type": "input_image", "image_url": image_url},
-            ]}],
-        )
-        output_text = getattr(response, "output_text", None) or "".join(
-            part.text for item in response.output if item.type == "message"
-            for part in item.content if getattr(part, "text", None)
-        )
-        point = self._parse_point(output_text)
+        try:
+            response = self._get_client().responses.create(
+                model=self.model,
+                input=[{"role": "user", "content": [
+                    {"type": "input_text", "text": prompt},
+                    {"type": "input_image", "image_url": image_url},
+                ]}],
+            )
+        except Exception as exc:
+            exception_name = type(exc).__name__.lower()
+            timed_out = isinstance(exc, TimeoutError) or 'timeout' in exception_name
+            response_failed = any(marker in exception_name for marker in ('apistatus', 'ratelimit'))
+            payload = getattr(exc, 'details', None)
+            if not isinstance(payload, dict):
+                payload = {}
+            payload.update(
+                error_code=('VLM_REQUEST_TIMEOUT' if timed_out else
+                            'VLM_RESPONSE_FAILED' if response_failed else 'VLM_REQUEST_FAILED'),
+                error_message=str(exc) or type(exc).__name__,
+                failed_stage='vlm_request',
+            )
+            exc.details = payload
+            raise
+        try:
+            output_text = getattr(response, "output_text", None) or "".join(
+                part.text for item in response.output if item.type == "message"
+                for part in item.content if getattr(part, "text", None)
+            )
+            point = self._parse_point(output_text)
+        except Exception as exc:
+            exc.details = {
+                'error_code': 'VLM_RESPONSE_FAILED',
+                'error_message': str(exc),
+                'failed_stage': 'vlm_response',
+            }
+            raise
         u = round(point["x"] * (width - 1))
         v = round(point["y"] * (height - 1))
         z, depth_sampling = sample_depth(depth, u, v,
@@ -143,9 +169,19 @@ class VLMPointEstimator:
             "frame": "world",
             "confidence": point.get("confidence"),
         }
-        if point_type == 'grasp':
+        if point_type in {'grasp', 'handle'}:
             from .axis import estimate_axis
-            result.update(estimate_axis(point, depth, intrinsics, position, rotation))
+            if point_type == 'grasp':
+                result.update(estimate_axis(point, depth, intrinsics, position, rotation))
+            if point_type == 'handle':
+                from .handle import estimate_handle
+                try:
+                    result.update(estimate_handle(point, depth, intrinsics, position, rotation, result))
+                except ValueError as exc:
+                    exc.details = {'error_code': 'HANDLE_POSE_ESTIMATION_FAILED',
+                        'error_message': str(exc), 'failed_stage': 'perception',
+                        'details': {'estimate': result, 'references': point}}
+                    raise
         return result
 
     @staticmethod
@@ -157,17 +193,11 @@ class VLMPointEstimator:
             raise FileNotFoundError(f"找不到提示词文件: {path}") from exc
         except json.JSONDecodeError as exc:
             raise ValueError(f"提示词文件不是有效 JSON: {path}") from exc
-        if not isinstance(prompt, dict) or any(
+        if not isinstance(prompt, dict) or set(prompt) != {"target", "description", "respond"} or any(
             not isinstance(prompt.get(key), str) or not prompt[key].strip()
             for key in ("target", "description", "respond")
         ):
             raise ValueError(f"提示词文件必须包含非空的 target、description、respond: {path}")
-        names = prompt.get('target_names', {})
-        if not isinstance(names, dict) or any(
-            not isinstance(key, str) or not isinstance(value, str) or not value.strip()
-            for key, value in names.items()
-        ):
-            raise ValueError(f"提示词文件的 target_names 必须是名称对照表: {path}")
         return prompt
 
     def _get_client(self) -> Any:
@@ -178,6 +208,8 @@ class VLMPointEstimator:
             self._client = OpenAI(
                 api_key=api_key,
                 base_url="https://cn-beijing.maas.qianwenaiapi.com/compatible-mode/v1",
+                timeout=45.0,
+                max_retries=0,
             )
         return self._client
 
@@ -204,7 +236,7 @@ class VLMPointEstimator:
             if isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not np.isfinite(confidence) or not 0 <= confidence <= 1:
                 raise ValueError("VLM confidence must be in [0, 1].")
             point["confidence"] = float(confidence)
-        for key in ('is_elongated', 'axis_points'):
+        for key in ('is_elongated', 'axis_points', 'panel_points'):
             if key in result:
                 point[key] = result[key]
         return point

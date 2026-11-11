@@ -47,10 +47,17 @@ def relative_tool_motion(backend, parameters, operation):
     if any(key in parameters for key in ('target_position_m', 'target_angle_deg')):
         raise ValueError('Relative motion cannot include an absolute mechanism goal')
     frame = parameters.get('frame', 'tool')
-    if frame not in {'tool', 'world'}:
-        raise ValueError('Relative motion frame must be tool or world')
+    if frame not in {'tool', 'world', 'grasp'}:
+        raise ValueError('Relative motion frame must be tool, world or grasp')
     pose = backend.get_end_effector_pose()
+    origin = np.asarray(pose['position'])
     rotation = np.asarray(pose['rotation_matrix']) if frame == 'tool' else np.eye(3)
+    if frame == 'grasp':
+        site = mujoco.mj_name2id(backend.model, mujoco.mjtObj.mjOBJ_SITE, 'grasp_center')
+        if site < 0:
+            raise ValueError('grasp frame requires the calibrated grasp_center site')
+        rotation = backend.data.site_xmat[site].reshape(3, 3).copy()
+        origin = backend.data.site_xpos[site].copy()
     def vector(value, name):
         array = np.asarray(value, dtype=float)
         if array.shape != (3,) or not np.all(np.isfinite(array)):
@@ -75,7 +82,7 @@ def relative_tool_motion(backend, parameters, operation):
         if center.shape != (3,) or not np.all(np.isfinite(center)):
             raise ValueError('arc_center must be a finite world xyz point')
     else:
-        center = np.asarray(pose['position']) + vector(parameters.get('arc_center_offset'), 'arc_center_offset')
+        center = origin + vector(parameters.get('arc_center_offset'), 'arc_center_offset')
     axis = vector(parameters.get('arc_axis'), 'arc_axis')
     if np.linalg.norm(axis) < 1e-12:
         raise ValueError('arc_axis must not be zero')

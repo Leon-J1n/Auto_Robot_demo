@@ -27,8 +27,8 @@ class CenterPointTests(unittest.TestCase):
 
     def test_random_points_are_distinct_inside_rotated_central_region_and_back_project(self):
         estimates = self.sample()
-        self.assertEqual(len(estimates), 3)
-        self.assertEqual(len({tuple(e['pixel'].values()) for e in estimates}), 3)
+        self.assertEqual(len(estimates), 5)
+        self.assertEqual(len({tuple(e['pixel'].values()) for e in estimates}), 5)
         transform = rigid_pose(self.pose['position'], self.pose['quaternion_xyzw'])
         for estimate in estimates:
             world = np.array([estimate['world_point'][a] for a in 'xyz'])
@@ -82,7 +82,7 @@ class CenterPointTests(unittest.TestCase):
         self.assertGreater(origin[0], 0)
         samples = random_center_estimates(cropped, self.pose, np.array([-.06, -.06, -.05]),
                                          np.array([.06, .06, .05]), np.random.default_rng(42))
-        self.assertEqual(len(samples), 3)
+        self.assertEqual(len(samples), 5)
         for sample in samples:
             u = sample['pixel']['x'] + origin[0]
             v = sample['pixel']['y'] + origin[1]

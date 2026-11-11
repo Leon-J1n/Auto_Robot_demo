@@ -164,7 +164,9 @@ class TaskSkillExecutor:
             )
             if path_type == 'joint':
                 request['target'] = {'type': 'joint', 'joint_positions': selected_joint_goal.tolist()}
-        elif parameters.get('link'):
+        elif parameters.get('link') and not (
+                callable(getattr(self.resolver, 'is_visual_handle', None))
+                and self.resolver.is_visual_handle(parameters.get('target'), self.resources)):
             from demo.interaction.requests import motion_request
             request = motion_request(self.resources, backend, parameters, blackboard=sync.blackboard)
         else:
@@ -184,6 +186,9 @@ class TaskSkillExecutor:
                     # contact; do not run the legacy target-body closure probe.
                     parts, resolved = adapter.prepare(request, state, grasp_request=None,
                         retreat_lift_height=0.0)
+                    if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
+                        backend.contact_target = resolved['target_name']
+                        backend.contact_target_object_id = parameters['target']
                 else:
                     parts, resolved = adapter.prepare(request, state)
             except Exception as exc:
@@ -454,6 +459,24 @@ class TaskSkillExecutor:
                 execution_result.pop('frames', None)
         row.update(result, **({'target_resolution': resolved} if resolved is not None else {}))
         if result.get('success') and command['skill_name'] == 'approach':
+            refine = getattr(self.resolver, 'refine_after_approach', None)
+            if (callable(refine) and (resolved or {}).get('visual_estimate')
+                    and resolved.get('selected', {}).get('pose_source') in
+                    ('vlm_rgbd_grasp', 'blackboard_contact_link')):
+                self.stage = 'wrist_refinement'
+                self.report['active_substep'] = self.stage
+                self.backend.set_status('Wrist camera / refining grasp position')
+                current = self.sync.sync(self.backend, self.kinematics, self.checker)
+                row['coarse_target_resolution'] = deepcopy(resolved)
+                try:
+                    resolved = refine(resolved, self.resources, current, self.kinematics, self.checker)
+                except Exception as exc:
+                    row.update(success=False, status='error', error=getattr(exc, 'details', {
+                        'error_code': 'WRIST_GRASP_REFINEMENT_FAILED', 'failed_stage': self.stage,
+                        'error_message': str(exc)}))
+                    raise
+                row['target_resolution'] = resolved
+                row['wrist_refinement'] = resolved['visual_estimate']['wrist_refinement']
             self._remember_interaction(command, resolved)
         return row
 

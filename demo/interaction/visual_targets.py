@@ -14,6 +14,21 @@ def infer_visual_targets(commands):
         identity = (str(target), point_type)
         targets.setdefault(identity, {
             'target_id': target, 'point_type': point_type, 'camera_id': 'global'})
+    # The pick owns perception settings; its bound approach must use them too.
+    configured = {}
+    for command in commands:
+        if command.get('skill_name') != 'pick':
+            continue
+        parameters = command.get('parameters', {})
+        identity = (str(parameters.get('target')), 'grasp')
+        settings = {key: parameters[key] for key in
+                    ('grasp_type', 'target_description', 'camera_id', 'link') if key in parameters}
+        if settings.get('grasp_type', 'handle') not in {'handle', 'top_down'}:
+            raise ValueError('grasp_type must be handle or top_down')
+        if identity in configured and configured[identity] != settings:
+            raise ValueError('One target cannot use different visual grasp settings in the same run')
+        configured[identity] = settings
+        targets[identity].update(settings)
     return list(targets.values())
 
 

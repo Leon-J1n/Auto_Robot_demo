@@ -66,7 +66,7 @@ def floor_fallback_candidates(resolved, checker, seed):
 
 
 def validate_depth_candidate(resolved, candidate, joints, kin, checker, seed, safety_distance):
-    """Check static open geometry first, then the vertical contact path."""
+    """Check static open geometry first, then the grasp-axis contact path."""
     from atomic_action.motion.common.interaction import pose_request
     from atomic_action.motion.common.utils.validation import validate_move_request
     from planning import PickContactPlanner
@@ -74,8 +74,15 @@ def validate_depth_candidate(resolved, candidate, joints, kin, checker, seed, sa
 
     goal = np.asarray(candidate['world_from_control'], dtype=float)
     grasp = np.asarray(candidate['world_from_grasp'], dtype=float)
-    floor_z = table_floor(checker.backend, grasp[:3, 3])
-    geometry = validate_grasp_geometry(checker, joints, floor_z, safety_distance=safety_distance)
+    if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
+        from demo.interaction.table_clearance import DEFAULT_OPEN_WIDTH_M
+        hit = checker.check(joints, safety_distance=safety_distance, gripper_width=DEFAULT_OPEN_WIDTH_M)
+        geometry = {'success': not hit.in_collision,
+                    'reason': 'grasp_geometry_collision' if hit.in_collision else 'static_geometry_valid',
+                    'contacts': list(hit.contacts), 'validation_mode': 'static_open_geometry'}
+    else:
+        floor_z = table_floor(checker.backend, grasp[:3, 3])
+        geometry = validate_grasp_geometry(checker, joints, floor_z, safety_distance=safety_distance)
     if not geometry['success']:
         return geometry
     base = deepcopy(resolved.get('depth_search_move_defaults') or {})

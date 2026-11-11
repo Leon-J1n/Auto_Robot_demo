@@ -123,17 +123,40 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
     def is_visual_place(self, target_id):
         return (str(target_id), self.point_type) in self.visual_targets and self.point_type == 'place'
 
+    def is_visual_handle(self, target_id, resources):
+        target = self.visual_targets.get((str(target_id), self.point_type))
+        if target is None or self.point_type != 'grasp':
+            return False
+        if 'grasp_type' in target:
+            return target['grasp_type'] == 'handle'
+        obj = scene_object_by_id(resources.scene, target_id)
+        return component(obj, 'Semantic').get('semantic_name', '').lower() == 'drawer'
+
     def select(self, resolved, kin, checker, seed, **kwargs):
         target = self.visual_targets.get((str(resolved['target_id']), self.point_type))
         if target is not None and self.point_type == 'place' and resolved.get('placement_height_search_pending'):
             return self._select_place_height(resolved, kin, checker, seed, **kwargs)
         if target is None or self.point_type != 'grasp':
             return super().select(resolved, kin, checker, seed, **kwargs)
+        if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
+            if kwargs.get('grasp_index') not in (None, 0):
+                raise GraspResolutionError('Visual handle grasp has only logical grasp_index 0')
+            kwargs = {**kwargs, 'grasp_index': None}
         previous_target = getattr(self.backend, 'contact_target', None)
         previous_id = getattr(self.backend, 'contact_target_object_id', None)
         self.backend.contact_target = resolved['target_name']
         self.backend.contact_target_object_id = resolved['target_id']
         try:
+            if resolved.get('fixed_grasp_validation_pending'):
+                caller_validator = kwargs.get('candidate_validator')
+                def validate_fixed(q, candidate):
+                    evidence = validate_depth_candidate(
+                        resolved, candidate, q, kin, checker, seed, kwargs.get('safety_distance', .003))
+                    if evidence['success'] and caller_validator is not None:
+                        return caller_validator(q, candidate)
+                    return evidence
+                return super().select(resolved, kin, checker, seed,
+                    **{**kwargs, 'candidate_validator': validate_fixed})
             if not resolved.get('depth_search_pending'):
                 return super().select(resolved, kin, checker, seed, **kwargs)
             attempts = []
@@ -144,7 +167,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 if evidence['success'] and caller_validator is not None:
                     return caller_validator(q, candidate)
                 return evidence
-            for depth in GRASP_DEPTHS_M:
+            for depth in resolved.get('visual_estimate', {}).get('grasp_depth_candidates_m', GRASP_DEPTHS_M):
                 group = [c for c in resolved['candidates'] if c['grasp_depth_offset_m'] == depth]
                 if not group:
                     continue
@@ -161,6 +184,14 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                                  'rejected': choice.get('rejected', [])})
                 choice['grasp_depth_attempts'] = attempts
                 return choice
+            if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
+                error = GraspResolutionError('把手正面抓取候选均不可行，未执行接近')
+                error.details = {'error_code': 'GRASP_DEPTH_SEARCH_FAILED',
+                    'error_message': str(error), 'failed_stage': 'target_resolution',
+                    'details': {'depth_attempts': attempts},
+                    'rejected': [item for attempt in attempts
+                                 for item in attempt['error'].get('rejected', [])]}
+                raise error
             fallback_candidates = floor_fallback_candidates(resolved, checker, seed)
             fallback = {'used': True, 'success': False, 'candidates': fallback_candidates}
             try:
@@ -323,7 +354,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             evidence['target_point_world'] = dict(zip('xyz', map(float, point)))
             evidence['grasp_point_world'] = evidence['target_point_world'].copy()
             self.blackboard.remember_visual_grasp(
-                resolved['target_name'], np.asarray(selected['world_from_grasp']), evidence)
+                resolved['target_name'], np.asarray(selected['world_from_grasp']), evidence,
+                anchor_frame=evidence.get('anchor_frame'))
             resolved['visual_estimate'] = evidence
         elif isinstance(evidence, dict) and selected.get('pose_source') == 'vlm_rgbd_place':
             evidence = dict(evidence, placement_height_selected=True,
@@ -337,6 +369,107 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             resolved['visual_estimate'] = evidence
         super().remember_selection(resolved)
 
+    def refine_after_approach(self, resolved, resources, state, kin, checker):
+        """Validate wrist position refinement before atomically replacing the cache."""
+        from demo.interaction.wrist_refinement import refine_surface, refinement_error
+        name = resolved['target_name']
+        evidence = resolved.get('visual_estimate', {})
+        if (self.point_type != 'grasp' or not evidence
+                or (str(resolved['target_id']), 'grasp') not in self.visual_targets):
+            return resolved
+        vertical = evidence.get('grasp_estimation_method') == 'vertical_aabb'
+        self.blackboard.observe(state)
+        from time import perf_counter
+        started = perf_counter()
+        stage_started = started
+        timings = {}
+        stage = None
+
+        def progress(next_stage, label):
+            nonlocal stage, stage_started
+            now = perf_counter()
+            if stage is not None:
+                timings[stage] = now - stage_started
+            stage, stage_started = next_stage, now
+            set_status = getattr(self.backend, 'set_status', None)
+            if callable(set_status):
+                set_status(label)
+        try:
+            if (state.get('gripper') or {}).get('holding'):
+                raise refinement_error('夹爪仍持有物体，不能重新定位抓取位置')
+            # Successful approach already passed the runtime settling gate.
+            # Re-read the cached pose at the latest observed target transform.
+            grasp = self.blackboard.grasp_pose(name, 0)
+            if grasp is None:
+                grasp = self.blackboard.visual_grasp(name)
+            if grasp is None:
+                raise refinement_error('缺少已选定的抓取姿态')
+            grasp = np.asarray(grasp).copy()
+            selected_depth = float(evidence.get('grasp_depth_offset_m', 0.))
+            surface = grasp[:3, 3] - selected_depth * grasp[:3, 2]
+            progress('capture', 'Wrist camera / capturing RGB-D')
+            frame = self.backend.get_camera_frame('wrist')
+            target = self.visual_targets[(str(resolved['target_id']), 'grasp')]
+            progress('vlm', 'Wrist camera / VLM localization (network timeout 45s, no automatic retries)')
+            estimate, diagnostics = refine_surface(self.estimator, frame, surface,
+                target.get('target_description', name.lower()), vertical=vertical)
+            progress('validation', 'Wrist camera / validating IK, collision and contact path')
+            refined = deepcopy(resolved)
+            new_surface = np.array([estimate['world_point'][key] for key in 'xyz'])
+            transform = np.asarray(resolved['control_from_grasp'])
+            depths = ([-float(evidence.get('grasp_shallow_offset_m', .015))] if vertical
+                      else list(evidence.get('grasp_depth_candidates_m', GRASP_DEPTHS_M)))
+            candidates = []
+            for depth in depths:
+                pose = grasp.copy()
+                pose[:3, 3] = new_surface + depth * pose[:3, 2]
+                candidate = deepcopy(resolved['selected'])
+                candidate.pop('floor_fallback', None)
+                candidate.update(world_from_grasp=pose.tolist(),
+                    world_from_control=(pose @ np.linalg.inv(transform)).tolist(),
+                    pose_source='vlm_rgbd_grasp', grasp_depth_offset_m=depth)
+                candidates.append(candidate)
+            updated = deepcopy(evidence)
+            # New observation supplies position only; retain the selected axis evidence.
+            updated.update({key: value for key, value in estimate.items()
+                            if not key.startswith(('axis_', 'long_axis')) and key != 'is_elongated'})
+            updated.update(grasp_rotation_world=grasp[:3, :3].tolist(),
+                surface_normal_world=(-grasp[:3, 2]).tolist(),
+                wrist_refinement={**diagnostics, 'status': 'validated'},
+                depth_selected=False)
+            # Do not retain evidence from the old position's preflight.
+            for key in ('grasp_depth_preflight', 'grasp_floor_fallback', 'grasp_depth_attempts'):
+                updated.pop(key, None)
+                refined.pop(key, None)
+            refined.pop('closure_validation', None)
+            refined.update(candidates=candidates, visual_estimate=updated,
+                fixed_grasp_validation_pending=vertical, depth_search_pending=not vertical)
+            choice = self.select(refined, kin, checker, state['joints'], prefer_direct=False,
+                safety_distance=float(resources.scene.get('move_defaults', {}).get('constraints', {}).get('safety_distance', .003)))
+            progress('cache', 'Wrist camera / refinement validated')
+            choice['visual_estimate']['wrist_refinement']['timing_s'] = dict(timings)
+            choice['visual_estimate']['wrist_refinement']['elapsed_s'] = perf_counter() - started
+            self.blackboard.clear_grasp_anchor(name)
+            self.remember_selection(choice)
+            return choice
+        except Exception as exc:
+            if stage is not None:
+                timings[stage] = perf_counter() - stage_started
+            error = refinement_error('腕部抓取精定位失败：' + str(exc),
+                cause=getattr(exc, 'details', {'type': type(exc).__name__}),
+                target_id=resolved['target_id'], substage=stage, timing_s=timings,
+                elapsed_s=perf_counter() - started)
+            fallback = deepcopy(resolved)
+            fallback['visual_estimate']['wrist_refinement'] = {
+                'status': 'fallback_to_coarse', 'error': error.details,
+                'timing_s': dict(timings), 'elapsed_s': perf_counter() - started}
+            # Failed refinement must not replace the previously validated pose
+            # or its contact anchor. Pick resolves that existing cache normally.
+            set_status = getattr(self.backend, 'set_status', None)
+            if callable(set_status):
+                set_status('Wrist refinement unavailable / using validated coarse grasp')
+            return fallback
+
     def resolve(self, target_id, resources, state):
         target = self.visual_targets.get((str(target_id), self.point_type))
         if target is None:
@@ -348,6 +481,10 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         self.blackboard.register(obj['object_id_in_scene'], name, model_id)
         object_pose = self.blackboard.require_pose(name)
         point_type = target['point_type']
+        handle = self.is_visual_handle(target_id, resources)
+        anchor_frame = name + '__' + target['link'] if target.get('link') else name
+        if target.get('link'):
+            self.blackboard.require_pose(anchor_frame)
         grasp = (self.blackboard.grasp_pose(name, 0) if point_type == 'grasp' else None)
         if grasp is None:
             if point_type == 'grasp':
@@ -382,7 +519,9 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                         target='指定外侧区域的支撑表面', instruction=relative_instruction(region))
                     validate_relative_point(estimate, region)
                 else:
-                    estimate = self.estimator.estimate_frame(frame, point_type=point_type, target=name.lower())
+                    estimate = self.estimator.estimate_frame(frame,
+                        point_type='vertical' if handle else point_type,
+                        target=target.get('target_description', name.lower()))
             except Exception as exc:
                 if point_type != 'place':
                     raise
@@ -408,8 +547,17 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                     estimate['relative_placement'] = deepcopy(region)
             grasp = np.eye(4)
             if point_type == 'grasp':
-                grasp[:3, :3], orientation = _downward_grasp_rotation(estimate)
-                estimate.update(orientation)
+                if handle:
+                    from demo.interaction.vertical_grasp import estimate_vertical_grasp
+                    metadata = self.blackboard.model(self.client, model_id)
+                    lower, upper = _model_bounds(metadata)
+                    estimate.update(estimate_vertical_grasp(
+                        estimate['world_point'], object_pose, lower, upper))
+                    grasp[:3, :3] = np.asarray(estimate['grasp_rotation_world'], dtype=float)
+                    estimate['anchor_frame'] = anchor_frame
+                else:
+                    grasp[:3, :3], orientation = _downward_grasp_rotation(estimate)
+                    estimate.update(orientation)
             else:
                 # Placement remains vertical; only grasp yaw follows the RGB-D reference axis.
                 grasp[:3, :3] = _DOWNWARD_PLACE_ROTATION
@@ -417,7 +565,10 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             if point_type == 'grasp':
                 # Cache the surface anchor; depth is selected later by ordered feasibility checks.
                 grasp[:3, 3] = surface_point
-                estimate.update(depth_selected=False, grasp_depth_candidates_m=list(GRASP_DEPTHS_M))
+                shallow = estimate.get('grasp_shallow_offset_m', 0.)
+                depths = [-shallow] if handle else [round(depth - shallow, 6) for depth in GRASP_DEPTHS_M]
+                estimate.update(depth_selected=False, grasp_depth_candidates_m=depths,
+                                depth_search_enabled=not handle)
             else:
                 gripper = state.get('gripper') or {}
                 held_name = gripper.get('object_id')
@@ -432,7 +583,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 axis: float(grasp[index, 3]) for index, axis in enumerate('xyz')}
             if point_type == 'grasp':
                 estimate['grasp_point_world'] = estimate['target_point_world'].copy()
-                self.blackboard.remember_visual_grasp(name, grasp, estimate)
+                self.blackboard.remember_visual_grasp(name, grasp, estimate, anchor_frame=anchor_frame)
             else:
                 estimate['placement_cycle_id'] = self.place_cycle_id
                 self.blackboard.remember_visual_place(name, grasp, estimate)
@@ -456,7 +607,9 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                    and candidate['pose_source'] != 'blackboard_contact_link')
         if pending:
             candidates = []
-            for depth in GRASP_DEPTHS_M:
+            for depth in evidence.get('grasp_depth_candidates_m', GRASP_DEPTHS_M):
+                if depth > evidence.get('max_grasp_depth_m', float('inf')):
+                    continue
                 shifted = grasp.copy()
                 shifted[:3, 3] += depth * shifted[:3, 2]
                 for yaw in ((0., float(np.pi)) if evidence.get('long_axis_aligned') else (0.,)):
@@ -489,7 +642,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             'control_from_grasp': transform.tolist(),
             'blackboard_revision': self.blackboard.revision,
             'candidates': candidates,
-            'depth_search_pending': pending,
+            'depth_search_pending': pending and not handle,
+            'fixed_grasp_validation_pending': pending and handle,
             'placement_height_search_pending': placement_pending,
             'depth_search_move_defaults': resources.scene.get('move_defaults', {}),
             'visual_estimate': evidence,

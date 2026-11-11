@@ -307,7 +307,7 @@ VLM 放置位姿从感知表面点沿世界 Z 轴依次向上搜索 0、1、…�
 | `grasp.mode` | string | physical | 物理接触与摩擦抓取；contact 时不填写 |
 | `distance` | number | 直线运动必填 | 正数，相对末端行程，m；contact 从首次真实接触处开始计量，不含空行程 |
 | `direction` | number[3] | pull 为 [0,0,-1]；push 为 [0,0,1] | 直线运动方向，非零向量 |
-| `frame` | string | tool | direction、圆弧偏移与轴向所在坐标系：tool / world |
+| `frame` | string | tool | direction、圆弧偏移与轴向所在坐标系：tool / world / grasp |
 | `angle_deg` | number | 相对圆弧必填 | 按右手定则带符号的角度增量，度 |
 | `arc_center_offset` | number[3] | 相对圆弧必填 | 相对起始 TCP 原点的轴心偏移，m |
 | `arc_axis` | number[3] | 相对圆弧必填 | 旋转轴方向，非零向量 |
@@ -324,6 +324,7 @@ VLM 放置位姿从感知表面点沿世界 Z 轴依次向上搜索 0、1、…�
 
 - 相对运动使用 distance 或 angle_deg，二者只能选一个。contact 编排当前只支持 distance 直线 push。
 - tool 指运动开始时的 TCP 坐标系；显式 direction 就是实际运动方向，不因 pull 再次反转。
+- grasp 使用实测 `grasp_center` 坐标系；正面抓抽屉时沿 `[0,0,-1]` 拉出，沿 `[0,0,1]` 推回。把手视觉模式和命令示例见 [VLM 把手抓取](../atomic_action/perception/vlm_estimate/README.md#drawer-handle-grasping)。
 - contact 保持现有夹爪开度，不主动张开或闭合；要求当前没有抓持对象，不能同时填写 grasp / grasp_request。
 - contact 自动接近沿用原始把手抓取位姿，不额外增加末端旋转、指垫尺寸补偿或初始间隙偏移；接触方式不同本身不改变目标位姿。
 - contact 不要求起步前已有接触。接近完成后先向前运动，首次真实接触建立时将有效行程归零，然后继续推动 distance。空行程不扣减 distance，也不计入 actual_delta / travel_distance。规划用几何接触预测延长同一连续路径，成功与剩余行程依据实际接触位置验证。

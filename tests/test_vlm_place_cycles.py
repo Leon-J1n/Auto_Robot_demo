@@ -278,7 +278,7 @@ class PlacementFallbackTests(unittest.TestCase):
 
     def test_all_failures_are_bounded_and_report_every_point_without_double_counting(self):
         from demo.error_messages import describe_error
-        for vlm_error, expected_calls in ((False, 44), (True, 33)):
+        for vlm_error, expected_calls in ((False, 66), (True, 55)):
             with self.subTest(vlm_error=vlm_error):
                 self.setUp()
                 if vlm_error:
@@ -288,10 +288,10 @@ class PlacementFallbackTests(unittest.TestCase):
                     self.resolver.select(self.resolve('1'), kin, checker, np.zeros(3))
                 error = caught.exception.details
                 fallback = error['details']['center_fallback']
-                self.assertEqual(len(fallback['attempts']), 3)
+                self.assertEqual(len(fallback['attempts']), 5)
                 self.assertEqual(kin.solve_all.call_count, expected_calls)
                 self.assertEqual(len(error['rejected']), expected_calls)
-                self.assertEqual(len({tuple(a['world_point'].values()) for a in fallback['attempts']}), 3)
+                self.assertEqual(len({tuple(a['world_point'].values()) for a in fallback['attempts']}), 5)
                 self.assertIn(f'{expected_calls} 次', describe_error(error, '失败'))
                 self.assertFalse(self.board.visual_place_evidence('Basket')['placement_height_selected'])
                 checker.check_path.assert_not_called()

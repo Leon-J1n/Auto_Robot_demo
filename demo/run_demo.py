@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from demo.error_messages import describe_error, error_from_exception
+from demo.error_messages import describe_error, error_category, error_from_exception
 from collision.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
@@ -79,7 +79,7 @@ SUCCESS_ACTIONS = {
 }
 ERROR_DESCRIPTIONS = {
     'GRASP_FAILED': '未能维持稳定抓持',
-    'IK_FAILED': '目标位姿没有可用逆解',
+    'IK_FAILED': '逆运动学求解失败',
     'TARGET_UNREACHABLE': '目标超出机械臂可达范围',
     'PATH_NOT_FOUND': '未找到满足约束的运动路径',
     'PLANNING_FAILED': '未能生成满足约束的轨迹',
@@ -163,10 +163,10 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
     if description is None:
         description = STAGE_DESCRIPTIONS.get(error.get('failed_stage') or stage, '步骤执行失败')
     description = describe_error(error, description)
-    code = error.get('error_code')
+    description = description.replace('|', '｜')
     if status == 'suspend':
-        return f"suspend: 任务中止，{target} 未完成目标；{description}" + (f"（{code}）" if code else '')
-    return f"error: {description}" + (f"（{code}）" if code else '')
+        description = f'任务中止，{target} 未完成目标；{description}'
+    return f"error|{error_category(error, stage=stage)}|{description}"
 
 
 def _default_output_dir(command_file):
@@ -535,8 +535,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         elif active_command is None:
             initial_error = error_from_exception(exc, stage=stage)
             cause = describe_error(initial_error, '初始化失败')
-            code = initial_error.get('error_code')
-            print(f'error: 初始化失败：{cause}' + (f'（{code}）' if code else ''), flush=True)
+            cause = cause.replace('|', '｜')
+            print(f"error|{error_category(initial_error, stage=stage)}|初始化失败：{cause}", flush=True)
         report['error'] = {'stage': stage, 'message': str(exc), 'type': type(exc).__name__}
         report['error'].update(error_from_exception(
             exc, stage=stage, existing=row.get('error') if row else None))

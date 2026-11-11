@@ -1,4 +1,4 @@
-"""Validate VLM surface references and back-project their horizontal direction."""
+"""Validate VLM references and back-project a horizontal or full 3-D axis."""
 import numpy as np
 
 from .depth import InvalidPointDepth, sample_depth
@@ -14,7 +14,7 @@ def project_pixel(u, v, depth, intrinsics, position, rotation):
     return position + rotation @ camera, z, sampling
 
 
-def estimate_axis(point, depth, intrinsics, position, rotation):
+def estimate_axis(point, depth, intrinsics, position, rotation, *, horizontal=True):
     """No model dimensions or simulated object orientation enter this calculation."""
     result = {'is_elongated': point.get('is_elongated'), 'axis_points': None,
               'axis_status': 'missing', 'axis_reason': 'VLM 未提供长轴判断'}
@@ -46,16 +46,17 @@ def estimate_axis(point, depth, intrinsics, position, rotation):
                               'world_point': dict(zip('xyz', map(float, world)))})
         result['axis_points'] = projected
         worlds = np.array([[item['world_point'][key] for key in 'xyz'] for item in projected])
-        horizontal = worlds[1] - worlds[0]
-        horizontal[2] = 0.
-        length = float(np.linalg.norm(horizontal))
+        direction = worlds[1] - worlds[0]
+        if horizontal:
+            direction[2] = 0.
+        length = float(np.linalg.norm(direction))
         if length < MIN_AXIS_LENGTH_M:
-            raise ValueError('长轴水平投影过短，无法确定抓取旋转')
+            raise ValueError('长轴水平投影过短，无法确定抓取旋转' if horizontal else '把手三维长轴过短，无法确定抓取旋转')
         # Direction comes only from the two reference depths. A straight
         # image chord through a curved object may cross background; do not
         # sample or validate that chord or compare it with the grasp surface.
         result.update(axis_status='valid', axis_reason=None,
-                      long_axis_world=(horizontal / length).tolist(), axis_length_m=length)
+                      long_axis_world=(direction / length).tolist(), axis_length_m=length)
     except ValueError as exc:
         result['axis_reason'] = str(exc)
         if isinstance(exc, InvalidPointDepth):

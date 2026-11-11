@@ -86,7 +86,7 @@ class GraspDepthSearchTests(unittest.TestCase):
                                success=False, error=error)
         self.assertIn('接触路径规划失败', message)
         self.assertIn('桌面底限兜底失败', message)
-        self.assertIn('GRASP_DEPTH_SEARCH_FAILED', message)
+        self.assertTrue(message.startswith('error|目标可行性|'))
         self.assertIsNone(self.board.visual_grasp('Apple'))
         self.assertEqual(self.backend.contact_target, 'previous')
         self.assertEqual(self.backend.contact_target_object_id, 99)

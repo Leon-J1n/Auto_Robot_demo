@@ -42,7 +42,7 @@ class DemoErrorMessagesTests(unittest.TestCase):
         self.assertIn('(204, 407)', message)
         self.assertIn('深度无效（NaN）', message)
         self.assertIn('无法换算三维坐标', message)
-        self.assertIn('（VLM_DEPTH_INVALID）', message)
+        self.assertTrue(message.startswith('error|观测与感知|'))
         self.assertEqual(error['details']['image_size'], {'width': 1024, 'height': 1024})
 
     def test_rrt_timeout_keeps_prior_contact_failure_without_claiming_impossible(self):
@@ -54,7 +54,7 @@ class DemoErrorMessagesTests(unittest.TestCase):
         message = self.render(error)
         self.assertIn('直线下探失败：right_pad 与 Apple 穿透 1.821 mm', message)
         self.assertIn('关节避障失败：RRT-Connect 在5 s 规划预算内未找到无碰撞路径', message)
-        self.assertIn('（PATH_NOT_FOUND）', message)
+        self.assertTrue(message.startswith('error|路径规划|'))
         self.assertNotIn('不存在', message)
         del error['details']['preceding_contact_error']
         self.assertNotIn('直线下探', self.render(error))
@@ -64,8 +64,7 @@ class DemoErrorMessagesTests(unittest.TestCase):
             with self.subTest(code=code):
                 message = self.render({'error_code': code, 'error_message': '目标 Banana 缺少模型尺寸'})
                 self.assertIn('目标 Banana 缺少模型尺寸', message)
-                if code:
-                    self.assertIn('（CUSTOM_FAILURE）', message)
+                self.assertTrue(message.startswith('error|请求与状态检查|'))
 
     def test_clearance_and_penetration_differ(self):
         for distance, text in ((.0001577127, '安全间距不足，当前 0.158 mm'),
@@ -76,7 +75,7 @@ class DemoErrorMessagesTests(unittest.TestCase):
                         {'geom1': 'right_pad', 'geom2': 'WorkTable', 'distance': distance}]}})
                 self.assertIn('right_pad 与 WorkTable', message)
                 self.assertIn(text, message)
-                self.assertIn('（PATH_CONSTRAINT_INFEASIBLE）', message)
+                self.assertTrue(message.startswith('error|路径规划|'))
                 self.assertEqual('要求 3.000 mm' in message, distance > 0)
 
     def test_nested_rejected_contacts_are_history_not_an_overall_collision(self):
@@ -236,10 +235,35 @@ class DemoErrorMessagesTests(unittest.TestCase):
                          'success: 已抓取目标 Apple')
         message = self.render({'error_code': 'CONTACT_LOST', 'error_message': '物体已脱离夹爪'},
                               status='suspend', target_name='Apple')
-        self.assertIn('suspend: 任务中止', message)
-        self.assertIn('物体已脱离夹爪（CONTACT_LOST）', message)
+        self.assertEqual(message, 'error|运动执行|任务中止，Apple 未完成目标；物体已脱离夹爪')
         self.assertIn('上游未提供具体失败原因', self.render({'error_code': 'IK_FAILED'}))
         self.assertEqual(describe_error(None, '失败'), '失败；上游未提供具体失败原因')
+
+    def test_vlm_failures_use_dedicated_categories_and_details(self):
+        cases = [
+            ({'error_code': 'VLM_REQUEST_TIMEOUT', 'failed_stage': 'vlm_request'},
+             'error|VLM 交互|VLM 请求超时'),
+            ({'error_code': 'VLM_REQUEST_FAILED', 'failed_stage': 'vlm_request',
+              'error_message': '服务返回 503'},
+             'error|VLM 交互|VLM 请求失败：服务返回 503'),
+            ({'error_code': 'VLM_RESPONSE_FAILED', 'failed_stage': 'vlm_response',
+              'error_message': 'VLM response must be a JSON object.'},
+             'error|VLM 交互|VLM 返回失败：VLM 返回内容不是 JSON 对象'),
+        ]
+        for error, expected in cases:
+            with self.subTest(error=error):
+                self.assertEqual(self.render(error), expected)
+
+    def test_error_text_cannot_break_pipe_delimited_format(self):
+        self.assertEqual(self.render({'error_message': '上游错误 | 连接拒绝'}),
+                         'error|请求与状态检查|上游错误 ｜ 连接拒绝')
+
+    def test_error_format_assigns_pose_and_motion_failures_to_distinct_categories(self):
+        self.assertEqual(self.render({'error_code': 'TARGET_POSE_UNREACHABLE'}),
+                         'error|目标可行性|目标位姿候选均无可用逆解')
+        self.assertEqual(self.render({'error_code': 'IK_FAILED'}),
+                         'error|目标可行性|逆运动学求解失败；上游未提供具体失败原因')
+        self.assertTrue(self.render({'error_code': 'EXECUTION_TIMEOUT'}).startswith('error|运动执行|'))
 
 
 if __name__ == '__main__':
