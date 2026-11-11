@@ -11,7 +11,7 @@
 | 字段 | 含义 |
 | --- | --- |
 | `command_id` | 本次任务内唯一的字符串标识 |
-| `skill_name` | 技能名称，如 `move_to`、`pick`、`put`、`approach`、`retreat` |
+| `skill_name` | 技能名称，如 `move_to`、`pick`、`put`、`approach`、`retreat`、`pull`、`push` |
 | `parameters` | 技能参数对象；所有技能参数均放在此处 |
 
 ## 2. 技能职责与参数
@@ -119,6 +119,22 @@
 
 `search` 可整体省略。默认从当前实际位置依次尝试撤退 10～3 cm。
 
+### pull / push：直线推拉抽屉
+
+先用 `approach`、`pick` 抓住抽屉把手，再执行直线 `pull` 拉开或 `push` 推回。推拉从当前实测末端位姿出发，保持末端朝向；动作成功后自动松开夹爪，因此下一次推拉前需要重新抓持。`pull` / `push` 不负责选择把手抓取点。
+
+```json
+{"command_id": "3", "skill_name": "pull", "parameters": {"frame": "grasp", "distance": 0.16}}
+```
+
+| 参数 | 必填 / 默认 | 含义 |
+| --- | --- | --- |
+| `distance` | 必填 | 直线运动距离，单位 m，必须大于 0 |
+| `frame` | `tool` | 运动方向的参考坐标系：`tool` 为当前工具坐标系，`grasp` 为标定的 `grasp_center` 坐标系，`world` 为世界坐标系 |
+| `direction` | `pull` 为 `[0, 0, -1]`；`push` 为 `[0, 0, 1]` | 相对于 `frame` 的非零方向向量；显式指定时即为实际运动方向 |
+
+示例采用 `frame: "grasp"`，要求机器人已标定 `grasp_center`，且其 Z 轴与抽屉进出方向匹配。`distance` 始终填正数；方向不匹配时按实际坐标系显式设置 `direction`。推拉的场景目标由前面的抓持确定，本条 command 无需填写 `target`。
+
 ## 3. Commands 如何装配
 
 任务文件包含场景信息和一个按执行顺序排列的 `commands` 数组。下面以“把物体 7 放到容器 12”为例；ID 和场景版本须对应实际注册场景，`home` 须已配置。
@@ -177,4 +193,13 @@ approach(object) → pick(object) → lift_up(distance) → retreat(object)
     → approach(destination) → put(destination) → retreat(destination)
 ```
 
-把图中的每个节点依次写成一条 command 即可；完整装配示例见上一节。
+### 开关抽屉
+
+`drawer` 为抽屉的场景对象 ID。每次推拉前抓住把手；推拉成功后夹爪已松开，再执行 `retreat`。
+
+```text
+approach(drawer) → pick(drawer) → pull(frame=grasp, distance=0.16) → retreat(drawer)
+    → approach(drawer) → pick(drawer) → push(frame=grasp, distance=0.16) → retreat(drawer)
+```
+
+把图中的每个节点依次写成一条 command 即可。抓取放置的完整装配示例见上一节；抽屉直线推拉的完整命令见 [`commands.007.json`](../demo/task_commands/commands.007/commands.007.json)。
