@@ -1,9 +1,11 @@
 """Planning-side interface for trajectory time parameterization."""
 from __future__ import annotations
+import time
 from typing import Any, Mapping
 import numpy as np
 from .errors import PlanningError
 from execution.config import motion_settings
+from .collision_sampling import collision_sampling_settings, spline_collision_samples
 
 
 def _scaled_joint_limit(config, key, scale_key, dof, *, multiplier_key=None, clip_to_base=False):
@@ -47,6 +49,7 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
     if points.ndim != 2 or len(points) < 2 or points.shape[1] == 0 or not np.all(np.isfinite(points)):
         raise ValueError('waypoints must be finite NxDOF, N >= 2')
     velocity, acceleration = continuous_motion_limits(move_request, points.shape[1])
+    collision_resolution, spline_subdivisions = collision_sampling_settings(move_request)
     timing_config = move_request.get('planning', {}).get('time_parameterization', {})
     max_jerk = timing_config.get('max_jerk')
     local_timing = circular and max_jerk is None
@@ -57,6 +60,7 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
         return profile.samples(1., 0., None, velocity, acceleration, timestep,
                                max_jerk=max_jerk, corner_slowdown=corner_slowdown)
     points = points[np.r_[True, np.any(np.diff(points, axis=0) != 0, axis=1)]]
+    sampling_started = time.perf_counter()
     if len(points) == 1:
         references = np.repeat(points, 2, axis=0)
         duration = timestep
@@ -70,25 +74,33 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
         interpolator = timing_config.get('path_interpolator', 'cubic_c2')
         profile = ContinuousJointPath(points, fractions, interpolator=interpolator)
         references, duration = sample(profile)
-        progress = np.linspace(0, 1, max(len(points)*4, int(np.ceil(profile.max_slope/0.01))+1))
-        # One geometrically dense monotone path is enough: check_path's
-        # resolution parameter samples each segment between these points, so
-        # the time-sampled references do not need a second FCL traversal.
-        validation_points = profile.spline(progress)
+        validation_points = spline_collision_samples(profile, collision_resolution, spline_subdivisions)
+    trajectory_sampling_s = time.perf_counter() - sampling_started
+    linear_validation_s = 0.0
     if kinematics is not None and move_request.get('motion', {}).get('path_type') == 'linear':
+        linear_validation_started = time.perf_counter()
         start_pose, end_pose = kinematics.forward(points[0]), kinematics.forward(points[-1])
         origin = np.asarray(start_pose['position'])
         direction = np.asarray(end_pose['position']) - origin
         length_squared = float(direction @ direction)
-        for q in validation_points:
+        # Keep Cartesian straightness validation at its previous density;
+        # only collision sampling is relaxed by collision_validation settings.
+        geometry_points = (profile.spline(np.linspace(0, 1,
+            max(len(points)*4, int(np.ceil(profile.max_slope/.01))+1)))
+            if profile is not None else validation_points)
+        for q in geometry_points:
             actual = np.asarray(kinematics.forward(q)['position'])
             fraction = np.clip(float((actual-origin) @ direction)/length_squared, 0, 1) if length_squared > 1e-16 else 0
             if np.linalg.norm(actual-origin-fraction*direction) > 0.005:
                 raise PlanningError('Smoothed trajectory exceeds linear path tolerance', code='TRAJECTORY_INVALID',
                                     recoverable=True, details={'stage':'execution_preparation'})
+        linear_validation_s = time.perf_counter() - linear_validation_started
     collision_fallback = None
+    collision_validation_s = 0.0
+    cache_before = dict(getattr(collision_checker, 'path_validation_cache_stats', {}) or {})
     if collision_checker is not None:
-        checked = collision_checker.check_path(validation_points, resolution=0.01,
+        collision_validation_started = time.perf_counter()
+        checked = collision_checker.check_path(validation_points, resolution=collision_resolution,
             safety_distance=float(move_request.get('constraints', {}).get('safety_distance', 0.0)),
             allowed_geom_ids=getattr(collision_checker, 'allowed_target_geom_ids', None))
         if checked.in_collision:
@@ -99,11 +111,10 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
             if len(points) > 1 and profile.interpolator == 'cubic_c2':
                 fallback = ContinuousJointPath(points, fractions, interpolator='pchip')
                 fallback_refs, fallback_duration = sample(fallback)
-                fallback_progress = np.linspace(
-                    0, 1, max(len(points)*4, int(np.ceil(fallback.max_slope/0.01))+1))
-                fallback_validation = fallback.spline(fallback_progress)
+                fallback_validation = spline_collision_samples(
+                    fallback, collision_resolution, spline_subdivisions)
                 fallback_check = collision_checker.check_path(
-                    fallback_validation, resolution=0.01,
+                    fallback_validation, resolution=collision_resolution,
                     safety_distance=float(move_request.get('constraints', {}).get('safety_distance', 0.0)),
                     allowed_geom_ids=getattr(collision_checker, 'allowed_target_geom_ids', None))
                 if not fallback_check.in_collision:
@@ -116,7 +127,10 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
             else:
                 raise PlanningError('Continuous trajectory failed collision validation', code='TRAJECTORY_INVALID',
                     recoverable=True, details={'stage': 'execution_preparation', 'contacts': list(checked.contacts)})
+        collision_validation_s = time.perf_counter() - collision_validation_started
+    circular_validation_s = 0.0
     if circular and kinematics is not None and profile is not None:
+        circular_validation_started = time.perf_counter()
         arc = result.get('diagnostics', {})
         center, axis, angle = (np.asarray(arc['center']), np.asarray(arc['axis']), float(arc['angle']))
         from scipy.spatial.transform import Rotation
@@ -137,6 +151,7 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
                                                           'orientation_error_rad': max_orientation_error})
         result.setdefault('diagnostics', {})['circular_path_validation'] = {
             'max_position_error_m': max_position_error, 'max_orientation_error_rad': max_orientation_error}
+        circular_validation_s = time.perf_counter() - circular_validation_started
     result.update(geometric_waypoints=points.tolist(), time_parameterized_waypoints=references.tolist(),
                   timestamps=np.linspace(0, duration, len(references)).tolist(), duration=float(duration))
     result.pop('velocities', None)
@@ -150,6 +165,20 @@ def prepare_continuous_trajectory(trajectory, move_request, *, collision_checker
         'acceleration_limited': True, 'jerk_limited': max_jerk is not None,
         'time_law': 'local_acceleration_bounds' if local_timing else 'global_quintic',
         'limit_source': move_request.get('planning', {}).get('time_parameterization', {}).get('limit_source'),
+        'trajectory_sampling_s': trajectory_sampling_s,
+        'linear_path_validation_s': linear_validation_s,
+        'collision_validation_s': collision_validation_s,
+        'circular_path_validation_s': circular_validation_s,
+        'validation_waypoint_count': len(validation_points),
+        'collision_resolution_rad': collision_resolution,
+        'spline_subdivisions': spline_subdivisions,
+        'path_validation_cache_enabled': bool(getattr(collision_checker, 'path_validation_cache_enabled', False)),
+        'planner_waypoint_count': len(points),
+        'validation_waypoints_identical_to_planner': bool(np.array_equal(validation_points, points)),
+        'path_validation_cache': {
+            key: value - cache_before.get(key, 0)
+            for key, value in (getattr(collision_checker, 'path_validation_cache_stats', {}) or {}).items()
+        },
     }
     if local_timing:
         sample_dt = duration / (len(references) - 1)

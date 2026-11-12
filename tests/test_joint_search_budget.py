@@ -49,15 +49,22 @@ class JointSearchBudgetTests(unittest.TestCase):
         self.executor.direct_planner.plan.assert_called_once()
         self.executor.collision_free_planner.plan.assert_called_once()
         bounded = self.executor.collision_free_planner.plan.call_args.args[1]
-        self.assertEqual(bounded['planning']['planning_time'], 2.)
+        self.assertEqual(bounded['planning']['planning_time'], 1.)
         self.assertTrue(selection['fallback_used'])
         diagnostics = trajectory['diagnostics']['configuration_selection']
         self.assertEqual(diagnostics['bypass_attempts'], 1)
         self.assertEqual(diagnostics['endpoint_rejected_count'], 2)
-        self.assertEqual(diagnostics['untested_direct_count'], 1)
+        self.assertEqual(diagnostics['untested_direct_count'], 0)
+        self.assertEqual(diagnostics['candidates_pruned_by_lower_bound'], 1)
+        self.assertTrue(diagnostics['candidate_timings'])
+        self.assertTrue(any('direct_elapsed_s' in item for item in diagnostics['candidate_timings']))
+        self.assertTrue(any('coarse_path_check_s' in item and 'fine_direct_plan_s' in item
+                            for item in diagnostics['candidate_timings']))
+        self.assertTrue(any('elapsed_s' in item and 'budget_s' in item
+                            for item in diagnostics['candidate_timings']))
         self.assertLess(self.clock, 5.)
 
-    def test_cheap_direct_checks_compare_branches_then_share_remaining_rrt_budget(self):
+    def test_failed_early_bypass_is_retried_with_remaining_budget(self):
         def blocked(path, request, context):
             self.clock += .1
             raise CollisionPlanningError('blocked')
@@ -69,13 +76,23 @@ class JointSearchBudgetTests(unittest.TestCase):
         self.executor.collision_free_planner.plan.side_effect = failed_detour
         with self.assertRaises(PlanningError) as caught:
             self.search()
-        self.assertEqual(self.executor.direct_planner.plan.call_count, 2)
+        self.assertEqual(self.executor.direct_planner.plan.call_count, 1)
         self.assertEqual(self.executor.collision_free_planner.plan.call_count, 2)
         details = caught.exception.details
         self.assertEqual(details['bypass_attempts'], 2)
         self.assertTrue(details['budget_exhausted'])
         self.assertEqual(details['planning_elapsed_s'], 5.)
         self.assertEqual(details['planning_time_budget_s'], 5.)
+        self.assertTrue(details['candidate_timings'])
+
+    def test_near_detour_prunes_expensive_distant_direct_candidates(self):
+        trajectory = self.search()
+        self.executor.direct_planner.plan.assert_called_once()
+        self.executor.collision_free_planner.plan.assert_called_once()
+        diagnostics = trajectory['diagnostics']['configuration_selection']
+        self.assertEqual(diagnostics['candidates_pruned_by_lower_bound'], 3)
+        direct = next(t for t in diagnostics['candidate_timings'] if 'direct_elapsed_s' in t)
+        self.assertEqual(direct['direct_elapsed_s'], 3.)
 
     def test_invalid_endpoints_never_receive_path_search_budget(self):
         self.executor.collision_checker.check.return_value = SimpleNamespace(in_collision=True, contacts=())

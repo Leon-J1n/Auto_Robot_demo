@@ -28,6 +28,7 @@ DEFAULT_SCENE_SETTINGS = {
             'mode': 'auto',
             'planning_time': 10.0,
             'allow_replan': True,
+            'collision_validation': {'resolution_rad': .02, 'spline_subdivisions': 2},
         },
     },
     'object_library': {

@@ -20,15 +20,15 @@ from demo.interaction.requests import apply_global_motion_timing
 class GlobalConfigTest(unittest.TestCase):
     def test_defaults_and_explicit_motion_scales(self):
         scene = apply_default_scene_settings({})
-        self.assertEqual(scene['move_defaults']['constraints']['velocity_scale'], .6)
-        self.assertEqual(scene['move_defaults']['constraints']['acceleration_scale'], 1.)
+        self.assertEqual(scene['move_defaults']['constraints']['velocity_scale'], .4)
+        self.assertEqual(scene['move_defaults']['constraints']['acceleration_scale'], .8)
         self.assertEqual(scene['trajectory'], {'fps': 60, 'pause_seconds': 1.})
         explicit = {'move_defaults': {'constraints': {'velocity_scale': .2}},
                     'trajectory': {'pause_seconds': 0}}
         original = deepcopy(explicit)
         merged = apply_default_scene_settings(explicit)
         self.assertEqual(merged['move_defaults']['constraints']['velocity_scale'], .2)
-        self.assertEqual(merged['move_defaults']['constraints']['acceleration_scale'], 1.)
+        self.assertEqual(merged['move_defaults']['constraints']['acceleration_scale'], .8)
         self.assertEqual(merged['trajectory'], {'fps': 60, 'pause_seconds': 0})
         self.assertEqual(explicit, original)
 
@@ -38,7 +38,7 @@ class GlobalConfigTest(unittest.TestCase):
             path = Path(directory) / 'global.json'
             path.write_text(json.dumps(config), encoding='utf-8')
             with patch('execution.config.GLOBAL_CONFIG_PATH', path):
-                self.assertEqual(load_global_config()['motion']['velocity_scale'], .6)
+                self.assertEqual(load_global_config()['motion']['velocity_scale'], .4)
                 config['motion']['velocity_scale'] = .3
                 path.write_text(json.dumps(config), encoding='utf-8')
                 self.assertEqual(apply_default_scene_settings({})['move_defaults']['constraints']['velocity_scale'], .3)
@@ -58,13 +58,13 @@ class GlobalConfigTest(unittest.TestCase):
     def test_action_validation_and_timing_use_same_defaults(self):
         request = {'target': {'type': 'joint', 'joint_positions': [0.] * 6}}
         normalized = validate_move_request(request)
-        self.assertEqual(normalized['constraints']['velocity_scale'], .6)
-        self.assertEqual(normalized['constraints']['acceleration_scale'], 1.)
+        self.assertEqual(normalized['constraints']['velocity_scale'], .4)
+        self.assertEqual(normalized['constraints']['acceleration_scale'], .8)
         base = {'planning': {'time_parameterization': {
             'max_velocity': [2.] * 6, 'max_acceleration': [4.] * 6}}}
         v, a = continuous_motion_limits(base, 6)
-        np.testing.assert_allclose(v, [1.2] * 6)
-        np.testing.assert_allclose(a, [4.] * 6)
+        np.testing.assert_allclose(v, [.8] * 6)
+        np.testing.assert_allclose(a, [3.2] * 6)
         override = {'constraints': {'velocity_scale': .2, 'acceleration_scale': .5}}
         resources = SimpleNamespace(scene={'move_defaults': base}, joint_names=['j'] * 6)
         timing = apply_global_motion_timing(resources, override)['strategy_params']['time_parameterization']

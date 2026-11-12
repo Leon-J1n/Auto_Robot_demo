@@ -49,7 +49,7 @@ OLS MetadataRef → URDF / Mesh / 物理元数据
 
 执行输入中的 `time_parameterized_waypoints` 为 `N × DOF` 关节角数组，`timestamps` 为从 0 开始的秒数数组；两者逐行对应。重复时间戳只有在对应位置一致时才会合并。执行前检查维数、有限值、时间顺序、关节限位及起点是否匹配当前状态。
 
-当前 demo 统一使用 `planning.time_parameterization.prepare_continuous_trajectory()`：平滑关节路径后为整段运动分配连续时间表，只在阶段起止处停稳。每关节速度基准由 URDF `limit.velocity` 读取，加速度基准统一取速度上限的两倍；两者分别乘 `velocity_scale` 和 `acceleration_scale`。当前全局默认值为 `velocity_scale=0.5`、`acceleration_scale=1.0`，corner slowdown 默认值为 `0.15`。生成的平滑路径在执行前重新校验碰撞。推拉共用同一连续轨迹实现和全局限值；夹爪开合独立控制。当前不约束 jerk，Ruckig 接口仍保留但不在 demo 执行链中使用。
+当前 demo 统一使用 `planning.time_parameterization.prepare_continuous_trajectory()`：平滑关节路径后为整段运动分配连续时间表，只在阶段起止处停稳。每关节速度基准由 URDF `limit.velocity` 读取，加速度基准统一取速度上限的两倍；两者分别乘 `velocity_scale` 和 `acceleration_scale`。当前全局默认值为 `velocity_scale=0.4`、`acceleration_scale=0.8`，corner slowdown 默认值为 `0.15`。生成的平滑路径在执行前重新校验碰撞。推拉共用同一连续轨迹实现和全局限值；夹爪开合独立控制。当前不约束 jerk，Ruckig 接口仍保留但不在 demo 执行链中使用。
 
 MuJoCo 使用位置执行器、偏置力补偿和 `mj_step`，步长 0.002 s。仅初始化时设置关节位置，运行中通过执行器跟踪轨迹。回调时间是仿真时间，计算耗时可能导致实际运行速度低于实时。
 

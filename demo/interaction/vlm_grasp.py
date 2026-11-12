@@ -3,6 +3,7 @@
 from dataclasses import replace
 from copy import deepcopy
 from itertools import product
+from time import perf_counter
 
 import numpy as np
 
@@ -21,7 +22,7 @@ from demo.interaction.relative_placement import (
     validate_relative_point, random_region_estimates)
 
 
-PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(11))
+PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(9))
 # Rz(+90 degrees) @ Rx(180 degrees), expressed in the world frame.
 _DOWNWARD_GRASP_ROTATION = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., -1.]])
 _DOWNWARD_PLACE_ROTATION = _DOWNWARD_GRASP_ROTATION.copy()
@@ -136,6 +137,42 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         target = self.visual_targets.get((str(resolved['target_id']), self.point_type))
         if target is not None and self.point_type == 'place' and resolved.get('placement_height_search_pending'):
             return self._select_place_height(resolved, kin, checker, seed, **kwargs)
+        if (target is not None and self.point_type == 'place'
+                and resolved.get('visual_estimate', {}).get('placement_height_selected')):
+            try:
+                return super().select(resolved, kin, checker, seed, **kwargs)
+            except GraspResolutionError as exc:
+                # A physical payload can move within the fingers during transit.
+                # Revalidate against the current state, then recover by searching
+                # absolute height offsets from the same observed surface point.
+                retry = deepcopy(resolved)
+                evidence = retry['visual_estimate']
+                selected_height = float(evidence['placement_height_offset_m'])
+                heights = evidence.get('placement_height_candidates_m', PLACEMENT_HEIGHTS_M)
+                candidates = []
+                for candidate in resolved['candidates']:
+                    surface = np.asarray(candidate['world_from_grasp'], dtype=float).copy()
+                    surface[2, 3] -= float(candidate.get('placement_height_offset_m', selected_height))
+                    for height in heights:
+                        pose = surface.copy()
+                        pose[2, 3] += height
+                        candidates.append({**candidate, 'placement_height_offset_m': height,
+                            'world_from_grasp': pose.tolist(),
+                            'world_from_control': (pose @ np.linalg.inv(
+                                np.asarray(resolved['control_from_grasp']))).tolist()})
+                retry.update(candidates=candidates, placement_height_search_pending=True)
+                evidence['placement_height_selected'] = False
+                recovery = {'trigger': 'cached_place_pose_infeasible',
+                            'previous_height_offset_m': selected_height,
+                            'previous_error_code': getattr(exc, 'details', {}).get('error_code')}
+                evidence['placement_revalidation'] = recovery
+                try:
+                    choice = self._select_place_height(retry, kin, checker, seed, **kwargs)
+                except GraspResolutionError as recovery_error:
+                    recovery_error.details.setdefault('details', {})['placement_revalidation'] = recovery
+                    raise
+                choice['placement_revalidation'] = recovery
+                return choice
         if target is None or self.point_type != 'grasp':
             return super().select(resolved, kin, checker, seed, **kwargs)
         if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
@@ -218,23 +255,78 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             self.backend.contact_target_object_id = previous_id
 
     def _search_place_heights(self, resolved, kin, checker, seed, **kwargs):
-        """Try ascending Z offsets with ordinary IK/endpoint collision checks only."""
+        """Find the lowest feasible offset using the monotone-height assumption."""
         attempts = []
-        for height in PLACEMENT_HEIGHTS_M:
-            group = [c for c in resolved['candidates'] if c['placement_height_offset_m'] == height]
-            if not group:
-                continue
+        groups = {
+            height: [c for c in resolved['candidates'] if c['placement_height_offset_m'] == height]
+            for height in PLACEMENT_HEIGHTS_M
+        }
+        heights = [height for height in PLACEMENT_HEIGHTS_M if groups[height]]
+        tested = {}
+
+        def test(index):
+            height = heights[index]
+            if height in tested:
+                return tested[height]
+            attempt_started = perf_counter()
             try:
-                choice = super().select({**resolved, 'candidates': group}, kin, checker, seed, **kwargs)
+                choice = ObjectLibraryGraspResolver.select(
+                    {**resolved, 'candidates': groups[height]}, kin, checker, seed, **kwargs)
             except GraspResolutionError as exc:
-                attempts.append({'placement_height_offset_m': height, 'success': False,
-                                 'error': getattr(exc, 'details', {}) or {'error_message': str(exc)}})
-                continue
-            attempts.append({'placement_height_offset_m': height, 'success': True,
-                             'rejected': choice.get('rejected', [])})
-            choice['placement_height_attempts'] = attempts
-            return choice, attempts
-        return None, attempts
+                result = {'choice': None, 'attempt': {
+                    'placement_height_offset_m': height, 'success': False, 'evaluated': True,
+                    'elapsed_s': perf_counter() - attempt_started,
+                    'error': getattr(exc, 'details', {}) or {'error_message': str(exc)}}}
+            else:
+                result = {'choice': choice, 'attempt': {
+                    'placement_height_offset_m': height, 'success': True, 'evaluated': True,
+                    'elapsed_s': perf_counter() - attempt_started,
+                    'rejected': choice.get('rejected', [])}}
+            tested[height] = result
+            return result
+
+        if not heights:
+            return None, attempts
+
+        low = test(0)
+        selected = low if low['choice'] is not None else None
+        if selected is None and len(heights) > 1:
+            high = test(len(heights) - 1)
+            if high['choice'] is not None:
+                lower, upper = 0, len(heights) - 1
+                selected = high
+                while upper - lower > 1:
+                    middle = (lower + upper) // 2
+                    result = test(middle)
+                    if result['choice'] is None:
+                        lower = middle
+                    else:
+                        upper = middle
+                        selected = result
+
+        # Keep diagnostics in physical height order and make inferred results
+        # explicit; only measured candidates contribute elapsed time.
+        for index, height in enumerate(heights):
+            result = tested.get(height)
+            if result is None:
+                if selected is None:
+                    success = False
+                    reason = 'all higher tested heights were infeasible'
+                elif index < heights.index(selected['attempt']['placement_height_offset_m']):
+                    success = False
+                    reason = 'binary search inferred infeasible below the selected height'
+                else:
+                    success = True
+                    reason = 'binary search inferred feasible above the selected height'
+                attempts.append({'placement_height_offset_m': height, 'success': success,
+                                 'evaluated': False, 'inferred_by_monotonicity': True,
+                                 'inference': reason})
+            else:
+                attempts.append(result['attempt'])
+        if selected is None:
+            return None, attempts
+        selected['choice']['placement_height_attempts'] = attempts
+        return selected['choice'], attempts
 
     def _center_estimates(self, target_id):
         context = self._placement_contexts.get(str(target_id))
@@ -297,6 +389,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         if not points and not fallback['attempts']:
             fallback.setdefault('unavailable_reason', '容器中央附近没有可用的 RGB-D 随机点')
         while points:
+            point_started = perf_counter()
             estimate = points.pop(0)
             context = self._placement_contexts[str(resolved['target_id'])]
             estimate = self._restore_crop_pixel(estimate, context['crop_origin'])
@@ -308,6 +401,9 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 estimate['relative_placement'] = deepcopy(resolved['visual_estimate']['relative_placement'])
             estimate['placement_request'] = deepcopy(resolved['visual_estimate'].get(
                 'placement_request', placement_parameters({})))
+            if 'placement_revalidation' in resolved['visual_estimate']:
+                estimate['placement_revalidation'] = deepcopy(
+                    resolved['visual_estimate']['placement_revalidation'])
             estimate['placement_center_fallback'].update(trigger=fallback['trigger'])
             if fallback.get('vlm_error_type'):
                 estimate['placement_center_fallback']['vlm_error_type'] = fallback['vlm_error_type']
@@ -326,7 +422,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             choice, alternative_attempts = self._search_place_heights(
                 alternative, kin, checker, seed, **kwargs)
             fallback['attempts'].append({'world_point': estimate['world_point'],
-                'height_attempts': alternative_attempts, 'success': choice is not None})
+                'height_attempts': alternative_attempts, 'success': choice is not None,
+                'elapsed_s': perf_counter() - point_started})
             if choice is not None:
                 estimate['placement_center_fallback'].update(
                     attempts=deepcopy(fallback['attempts']))
@@ -384,7 +481,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
 
     def refine_after_approach(self, resolved, resources, state, kin, checker):
         """Validate wrist position refinement before atomically replacing the cache."""
-        from demo.interaction.wrist_refinement import refine_surface, refinement_error
+        from demo.interaction.wrist_refinement import refine_surface, refinement_error, coarse_point_projection
         name = resolved['target_name']
         evidence = resolved.get('visual_estimate', {})
         if (self.point_type != 'grasp' or not evidence
@@ -422,6 +519,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             surface = grasp[:3, 3] - selected_depth * grasp[:3, 2]
             progress('capture', 'Wrist camera / capturing RGB-D')
             frame = self.backend.get_camera_frame('wrist')
+            framing = coarse_point_projection(frame, surface)
             target = self.visual_targets[(str(resolved['target_id']), 'grasp')]
             crop_origin = None
             if not vertical:
@@ -431,6 +529,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             progress('vlm', 'Wrist camera / VLM localization')
             estimate, diagnostics = refine_surface(self.estimator, frame, surface,
                 target.get('target_description', name.lower()), vertical=vertical)
+            diagnostics['coarse_point_in_full_image'] = framing
             estimate = self._restore_crop_pixel(estimate, crop_origin)
             if crop_origin is not None:
                 diagnostics.update(image_region='target_aabb_crop',
@@ -545,6 +644,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             elif not handle:
                 metadata = self.blackboard.model(self.client, model_id)
                 frame, crop_origin = _target_crop(frame, object_pose, metadata)
+            visual_started = perf_counter()
             try:
                 if vertical_place:
                     estimate = {'point_type': 'place',
@@ -576,6 +676,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                     raise error from exc
                 estimate = points.pop(0)
                 estimate['placement_center_fallback'].update(trigger='vlm_error', vlm_error_type=type(exc).__name__)
+            else:
+                estimate['visual_estimation_s'] = perf_counter() - visual_started
             estimate = self._restore_crop_pixel(estimate, crop_origin)
             if point_type == 'place':
                 estimate['placement_request'] = dict(self.place_parameters)

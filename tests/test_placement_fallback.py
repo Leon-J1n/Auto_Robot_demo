@@ -27,14 +27,14 @@ class CenterPointTests(unittest.TestCase):
 
     def test_random_points_are_distinct_inside_rotated_central_region_and_back_project(self):
         estimates = self.sample()
-        self.assertEqual(len(estimates), 5)
-        self.assertEqual(len({tuple(e['pixel'].values()) for e in estimates}), 5)
+        self.assertEqual(len(estimates), 3)
+        self.assertEqual(len({tuple(e['pixel'].values()) for e in estimates}), 3)
         transform = rigid_pose(self.pose['position'], self.pose['quaternion_xyzw'])
         for estimate in estimates:
             world = np.array([estimate['world_point'][a] for a in 'xyz'])
             local = (world - transform[:3, 3]) @ transform[:3, :3]
             relative = local[:2] / (self.upper - self.lower)[:2]
-            self.assertLessEqual(np.linalg.norm(relative), .30)
+            self.assertLessEqual(np.linalg.norm(relative), .20)
             self.assertGreater(np.linalg.norm(relative), .01)
             u, v = estimate['pixel']['x'], estimate['pixel']['y']
             np.testing.assert_allclose(world, [(u - 40) * .004, -(v - 40) * .004, .6])
@@ -56,14 +56,14 @@ class CenterPointTests(unittest.TestCase):
         self.frame.depth[40, 42] = 1.  # Background outside the destination volume.
         self.assertEqual(self.sample(), [])
 
-    def test_radius_is_thirty_percent_of_model_size(self):
+    def test_radius_is_twenty_percent_of_model_size(self):
         self.pose = {'position': [0., 0., .6], 'quaternion_xyzw': [0., 0., 0., 1.]}
         self.frame.depth[:] = np.nan
-        self.frame.depth[40, 69] = .4  # X=.116, inside radius .30*.4=.12 m.
-        self.frame.depth[40, 71] = .4  # X=.124, outside.
+        self.frame.depth[40, 59] = .4  # X=.076, inside radius .20*.4=.08 m.
+        self.frame.depth[40, 61] = .4  # X=.084, outside.
         samples = self.sample()
-        self.assertEqual([s['pixel'] for s in samples], [{'x': 69, 'y': 40}])
-        self.assertEqual(samples[0]['placement_center_fallback']['radius_fraction_xy'], .30)
+        self.assertEqual([s['pixel'] for s in samples], [{'x': 59, 'y': 40}])
+        self.assertEqual(samples[0]['placement_center_fallback']['radius_fraction_xy'], .20)
 
     def test_camera_rotation_and_cropped_intrinsics_preserve_world_points(self):
         from demo.interaction.vlm_grasp import _target_crop
@@ -82,7 +82,7 @@ class CenterPointTests(unittest.TestCase):
         self.assertGreater(origin[0], 0)
         samples = random_center_estimates(cropped, self.pose, np.array([-.06, -.06, -.05]),
                                          np.array([.06, .06, .05]), np.random.default_rng(42))
-        self.assertEqual(len(samples), 5)
+        self.assertEqual(len(samples), 3)
         for sample in samples:
             u = sample['pixel']['x'] + origin[0]
             v = sample['pixel']['y'] + origin[1]

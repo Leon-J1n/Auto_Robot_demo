@@ -215,6 +215,21 @@ class DemoErrorMessagesTests(unittest.TestCase):
         error['error_code'] = 'PLACEMENT_PERCEPTION_FAILED'
         self.assertEqual(describe_error(error, '失败'), '放置感知失败，无法获得有效放置点')
 
+    def test_placement_messages_hide_recovery_even_without_center_diagnostics(self):
+        from copy import deepcopy
+        command = {'skill_name': 'put', 'parameters': {'target': 12}}
+        for details in ({}, {'floor_fallback': {'success': False}},
+                        {'relative_region': {'relation': 'above'}},
+                        {'placement_revalidation': {'trigger': 'cached_place_pose_infeasible'}}):
+            error = {'error_code': 'PLACEMENT_HEIGHT_SEARCH_FAILED',
+                     'error_message': '随机兜底重试均失败', 'details': details}
+            original = deepcopy(error)
+            message = step_message(command, success=False, error=error)
+            for hidden in ('兜底', '随机', '重试', '档', '10 cm'):
+                self.assertNotIn(hidden, message)
+            self.assertIn('放置位姿', message)
+            self.assertEqual(error, original)  # Internal diagnostic history remains intact.
+
     def test_exception_diagnostics_support_all_payload_shapes(self):
         for payload in (None, [], [{'geom1': 'a'}], {'contacts': []}):
             with self.subTest(payload=payload):

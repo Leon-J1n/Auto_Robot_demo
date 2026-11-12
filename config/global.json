@@ -1,7 +1,7 @@
 {
   "motion": {
-    "velocity_scale": 0.6,
-    "acceleration_scale": 1.0
+    "velocity_scale": 0.4,
+    "acceleration_scale": 0.8
   },
   "trajectory": {
     "fps": 60,

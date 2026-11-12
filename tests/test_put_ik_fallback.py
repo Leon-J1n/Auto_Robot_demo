@@ -54,8 +54,24 @@ class PutIKFallbackTests(unittest.TestCase):
         selection = {}
         trajectory = _MoveExecutor._plan_joint_candidates(executor, fallback, context, selection, path)
         np.testing.assert_allclose(trajectory['waypoints'][-1], second)
-        self.assertEqual(checker.check.call_count, 3)
+        self.assertEqual(checker.check.call_count, 2)
         self.assertEqual(kin.solve_all.call_args.args[0]['type'], 'pose')
+
+    def test_direct_planner_reuses_prechecked_endpoint_but_validates_full_path(self):
+        checker = SimpleNamespace(
+            check=Mock(side_effect=AssertionError('endpoint was already checked')),
+            validate_execution_path=Mock(return_value=SimpleNamespace(in_collision=False, contacts=())))
+        planner = DirectPlanner(collision_checker=checker, joint_limits=np.array([[-3., 3.]] * 6))
+        request = {'constraints': {'avoid_collision': True, 'safety_distance': .003,
+                                   'velocity_scale': .4}}
+        path = {'path_type': 'joint', 'joint_waypoints': np.vstack((np.zeros(6), np.full(6, .1))),
+                'endpoint_collision_prechecked': True}
+        trajectory = planner.plan(path, request, {})
+        checker.check.assert_not_called()
+        checker.validate_execution_path.assert_called_once()
+        stages = trajectory['diagnostics']['planning_stages_s']
+        self.assertEqual(stages['endpoint_collision_check'], 0.0)
+        self.assertTrue(stages['endpoint_collision_prechecked'])
 
 
 if __name__ == '__main__':

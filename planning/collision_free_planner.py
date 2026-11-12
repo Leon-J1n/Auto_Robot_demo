@@ -11,6 +11,7 @@ import numpy as np
 from .errors import PlanningError
 from .trajopt_optimizer import TrajOptOptimizer
 from .arm_posture import preference_for, path_cost
+from .collision_sampling import collision_sampling_settings
 
 
 class CollisionFreePlanner:
@@ -45,11 +46,13 @@ class CollisionFreePlanner:
         if move_request["motion"]["path_constraint"] == "hard" and path_request["path_type"] != "joint":
             raise PlanningError("A hard Cartesian path cannot be relaxed for collision avoidance.", code="PATH_CONSTRAINT_INFEASIBLE", recoverable=True)
         started = time.perf_counter()
+        collision_resolution, _ = collision_sampling_settings(move_request)
         deadline = started + float(move_request["planning"]["planning_time"])
         attempts = int(move_request["planning"]["max_attempts"])
         start = np.asarray(path_request["start"], dtype=float)
         goal = np.asarray(path_request["goal"], dtype=float)
         safety_distance = float(move_request["constraints"].get("safety_distance", 0.0))
+        endpoint_check_started = time.perf_counter()
         start_collision = self.collision_checker.check(start, safety_distance=safety_distance)
         if start_collision.in_collision:
             raise PlanningError(
@@ -62,17 +65,20 @@ class CollisionFreePlanner:
                 "Goal state is in collision.", code="COLLISION_DETECTED", recoverable=True,
                 details={"location": "goal", "contacts": list(goal_collision.contacts)},
             )
+        endpoint_check_s = time.perf_counter() - endpoint_check_started
         orientation_constraint = path_request.get("orientation_constraint", {})
         if orientation_constraint.get("enabled"):
             if self.kinematics is None:
                 raise PlanningError("Fixed-orientation collision planning requires a kinematics service.", code="PLANNING_FAILED")
             return self._plan_fixed_orientation(
                 start, goal, move_request, context, orientation_constraint["orientation"], deadline, attempts, safety_distance, started,
+                endpoint_check_s=endpoint_check_s,
             )
         cache_scope = getattr(self.collision_checker, 'planning_cache', nullcontext)
         with cache_scope():
             rng = np.random.default_rng(17)
             path = None
+            search_started = time.perf_counter()
             for _ in range(attempts):
                 path = self._rrt_connect(start, goal, deadline, rng, safety_distance)
                 if path is not None:
@@ -83,6 +89,7 @@ class CollisionFreePlanner:
                     code="PATH_NOT_FOUND", recoverable=True,
                     details={"planner": "rrt_connect", "attempts": attempts, "planning_time": float(move_request["planning"]["planning_time"])},
                 )
+            search_s = time.perf_counter() - search_started
             shortcut_diagnostics: dict[str, Any] = {}
             shortcut = self._shortcut(path, rng, safety_distance, iterations=120, diagnostics=shortcut_diagnostics)
             if preference_for(self.kinematics) is not None and path_cost(self.kinematics, shortcut) > path_cost(self.kinematics, path) + 1e-9:
@@ -90,18 +97,21 @@ class CollisionFreePlanner:
             else:
                 path = shortcut
             trajopt_seed = _densify(np.asarray(path), 0.04)
+            trajopt_started = time.perf_counter()
             optimized_path, trajopt_diagnostics = self.trajopt.optimize(
                 trajopt_seed,
                 safety_distance=safety_distance,
             )
+            trajopt_diagnostics["elapsed_s"] = time.perf_counter() - trajopt_started
             if preference_for(self.kinematics) is not None and path_cost(self.kinematics, optimized_path) > path_cost(self.kinematics, trajopt_seed) + 1e-9:
                 optimized_path = trajopt_seed
                 trajopt_diagnostics.update(applied=False, arm_posture_preserved=True)
         waypoints = _densify(optimized_path, 0.04)
         allowed_geom_ids = getattr(self.collision_checker, "allowed_target_geom_ids", None)
+        final_check_started = time.perf_counter()
         final_check = self.collision_checker.check_path(
             waypoints,
-            resolution=0.01,
+            resolution=collision_resolution,
             safety_distance=safety_distance,
             allowed_geom_ids=allowed_geom_ids,
         )
@@ -110,7 +120,7 @@ class CollisionFreePlanner:
             # feasible RRT solution merely because optimization was attempted.
             fallback_waypoints = _densify(np.asarray(path), 0.04)
             fallback_check = self.collision_checker.check_path(
-                fallback_waypoints, resolution=0.01,
+                fallback_waypoints, resolution=collision_resolution,
                 safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids,
             )
             if fallback_check.in_collision:
@@ -121,6 +131,7 @@ class CollisionFreePlanner:
                 )
             waypoints = fallback_waypoints
             trajopt_diagnostics.update(applied=False, fallback_to_rrt=True, reason="optimized_path_final_check_failed")
+        final_validation_s = time.perf_counter() - final_check_started
         trajectory = {
             "planner": self.planner_id,
             "path_type": "joint",
@@ -134,6 +145,14 @@ class CollisionFreePlanner:
                 "shortcut": shortcut_diagnostics,
                 "collision_state_cache": getattr(self.collision_checker, "last_planning_cache_stats", None),
                 "trajopt": trajopt_diagnostics,
+                "planning_stages_s": {
+                    "endpoint_collision_checks": endpoint_check_s,
+                    "rrt_search": search_s,
+                    "shortcut": float(shortcut_diagnostics.get("elapsed_s", 0.0)),
+                    "trajopt": trajopt_diagnostics["elapsed_s"],
+                    "final_collision_validation": final_validation_s,
+                    "collision_resolution_rad": collision_resolution,
+                },
             },
         }
         return trajectory
@@ -149,6 +168,8 @@ class CollisionFreePlanner:
         attempts: int,
         safety_distance: float,
         started: float,
+        *,
+        endpoint_check_s: float = 0.0,
     ) -> dict[str, Any]:
         """Plan a translational detour while keeping one Cartesian orientation.
 
@@ -167,6 +188,7 @@ class CollisionFreePlanner:
         margin = max(0.20, min(0.50, np.linalg.norm(goal_position - start_position) + 0.10))
         lower = np.minimum(start_position, goal_position) - margin
         upper = np.maximum(start_position, goal_position) + margin
+        search_started = time.perf_counter()
         for _ in range(max(1, attempts) * 900):
             if time.perf_counter() >= deadline:
                 break
@@ -195,6 +217,7 @@ class CollisionFreePlanner:
                 code="PATH_NOT_FOUND", recoverable=True,
                 details={"planner": "cartesian_rrt_fixed_orientation", "attempts": attempts, "planning_time": float(move_request["planning"]["planning_time"])},
             )
+        search_s = time.perf_counter() - search_started
         chain: list[tuple[np.ndarray, np.ndarray]] = []
         index = goal_index
         while index >= 0:
@@ -203,6 +226,7 @@ class CollisionFreePlanner:
             index = parent
         chain.reverse()
         waypoints = [chain[0][1]]
+        reconstruction_started = time.perf_counter()
         for (position_a, joints_a), (position_b, _) in zip(chain[:-1], chain[1:]):
             edge = self._fixed_orientation_edge(position_a, waypoints[-1], position_b, orientation, cartesian_step, safety_distance, move_request)
             if edge is None:  # Defensive: a previously validated edge became invalid.
@@ -212,24 +236,32 @@ class CollisionFreePlanner:
                     details={"stage": "path_reconstruction"},
                 )
             waypoints.extend(edge[1:])
+        reconstruction_s = time.perf_counter() - reconstruction_started
         output = np.asarray(waypoints)
         original = output.copy()
+        shortcut_started = time.perf_counter()
         output, shortcut_diagnostics = self._shortcut_fixed_orientation(
             output, orientation, cartesian_step, safety_distance, move_request, rng,
         )
+        shortcut_s = time.perf_counter() - shortcut_started
         if preference_for(self.kinematics) is not None and path_cost(self.kinematics, output) > path_cost(self.kinematics, original) + 1e-9:
             output = original.copy()
             shortcut_diagnostics.update(applied=False, arm_posture_preserved=True)
-        final_check = self.collision_checker.check_path(output, resolution=0.01, safety_distance=safety_distance)
+        final_check_started = time.perf_counter()
+        collision_resolution, _ = collision_sampling_settings(move_request)
+        final_check = self.collision_checker.check_path(output, resolution=collision_resolution, safety_distance=safety_distance)
         if final_check.in_collision:
             output = original
             shortcut_diagnostics.update(applied=False, fallback_to_original=True)
-            if self.collision_checker.check_path(output, resolution=0.01, safety_distance=safety_distance).in_collision:
+            if self.collision_checker.check_path(output, resolution=collision_resolution, safety_distance=safety_distance).in_collision:
                 raise PlanningError("Fixed-orientation path failed final collision validation.", code="TRAJECTORY_INVALID", recoverable=True)
+        final_validation_s = time.perf_counter() - final_check_started
         before_smoothing = output
+        smoothing_started = time.perf_counter()
         output, smoothing_diagnostics = self._smooth_fixed_orientation(
             output, orientation, safety_distance, move_request,
         )
+        smoothing_s = time.perf_counter() - smoothing_started
         if preference_for(self.kinematics) is not None and path_cost(self.kinematics, output) > path_cost(self.kinematics, before_smoothing) + 1e-9:
             output = before_smoothing
             smoothing_diagnostics.update(applied=False, arm_posture_preserved=True)
@@ -241,7 +273,15 @@ class CollisionFreePlanner:
             "planning_time": time.perf_counter() - started,
             "duration": float(np.sum(np.max(np.abs(np.diff(output, axis=0)), axis=1)) / max(float(move_request["constraints"]["velocity_scale"]), 0.01)),
             "diagnostics": {"algorithm": "cartesian_rrt_fixed_orientation", "orientation_fixed": True,
-                            "shortcut": shortcut_diagnostics, "smoothing": smoothing_diagnostics},
+                            "shortcut": shortcut_diagnostics, "smoothing": smoothing_diagnostics,
+                            "planning_stages_s": {
+                                "endpoint_collision_checks": endpoint_check_s,
+                                "cartesian_rrt_search": search_s,
+                                "path_reconstruction_ik": reconstruction_s,
+                                "shortcut": shortcut_s,
+                                "final_collision_validation": final_validation_s,
+                                "fixed_orientation_smoothing": smoothing_s,
+                            }},
         }
         return trajectory
 

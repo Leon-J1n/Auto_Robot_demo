@@ -4,8 +4,8 @@ import numpy as np
 from demo.interaction.object_library import rigid_pose
 
 
-CENTER_RADIUS_FRACTION = .30  # Radius / model size on each local XY axis.
-MAX_CENTER_POINTS = 5
+CENTER_RADIUS_FRACTION = .20  # Radius / model size on each local XY axis.
+MAX_CENTER_POINTS = 3
 
 
 def random_center_estimates(frame, object_pose, lower, upper, rng):

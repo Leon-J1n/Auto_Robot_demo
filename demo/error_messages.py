@@ -87,7 +87,7 @@ def _contacts(error):
 
 _SEARCH_FAILURES = {
     'GRASP_DEPTH_SEARCH_FAILED': '抓深候选全部不可行',
-    'PLACEMENT_HEIGHT_SEARCH_FAILED': '0～10 cm 的 11 档放置高度均不可行',
+    'PLACEMENT_HEIGHT_SEARCH_FAILED': '未找到可用放置位姿',
     'NO_VALID_APPROACH': '预接近候选全部不可行',
     'NO_VALID_TARGET_POSE': '目标位姿候选全部不可用',
     'TARGET_POSE_COLLISION': '目标位姿候选全部被碰撞或间距检查淘汰',
@@ -237,20 +237,18 @@ def _search_summary(error, fallback):
         prefix = f'{len(attempts)} 档抓深均不可行'
     else:
         prefix = _SEARCH_FAILURES.get(code, fallback)
-    center_fallback = details.get('center_fallback')
-    if code == 'PLACEMENT_HEIGHT_SEARCH_FAILED' and isinstance(center_fallback, dict):
-        prefix = '未找到可用放置位姿'
     if not rejected:
         if details.get('budget_exhausted'):
             return prefix + '：规划预算已耗尽，未证明不存在其他可行路径'
-        if code in _SEARCH_FAILURES or (code == 'PLACEMENT_HEIGHT_SEARCH_FAILED' and isinstance(center_fallback, dict)):
+        if code in _SEARCH_FAILURES:
             return prefix
         return None
     counts = Counter(_rejection_reason(item) for item in rejected)
     reasons = [f'{_REASONS[key]} {count} 次' for key, count in counts.items()]
     summary = prefix + '：' + '；'.join(reasons)
     fallback = details.get('floor_fallback')
-    if isinstance(fallback, dict) and fallback.get('success') is False:
+    if (code != 'PLACEMENT_HEIGHT_SEARCH_FAILED'
+            and isinstance(fallback, dict) and fallback.get('success') is False):
         counts = Counter(_rejection_reason(item) for item in _rejections(fallback.get('error')))
         causes = '；'.join(f'{_REASONS[key]} {count} 次' for key, count in counts.items())
         summary += '；桌面底限兜底失败' + ('：' + causes if causes else '')
@@ -279,7 +277,7 @@ def describe_error(error, fallback):
     if code == 'PLACEMENT_PERCEPTION_FAILED':
         return '放置感知失败，无法获得有效放置点'
     if code == 'PLACEMENT_HEIGHT_SEARCH_FAILED' and details.get('relative_region', {}).get('relation') in {'above', 'below'}:
-        return message or '指定上下相对放置位姿不可行'
+        return '指定上下相对放置位姿不可行'
     if code == 'PATH_NOT_FOUND':
         planner = details.get('planner')
         budget = details.get('planning_time')

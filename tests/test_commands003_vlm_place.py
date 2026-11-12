@@ -105,7 +105,7 @@ class Commands003VLMPlaceTests(unittest.TestCase):
         self.assertNotIn('held_bottom_offset_m', estimate)
         self.assertNotIn('placement_clearance_m', estimate)
         self.assertNotIn('placement_world_z_offset_m', estimate)
-        self.assertEqual(estimate['placement_height_candidates_m'], [cm / 100. for cm in range(11)])
+        self.assertEqual(estimate['placement_height_candidates_m'], [cm / 100. for cm in range(9)])
         self.assertEqual(estimate['held_object'], 'Apple')
         self.assertNotIn('floor_pixel', estimate)
         self.assertEqual(estimate['world_point'], {'x': -.2, 'y': .15, 'z': .62})

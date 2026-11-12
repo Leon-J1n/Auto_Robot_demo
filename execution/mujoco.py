@@ -330,6 +330,25 @@ class MuJoCoExecutionBackend:
                 'current_pose': self.get_end_effector_pose(),
                 'controller_state': {'ready': True, 'mode': 'mujoco_actuator'}}
 
+    def get_control_from_camera(self, camera_id):
+        """Read rigid hand-eye calibration from live poses without rendering."""
+        name = {'global': 'global_camera', 'wrist': 'wrist_camera'}.get(camera_id, camera_id)
+        camera = self._id(mujoco.mjtObj.mjOBJ_CAMERA, name)
+
+        def rigid_root(body):
+            while body > 0 and self.model.body_jntnum[body] == 0:
+                body = int(self.model.body_parentid[body])
+            return body
+
+        if rigid_root(int(self.model.cam_bodyid[camera])) != rigid_root(int(self.model.site_bodyid[self.tip_id])):
+            raise ValueError('Observation camera must be rigidly attached to the TCP')
+        control = self.get_end_effector_pose()
+        rotation = np.asarray(control['rotation_matrix'])
+        result = np.eye(4)
+        result[:3, :3] = rotation.T @ self.data.cam_xmat[camera].reshape(3, 3)
+        result[:3, 3] = rotation.T @ (self.data.cam_xpos[camera] - control['position'])
+        return result
+
     def get_camera_frame(self, camera_id):
         from sensors.camera import CameraManager
         from sensors.camera_mujoco import MujocoCamera

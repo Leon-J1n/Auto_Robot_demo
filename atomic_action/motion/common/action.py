@@ -103,7 +103,12 @@ class _MoveExecutor:
             finally:
                 timing["planning"] = time.perf_counter() - stage_started
             if self.trajectory_callback is not None:
-                self.trajectory_callback(trajectory, normalized, selection)
+                stage_started = time.perf_counter()
+                try:
+                    self.trajectory_callback(trajectory, normalized, selection)
+                finally:
+                    timing["trajectory_preparation"] = time.perf_counter() - stage_started
+            stage_started = time.perf_counter()
             posture = preference_for(getattr(self, 'kinematics', None))
             if posture is not None:
                 trajectory.setdefault('diagnostics', {})['arm_posture'] = {
@@ -111,6 +116,11 @@ class _MoveExecutor:
                     'start': posture.metrics(trajectory['waypoints'][0]),
                     'goal': posture.metrics(trajectory['waypoints'][-1]),
                     'path_penalty_rad': posture.path_penalty(trajectory['waypoints'])}
+            timing["posture_scoring"] = time.perf_counter() - stage_started
+            timing["pre_execution_total"] = time.perf_counter() - started
+            planning_stages = trajectory.get("diagnostics", {}).get("planning_stages_s")
+            if planning_stages:
+                timing["planner_stages"] = dict(planning_stages)
             stage_started = time.perf_counter()
             try:
                 execution_result = self._execute_trajectory(trajectory, normalized, context)
@@ -165,6 +175,10 @@ class _MoveExecutor:
             result = failure_result(ErrorCode.INTERNAL_ERROR, str(exc), failed_stage="unknown", recoverable=False)
         if selection is not None:
             result["selection"] = selection
+        if trajectory is not None:
+            planning_stages = trajectory.get("diagnostics", {}).get("planning_stages_s")
+            if planning_stages:
+                timing["planner_stages"] = dict(planning_stages)
         timing["total"] = time.perf_counter() - started
         result["timing"] = timing
         return result
@@ -250,6 +264,7 @@ class _MoveExecutor:
         bypass_attempts = 0
         direct_check_time = 0.0
         untested = []
+        candidate_timings = []
 
         def consider(trajectory, candidate_selection):
             nonlocal best
@@ -266,16 +281,26 @@ class _MoveExecutor:
             bounded["planning"].update(planning_time=budget, max_attempts=1)
             candidate_selection = dict(selection)
             bypass_attempts += 1
+            timing = {'goal': np.asarray(path['goal'], dtype=float).tolist(), 'elapsed_s': 0.0}
+            bypass_started = time.perf_counter()
             try:
                 consider(self._plan_collision_fallback(
                     bounded, context, candidate_selection, path, collision_error), candidate_selection)
+                timing['success'] = True
             except PlanningError as exc:
                 failures.append(exc)
+                timing.update(success=False, error_code=exc.code)
+            finally:
+                timing['elapsed_s'] = time.perf_counter() - bypass_started
+                timing['budget_s'] = float(budget)
+                candidate_timings.append(timing)
+            return timing['success']
 
         # Reject colliding endpoints before spending the shared budget on long
         # segment checks. Such goals cannot be repaired by an RRT detour.
         viable_goals = []
         for goal in goals:
+            endpoint_started = time.perf_counter()
             if request.get('constraints', {}).get('avoid_collision'):
                 hit = self.collision_checker.check(goal, safety_distance=float(
                     request['constraints'].get('safety_distance', 0.0)),
@@ -284,8 +309,14 @@ class _MoveExecutor:
                     failures.append(PlanningError('Goal state is in collision.',
                         code='COLLISION_DETECTED', recoverable=True,
                         details={'location': 'goal', 'contacts': list(hit.contacts)}))
+                    candidate_timings.append({'goal': np.asarray(goal).tolist(),
+                        'endpoint_check_s': time.perf_counter() - endpoint_started,
+                        'endpoint_collision': True, 'status': 'endpoint_collision'})
                     continue
             viable_goals.append(goal)
+            candidate_timings.append({'goal': np.asarray(goal).tolist(),
+                'endpoint_check_s': time.perf_counter() - endpoint_started,
+                'endpoint_collision': False, 'status': 'pending'})
 
         for goal_index, goal in enumerate(viable_goals):
             remaining = deadline - time.perf_counter()
@@ -303,62 +334,75 @@ class _MoveExecutor:
             lower_bound = float(np.sum(np.abs(periodic_delta(goal))))
             if best is not None and lower_bound > best[0][0] + 1e-9:
                 pruned += 1
+                candidate_timings.append({'goal': np.asarray(goal).tolist(),
+                    'status': 'pruned_by_lower_bound', 'lower_bound_cost': lower_bound})
                 continue
             # Approach contact validation is expensive. Apply the proven
             # travel lower bound before constructing another contact line.
             if validator is not None:
                 validated += 1
+                validation_started = time.perf_counter()
                 if not validator(goal):
                     rejected += 1
+                    candidate_timings.append({'goal': np.asarray(goal).tolist(),
+                        'status': 'contact_validation_rejected',
+                        'contact_validation_s': time.perf_counter() - validation_started})
                     continue
+                candidate_timings.append({'goal': np.asarray(goal).tolist(),
+                    'status': 'contact_validated',
+                    'contact_validation_s': time.perf_counter() - validation_started})
             path = {key: value for key, value in path_request.items() if key not in {"candidate_goals", "candidate_validator"}}
             path.update(goal=np.asarray(goal), joint_waypoints=np.vstack((start, goal)))
             candidate_selection = dict(selection)
             direct_started = time.perf_counter()
+            candidate_timing = {'goal': np.asarray(goal).tolist(), 'status': 'direct_pending'}
+            candidate_timings.append(candidate_timing)
             try:
                 if request.get('constraints', {}).get('avoid_collision'):
                     # Reject blocked joint segments on the 0.04 rad grid before
                     # the expensive 0.01 rad execution validation. A survivor
                     # still receives the full fine check in DirectPlanner.
+                    coarse_started = time.perf_counter()
                     coarse = self.collision_checker.check_path(
                         path['joint_waypoints'], resolution=.04,
                         safety_distance=float(request['constraints'].get('safety_distance', 0.0)),
                         allowed_geom_ids=getattr(self.collision_checker, 'allowed_target_geom_ids', None))
+                    candidate_timing['coarse_path_check_s'] = time.perf_counter() - coarse_started
                     if coarse.in_collision:
                         raise CollisionPlanningError('Direct path collides with the robot or environment.',
                                                      details=coarse.contacts)
-                trajectory = self.direct_planner.plan(path, request, context)
+                    # The endpoint was checked above with the same policy. The
+                    # planner still validates the complete path at fine resolution.
+                    path['endpoint_collision_prechecked'] = True
+                direct_plan_started = time.perf_counter()
+                try:
+                    trajectory = self.direct_planner.plan(path, request, context)
+                finally:
+                    candidate_timing['fine_direct_plan_s'] = time.perf_counter() - direct_plan_started
+                candidate_timing['direct_success'] = True
                 candidate_selection.update(planning_mode="direct", fallback_used=False)
                 consider(trajectory, candidate_selection)
             except CollisionPlanningError as exc:
+                candidate_timing.update(direct_success=False, direct_collision=True)
                 failures.append(exc)
-                if validator is None:
-                    pending.append((lower_bound, path, exc))
+                # Try the nearer blocked goal before finely validating distant
+                # branches. A feasible detour supplies an upper bound for pruning.
+                candidate_timing['direct_elapsed_s'] = time.perf_counter() - direct_started
+                remaining = deadline - time.perf_counter()
+                entry = (lower_bound, path, exc)
+                if remaining > 0:
+                    budget = min(remaining, max(.25, remaining / (len(viable_goals) - goal_index)))
+                    if not bypass(entry, budget):
+                        pending.append(entry)
                 else:
-                    # Establish a feasible bypass early so its cost can prune
-                    # remaining approach configurations before IK validation.
-                    remaining = deadline - time.perf_counter()
-                    if remaining > 0:
-                        bounded = deepcopy(request)
-                        bounded["planning"].update(
-                            planning_time=min(remaining, max(0.25, remaining / (len(goals) - goal_index))),
-                            max_attempts=1)
-                        try:
-                            bypass_attempts += 1
-                            consider(self._plan_collision_fallback(
-                                bounded, context, candidate_selection, path, exc), candidate_selection)
-                        except PlanningError as planning_error:
-                            failures.append(planning_error)
-                            # An early small search budget is not evidence of
-                            # infeasibility. Retry competitive goals with the
-                            # remaining budget after pruning other candidates.
-                            pending.append((lower_bound, path, exc))
-                    else:
-                        pending.append((lower_bound, path, exc))
+                    pending.append(entry)
             except PlanningError as exc:
+                candidate_timing.update(direct_success=False, direct_collision=False,
+                                        error_code=exc.code)
                 failures.append(exc)
             finally:
-                direct_check_time = max(direct_check_time, time.perf_counter() - direct_started)
+                candidate_timing.setdefault('direct_elapsed_s', time.perf_counter() - direct_started)
+                direct_check_time = max(direct_check_time, candidate_timing['direct_elapsed_s'])
             evaluated += 1
         for pending_index, entry in enumerate(pending):
             lower_bound = entry[0]
@@ -383,6 +427,7 @@ class _MoveExecutor:
                          'planning_time_budget_s': float(request['planning']['planning_time']),
                          'planning_elapsed_s': time.perf_counter() - started,
                          'budget_exhausted': time.perf_counter() >= deadline,
+                         'candidate_timings': candidate_timings,
                          'rejected': attempts})
         score, trajectory, chosen = best
         selection.update(chosen)
@@ -398,6 +443,7 @@ class _MoveExecutor:
             "contact_candidates_validated": validated, "contact_candidates_rejected": rejected,
             "candidates_pruned_by_lower_bound": pruned,
             "budget_exhausted": time.perf_counter() >= deadline,
+            "candidate_timings": candidate_timings,
         }
         return trajectory
     def _execute_trajectory(self, trajectory: Mapping[str, Any], request: Mapping[str, Any], context: Mapping[str, Any]) -> Dict[str, Any]:

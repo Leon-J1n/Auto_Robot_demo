@@ -1,5 +1,6 @@
 """Shared motion request and interaction execution helpers."""
 from copy import deepcopy
+from time import perf_counter
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -84,7 +85,9 @@ class DemoInteractionMove:
             self.checker.set_allowed_target_names(set())
         if hasattr(self.checker, 'allowed_proxy_target_names'):
             self.checker.allowed_proxy_target_names = set()
+        resolve_started = perf_counter()
         resolved = self.resolver.resolve(target['target_id'], self.resources, state)
+        resolve_elapsed = perf_counter() - resolve_started
         # The selected grasp pose is expected to bring the gripper into the
         # target; keep this narrow proxy allowance for candidate selection.
         if closure_request is not None and hasattr(self.checker, 'allowed_proxy_target_names'):
@@ -115,9 +118,14 @@ class DemoInteractionMove:
                 floor = table_floor(self.checker.backend, point)
                 return validate_grasp_geometry(self.checker, q, floor,
                     safety_distance=base['constraints']['safety_distance'])
+        selection_started = perf_counter()
         resolved = self.resolver.select(resolved, self.kinematics, self.checker, state['joints'],
             safety_distance=base['constraints']['safety_distance'], grasp_index=target.get('grasp_index'),
             prefer_direct=prefer_direct, candidate_validator=validator)
+        self.last_resolution_timing_s = {
+            'resolve_total': resolve_elapsed,
+            'candidate_selection': perf_counter() - selection_started,
+        }
         remember = getattr(self.resolver, 'remember_selection', None)
         if remember is not None:
             remember(resolved)
@@ -135,6 +143,7 @@ class DemoInteractionMove:
         # goal instead of replacing it with a distant directly reachable goal.
         base, resolved, _, _, path_type = self._resolve_request(
             request, state, prefer_direct=False, allow_fixed_orientation=True)
+        resolved['resolution_timing_s'] = dict(self.last_resolution_timing_s)
         resolved['approach'] = {'used': False, 'reason': 'single_target_move'}
         if path_type == 'joint' and not base['constraints'].get('keep_end_effector_orientation'):
             base['target'] = {'type': 'joint', 'joint_positions': resolved['joint_positions']}

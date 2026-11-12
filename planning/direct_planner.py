@@ -8,6 +8,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from .errors import CollisionPlanningError, PlanningError
+from .collision_sampling import collision_sampling_settings
 
 
 class DirectPlanner:
@@ -27,6 +28,7 @@ class DirectPlanner:
         context: Mapping[str, Any],
     ) -> Any:
         started = time.perf_counter()
+        collision_resolution, _ = collision_sampling_settings(move_request)
         source = np.asarray(path_request["joint_waypoints"], dtype=float)
         if source.ndim != 2 or source.shape[1] != 6 or len(source) < 2:
             raise PlanningError("Path strategy returned an invalid joint path.")
@@ -34,7 +36,10 @@ class DirectPlanner:
             raise PlanningError("Path contains non-finite joint values.")
         if np.any(source < self.joint_limits[:, 0]) or np.any(source > self.joint_limits[:, 1]):
             raise PlanningError("Path violates joint limits.", code="JOINT_LIMIT_VIOLATION")
-        if move_request["constraints"]["avoid_collision"]:
+        endpoint_check_s = 0.0
+        if (move_request["constraints"]["avoid_collision"]
+                and not path_request.get('endpoint_collision_prechecked', False)):
+            endpoint_started = time.perf_counter()
             goal_check = self.collision_checker.check(
                 source[-1],
                 safety_distance=float(move_request["constraints"].get("safety_distance", 0.0)),
@@ -48,18 +53,25 @@ class DirectPlanner:
                     "Goal state is in collision.", code="COLLISION_DETECTED", recoverable=True,
                     details={"location": "goal", "contacts": list(goal_check.contacts)},
                 )
+            endpoint_check_s = time.perf_counter() - endpoint_started
         # Keep the exported joint trajectory dense enough for actuator
         # tracking and route recording.  This is a per-joint max increment.
+        densify_started = time.perf_counter()
         waypoints = _densify(source, max_step=0.04)
+        densify_s = time.perf_counter() - densify_started
+        path_check_s = 0.0
         if move_request["constraints"]["avoid_collision"]:
+            path_check_started = time.perf_counter()
             safety_distance = float(move_request["constraints"].get("safety_distance", 0.0))
             validator = getattr(self.collision_checker, 'validate_execution_path', None)
             kwargs = dict(safety_distance=safety_distance,
+                          resolution=collision_resolution,
                           allowed_geom_ids=getattr(self.collision_checker, "allowed_target_geom_ids", None))
             result = (validator(waypoints, **kwargs) if callable(validator) else
-                      self.collision_checker.check_path(waypoints, resolution=.04, **kwargs))
+                      self.collision_checker.check_path(waypoints, **kwargs))
             if result.in_collision:
                 raise CollisionPlanningError("Direct path collides with the robot or environment.", details=result.contacts)
+            path_check_s = time.perf_counter() - path_check_started
         velocity_scale = float(move_request["constraints"]["velocity_scale"])
         duration = float(np.sum(np.max(np.abs(np.diff(waypoints, axis=0)), axis=1)) / max(velocity_scale, 0.01))
         trajectory = {
@@ -69,7 +81,16 @@ class DirectPlanner:
             **({"cartesian_joint_waypoints": source.tolist()} if path_request["path_type"] in {"linear", "circular"} else {}),
             "duration": duration,
             "planning_time": time.perf_counter() - started,
-            "diagnostics": path_request.get("diagnostics", {}),
+            "diagnostics": {
+                **path_request.get("diagnostics", {}),
+                "planning_stages_s": {
+                    "endpoint_collision_check": endpoint_check_s,
+                    "endpoint_collision_prechecked": bool(path_request.get('endpoint_collision_prechecked', False)),
+                    "path_densification": densify_s,
+                    "direct_path_collision_check": path_check_s,
+                    "collision_resolution_rad": collision_resolution,
+                },
+            },
         }
         return trajectory
 

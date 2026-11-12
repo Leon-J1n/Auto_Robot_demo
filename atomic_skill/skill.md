@@ -82,7 +82,7 @@
 ]
 ```
 
-前后左右采用机器人基座方向在桌面平面的投影，与对象相对 `move_to` 的方向约定一致：前为基座 +X、左为基座 +Y，后和右取反向。先将目标自身包围盒变换到世界坐标，求对应方向的边界，再向外偏移指定距离。水平方向由 VLM 在该位置附近半径 2 cm 的区域选择可见支撑表面，深度取自当前 RGB-D，并沿世界 Z 轴搜索 0～10 cm 放置高度；因此最终选点允许在区域内变化。`above`、`below` 沿世界 Z 轴从目标上、下边界偏移指定距离，直接得到空间释放位置，可悬空；不请求 VLM，也不额外搜索放置高度。两种方式都由同轮 approach/put 共用结果，目标位姿仍需通过 IK、碰撞和路径规划检查。
+前后左右采用机器人基座方向在桌面平面的投影，与对象相对 `move_to` 的方向约定一致：前为基座 +X、左为基座 +Y，后和右取反向。先将目标自身包围盒变换到世界坐标，求对应方向的边界，再向外偏移指定距离。水平方向由 VLM 在该位置附近半径 2 cm 的区域选择可见支撑表面，深度取自当前 RGB-D，并沿世界 Z 轴搜索 0～8 cm 放置高度（步长 1 cm）；因此最终选点允许在区域内变化。`above`、`below` 沿世界 Z 轴从目标上、下边界偏移指定距离，直接得到空间释放位置，可悬空；不请求 VLM，也不额外搜索放置高度。两种方式都由同轮 approach/put 共用结果，目标位姿仍需通过 IK、碰撞和路径规划检查。
 
 ### approach：移动到交互前的接近位姿
 
@@ -137,7 +137,7 @@
 
 ## 3. Commands 如何装配
 
-任务文件包含场景信息和一个按执行顺序排列的 `commands` 数组。下面以“把物体 7 放到容器 12”为例；ID 和场景版本须对应实际注册场景，`home` 须已配置。
+任务文件包含场景信息和一个按执行顺序排列的 `commands` 数组。下面以“把物体 7 放到容器 12”为例；ID 和场景版本须对应实际注册场景。
 
 ```json
 {
@@ -150,10 +150,9 @@
     {"command_id": "2", "skill_name": "pick", "parameters": {"target": 7, "hold_force": 15.0}},
     {"command_id": "3", "skill_name": "lift_up", "parameters": {"distance": 0.02}},
     {"command_id": "4", "skill_name": "retreat", "parameters": {"target": 7}},
-    {"command_id": "5", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}},
-    {"command_id": "6", "skill_name": "approach", "parameters": {"target": 12}},
-    {"command_id": "7", "skill_name": "put", "parameters": {"target": 12}},
-    {"command_id": "8", "skill_name": "retreat", "parameters": {"target": 12}}
+    {"command_id": "5", "skill_name": "approach", "parameters": {"target": 12}},
+    {"command_id": "6", "skill_name": "put", "parameters": {"target": 12}},
+    {"command_id": "7", "skill_name": "retreat", "parameters": {"target": 12}}
   ]
 }
 ```
@@ -166,6 +165,7 @@
 - 当前 VLM 流程根据 commands 自动推断感知类型，默认相机为 `global`，无需额外填写 `visual_estimates`。
 - 抓取位姿在首次需要且没有缓存时感知，后续随目标运动维护；每轮放置在对应 `approach` 开始时重新感知，同轮 `put` 共用结果。直接调用 `put` 时在其开始时感知。
 - `lift_up` 从当前末端位姿沿世界 +Z 直线抬升，保持当前朝向；参数为 `distance`，默认 `0.02`，必须大于 0，无需 `target`。
+- 抓取后默认直接接近目的地，非必要不插入 `move_to(home)`。任务结束后可按需回 home；明确需要中转姿态时也可显式插入。使用前须配置 `named_targets.home`，并按当前夹持状态通过正常碰撞与路径检查。
 
 ## 4. 常用任务级 Skill Graph
 
@@ -189,7 +189,6 @@ approach(destination) → put(destination) → retreat(destination)
 
 ```text
 approach(object) → pick(object) → lift_up(distance) → retreat(object)
-    → move_to(home)
     → approach(destination) → put(destination) → retreat(destination)
 ```
 

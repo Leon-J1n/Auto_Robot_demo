@@ -55,6 +55,8 @@ def validate_move_request(
     if not isinstance(normalized["planning"], Mapping):
         raise MoveValidationError("planning must be an object.")
     normalized["planning"] = dict(normalized["planning"])
+    from planning.collision_sampling import collision_sampling_settings
+    collision_sampling_settings(normalized)
     normalized["planning"].setdefault("mode", "auto")
     normalized["planning"].setdefault("allow_replan", True)
     normalized["planning"].setdefault("planning_time", 10.0)

@@ -10,6 +10,21 @@ def refinement_error(message, **details):
     return error
 
 
+def coarse_point_projection(frame, surface):
+    """Report actual framing before any target crop, using camera local -Z."""
+    camera = frame.camera_pose.rotation_matrix.T @ (np.asarray(surface) - frame.camera_pose.position)
+    depth = float(-camera[2])
+    if depth <= 1e-6:
+        return {'in_front': False, 'optical_depth_m': depth}
+    intr = frame.intrinsics
+    x = float(intr.fx * camera[0] / depth + intr.cx)
+    y = float(intr.cy - intr.fy * camera[1] / depth)
+    return {'in_front': True, 'optical_depth_m': depth,
+            'pixel': {'x': x, 'y': y},
+            'in_frame': bool(0 <= x < intr.width and 0 <= y < intr.height),
+            'distance_from_principal_point_px': float(np.hypot(x - intr.cx, y - intr.cy))}
+
+
 def refine_surface(estimator, frame, surface, target, *, vertical=True):
     """Locate the target in the current wrist frame or its selected region."""
     instruction = ('这是接近完成后的腕部图像。重新定位指定的同一目标物体的可见抓取点。'

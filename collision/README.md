@@ -6,9 +6,13 @@
 
 每次复用前读取 SDK 实际实体层级、局部/世界变换和 Collider 描述；场景发生变化会清空缓存，包括绕过适配器直接修改 SDK 实体的情况。不能只依赖 SDK revision，因为部分位姿写入不更新该值。零裕量实时构型检查继续直接查询原生库。机器人模型/关节定义更换仍需重建 checker；同一个实例应串行使用。
 
-`validate_execution_path(points, safety_distance=..., allowed_geom_ids=...)` 使用 0.01 rad 的权威细采样检查；`DirectPlanner` 和时间参数化都遵循这一安全分辨率，避免先做 0.04 rad 粗检查再重复遍历细网格。路径内部共享端点只检查一次，几何路径、安全裕量与细采样要求不变。
+`validate_execution_path(points, resolution=.02, safety_distance=..., allowed_geom_ids=...)` 默认按 0.02 rad 的单关节最大增量进行离散碰撞验证；直接规划、普通 RRT 规划最终复核和平滑轨迹验证共用 `planning.collision_validation.resolution_rad`（默认 `0.02`）。RRT 扩展及 TrajOpt 局部查询仍保留各自分辨率。安全间距和终点检查不变。离散采样不能保证发现采样点之间的短暂碰撞，增大步长会降低碰撞检出能力。
 
 `checker.cache_stats` 记录 `native_queries`、`configuration_hits`、`path_hits`、`invalidations`；统一 demo 的报告包含 `collision_cache_stats`。诊断时可设置 `checker.cache_enabled=False` 禁止缓存复用。
+
+带夹爪的 `GraspCollisionChecker` 完整路径精确缓存现已默认关闭：直接调用原路径检查，不生成完整场景签名。此前实测命中率为零且签名成本高。单构型查询缓存不受此开关影响。仅用于对照时可显式设置 `path_validation_cache_enabled=True`，启用最多 128 条的精确整段缓存；其复用要求路径、分辨率、裕量、场景状态、模型几何与策略完全相同。时间参数化诊断记录 `path_validation_cache_enabled`、采样分辨率和路点数。
+
+规划末尾验证关节折线，连续时间参数化则验证 cubic/PCHIP 样条；两者通常具有不同几何路径和采样点，不能因共享端点就跳过后者的碰撞验证。
 
 `simplatform_fcl.py` uses the SimPlatform checkout in `libraries/simplatform/source/SimPlatform-main`.
 The adapter creates `Simulator(physics="none", collision="fcl")`, loads the UR5e URDF and
@@ -54,3 +58,11 @@ SimPlatform 返回的 URDF 关节列表可能包含 `attachment_site_fixed`，�
 
 本地优化构建说明见 [SimPlatform 原生构建](../libraries/simplatform_native/README.md)。新 DLL 支持在 FCL 距离计算前过滤已有的结构允许对；旧 DLL 自动使用原接口。`native_filter_enabled=False` 仅用于性能对照，不改变最终允许碰撞规则。排除对集合纳入配置缓存键，规则撤销后不会沿用此前已过滤的查询结果。
 
+
+平滑轨迹按每个样条区间的精确关节导数上界分配碰撞采样点，保留全部样条节点，每区间至少 `planning.collision_validation.spline_subdivisions`（默认 `2`）等分。运动执行采样率、速度/加速度限制及直线/圆弧几何精度检查不受该设置影响。若需细采样对照，在场景 `move_defaults.planning` 或命令 `parameters.request.planning` 中设置：
+
+```json
+{"collision_validation": {"resolution_rad": 0.01, "spline_subdivisions": 4}}
+```
+
+该设置恢复较细的检查密度，但新实现按区间分配采样，采样位置不与旧版全局均匀网格完全一致。

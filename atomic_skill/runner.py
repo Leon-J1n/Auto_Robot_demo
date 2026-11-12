@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import time
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -119,12 +120,19 @@ class TaskSkillExecutor:
             and parameters.get('target') not in {'end_effector', '__end_effector__'}
         )
         if relative_move_to:
+            target_started = time.perf_counter()
             resolved_move = self.resolver.resolve(parameters['target'], self.resources, state)
+            target_resolve_s = time.perf_counter() - target_started
+            select_started = time.perf_counter()
             selected_move = self.resolver.select(
                 resolved_move, self.kinematics, self.checker, state['joints'],
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
                 prefer_direct=False)
+            row['target_resolution_timing_s'] = {
+                'resolve_total': target_resolve_s,
+                'candidate_selection': time.perf_counter() - select_started,
+            }
             self.resolver.remember_selection(selected_move)
             if selected_move.get('visual_estimate') is not None:
                 row['visual_grasp_resolution'] = selected_move
@@ -180,6 +188,7 @@ class TaskSkillExecutor:
             self.stage = 'target_resolution'
             try:
                 adapter = self.adapters[skill]
+                resolution_started = time.perf_counter()
                 if skill == 'pick':
                     # Pick only resolves and reaches the grasp pose here.
                     # Closure is a target-free gripper action performed after
@@ -191,6 +200,10 @@ class TaskSkillExecutor:
                         backend.contact_target_object_id = parameters['target']
                 else:
                     parts, resolved = adapter.prepare(request, state)
+                row['target_resolution_timing_s'] = dict(
+                    getattr(adapter, 'last_resolution_timing_s', {}) or {})
+                row['target_resolution_timing_s']['adapter_prepare_total'] = (
+                    time.perf_counter() - resolution_started)
             except Exception as exc:
                 row.update(success=False, error={'error_code': 'TARGET_RESOLUTION_FAILED',
                     'failed_stage': self.stage, 'error_message': str(exc)})
@@ -426,12 +439,19 @@ class TaskSkillExecutor:
                 raise ValueError(f"{command['skill_name']} requires an object-library resolver")
             target = parameters.pop('target', None)
             self.stage = 'target_resolution'
+            resolve_started = time.perf_counter()
             resolved = self.resolver.resolve(target, self.resources, state)
+            resolve_elapsed = time.perf_counter() - resolve_started
+            select_started = time.perf_counter()
             selected = self.resolver.select(
                 resolved, self.kinematics, self.checker, state['joints'],
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
                 prefer_direct=False)
+            row['target_resolution_timing_s'] = {
+                'resolve_total': resolve_elapsed,
+                'candidate_selection': time.perf_counter() - select_started,
+            }
             self.resolver.remember_selection(selected)
             resolved = selected
             pose = np.asarray(selected['selected']['world_from_control'], dtype=float)
@@ -442,6 +462,28 @@ class TaskSkillExecutor:
                 'quaternion_xyzw': Rotation.from_matrix(pose[:3, :3]).as_quat().tolist(),
                 'frame': 'world',
             }
+            # Observation changes only the approach pose, never the cached grasp.
+            if (parameters.get('wrist_camera_alignment', True)
+                    and resolved.get('visual_estimate')
+                    and resolved['selected'].get('pose_source') in
+                    ('vlm_rgbd_grasp', 'blackboard_contact_link')
+                    and callable(getattr(self.resolver, 'refine_after_approach', None))):
+                calibration = getattr(self.backend, 'get_control_from_camera', None)
+                try:
+                    if not callable(calibration):
+                        raise ValueError('Backend does not expose rigid camera calibration')
+                    world_grasp = np.asarray(resolved['selected'].get(
+                        'world_from_grasp', pose @ control_from_grasp), dtype=float)
+                    depth = float(resolved['selected'].get('grasp_depth_offset_m',
+                        resolved['visual_estimate'].get('grasp_depth_offset_m', 0.)))
+                    surface = world_grasp[:3, 3] - depth * world_grasp[:3, 2]
+                    parameters['_wrist_observation'] = {
+                        'control_from_camera': np.asarray(calibration('wrist')).tolist(),
+                        'target_world': surface.tolist(),
+                    }
+                except (ValueError, KeyError, TypeError) as exc:
+                    row['wrist_observation'] = {'status': 'fallback_to_gripper_approach',
+                                              'reason': str(exc)}
         executor = PoseSearchExecutor(
             resources=self.resources, backend=self.backend,
             synchronizer=self.sync, kinematics=self.kinematics,

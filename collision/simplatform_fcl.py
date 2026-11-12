@@ -519,15 +519,9 @@ class SimPlatformFCLCollisionChecker:
             self._remember(self._path_cache, path_key, result, 128)
         return result
 
-    def validate_execution_path(self, waypoints, **kwargs):
-        """Validate once on the authoritative fine grid.
-
-        The former coarse-then-fine pair traversed the same path twice before
-        continuous time preparation traversed it again.  The 1 cm grid is
-        already the stricter check, so the coarse pass added work without
-        adding a safety guarantee.
-        """
-        return self.check_path(waypoints, resolution=.01, **kwargs)
+    def validate_execution_path(self, waypoints, *, resolution=.02, **kwargs):
+        """Validate once at the requested maximum per-joint step (radians)."""
+        return self.check_path(waypoints, resolution=resolution, **kwargs)
 
     def close(self) -> None:
         if getattr(self, "_sim", None) is not None:

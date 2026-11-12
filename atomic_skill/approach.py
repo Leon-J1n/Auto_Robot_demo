@@ -71,6 +71,7 @@ class PoseSearchExecutor:
         self.params = deepcopy(params)
         self.phases = []
         self.phase = skill
+        self.wrist_observation = None
         from atomic_skill.approach import ApproachSkill
         from atomic_skill.retreat import RetreatSkill
         operation = ApproachSkill(self) if skill == 'approach' else RetreatSkill(self)
@@ -78,7 +79,9 @@ class PoseSearchExecutor:
         failed = next((item for item in reversed(self.phases) if not item.get('success')), None)
         return {'success': bool(success), 'status': 'success' if success else 'error',
                 'error': None if success else (failed or {}).get('error'),
-                'substeps': self.phases}
+                'substeps': self.phases,
+                **({'wrist_observation': self.wrist_observation}
+                   if self.wrist_observation is not None else {})}
 
 
 class ApproachSkill:
@@ -177,7 +180,11 @@ class ApproachSkill:
             return self._fail("INVALID_APPROACH_REQUEST", str(exc))
 
         operation = operation or getattr(e, "operation", None) or "approach"
-        def attempt(distance):
+        observation = params.get('_wrist_observation')
+        if observation is not None:
+            e.wrist_observation = {'status': 'searching', 'rejected': []}
+
+        def attempt(distance, *, align_camera=False):
             # Derive a complete pre-grasp transform from the final grasp pose.
             # The rotation is part of the candidate: IK and collision planning
             # must validate the gripper orientation together with its position.
@@ -185,23 +192,48 @@ class ApproachSkill:
                 np.block([[rotation, position[:, None]],
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance
             )
+            alignment = None
+            if align_camera:
+                from atomic_skill.wrist_observation import camera_aligned_pose
+                try:
+                    candidate_transform, alignment = camera_aligned_pose(
+                        candidate_transform, observation['control_from_camera'],
+                        observation['target_world'])
+                except ValueError as exc:
+                    e.wrist_observation['rejected'].append(
+                        {'distance_m': distance, 'reason': str(exc)})
+                    return None
             candidate_pose = deepcopy(pose)
             candidate_pose["position"] = candidate_transform[:3, 3].tolist()
             candidate_pose["rotation_matrix"] = candidate_transform[:3, :3].tolist()
             before = e.backend.physics_steps
-            if e._move(
+            moved = e._move(
                     f"{operation}_approach_{int(round(float(distance) * 1000))}mm",
                     spec={"mechanism_pose": candidate_pose}, contact=False,
                     override={"motion": {"path_type": "joint", "path_constraint": "soft"},
-                              "planning": {"mode": "collision_free", "allow_replan": True}}):
+                              "planning": {"mode": "collision_free", "allow_replan": True}})
+            if alignment is not None:
+                e.phases[-1]['wrist_observation'] = alignment
+                if moved:
+                    e.wrist_observation.update(status='camera_aligned', **alignment)
+            if moved:
                 return True
             failed = e.phases[-1]
             if not planning_failed_without_motion(failed, e.backend, before):
                 return False
             return None
         before_search = e.backend.physics_steps
+        distances = search_distances(params, minimum=minimum, maximum=maximum, step=step, label='approach')
+        if observation is not None:
+            if run_candidate_search(distances, lambda distance: attempt(distance, align_camera=True)):
+                return True
+            # Never retry after motion or an execution failure.
+            if e.phases and not planning_failed_without_motion(e.phases[-1], e.backend, before_search):
+                e.wrist_observation['status'] = 'failed'
+                return False
+            e.wrist_observation['status'] = 'fallback_to_gripper_approach'
         if run_candidate_search(
-            search_distances(params, minimum=minimum, maximum=maximum, step=step, label='approach'),
+            distances,
             attempt):
             return True
         failed = e.phases[-1] if e.phases else {}

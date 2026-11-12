@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -177,6 +178,82 @@ def _default_output_dir(command_file):
     if command_path.parent.name == command_path.stem:
         return command_path.parent / 'output'
     return command_path.parent / command_path.stem / 'output'
+
+
+def _write_command_planning_timing(output_dir, index, row):
+    """Write compact planning-stage timings for one command and its motion phases."""
+    phases = row.get('substeps')
+    candidates = phases if isinstance(phases, list) else [row]
+    motions = []
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        timing = item.get('timing')
+        if not isinstance(timing, dict):
+            continue
+        trajectory = item.get('trajectory') or {}
+        diagnostics = trajectory.get('diagnostics', {}) if isinstance(trajectory, dict) else {}
+        timing_s = {
+            key: value for key, value in timing.items()
+            if key not in {'execution', 'total'} and isinstance(value, (int, float))
+        }
+        planner_details = {
+            key: diagnostics[key] for key in
+            ('algorithm', 'planning_stages_s', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache',
+             'configuration_selection')
+            if key in diagnostics
+        }
+        ik_details = diagnostics.get('ik_branch_selection')
+        if isinstance(ik_details, dict):
+            planner_details['ik_branch_selection'] = {
+                key: ik_details[key] for key in
+                ('candidate_count', 'evaluated_count', 'selected_branch', 'explicit_seed',
+                 'search_mode', 'ik_cache_hits', 'collision_cache_hits')
+                if key in ik_details
+            }
+        timing_details = diagnostics.get('time_parameterization')
+        if isinstance(timing_details, dict):
+            planner_details['time_parameterization'] = {
+                key: timing_details[key] for key in
+                ('backend', 'path_interpolator', 'collision_fallback', 'trajectory_sampling_s',
+                 'linear_path_validation_s', 'collision_validation_s', 'circular_path_validation_s',
+                 'validation_waypoint_count', 'planner_waypoint_count',
+                 'collision_resolution_rad', 'spline_subdivisions', 'path_validation_cache_enabled',
+                 'validation_waypoints_identical_to_planner', 'path_validation_cache')
+                if key in timing_details
+            }
+        motions.append({
+            'phase': item.get('phase', 'move'),
+            'planner': trajectory.get('planner'),
+            'planning_mode': (item.get('selection') or {}).get('planning_mode'),
+            'timing_s': timing_s,
+            'planner_diagnostics': planner_details,
+        })
+    command_id = str(row.get('command_id', 'command'))
+    safe_id = re.sub(r'[^A-Za-z0-9_.-]+', '_', command_id).strip('._') or 'command'
+    relative_path = Path('commands') / f'{index:03d}_{safe_id}' / 'planning_timing.json'
+    target = Path(output_dir) / relative_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target_resolution_timing = row.get('target_resolution_timing_s')
+    target_resolution = row.get('target_resolution')
+    if not isinstance(target_resolution_timing, dict) and isinstance(target_resolution, dict):
+        target_resolution_timing = target_resolution.get('resolution_timing_s')
+    target.write_text(json.dumps({
+        'command_id': command_id,
+        'skill_name': row.get('skill_name'),
+        'success': row.get('success'),
+        'target_resolution_timing_s': target_resolution_timing or {},
+        'wrist_observation': row.get('wrist_observation'),
+        'target_resolution_diagnostics': {
+            key: target_resolution[key] for key in
+            ('resolution_timing_s', 'placement_height_attempts', 'grasp_depth_attempts',
+             'grasp_floor_fallback', 'visual_estimate')
+            if isinstance(target_resolution, dict) and key in target_resolution
+        },
+        'motions': motions,
+    }, indent=2, default=str), encoding='utf-8')
+    row['planning_timing_file'] = relative_path.as_posix()
+    return relative_path
 
 
 def _resolve_command_file(command_file):
@@ -489,6 +566,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                             stage = task_executor.stage
                             row.setdefault('success', False)
                             row['error'] = error_from_exception(exc, stage=stage, existing=row.get('error'))
+                            _write_command_planning_timing(output, index, row)
                             report['steps'].append(row)
                             raise
                         clear_detach = getattr(checker, 'clear_detach_contacts', None)
@@ -508,6 +586,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                     row['success'] = True
                     row['status'] = 'success'
                     row['completion'] = 'partial'
+                _write_command_planning_timing(output, index, row)
                 report['steps'].append(row)
                 (output / 'report.json').write_text(json.dumps(report, indent=2, default=serializable), encoding='utf-8')
                 print(step_message(command, success=bool(row.get('success')),
@@ -521,6 +600,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                     raise RuntimeError(f"Step failed: {row.get('error')}")
         report.update(success=True, status='success', final_state=backend.get_state(), frame_count=frame_index,
                       collision_cache_stats=dict(checker.cache_stats),
+                      path_validation_cache_stats=dict(getattr(checker, 'path_validation_cache_stats', {})),
                       planning_cache_stats=dict(getattr(checker, 'planning_cache_totals', {})),
                       physics_steps=backend.physics_steps, execution_backend=backend_name,
                       viewer_sync_count=getattr(backend, 'viewer_sync_count', 0))
@@ -528,8 +608,18 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     except Exception as exc:
         report.update(success=False, status='error')
         if active_command is not None and not active_step_logged:
+            error = error_from_exception(exc, stage=stage, existing=row.get('error') if row else None)
+            if row is None:
+                row = {'command_id': active_command.get('command_id'),
+                       'skill_name': active_command.get('skill_name')}
+            row.setdefault('success', False)
+            row.setdefault('error', error)
+            _write_command_planning_timing(output, index, row)
+            if not any(step.get('command_id') == active_command.get('command_id')
+                       for step in report['steps']):
+                report['steps'].append(row)
             print(step_message(active_command, success=False,
-                               error=error_from_exception(exc, stage=stage, existing=row.get('error') if row else None),
+                               error=error,
                                stage=stage, target_name=active_target_name), flush=True)
             active_step_logged = True
         elif active_command is None:

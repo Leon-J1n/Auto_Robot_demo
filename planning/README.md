@@ -105,7 +105,7 @@ except CollisionPlanningError:
 
 碰撞检测器需提供 `check(q, *, safety_distance=...)`、`check_path(waypoints, *, resolution=..., safety_distance=..., allowed_geom_ids=...)`；返回对象至少有 `in_collision`、`contacts`。保持姿态服务需提供 `forward(q)`、`solve_one(...)`，结果通过 `.solution` 读取。
 
-当前默认碰撞检查按关节插值采样，`resolution` 表示单关节采样增量（弧度）。普通 RRT 默认 0.02，直接规划和最终复核均使用 0.01。
+当前默认碰撞检查按关节插值采样，`resolution` 表示单关节采样增量（弧度）。普通 RRT 扩展默认 0.02；直接规划、普通避障规划最终复核及平滑轨迹验证默认使用 `planning.collision_validation.resolution_rad=0.02`。平滑轨迹每区间至少二等分，按局部导数上界增加采样，保留全部样条节点。终点和碰撞裕量不变；采样放宽可能漏掉采样点间短暂碰撞，详细配置见 [碰撞说明](../collision/README.md)。
 
 ## 扩展边界
 

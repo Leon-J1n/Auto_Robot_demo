@@ -5,12 +5,91 @@ from scipy.spatial.transform import Rotation
 from collections import OrderedDict
 from copy import deepcopy
 from contextlib import contextmanager
+import pickle
+from time import perf_counter
 
 from collision.simplatform_fcl import SimPlatformFCLCollisionChecker, CollisionResult
 from execution.resources import component
 
 
 class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
+    def _path_validation_state(self):
+        """Exact live scene/model/policy guard, never a rounded joint key."""
+        from planning.prepared_trajectory import planning_state_signature
+        b = self.backend
+        c = b.gripper_controller
+        policy = (
+            self._scene_cache_stamp(),
+            getattr(self, 'scene_revision', 0),
+            frozenset(self.allowed_target_names), frozenset(self._names.items()),
+            frozenset(self.dynamic_names), frozenset(self.dynamic_handles),
+            frozenset(self.tool_geoms), frozenset(self.robot_bodies),
+            frozenset(self.geoms), frozenset(self.excluded), frozenset(self.adjacent),
+            tuple(self.body_names), frozenset(self._collider_links.items()),
+            getattr(b, 'contact_target', None), getattr(b, 'contact_target_object_id', None),
+            getattr(self, '_physical_closure_target', None),
+            getattr(c, 'held_name', None), getattr(c, 'mode', None), getattr(c, 'base_id', None),
+            np.asarray(getattr(c, 'relative_pose', [])).tobytes(),
+            pickle.dumps(getattr(b, 'grasp_approach_goal', None)),
+            pickle.dumps(getattr(getattr(b, 'resources', None), 'scene', None)),
+            tuple(np.asarray(getattr(b.data, name, [])).tobytes() for name in ('xpos', 'xmat')),
+            tuple(np.asarray(getattr(b.model, name, [])).tobytes() for name in
+                  ('geom_rbound', 'body_weldid', 'mesh_vert', 'mesh_face', 'mesh_vertadr',
+                   'mesh_vertnum', 'mesh_faceadr', 'mesh_facenum', 'geom_dataid', 'jnt_qposadr')),
+            np.asarray(b.qpos_indices).tobytes(),
+            tuple(sorted(getattr(b, 'object_ids', {}).items())),
+            self.allow_gripper_environment_contact, frozenset(self.support_geoms),
+            frozenset(getattr(self, '_lift_clearance_pairs', {}).items()),
+            getattr(self, '_lift_ignored_payload_geoms', frozenset()),
+            getattr(self, '_lift_ignored_payload_names', frozenset()),
+        )
+        return planning_state_signature(b, self), policy
+
+    def check_path(self, waypoints, *, resolution=.05, safety_distance=0., allowed_geom_ids=None):
+        # The base FCL path cache is disabled for live articulated geometry.
+        # Reuse only an identical whole query guarded by BOTH live and FCL state.
+        if not hasattr(self, 'backend') or not getattr(self, 'path_validation_cache_enabled', False):
+            return super().check_path(waypoints, resolution=resolution,
+                safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
+        points = np.asarray(waypoints, dtype=float)
+        # RRT edges and TrajOpt local probes are small; hashing a whole scene
+        # for those would cost more than the reuse opportunity is worth.
+        if (points.ndim != 2 or len(points) < 4 or not np.all(np.isfinite(points))
+                or not np.isfinite(resolution) or resolution <= 0 or not np.isfinite(safety_distance)):
+            return super().check_path(points, resolution=resolution,
+                safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
+        if not hasattr(self, '_validated_paths'):
+            self._validated_paths = OrderedDict()
+            self.path_validation_cache_stats = {'hits': 0, 'misses': 0, 'invalidations': 0,
+                                                'reused_waypoints': 0, 'state_guard_s': 0.0}
+        def state_snapshot():
+            started = perf_counter()
+            state = self._path_validation_state()
+            self.path_validation_cache_stats['state_guard_s'] += perf_counter() - started
+            return state
+        state = state_snapshot()
+        if state != getattr(self, '_validated_path_state', None):
+            self._validated_paths.clear()
+            self._query_cache.clear()
+            self._validated_path_state = state
+            self.path_validation_cache_stats['invalidations'] += 1
+        key = (points.shape, points.tobytes(), float(resolution), float(safety_distance),
+               frozenset(allowed_geom_ids or ()))
+        if key in self._validated_paths:
+            self.path_validation_cache_stats['hits'] += 1
+            self.path_validation_cache_stats['reused_waypoints'] += len(points)
+            self._validated_paths.move_to_end(key)
+            return deepcopy(self._validated_paths[key])
+        self.path_validation_cache_stats['misses'] += 1
+        result = super().check_path(points, resolution=resolution,
+            safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
+        # Never publish a certificate if a probe or callback changed the guard.
+        if state_snapshot() == state:
+            self._validated_paths[key] = deepcopy(result)
+            while len(self._validated_paths) > 128:
+                self._validated_paths.popitem(last=False)
+        return result
+
     @contextmanager
     def lift_payload_collision_scope(self):
         """Ignore only the captured held object's collisions during one lift."""
