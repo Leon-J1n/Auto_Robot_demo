@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "turkey_baster",
+    "object_name_Chinese": "胶头滴管",
+    "object_id": 47,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "胶头滴管,滴管",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.14210499823093414,
+      -0.1418440043926239,
+      0.03402400016784668,
+      -0.03402400016784668,
+      0.06767699867486954,
+      0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.06,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.4,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.028,
+        3.1415,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        1.0471
+      ],
+      [
+        0.0,
+        0.0,
+        0.028,
+        3.1415,
+        0.0,
+        3.14,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

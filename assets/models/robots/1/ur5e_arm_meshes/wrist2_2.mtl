@@ -1,6 +1,0 @@
-newmtl surface
-Ka 0.05 0.05 0.05
-Kd 0.278 0.278 0.278
-Ks 0.12 0.12 0.12
-Ns 32
-map_Kd wrist2_2.png

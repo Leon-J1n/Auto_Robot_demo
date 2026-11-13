@@ -38,7 +38,7 @@
     "viewport.localAxesToggle": true,
     "viewport.cameraWall": true,
     "viewport.worldAxes": false,
-    "viewport.grid": false,
+    "viewport.grid": true,
     "viewport.toolbar": true,
     "viewport.lightingPreset": true,
     "viewport.shadows": true,

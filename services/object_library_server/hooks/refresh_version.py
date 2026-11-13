@@ -29,8 +29,10 @@ VERSION_LINE = re.compile(r"^(AppVersion|ResVersion)\s+(\d+\.\d+\.\d+)(?:-\S+)?\
 
 
 def git(*args):
-    return subprocess.run(["git", *args], cwd=ROOT, check=True,
-                          capture_output=True, text=True).stdout.strip()
+    # git emits UTF-8 paths; the locale encoding (e.g. GBK on Chinese Windows)
+    # must not be used, and quotepath would octal-escape non-ASCII paths.
+    return subprocess.run(["git", "-c", "core.quotepath=false", *args], cwd=ROOT, check=True,
+                          capture_output=True, encoding="utf-8").stdout.strip()
 
 
 def changed_files():

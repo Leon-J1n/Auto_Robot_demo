@@ -1,17 +1,32 @@
 {
   "semantic_properties": {
     "object_name": "cabinet",
+    "object_name_Chinese": "储物柜",
     "object_id": 28,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "red,wooden,single",
+    "tag": "储物柜,家具,单门,红木,矮款,柜子",
     "can_place": true
   },
   "geometric_properties": {
-    "AABB": [0.114000072, -0.136507278, 0.150000000, -0.150000000, 0.450000000, -0.000000072]
+    "AABB": [
+      0.114000072,
+      -0.136507278,
+      0.15,
+      -0.15,
+      0.45,
+      -7.2e-08
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": true,
     "mass_kg": 2.25,
     "friction": {
       "format": "[sliding, torsional, rolling]",

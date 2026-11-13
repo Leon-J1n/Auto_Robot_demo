@@ -142,6 +142,30 @@ describe("parseWorld", () => {
     expect(world.get(1)?.rawComponents).toContainEqual(unknown);
   });
 
+  /**
+   * §4.10 (Q165): the reader only stores PhysicalProperties as-is for later use. OLS's own
+   * 接入状态 says a parser that has not wired this component keeps it through the §3.4
+   * unknown-component rule -- raw retained, no typed view, no normalization, no rejection.
+   * The nested friction dictionary and an author-added key must both survive untouched, and
+   * toJSON must hand the very same dictionary back (§3.8 byte-faithful round-trip).
+   */
+  it("stores PhysicalProperties verbatim for later use, without consuming it (§4.10, Q165)", () => {
+    const physical = {
+      component_type: "PhysicalProperties",
+      properties: {
+        is_static: true,
+        mass_kg: 22.0,
+        friction: { format: "[sliding, torsional, rolling]", values: [0.8, 0.01, 0.001] },
+        restitution: 0.05,
+        curator: "lab",
+      },
+    };
+    const world = parseWorld(doc([{ ...object(1, null), components: [transform(null), physical] }]));
+    expect(world.objects).toHaveLength(1);
+    expect(world.get(1)?.rawComponents).toContainEqual(physical);
+    expect(world.toJSON().objects[0]!.components).toContainEqual(physical);
+  });
+
   it("falls back to the identity pose when Transform is missing or malformed", () => {
     const world = parseWorld(doc([
       { object_id_in_scene: 1, object_name_in_scene: "no transform", components: [] },

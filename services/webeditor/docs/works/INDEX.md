@@ -5,6 +5,28 @@
 
 | 任务文件夹 | 完成日期 | 状态 | 决议号 | 一句话 |
 |---|---|---|---|---|
+| [2026-11-12-physical-properties](2026-11-12-physical-properties/README.md) | 2026-11-12 | 已完成 | Q165 / §3 §4.6.1 §12.48 | PhysicalProperties 组件：文档同步、读取原样存（零改动）、摆放/替换机械臂夹爪相机时按资产逐字删 scale 写入 |
+| [2026-11-12-cachestorage](2026-11-12-cachestorage/README.md) | 2026-11-12 | 已完成 | Q164 / §6.7 §12.47 | 超大几何走 CacheStorage：Chrome 磁盘缓存收不下的那份 48 MB 网格改存显式缓存，重启后整份世界零重传 |
+| [2026-11-12-client-disconnect](2026-11-12-client-disconnect/README.md) | 2026-11-12 | 已完成 | Q163 / §6.11 §12.46 | 客户端中途断连不算服务端错误：OLS 静默结束该请求，不再往死 socket 上写 500、不刷两段 traceback |
+| [2026-11-12-long-term-cache](2026-11-12-long-term-cache/README.md) | 2026-11-12 | 已完成 | Q162 / §6.7 §6.11 §12.45 | 长期缓存：OLS 发 ETag/304 与资产版本号，带 `v` 的资产路由 immutable，重启浏览器后几何零重传 |
+| [2026-11-12-camera-tag-chinese](2026-11-12-camera-tag-chinese/README.md) | 2026-11-12 | 已完成 | Q161 / §4.6.1 | 相机角色判据认中文 tag「相机」：线上 tag 无英文 camera，点相机不再被当道具摆上桌 |
+| [2026-11-11-refresh-keeps-scene](2026-11-11-refresh-keeps-scene/README.md) | 2026-11-11 | 已完成 | Q160 / §5.8 §1.4 §5.4 §5.9 §5.13 | 刷新回到刷新前的现场：绑定浏览器自证时 `/getWorld` 用 `snapshot` 认领它上一次的上报，与 AgentBrain 无关 |
+| [2026-11-11-rail-labels-from-ols](2026-11-11-rail-labels-from-ols/README.md) | 2026-11-11 | 已完成 | Q159 / §4.7 §7.2 §4.6 | 导航栏大类文字改取 OLS 分类第一层：场景 / 模型 / 机器人 |
+| [2026-11-11-asset-list-two-columns](2026-11-11-asset-list-two-columns/README.md) | 2026-11-11 | 已完成 | Q158 / §4.6 §12.7 | 资产列表改双栏卡片（图上文下、方图占满），展开时借 Q157 的宽度放宽左栏 |
+| [2026-11-11-agent-collapsed-for-assets](2026-11-11-agent-collapsed-for-assets/README.md) | 2026-11-11 | 已完成 | Q157 / §7.5 | 资产面板展开时借走 Agent 那一栏，收起时按同一判据还回 |
+| [2026-11-11-asset-kinds-on-rail](2026-11-11-asset-kinds-on-rail/README.md) | 2026-11-11 | 已完成 | Q156 / §4.6 §4.7 §7.2 | 场景/模型/机器人三大类移到导航栏替换 Asset 按钮，面板内只剩 OLS 第二级分类 |
+| [2026-11-11-scene-chinese-name](2026-11-11-scene-chinese-name/README.md) | 2026-11-11 | 已完成 | Q155 / §4.6 | 场景资产改用详情顶层 scene_name_Chinese，物体仍读 semantic_properties |
+| [2026-11-10-speech-deployment-docs](2026-11-10-speech-deployment-docs/README.md) | 2026-11-10 | 已完成 | §7.6/§9.1 | 补齐独立语音服务启动、8600 端口、词表与已有 URL 配置说明 |
+| [2026-11-10-free-camera-distance](2026-11-10-free-camera-distance/README.md) | 2026-11-10 | 已完成 | §4.7 | 自由相机默认距离缩至原来的四分之一，保持观察目标与方向 |
+| [2026-11-10-two-pass-speech](2026-11-10-two-pass-speech/README.md) | 2026-11-10 | 已完成 | §7.6 | 升级流式模型，句末 Paraformer 复核后再发送 |
+| [2026-11-10-trajectory-style](2026-11-10-trajectory-style/README.md) | 2026-11-10 | 已完成 | §7.3/§9.1 | 轨迹点半径减半、50% 透明，相邻点增加同色细线并同步显隐清理 |
+| [2026-11-10-agent-details](2026-11-10-agent-details/README.md) | 2026-11-10 | 已完成 | §7.4/§9.1 | disable_agent_details 为 true 时隐藏回复中的任务、调用统计、场景标识与产物细节 |
+| [2026-11-09-ols-display-placement](2026-11-09-ols-display-placement/README.md) | 2026-11-09 | 已完成 | §4.6 | 三类资产优先显示 OLS 中文名，放置与占地计算采用资产声明的四元数 |
+| [2026-11-09-local-streaming-speech](2026-11-09-local-streaming-speech/README.md) | 2026-11-09 | 已完成 | §7.6/§9.1 | AudioWorklet 经独立 Gateway WebSocket 转发本地 sherpa-onnx，发送前等最终结果，CUDA 优先/CPU 回退 |
+| [2026-11-09-speech-input](2026-11-09-speech-input/README.md) | 2026-11-09 | 已完成 | §7.5/§7.6 | 麦克风聆听时高亮，点击发送或回车发送立即停止，隔离延迟识别结果 |
+| [2026-11-09-launcher-ip](2026-11-09-launcher-ip/README.md) | 2026-11-09 | 已完成 | §11.6 | 双击启动自动探测 IPv4，以临时配置覆盖 OLS 地址，保留源配置 |
+| [2026-11-09-box-color](2026-11-09-box-color/README.md) | 2026-11-09 | 已完成 | §4.8.6 | 普通包围盒改紫色，选中描边保持黄色 |
+| [2026-11-09-asset-panel](2026-11-09-asset-panel/README.md) | 2026-11-09 | 已完成 | Q154（§4.6） | 资产条目去掉 ID 与分类，放大缩略图与名称 |
 | [2026-11-07-browser-profile-isolation](2026-11-07-browser-profile-isolation/README.md) | 2026-11-07 | 已完成 | Q153（规格 §2.9／§2.10／§5.1／§11.2.2） | 用持久 `browser_id` 作为 gateway profile 分区键，隔离现场、会话、任务、pending 与回执，并默认监听 `0.0.0.0` |
 | [2026-11-06-ws与嵌套点选](2026-11-06-ws与嵌套点选/README.md) | 2026-11-06 | 进行中 | Q152（规格 §4.5／§5.8） | 代理断线静默处理、重连去重，嵌套相机按真实世界节点独立点选 |
 | [2026-11-06-连续添加竞态](2026-11-06-连续添加竞态/README.md) | 2026-11-06 | 已完成 | Q151（规格 §4.6.1／§5.7／§12.44） | 连续点击时并发初始化 baseline 会替换正在编辑的 World；重连多 socket 的旧 state_sync 也可能晚落盘覆盖新现场；两侧都串行化 |

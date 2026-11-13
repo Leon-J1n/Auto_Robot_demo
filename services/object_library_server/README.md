@@ -140,7 +140,11 @@ UPDATE assets SET no_display = 1 WHERE id = 22; -- 在 data/model_index.db 中�
 ```bash
 # 资产列表（可按 category 精确过滤）
 curl "$BASE/list?type=model&uid=0&category=模型.抓取物"
-# -> {"type":"model","items":[{"id":1,"name":"apple","category":"模型.抓取物"}, ...]}
+# -> {"type":"model","items":[{"id":1,"name":"apple","category":"模型.抓取物","version":"124d5e9696fc61f1"}, ...]}
+
+# 单个资产的版本号（与 /list 条目里的 version 逐字相同）
+curl "$BASE/assetVersion?type=model&id=1"
+# -> {"type":"model","id":1,"version":"124d5e9696fc61f1"}
 
 # 类别列表
 curl "$BASE/listCategory?type=scene"
@@ -165,6 +169,20 @@ curl -o thumb.png "$BASE/thumbnail?type=model&id=1"
 ```
 
 `/file`、`/fileByName` 的路径安全规则：禁止 `..`、绝对路径、盘符、空字节、符号链接；最终路径必须落在 `data/<type>s/<id>/` 内；`id`/`name` 必须先在索引中解析为可见记录。
+
+### 浏览器长期缓存（版本号 + ETag）
+
+- **`version`**：16 位十六进制，由 `data/<type>s/<id>/` 下**全部文件**的 `(相对路径, 字节数, mtime_ns)` 排序后连同索引行的 `name`/`category` 一起做 SHA-256 得出。**只 stat、不读文件内容**，也不写进任何磁盘索引；改字节数、改 mtime、增删文件、改 `name`/`category` 都会让它变。两个出口：`/assetVersion?type=&id=` 与 `/list` 每个条目的 `version`，对同一资产必须相等。
+- **`ETag` / `If-None-Match`**：所有 GET 的 200 响应都带 `ETag`（JSON 取响应体哈希，文件取 `(字节数, mtime_ns)`）；带匹配的 `If-None-Match` 再来 ⇒ **304、空体、仍带 CORS 头、不带 `Content-Length`**。文件那一路在 304 时连读盘都省掉。
+- **`v` 决定缓存强度**：资产路由（`/scene`、`/model`、`/robot`、三条 `*ByName`、`/file`、`/fileByName`、`/thumbnail`）带 `v=<版本号>` ⇒ `Cache-Control: public, max-age=31536000, immutable`，浏览器刷新页签／重启后直接从磁盘缓存取、一个请求都不发；不带 `v` ⇒ `Cache-Control: no-cache`（存但每次复核）。服务端**不校验 `v` 的内容**——校验就要为每次文件请求走一遍目录；`v` 只是缓存键，资产变了版本号就变、URL 跟着变，旧键自然不再被问到。
+- **三条 oracle 路由**（`/list`、`/listCategory`、`/assetVersion`）回答的是"有什么／是哪一版"，**永远 `no-cache`**，带 `v` 也不变 `immutable`。
+- 客户端拿不到版本号（旧服务端、`is_on_cos` 走 COS）时不拼 `v`，行为与加缓存之前逐字相同。
+
+### 客户端中途断连
+
+浏览器刷新页签或切走会取消在途请求，服务端于是可能在**读请求行／请求头**、**写响应体**、或**写 `ApiError` 应答**时抛 `ConnectionError`。这类一律**静默结束该请求并关闭连接**：不打 traceback，也**不再尝试往同一条已死的 socket 上写 `500 internal_error`**（那只会抛第二次，把日志刷成两段栈，而客户端根本收不到）。
+
+**Windows 上抛的是 `ConnectionAbortedError`（10053）或 `ConnectionResetError`（10054），不是 `BrokenPipeError`** —— 三者是兄弟类（同继承 `ConnectionError`），只挡 `BrokenPipeError` 挡不住前两个。真正的未预期异常仍照旧打 traceback 并回 `500`。响应形状与错误码表一律不变。
 
 ### 写入类（POST）
 

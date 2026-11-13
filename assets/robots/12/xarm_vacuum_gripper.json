@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "xarm_vacuum_gripper",
+    "object_name_Chinese": "吸盘夹爪",
     "object_id": 12,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "xarm,vacuum,gripper"
+    "tag": "真空吸盘夹爪,夹爪,吸盘式"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.0458,
       0.1265,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.656,
     "friction": {
       "format": "[sliding, torsional, rolling]",

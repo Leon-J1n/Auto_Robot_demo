@@ -72,67 +72,67 @@
     {
       "method": "GET",
       "path": "/api/agent/conversations",
-      "line": 3445,
+      "line": 3716,
       "handler": "gateway.conversations_list"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations",
-      "line": 3446,
+      "line": 3717,
       "handler": "gateway.conversations_create"
     },
     {
       "method": "DELETE",
       "path": "/api/agent/conversations/{conversationId}",
-      "line": 3449,
+      "line": 3720,
       "handler": "gateway.conversation"
     },
     {
       "method": "GET",
       "path": "/api/agent/conversations/{conversationId}",
-      "line": 3448,
+      "line": 3719,
       "handler": "gateway.conversation"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations/{conversationId}/activate",
-      "line": 3450,
+      "line": 3721,
       "handler": "gateway.conversation"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations/{conversationId}/messages",
-      "line": 3447,
+      "line": 3718,
       "handler": "gateway.conversation_messages"
     },
     {
       "method": "GET",
       "path": "/api/agent/health",
-      "line": 3412,
+      "line": 3683,
       "handler": "gateway.agent_health_cached"
     },
     {
       "method": "GET",
       "path": "/api/agent/jobs",
-      "line": 3451,
+      "line": 3722,
       "handler": "gateway.jobs"
     },
     {
       "method": "POST",
       "path": "/api/agent/jobs",
-      "line": 3452,
+      "line": 3723,
       "handler": "gateway.jobs"
     },
     {
       "method": "GET",
       "path": "/api/agent/jobs/{jobId}",
-      "line": 3453,
+      "line": 3724,
       "handler": "gateway.job"
     },
     {
       "method": "POST",
       "path": "/api/agent/recover",
-      "line": 3417,
+      "line": 3688,
       "handler": "gateway.recover_agent_session"
     }
   ],
@@ -237,217 +237,223 @@
     {
       "method": "GET",
       "path": "/",
-      "line": 3459,
+      "line": 3733,
       "handler": "gateway.static"
     },
     {
       "method": "POST",
       "path": "/acquireSceneLease",
-      "line": 3441,
+      "line": 3712,
       "handler": "gateway.acquire_scene_lease"
     },
     {
       "method": "POST",
       "path": "/addObject",
-      "line": 3432,
+      "line": 3703,
       "handler": "gateway.add_object"
     },
     {
       "method": "GET",
       "path": "/allocateObjectID",
-      "line": 3424,
+      "line": 3695,
       "handler": "gateway.allocate_object_id"
     },
     {
       "method": "GET",
       "path": "/api/agent/conversations",
-      "line": 3445,
+      "line": 3716,
       "handler": "gateway.conversations_list"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations",
-      "line": 3446,
+      "line": 3717,
       "handler": "gateway.conversations_create"
     },
     {
       "method": "DELETE",
       "path": "/api/agent/conversations/{conversationId}",
-      "line": 3449,
+      "line": 3720,
       "handler": "gateway.conversation"
     },
     {
       "method": "GET",
       "path": "/api/agent/conversations/{conversationId}",
-      "line": 3448,
+      "line": 3719,
       "handler": "gateway.conversation"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations/{conversationId}/activate",
-      "line": 3450,
+      "line": 3721,
       "handler": "gateway.conversation"
     },
     {
       "method": "POST",
       "path": "/api/agent/conversations/{conversationId}/messages",
-      "line": 3447,
+      "line": 3718,
       "handler": "gateway.conversation_messages"
     },
     {
       "method": "GET",
       "path": "/api/agent/health",
-      "line": 3412,
+      "line": 3683,
       "handler": "gateway.agent_health_cached"
     },
     {
       "method": "GET",
       "path": "/api/agent/jobs",
-      "line": 3451,
+      "line": 3722,
       "handler": "gateway.jobs"
     },
     {
       "method": "POST",
       "path": "/api/agent/jobs",
-      "line": 3452,
+      "line": 3723,
       "handler": "gateway.jobs"
     },
     {
       "method": "GET",
       "path": "/api/agent/jobs/{jobId}",
-      "line": 3453,
+      "line": 3724,
       "handler": "gateway.job"
     },
     {
       "method": "POST",
       "path": "/api/agent/recover",
-      "line": 3417,
+      "line": 3688,
       "handler": "gateway.recover_agent_session"
     },
     {
       "method": "GET",
       "path": "/api/health",
-      "line": 3408,
+      "line": 3679,
       "handler": "gateway.health"
     },
     {
       "method": "GET",
       "path": "/api/runtimeConfig",
-      "line": 3414,
+      "line": 3685,
       "handler": "gateway.runtime_config"
     },
     {
       "method": "GET",
       "path": "/api/sessionState",
-      "line": 3416,
+      "line": 3687,
       "handler": "gateway.session_state"
     },
     {
       "method": "GET",
       "path": "/brainCapabilities",
-      "line": 3422,
+      "line": 3693,
       "handler": "gateway.brain_capabilities"
     },
     {
       "method": "GET",
       "path": "/captureScene",
-      "line": 3427,
+      "line": 3698,
       "handler": "gateway.capture_scene"
     },
     {
       "method": "POST",
       "path": "/commitWorld",
-      "line": 3437,
+      "line": 3708,
       "handler": "gateway.commit_world"
     },
     {
       "method": "GET",
       "path": "/events",
-      "line": 3458,
+      "line": 3732,
       "handler": "gateway.events"
     },
     {
       "method": "GET",
       "path": "/get2DAABB",
-      "line": 3428,
+      "line": 3699,
       "handler": "gateway.get_2d_aabb"
     },
     {
       "method": "GET",
       "path": "/getWorld",
-      "line": 3425,
+      "line": 3696,
       "handler": "gateway.get_world"
     },
     {
       "method": "GET",
       "path": "/health",
-      "line": 3411,
+      "line": 3682,
       "handler": "gateway.agent_health"
     },
     {
       "method": "GET",
       "path": "/queryWorldCommit",
-      "line": 3438,
+      "line": 3709,
       "handler": "gateway.query_world_commit"
     },
     {
       "method": "POST",
       "path": "/releaseSceneLease",
-      "line": 3442,
+      "line": 3713,
       "handler": "gateway.release_scene_lease"
     },
     {
       "method": "POST",
       "path": "/removeObject",
-      "line": 3433,
+      "line": 3704,
       "handler": "gateway.remove_object"
     },
     {
       "method": "POST",
       "path": "/resolveUncertain",
-      "line": 3443,
+      "line": 3714,
       "handler": "gateway.resolve_uncertain"
     },
     {
       "method": "GET",
       "path": "/sessions",
-      "line": 3419,
+      "line": 3690,
       "handler": "gateway.sessions"
     },
     {
       "method": "POST",
       "path": "/sessions",
-      "line": 3420,
+      "line": 3691,
       "handler": "gateway.sessions"
     },
     {
       "method": "GET",
+      "path": "/speech",
+      "line": 3730,
+      "handler": "speech.handle"
+    },
+    {
+      "method": "GET",
       "path": "/tasks/{taskID}/artifacts/{name}",
-      "line": 3456,
+      "line": 3727,
       "handler": "gateway.task_artifact"
     },
     {
       "method": "POST",
       "path": "/updateItem",
-      "line": 3431,
+      "line": 3702,
       "handler": "gateway.update_item"
     },
     {
       "method": "POST",
       "path": "/updateTraj",
-      "line": 3444,
+      "line": 3715,
       "handler": "gateway.update_traj"
     },
     {
       "method": "POST",
       "path": "/updateWorld",
-      "line": 3430,
+      "line": 3701,
       "handler": "gateway.update_world"
     },
     {
       "method": "GET",
       "path": "/{route:.*}",
-      "line": 3460,
+      "line": 3734,
       "handler": "gateway.static"
     }
   ],

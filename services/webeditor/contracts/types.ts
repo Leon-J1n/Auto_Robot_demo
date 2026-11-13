@@ -609,8 +609,12 @@ export interface ErrorEnvelope {
 }
 
 export interface RuntimeConfig {
+  /** Hide Agent reply diagnostics only when explicitly true. */
+  disable_agent_details?: boolean;
   gateway: { host: string; port: number };
   library_server_url: string;
+  /** Gateway-only upstream address; browser audio always uses same-origin /speech. */
+  speech_service_url?: string;
   cos_base_url: string;
   max_payload_bytes: number;
   browser_request_timeout_seconds: number;
@@ -619,7 +623,7 @@ export interface RuntimeConfig {
   camera_preview: { max_width: number; max_height: number; max_hz: number };
   /** §7.3/Q97: the segment-end ghosts' opacity, 0..1. Absent or out-of-range reads as 0.5. */
   ghost_pose_opacity?: number;
-  /** §7.3/Q101: waypoint sphere radius in world metres. Absent or non-positive reads as 0.02. */
+  /** §7.3/Q101: waypoint sphere radius in world metres. Absent or non-positive reads as 0.01. */
   traj_waypoint_radius?: number;
   /** §7.3/Q101: one waypoint every N frames. Absent, non-integer or non-positive reads as 10. */
   traj_waypoint_stride_frames?: number;

@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "apple",
+    "object_name_Chinese": "苹果",
     "object_id": 1,
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "red",
+    "tag": "苹果,水果,球形",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.037333214,
       0.033874024,
       -0.037373223
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.068,
     "friction": {
       "format": "[sliding, torsional, rolling]",

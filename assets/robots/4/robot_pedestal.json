@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "robot_pedestal",
+    "object_name_Chinese": "机器人底座",
     "object_id": 4,
     "deformable": false,
     "scalable": true,
     "interactable": false,
-    "tag": "gray,fixed,cylindrical"
+    "tag": "机器人底座,支架,圆柱"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.1,
       0.25,
       -0.25
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": true,
     "mass_kg": 8.0,
     "friction": {
       "format": "[sliding, torsional, rolling]",

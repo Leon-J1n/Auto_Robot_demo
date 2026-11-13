@@ -1,0 +1,62 @@
+{
+  "semantic_properties": {
+    "object_name": "hex_nut",
+    "object_name_Chinese": "六角螺母",
+    "object_id": 45,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "六角螺母,螺母,大号螺母",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.04459467530250549,
+      5.571966175921261e-05,
+      0.02787981554865837,
+      -0.01847650483250618,
+      0.00826877448707819,
+      -0.010452616959810257
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.25,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.4,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0.02,
+        0.005,
+        0.01,
+        3.1415,
+        0.0,
+        0,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

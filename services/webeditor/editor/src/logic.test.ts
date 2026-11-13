@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  agentPlanItemsFromEvent, boundingBoxesEnabled, cameraFrustumSegments, cameraRig, cameraWallEnabled, cameraWallModeFor, cameraWallPace,
+  agentPanelVisible, agentPlanItemsFromEvent, boundingBoxesEnabled, cameraFrustumSegments, cameraRig, cameraWallEnabled, cameraWallModeFor, cameraWallPace,
   DEFAULT_GHOST_OPACITY, DEFAULT_LOCAL_AXES_LENGTH, DEFAULT_SHADOWS_ENABLED, DEFAULT_URDF_LINK_BOXES, DEFAULT_VIEWPORT_BACKGROUND, DEFAULT_WAYPOINT_RADIUS, DEFAULT_WAYPOINT_STRIDE_FRAMES,
-  depthColor, depthPalette, enterSendsAgentMessage, featureEnabled, ghostOpacity, leafArmIds, localAxesEnabled, localAxesRig, mergeSpeech, normalizeObjSource, objVertexBounds, panelMarkupChanged, projectBox, pickRecordMime, recordVideoName,
+  depthColor, depthPalette, enterSendsAgentMessage, featureEnabled, ghostOpacity, leafArmIds, localAxesEnabled, localAxesRig, mergeSpeech, normalizeObjSource, objVertexBounds, panelMarkupChanged, panelTabActive, panelTabPress, projectBox, pickRecordMime, recordVideoName,
   RECORD_MIME_CANDIDATES, shadowExtentsOf, shadowRangeOf, shadowsEnabled, timelineDueIndex, urdfLinkBoxesEnabled, viewportBackground,
   WAYPOINT_COLORS, waypointColor, waypointFrames, waypointSettings,
 } from "./logic";
@@ -83,7 +83,7 @@ describe("waypoint size and density (§7.3, Q101)", () => {
   });
 
   it("falls back to the shipped defaults", () => {
-    expect(DEFAULT_WAYPOINT_RADIUS).toBe(0.02);
+    expect(DEFAULT_WAYPOINT_RADIUS).toBe(0.01);
     expect(DEFAULT_WAYPOINT_STRIDE_FRAMES).toBe(10);
     expect(waypointSettings({})).toEqual({ radius: DEFAULT_WAYPOINT_RADIUS, strideFrames: DEFAULT_WAYPOINT_STRIDE_FRAMES });
     expect(waypointSettings(null)).toEqual({ radius: DEFAULT_WAYPOINT_RADIUS, strideFrames: DEFAULT_WAYPOINT_STRIDE_FRAMES });
@@ -660,6 +660,68 @@ describe("a panel that has not changed is not rewritten (§7.2, Q136)", () => {
     // `null` is "nothing has been confirmed on screen yet" -- a different fact from "the panel is empty".
     expect(panelMarkupChanged(null, "<li>robot</li>")).toBe(true);
     expect(panelMarkupChanged(null, "")).toBe(true);
+  });
+});
+
+describe("the rail's three asset tabs (§7.2, Q156)", () => {
+  const onScenes = { panel: "assets", open: true, kind: "scene" };
+
+  it("opens the panel on the 大类 that was pressed", () => {
+    expect(panelTabPress({ panel: "scene", open: false, kind: "scene" }, "assets", "robot"))
+      .toEqual({ open: true, kind: "robot" });
+  });
+
+  it("closes the panel when the 大类 already on show is pressed again", () => {
+    expect(panelTabPress(onScenes, "assets", "scene")).toEqual({ open: false, kind: "scene" });
+  });
+
+  it("switches the 大类 without closing the panel - the tab is (panel, kind), not panel alone", () => {
+    // Reading the tab as `panel` alone would call this a second press on the same tab and shut
+    // the panel the user just asked to look at.
+    expect(panelTabPress(onScenes, "assets", "model")).toEqual({ open: true, kind: "model" });
+  });
+
+  it("leaves the stored 大类 alone for the tabs that do not name one", () => {
+    expect(panelTabPress(onScenes, "details")).toEqual({ open: true, kind: "scene" });
+    expect(panelTabPress({ panel: "details", open: true, kind: "robot" }, "details"))
+      .toEqual({ open: false, kind: "robot" });
+  });
+
+  it("lights exactly one of the three asset buttons", () => {
+    const rail = ["scene", "model", "robot"].map((kind) => ({ panel: "assets", kind }));
+    expect(rail.map((tab) => panelTabActive(tab, onScenes))).toEqual([true, false, false]);
+    expect(rail.map((tab) => panelTabActive(tab, { ...onScenes, kind: "robot" }))).toEqual([false, false, true]);
+  });
+
+  it("lights nothing while the panel is closed, and still lights the plain tabs when it is open", () => {
+    expect(panelTabActive({ panel: "assets", kind: "scene" }, { ...onScenes, open: false })).toBe(false);
+    expect(panelTabActive({ panel: "details" }, { panel: "details", open: true, kind: "scene" })).toBe(true);
+    expect(panelTabActive({ panel: "details" }, onScenes)).toBe(false);
+  });
+});
+
+describe("the Agent column is lent to the asset panel (§7.5, Q157)", () => {
+  const idle = { agentEnabled: true, contextEnabled: true, panel: "scene", panelOpen: true };
+
+  it("gives the column back whenever the asset panel is not the one on show", () => {
+    expect(agentPanelVisible(idle)).toBe(true);
+    expect(agentPanelVisible({ ...idle, panel: "details" })).toBe(true);
+    expect(agentPanelVisible({ ...idle, panel: "assets", panelOpen: false })).toBe(true);
+  });
+
+  it("takes the column only while the asset panel is actually on show", () => {
+    expect(agentPanelVisible({ ...idle, panel: "assets" })).toBe(false);
+  });
+
+  it("keeps its own feature key the last word", () => {
+    // Collapsing is not switching off: with agent.conversation off the panel stays gone even
+    // after the asset panel closes, and the assets view never brings it back.
+    expect(agentPanelVisible({ ...idle, agentEnabled: false })).toBe(false);
+    expect(agentPanelVisible({ ...idle, agentEnabled: false, panel: "assets" })).toBe(false);
+  });
+
+  it("does not take the column when the context panel is switched off - nothing is showing then", () => {
+    expect(agentPanelVisible({ ...idle, contextEnabled: false, panel: "assets" })).toBe(true);
   });
 });
 

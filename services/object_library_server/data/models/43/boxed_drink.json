@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "boxed_drink",
+    "object_name_Chinese": "盒装饮料",
+    "object_id": 43,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "盒装饮料,饮料,纸盒装,果汁,苹果汁",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.02094738,
+      -0.02094738,
+      0.02356646,
+      -0.02356646,
+      0.105427067,
+      0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.010146,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.7,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.4,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        -0.01,
+        0.06,
+        3.1415,
+        1.57,
+        1.57,
+        0,
+        1,
+        0,
+        1.0471
+      ],
+      [
+        0.0,
+        0.0,
+        0.06,
+        3.1415,
+        -1.57,
+        3.14,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

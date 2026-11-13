@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "white_background_plane",
+    "object_name_Chinese": "背景板",
     "object_id": 14,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "white,background,plane"
+    "tag": "背景板,场景元素,平面"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.5,
       0.002,
       -0.002
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.0,
     "friction": {
       "format": "[sliding, torsional, rolling]",

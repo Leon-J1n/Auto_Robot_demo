@@ -18,6 +18,9 @@ import {
   pedestalPose,
   placeAsset,
   readAsset,
+  placementQuaternion,
+  propComponents,
+  armComponents,
   rewriteComponents,
   spotOnTable,
   TABLE_YAW,
@@ -70,17 +73,30 @@ const PIPER_DRIVER = {
   robot_attachment: { properties: { child_link: [] } },
 };
 
+/** The asset-side `physical_properties` exactly as OLS publishes it (Q165), `scale` included. */
+function physical(isStatic: boolean, mass: number, values: [number, number, number], restitution: number, scale: [number, number] = [1, 1]): Record<string, unknown> {
+  return {
+    is_static: isStatic,
+    mass_kg: mass,
+    friction: { format: "[sliding, torsional, rolling]", values: [...values] },
+    restitution,
+    scale: [...scale],
+  };
+}
+
 const DOCUMENTS: Record<string, Record<string, unknown>> = {
   "model:29": {
     path: "table.urdf",
     semantic_properties: { object_name: "table", object_id: 29 },
     geometric_properties: { AABB: TABLE_AABB },
+    physical_properties: physical(true, 22.0, [0.8, 0.01, 0.001], 0.05, [0.8, 2.0]),
     robot_driver: { properties: { role: "passive", joint_sequence: [], joint_limits: {}, available_connect_joints: [], available_connect_link: [], position: [], quaternion_xyzw: [] } },
   },
   "model:1": {
     path: "apple.obj",
     semantic_properties: { object_name: "apple", object_id: 1 },
     geometric_properties: { AABB: APPLE_AABB },
+    physical_properties: physical(false, 0.068, [0.8, 0.005, 0.0005], 0.05),
   },
   "model:23": {
     // The mug: an OBJ whose metadata AABB is transposed against the mesh it names (Q144).
@@ -93,12 +109,14 @@ const DOCUMENTS: Record<string, Record<string, unknown>> = {
     path: "drawer.urdf",
     semantic_properties: { object_name: "drawer", object_id: 25 },
     geometric_properties: { AABB: [0.2, -0.2, 0.2, -0.2, 0.3, 0] },
+    physical_properties: physical(true, 2.5, [0.7, 0.01, 0.001], 0.05, [1.0, 2.5]),
   },
   "model:33": { path: "button.obj", semantic_properties: { object_name: "button", object_id: 33 } },
   "robot:1": {
     path: "ur5e_arm.urdf",
     semantic_properties: { object_name: "ur5e_arm", object_id: 1 },
     geometric_properties: { AABB: ARM_AABB },
+    physical_properties: physical(false, 20.9949, [1.0, 0.005, 0.0001], 0.05),
     scene_one_arm: [{ robot_pose_percent_compared_to_table_length_center: PERCENT, has_pedestal: true, pedestal_id: 4, pedestal_scale: [1, 1, 1] }],
     robot_driver: { properties: UR5E_DRIVER },
   },
@@ -106,6 +124,7 @@ const DOCUMENTS: Record<string, Record<string, unknown>> = {
     path: "robotiq_2f85.urdf",
     semantic_properties: { object_name: "robotiq_2f85", object_id: 2 },
     geometric_properties: { AABB: [0.07421503, -0.07421503, 0.0375, -0.0375, 0.16022, -3e-09] },
+    physical_properties: physical(false, 0.901, [0.7, 0.01, 0.001], 0.05),
     robot_driver: {
       properties: {
         role: "arm",
@@ -120,19 +139,22 @@ const DOCUMENTS: Record<string, Record<string, unknown>> = {
   },
   "robot:3": {
     path: "d435i.obj",
-    semantic_properties: { object_name: "d435i", object_id: 3, tag: "d435i,camera" },
+    semantic_properties: { object_name: "d435i", object_id: 3, tag: "D435i相机,深度相机,双目,RealSense" },
     geometric_properties: { AABB: [0.045, -0.044914, 0.0125, -0.0125, 0, -0.025055] },
+    physical_properties: physical(false, 0.055, [0.55, 0.005, 0.0005], 0.12),
   },
   "robot:4": {
     path: "robot_pedestal.obj",
     semantic_properties: { object_name: "robot_pedestal", object_id: 4 },
     geometric_properties: { AABB: PEDESTAL_AABB },
+    physical_properties: physical(true, 8.0, [0.8, 0.01, 0.001], 0.05),
   },
   "robot:5": {
     // ur3, with the one field every shipped arm does fill left out, to pin the default.
     path: "ur3.urdf",
     semantic_properties: { object_name: "ur3", object_id: 5 },
     geometric_properties: { AABB: ARM_AABB },
+    physical_properties: physical(false, 18.4, [1.0, 0.005, 0.0001], 0.05),
     scene_one_arm: [{ robot_pose_percent_compared_to_table_length_center: PERCENT, has_pedestal: true, pedestal_id: 4 }],
     robot_driver: { properties: UR5E_DRIVER },
   },
@@ -153,8 +175,9 @@ const DOCUMENTS: Record<string, Record<string, unknown>> = {
   },
   "robot:11": {
     path: "d455.obj",
-    semantic_properties: { object_name: "d455", object_id: 11, tag: "d455 camera" },
+    semantic_properties: { object_name: "d455", object_id: 11, tag: "D455相机,深度相机,双目,RealSense" },
     geometric_properties: { AABB: [0.06199725, -0.06199725, 0.01449953, -0.0145, 0, -0.026] },
+    physical_properties: physical(false, 0.072, [0.8, 0.01, 0.001], 0.08),
   },
   "robot:13": {
     // An arm that publishes no `scene_one_arm` at all.
@@ -243,6 +266,17 @@ function stubSource(): AssetSource & { reads: string[], metaReads: string[] } {
       return Promise.resolve(kind === "model" && id === 23 ? MUG_OBJ : BARE_URDF);
     },
   };
+}
+
+/** One robot's tag rewritten, so the role judgement can be pinned against a wording OLS does not ship today. */
+function taggedSource(id: number, tag: string): AssetSource {
+  const source = stubSource();
+  const document = DOCUMENTS[`robot:${id}`]!;
+  const semantic = document.semantic_properties as Record<string, unknown>;
+  const rewritten = { ...document, semantic_properties: { ...semantic, tag } };
+  source.robot = async (requested: number) => parseModelMetadata(requested,
+    requested === id ? rewritten : DOCUMENTS[`robot:${requested}`]!, "robot");
+  return source;
 }
 
 /** happy-dom replaces the global `URL`, so `new URL(..., import.meta.url)` stops being a `file:` URL. */
@@ -497,9 +531,19 @@ describe("readAsset: what one click is (§4.6)", () => {
     expect(source.reads).toEqual([]);
   });
 
+  // Q161: those two tags are the live index's own words - Chinese. No row of the 14-row robot
+  // index says `camera` in English, so an English-only judgement called every shipped camera a 道具.
   it("calls a camera by the tag OLS publishes, the only place one says so", async () => {
     expect((await readAsset(stubSource(), "robot", 3)).role).toBe("camera");
     expect((await readAsset(stubSource(), "robot", 11)).role).toBe("camera");
+  });
+
+  it("still calls a camera by the English spelling of that tag", async () => {
+    expect((await readAsset(taggedSource(3, "d435i,camera"), "robot", 3)).role).toBe("camera");
+  });
+
+  it("leaves a Chinese-tagged 底座 a prop: the word is 相机, not the script", async () => {
+    expect((await readAsset(taggedSource(4, "机器人底座,支架,圆柱"), "robot", 4)).role).toBe("prop");
   });
 
   it("leaves a 模型 a prop however many joints its URDF has (§6.11)", async () => {
@@ -532,6 +576,32 @@ describe("readAsset: what one click is (§4.6)", () => {
 
   it("names an asset by OLS' own object_name when the panel gives no name", async () => {
     expect((await readAsset(stubSource(), "robot", 4)).name).toBe("robot_pedestal");
+  });
+
+  it("prefers the Chinese metadata name over the supplied panel name", async () => {
+    const source = stubSource();
+    const model = source.model;
+    source.model = async (id) => {
+      const metadata = await model(id);
+      return { ...metadata, raw: { ...metadata.raw, semantic_properties: { object_name_Chinese: "苹果" } } };
+    };
+    expect((await readAsset(source, "model", 1, "apple")).name).toBe("苹果");
+  });
+
+  it("uses the authored quaternion for both prop and arm transforms and their footprint", async () => {
+    const asset = await readAsset(stubSource(), "model", 1);
+    asset.metadata = { ...asset.metadata, raw: { ...asset.metadata.raw,
+      geometric_properties: { placement_quaternion_xyzw: [0, 0, 0, 1] } } };
+    expect(placementQuaternion(asset)).toEqual([0, 0, 0, 1]);
+    for (const components of [propComponents(asset, [0, 0, 0], 0), armComponents(asset, [0, 0, 0])]) {
+      expect(components[0]!.properties).toMatchObject({ quaternion_xyzw: [0, 0, 0, 1] });
+    }
+    const box: Box = { min: [0, 0, 0], max: [2, 1, 1] };
+    expect(orientedBox(box, [0, 0, 0], placementQuaternion(asset), [1, 1, 1])).toEqual(box);
+    for (const invalid of [undefined, [0, 0, 0], [0, 0, 0, 0], [0, 0, NaN, 1], "bad"]) {
+      asset.metadata.raw.geometric_properties = { placement_quaternion_xyzw: invalid };
+      expect(placementQuaternion(asset)).toEqual(TABLE_YAW);
+    }
   });
 });
 
@@ -574,7 +644,7 @@ describe("clicking a 模型 puts it on the shipped table", () => {
     const id = report.selected!;
     expect(report.added).toEqual([id]);
     expect(report.notice).toBe("已把「apple」摆到桌面上");
-    expect(componentTypes(world, id)).toEqual(["Transform", "MetadataRef", "MeshRenderer", "Semantic"]);
+    expect(componentTypes(world, id)).toEqual(["Transform", "MetadataRef", "MeshRenderer", "Semantic", "PhysicalProperties"]);
     expect(props(world, id, "Semantic")).toEqual({ semantic_name: "apple", category: "object", support: 1 });
     expect(props(world, id, "MetadataRef")).toEqual({ path: "$LIBRARY_SERVER/1", type: "model" });
     expectVecClose(position(world, id), [-0.187601202, -0.337889444, 0.637373223]);
@@ -886,7 +956,7 @@ describe("switching the 机械臂 of the shipped scene", () => {
     expect(props(world, 2, "MetadataRef")).toEqual({ path: "$LIBRARY_SERVER/8", type: "robot" });
     // What the scene authored around the arm survives the swap (§3.8), and the shipped
     // arm carries no MeshRenderer, so the swap adds none.
-    expect(componentTypes(world, 2)).toEqual(["Transform", "MetadataRef", "RobotDriver", "Semantic"]);
+    expect(componentTypes(world, 2)).toEqual(["Transform", "MetadataRef", "RobotDriver", "Semantic", "PhysicalProperties"]);
   });
 
   it("stands an arm that publishes no `scene_one_arm` at the triple the shipped ones all agree on", async () => {
@@ -967,7 +1037,7 @@ describe("switching the 夹爪 and the 相机", () => {
     expect(report.selected).toBe(3);
     expect(props(world, 3, "RobotDriver")).toMatchObject({ joint_sequence: ["robotiq_2f85_right_driver_joint"] });
     expect(props(world, 3, "RobotAttachment")).toMatchObject({ parent_link: "wrist_3_link", parent_joint: "wrist_3_joint", child_link: "robotiq_2f85_mount" });
-    expect(componentTypes(world, 3)).toEqual(["Transform", "MetadataRef", "RobotDriver", "RobotAttachment", "Semantic"]);
+    expect(componentTypes(world, 3)).toEqual(["Transform", "MetadataRef", "RobotDriver", "RobotAttachment", "Semantic", "PhysicalProperties"]);
   });
 
   it("hangs the first gripper from the arm the scene already has", async () => {
@@ -976,7 +1046,7 @@ describe("switching the 夹爪 and the 相机", () => {
     const report = await placeAsset(world, stubSource(), "robot", 2, "robotiq_2f85");
     expect(report.notice).toBe("已把夹爪「robotiq_2f85」挂到机械臂上");
     expect(props(world, report.selected!, "RobotAttachment")).toMatchObject({ parent_object_id: armId, parent_joint: "joint6", parent_link: "link6" });
-    expect(componentTypes(world, report.selected!)).toEqual(["Transform", "MetadataRef", "RobotDriver", "RobotAttachment", "Semantic"]);
+    expect(componentTypes(world, report.selected!)).toEqual(["Transform", "MetadataRef", "RobotDriver", "RobotAttachment", "Semantic", "PhysicalProperties"]);
     expect(findGripperObjects(world).map((node) => node.id)).toEqual([report.selected]);
   });
 
@@ -1003,9 +1073,90 @@ describe("switching the 夹爪 and the 相机", () => {
     const world = strippedWorld();
     const report = await placeAsset(world, stubSource(), "robot", 11, "d455", { random: () => 0 });
     expect(report.notice).toBe("场景里本来没有相机，已把「d455」摆到桌面上");
-    expect(componentTypes(world, report.selected!)).toEqual(["Transform", "MetadataRef", "MeshRenderer", "Camera", "Semantic"]);
+    expect(componentTypes(world, report.selected!)).toEqual(["Transform", "MetadataRef", "MeshRenderer", "Camera", "Semantic", "PhysicalProperties"]);
     expect(props(world, report.selected!, "Camera")).toEqual({ type: "rgbd", fov: 60, near: 0.01, far: 10, resolution: [640, 480] });
     expect(props(world, report.selected!, "Semantic")).toMatchObject({ category: "sensor", support: 1 });
+  });
+});
+
+/**
+ * §4.10 (Q165): OLS's own scene files write this component as the asset's `physical_properties`
+ * verbatim minus `scale`, so a placement and every swap write the same copy; keys the asset does
+ * not declare are the instance's own and survive a swap. The read side keeps a file's copy untouched.
+ */
+describe("PhysicalProperties on placed and swapped objects (§4.10, Q165)", () => {
+  it("stands a prop with the asset's own numbers and never copies the allowed scale range", async () => {
+    const world = sceneWorld();
+    const report = await placeAsset(world, stubSource(), "model", 25, "drawer", { random: () => 0 });
+    expect(props(world, report.selected!, "PhysicalProperties")).toEqual({
+      is_static: true,
+      mass_kg: 2.5,
+      friction: { format: "[sliding, torsional, rolling]", values: [0.7, 0.01, 0.001] },
+      restitution: 0.05,
+    });
+  });
+
+  it("writes the component even when the asset declares no physical properties at all", async () => {
+    const world = strippedWorld();
+    const report = await placeAsset(world, stubSource(), "robot", 8, "piper");
+    expect(componentTypes(world, report.selected!)).toContain("PhysicalProperties");
+    expect(props(world, report.selected!, "PhysicalProperties")).toEqual({});
+  });
+
+  it("makes the pedestal static and the arm it carries movable, each with its own mass", async () => {
+    const world = strippedWorld();
+    const report = await placeAsset(world, stubSource(), "robot", 1, "ur5");
+    const pedestal = world.objects.find((node) => node.semantic?.category === "support")!;
+    expect(props(world, report.selected!, "PhysicalProperties")).toMatchObject({ is_static: false, mass_kg: 20.9949 });
+    expect(props(world, pedestal.id, "PhysicalProperties")).toMatchObject({ is_static: true, mass_kg: 8.0 });
+  });
+
+  it("refreshes the asset's numbers on an arm swap and keeps keys the new asset does not declare", async () => {
+    const world = sceneWorld();
+    const node = world.get(2)!;
+    world.updateLocalItem(2, {
+      object_name_in_scene: node.name,
+      components: [...node.rawComponents, { component_type: "PhysicalProperties", properties: { is_static: true, mass_kg: 999, curator: "lab" } }],
+    });
+    await placeAsset(world, stubSource(), "robot", 5, "ur3");
+    expect(props(world, 2, "PhysicalProperties")).toEqual({
+      is_static: false,
+      mass_kg: 18.4,
+      friction: { format: "[sliding, torsional, rolling]", values: [1.0, 0.005, 0.0001] },
+      restitution: 0.05,
+      curator: "lab",
+    });
+  });
+
+  it("adds the component on a swap when the scene file never carried one", async () => {
+    const world = sceneWorld();
+    expect(componentTypes(world, 2)).not.toContain("PhysicalProperties");
+    await placeAsset(world, stubSource(), "robot", 5, "ur3");
+    expect(props(world, 2, "PhysicalProperties")).toMatchObject({ is_static: false, mass_kg: 18.4 });
+  });
+
+  it("gives a swapped gripper and both swapped cameras the new asset's properties", async () => {
+    const world = sceneWorld();
+    await placeAsset(world, stubSource(), "robot", 2, "robotiq_2f85");
+    expect(props(world, 3, "PhysicalProperties")).toMatchObject({ is_static: false, mass_kg: 0.901 });
+    await placeAsset(world, stubSource(), "robot", 11, "d455");
+    for (const id of [4, 5]) {
+      expect(props(world, id, "PhysicalProperties")).toEqual({
+        is_static: false,
+        mass_kg: 0.072,
+        friction: { format: "[sliding, torsional, rolling]", values: [0.8, 0.01, 0.001] },
+        restitution: 0.08,
+      });
+    }
+  });
+
+  it("leaves the viewpoint a camera swap must not touch alone", async () => {
+    const world = sceneWorld();
+    const camera = props(world, 5, "Camera");
+    const transform = props(world, 5, "Transform");
+    await placeAsset(world, stubSource(), "robot", 11, "d455");
+    expect(props(world, 5, "Camera")).toEqual(camera);
+    expect(props(world, 5, "Transform")).toEqual(transform);
   });
 });
 

@@ -1,0 +1,59 @@
+{
+  "command_id": "3",
+  "skill_name": "lift_up",
+  "success": true,
+  "target_resolution_timing_s": {},
+  "wrist_observation": null,
+  "target_resolution_diagnostics": {},
+  "motions": [
+    {
+      "phase": "move",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0010909999255090952,
+        "context": 0.0001330999657511711,
+        "selection": 6.09993003308773e-06,
+        "path_generation": 0.29688969999551773,
+        "planning": 0.00041999993845820427,
+        "trajectory_preparation": 0.039497700054198503,
+        "posture_scoring": 2.8999056667089462e-06,
+        "pre_execution_total": 0.3380485998932272
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 3.260001540184021e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 3.969995304942131e-05,
+          "direct_path_collision_check": 0.00028799986466765404,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0009169999975711107,
+          "linear_path_validation_s": 0.0014434999320656061,
+          "collision_validation_s": 0.03679170017130673,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 5,
+          "planner_waypoint_count": 3,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

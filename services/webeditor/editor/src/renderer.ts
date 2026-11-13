@@ -59,11 +59,11 @@ export const SHADOW_FIT_INTERVAL_MS = 250;
 /** Stripes on the caster itself are depth-map acne; a bias in world units moves it off. */
 export const SHADOW_NORMAL_BIAS = 0.02;
 /**
- * §4.8.6 (**Q119**): the wireframe that draws one box per world object. Green, because yellow is
+ * §4.8.6 (**Q119**): the wireframe that draws one box per world object. Purple, because yellow is
  * the selection outline (§4.5) and sky blue is the camera frustum (§4.4) - three families on one
  * stage have to be told apart at a glance.
  */
-export const BOX_WIRE_COLOR = 0x4ade80;
+export const BOX_WIRE_COLOR = 0xc084fc;
 
 /**
  * §4.8.7 (**Q121**): how often a running recording gets a frame. The stream is `captureStream(0)`,
@@ -380,6 +380,7 @@ function ghostAsset(object: THREE.Object3D, opacity: number): void {
  */
 interface WaypointLayer {
   mesh: THREE.InstancedMesh;
+  line: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
   geometry: THREE.SphereGeometry;
   material: THREE.MeshBasicMaterial;
   /** which clip these points came from, for the colour and the checkbox's two states */
@@ -580,7 +581,7 @@ export class ThreeRendererAdapter {
     // the scene document, so `syncScene` never prunes them and `World` never sees them.
     this.simWorld.add(this.overrideLights);
     this.scene.fog = new THREE.Fog(0x000000, 30, 120);
-    this.camera.position.set(7, 5, 8);
+    this.camera.position.set(1.75, 1.85, 2);
     this.renderer = new THREE.WebGLRenderer({
       canvas, antialias: true, alpha: false, powerPreference: "high-performance",
     });
@@ -1664,7 +1665,7 @@ export class ThreeRendererAdapter {
 
   /**
    * Put the batch's waypoint spheres on the stage (§7.3, Q101): one `InstancedMesh` per
-   * (clip, leaf arm) pair, so a dense path is a single draw call however many frames it
+   * (clip, leaf arm) pair plus one connecting line, so a dense path is two draw calls however many frames it
    * samples. Layers `paths` no longer mentions are dropped, and a layer whose radius, colour
    * or instance capacity changed is rebuilt - every sphere of a layer shares that one
    * geometry and material. Points are world-file coordinates; the layers hang under
@@ -1672,7 +1673,7 @@ export class ThreeRendererAdapter {
    */
   setWaypointPaths(paths: readonly WaypointPath[], radius: number): void {
     if (this.disposed) return;
-    const wanted = new Set(paths.map((path) => path.key));
+    const wanted = new Set(paths.filter((path) => path.points.length > 0).map((path) => path.key));
     for (const key of [...this.waypoints.keys()]) if (!wanted.has(key)) this.removeWaypointLayer(key);
     const matrix = new THREE.Matrix4();
     for (const path of paths) {
@@ -1693,6 +1694,11 @@ export class ThreeRendererAdapter {
       }
       layer.mesh.count = path.points.length;
       layer.mesh.instanceMatrix.needsUpdate = true;
+      const positions = layer.line.geometry.getAttribute("position");
+      path.points.forEach(([x, y, z], index) => positions.setXYZ(index, x, y, z));
+      positions.needsUpdate = true;
+      layer.line.geometry.setDrawRange(0, path.points.length);
+      layer.line.geometry.computeBoundingSphere();
     }
   }
 
@@ -1736,12 +1742,18 @@ export class ThreeRendererAdapter {
 
   private createWaypointLayer(path: WaypointPath, radius: number): WaypointLayer {
     const geometry = new THREE.SphereGeometry(radius, 12, 8);
-    const material = new THREE.MeshBasicMaterial({ color: path.color });
+    const material = new THREE.MeshBasicMaterial({ color: path.color, transparent: true, opacity: 0.5, depthWrite: false });
     const mesh = new THREE.InstancedMesh(geometry, material, path.points.length);
     mesh.userData.waypoint = true;
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute("position", new THREE.Float32BufferAttribute(path.points.length * 3, 3));
+    const line = new THREE.Line(lineGeometry,
+      new THREE.LineBasicMaterial({ color: path.color, transparent: true, opacity: 0.5, depthWrite: false, linewidth: 1 }));
+    line.userData.waypoint = true;
+    mesh.add(line);
     this.simWorld.add(mesh);
     const layer: WaypointLayer = {
-      mesh, geometry, material,
+      mesh, line, geometry, material,
       trajectoryIndex: path.trajectoryIndex,
       objectId: path.objectId,
       capacity: path.points.length,

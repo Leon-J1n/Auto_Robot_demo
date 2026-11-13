@@ -125,6 +125,20 @@ export interface LibraryItem {
   name: string;
   /** index `category` entry, e.g. `模型.抓取物` or `机械臂.六轴`; absent when OLS has none */
   category?: string;
+  /** Q162 cache token; absent on an OLS that predates `/assetVersion` */
+  version?: string;
+}
+
+/**
+ * OLS stores display names in two places (§4.6, Q155): objects and robots in
+ * `semantic_properties.object_name_Chinese`, scenes at the top level next to `scene_name`.
+ */
+export function chineseAssetName(document: unknown): string | undefined {
+  const value = document as { semantic_properties?: { object_name_Chinese?: unknown }; scene_name_Chinese?: unknown } | null;
+  for (const name of [value?.semantic_properties?.object_name_Chinese, value?.scene_name_Chinese]) {
+    if (typeof name === "string" && name.trim()) return name;
+  }
+  return undefined;
 }
 
 const COLLADA_IMAGE = /<(?:image|texture|effect|entry)\b[^>]*\b(?:href|url|location)\s*=\s*["']([^"']+)["']/gi;
@@ -199,6 +213,61 @@ export function parseModelMetadata(modelId: number, document: unknown, kind: Lib
 export type FetchLike = (input: string, init?: { signal?: AbortSignal }) => Promise<Response>;
 
 /**
+ * Q164: Chrome's HTTP disk cache refuses a single response above roughly an eighth of
+ * its capacity, so the 48.27 MB `d435i.obj` is re-sent on every browser start. CacheStorage
+ * has no per-entry limit. Only bodies this large are stored; smaller ones are already
+ * covered by the `v` + immutable path (§6.7).
+ */
+export const CACHE_STORAGE_MIN_BYTES = 8 * 1024 * 1024;
+
+/** The byte layer's storage, injected in tests. */
+export interface ByteStore {
+  get(url: string): Promise<ArrayBuffer | undefined>;
+  put(url: string, body: ArrayBuffer): Promise<void>;
+}
+
+interface CacheLike {
+  match(url: string): Promise<Response | undefined>;
+  put(url: string, response: Response): Promise<void>;
+  keys(): Promise<readonly Request[]>;
+  delete(request: Request): Promise<boolean>;
+}
+
+export interface CacheStorageLike {
+  open(name: string): Promise<CacheLike>;
+}
+
+/** The cache key minus its version, so one asset keeps only its newest body. */
+function withoutVersion(url: string): string {
+  const parsed = new URL(url);
+  parsed.searchParams.delete("v");
+  return parsed.toString();
+}
+
+/** `caches` is absent on an insecure origin (e.g. http://<lan-ip>), where the layer opts out. */
+export function cacheStorageBytes(
+  storage: CacheStorageLike | undefined = typeof caches === "undefined" ? undefined : caches,
+): ByteStore | undefined {
+  if (!storage) return undefined;
+  let opened: Promise<CacheLike> | undefined;
+  const open = () => (opened ??= storage.open("ols-geometry-v1"));
+  return {
+    async get(url) {
+      const response = await (await open()).match(url);
+      return response ? response.arrayBuffer() : undefined;
+    },
+    async put(url, body) {
+      const cache = await open();
+      await cache.put(url, new Response(body));
+      const asset = withoutVersion(url);
+      for (const key of await cache.keys()) {
+        if (key.url !== url && withoutVersion(key.url) === asset) await cache.delete(key);
+      }
+    },
+  };
+}
+
+/**
  * Maps a model-relative path to the URL to fetch, honouring `is_on_cos`
  * and the same-session URL cache (§6.3, §6.7).
  * Only a successful read is cached: a rejected one is forgotten, so a restarted
@@ -208,8 +277,10 @@ export class LibraryClient {
   private readonly jsonCache = new Map<string, Promise<unknown>>();
   private readonly binaryCache = new Map<string, Promise<ArrayBuffer>>();
   private readonly textCache = new Map<string, Promise<string>>();
+  private readonly versions = new Map<string, string>();
 
-  constructor(private readonly config: RuntimeConfig, private readonly fetchImpl: FetchLike) {}
+  constructor(private readonly config: RuntimeConfig, private readonly fetchImpl: FetchLike,
+              private readonly store: ByteStore | undefined = cacheStorageBytes()) {}
 
   /** The browser talks to OLS directly; `library_server_url` is the only base (§6.9). */
   olsUrl(relative: string): string {
@@ -225,23 +296,54 @@ export class LibraryClient {
       if (!base) throw new LibraryError("INVALID_PARAM", `cos_base_url is empty but model ${modelId} is flagged is_on_cos`);
       return `${base}/${normalized}`;
     }
-    return this.olsUrl(`file?type=${kind}&id=${modelId}&path=${encodeURIComponent(normalized)}`);
+    return this.olsUrl(`file?type=${kind}&id=${modelId}&path=${encodeURIComponent(normalized)}${this.versionQuery(kind, modelId)}`);
   }
 
   /** `/thumbnail?type=<kind>&id=<n>`: the index holds the path, the caller only needs the URL. */
   thumbnailUrl(kind: LibraryKind, id: number): string {
-    return this.olsUrl(`thumbnail?type=${kind}&id=${id}`);
+    return this.olsUrl(`thumbnail?type=${kind}&id=${id}${this.versionQuery(kind, id)}`);
+  }
+
+  /**
+   * Q162: `v` turns the response immutable, so a refresh or a browser restart reads
+   * the bytes from disk without a single request. Synchronous because both call sites
+   * (`ModelFiles.resolve` and `<img src>`) are; the version must already be in the table.
+   */
+  private versionQuery(kind: LibraryKind, id: number): string {
+    const version = this.versions.get(`${kind}:${id}`);
+    return version ? `&v=${encodeURIComponent(version)}` : "";
+  }
+
+  /** An OLS without this route simply leaves the table empty ⇒ no `v` ⇒ `no-cache` + ETag (§6.7). */
+  private async ensureVersion(kind: LibraryKind, id: number): Promise<void> {
+    const key = `${kind}:${id}`;
+    if (this.versions.has(key)) return;
+    try {
+      const document = await this.getJson(this.olsUrl(`assetVersion?type=${kind}&id=${id}`)) as { version?: unknown };
+      if (typeof document.version === "string" && document.version) this.versions.set(key, document.version);
+    } catch {
+      // fail-open: an unreadable version must never fail the load itself
+    }
   }
 
   async list(kind: LibraryKind): Promise<LibraryItem[]> {
     const document = await this.getJson(this.olsUrl(`list?type=${kind}`));
     const items = (document as { items?: unknown }).items;
     if (!Array.isArray(items)) throw new LibraryError("UPSTREAM_ERROR", `OLS /list?type=${kind} returned no items`, 502);
-    return items.map((item) => {
+    return Promise.all(items.map(async (item) => {
       const entry = item as Record<string, unknown>;
       const category = typeof entry.category === "string" && entry.category ? entry.category : undefined;
-      return { id: Number(entry.id), name: String(entry.name ?? ""), ...(category ? { category } : {}) };
-    });
+      const id = Number(entry.id);
+      const version = typeof entry.version === "string" && entry.version ? entry.version : undefined;
+      if (version) this.versions.set(`${kind}:${id}`, version);
+      let name = String(entry.name ?? "");
+      try {
+        name = chineseAssetName(await this.getJson(this.olsUrl(`${kind}?id=${id}${this.versionQuery(kind, id)}`))) ?? name;
+      } catch {
+        // An unavailable detail document must not hide an otherwise listed asset.
+      }
+      return { id, name, ...(category ? { category } : {}), ...(version ? { version } : {}) };
+    }));
   }
 
   /**
@@ -256,34 +358,73 @@ export class LibraryClient {
   }
 
   async scene(sceneId: number): Promise<unknown> {
-    return this.getJson(this.olsUrl(`scene?id=${sceneId}`));
+    await this.ensureVersion("scene", sceneId);
+    return this.getJson(this.olsUrl(`scene?id=${sceneId}${this.versionQuery("scene", sceneId)}`));
   }
 
   async model(modelId: number): Promise<ModelMetadata> {
-    const document = await this.getJson(this.olsUrl(`model?id=${modelId}`));
+    await this.ensureVersion("model", modelId);
+    const document = await this.getJson(this.olsUrl(`model?id=${modelId}${this.versionQuery("model", modelId)}`));
     return parseModelMetadata(modelId, document, "model");
   }
 
   /** A 机械臂 sits in its own id space; only the metadata route differs. */
   async robot(robotId: number): Promise<ModelMetadata> {
-    const document = await this.getJson(this.olsUrl(`robot?id=${robotId}`));
+    await this.ensureVersion("robot", robotId);
+    const document = await this.getJson(this.olsUrl(`robot?id=${robotId}${this.versionQuery("robot", robotId)}`));
     return parseModelMetadata(robotId, document, "robot");
   }
 
   /**
    * Drop the cached metadata documents so the next read reaches OLS again.
    * The panel's refresh button uses it: an asset list is only as fresh as its last read.
+   * The version table goes with them, or a changed asset would keep its old cache key.
    */
   invalidateMetadata(): void {
     this.jsonCache.clear();
+    this.versions.clear();
   }
 
   async fileText(modelId: number, path: string, isOnCos: boolean, kind: LibraryFileKind = "model"): Promise<string> {
-    return this.read(this.fileUrl(modelId, path, isOnCos, kind), this.textCache, (response) => response.text());
+    const url = this.fileUrl(modelId, path, isOnCos, kind);
+    return this.cached(this.textCache, url, async () => new TextDecoder().decode(await this.bytes(url)));
   }
 
   async fileBytes(modelId: number, path: string, isOnCos: boolean, kind: LibraryFileKind = "model"): Promise<ArrayBuffer> {
-    return this.read(this.fileUrl(modelId, path, isOnCos, kind), this.binaryCache, (response) => response.arrayBuffer());
+    return this.bytes(this.fileUrl(modelId, path, isOnCos, kind));
+  }
+
+  /**
+   * Q164: one byte-level read per URL, shared by the text view and `bundle` - the same OBJ
+   * is read by both, and reading it twice would fetch and store 48 MB twice.
+   */
+  private bytes(url: string): Promise<ArrayBuffer> {
+    return this.cached(this.binaryCache, url, async () => {
+      const stored = await this.storeGet(url);
+      if (stored) return stored;
+      const body = await (await this.request(url)).arrayBuffer();
+      await this.storePut(url, body);
+      return body;
+    });
+  }
+
+  private async storeGet(url: string): Promise<ArrayBuffer | undefined> {
+    try {
+      return await this.store?.get(url);
+    } catch {
+      // fail-open: an unreadable store is a miss, never a failed load (§12.47 ⑤)
+      return undefined;
+    }
+  }
+
+  private async storePut(url: string, body: ArrayBuffer): Promise<void> {
+    // No version means no key that can ever be invalidated, so nothing is stored (§12.47 ②).
+    if (body.byteLength < CACHE_STORAGE_MIN_BYTES || !/[?&]v=/.test(url)) return;
+    try {
+      await this.store?.put(url, body);
+    } catch {
+      // fail-open: quota or private mode must not cost the caller its bytes
+    }
   }
 
   /**
@@ -333,10 +474,6 @@ export class LibraryClient {
         throw new LibraryError("UPSTREAM_ERROR", `${url} did not return JSON`, response.status);
       }
     });
-  }
-
-  private read<T>(url: string, cache: Map<string, Promise<T>>, load: (response: Response) => Promise<T>): Promise<T> {
-    return this.cached(cache, url, async () => load(await this.request(url)));
   }
 
   private async request(url: string): Promise<Response> {

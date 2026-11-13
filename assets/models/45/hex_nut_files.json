@@ -1,0 +1,11 @@
+{
+  "is_on_cos": false,
+  "metadata": "hex_nut.json",
+  "path": "hex_nut.obj",
+  "thumbnail": "hex_nut_thumbnail.png",
+  "reference": [
+    "hex_nut.mtl",
+    "hex_nut_tex_0.png",
+    "hex_nut_tex_2.png"
+  ]
+}

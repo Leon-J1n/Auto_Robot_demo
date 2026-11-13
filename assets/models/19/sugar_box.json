@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "sugar_box",
+    "object_name_Chinese": "糖盒",
     "object_id": 19,
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "white,rectangular",
+    "tag": "糖盒,包装,长方体纸盒,Domino白砂糖",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.046573366,
       0.176151287,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.514,
     "friction": {
       "format": "[sliding, torsional, rolling]",

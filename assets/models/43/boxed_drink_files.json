@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "boxed_drink.json",
+  "path": "boxed_drink.obj",
+  "thumbnail": "boxed_drink_thumbnail.png",
+  "reference": [
+    "boxed_drink.mtl",
+    "boxed_drink.png"
+  ]
+}

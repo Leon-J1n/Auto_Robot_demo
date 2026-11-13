@@ -1,0 +1,11 @@
+{
+  "is_on_cos": false,
+  "metadata": "clear_tape.json",
+  "path": "clear_tape.obj",
+  "thumbnail": "clear_tape_thumbnail.png",
+  "reference": [
+    "clear_tape.mtl",
+    "clear_tape_tex_0.png",
+    "clear_tape_tex_1.png"
+  ]
+}

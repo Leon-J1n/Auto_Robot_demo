@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "ur5",
+    "object_name_Chinese": "UR5机械臂",
     "object_id": 1,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "ur5"
+    "tag": "UR5机械臂,机械臂,六轴"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.075525,
       0.234524,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 20.9949,
     "friction": {
       "format": "[sliding, torsional, rolling]",

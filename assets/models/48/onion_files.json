@@ -1,0 +1,11 @@
+{
+  "is_on_cos": false,
+  "metadata": "onion.json",
+  "path": "onion.obj",
+  "thumbnail": "onion_thumbnail.png",
+  "reference": [
+    "onion.mtl",
+    "onion_tex_0.png",
+    "onion_tex_1.png"
+  ]
+}

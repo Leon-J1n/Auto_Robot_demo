@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "lemon",
+    "object_name_Chinese": "柠檬",
+    "object_id": 42,
+    "deformable": false,
+    "scalable": true,
+    "interactable": true,
+    "tag": "柠檬,水果,生鲜,酸柠檬",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.034464,
+      -0.034454,
+      0.045273,
+      -0.045197,
+      0.065749,
+      -1.9e-05
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.246,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.35381,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      0.6,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.0192,
+        3.1415,
+        0.0,
+        1.57,
+        0,
+        1,
+        0,
+        1.0471
+      ],
+      [
+        0.0,
+        0.0,
+        0.0192,
+        3.1415,
+        0.0,
+        -1.5707,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

@@ -1,6 +1,0 @@
-newmtl surface
-Ka 0.05 0.05 0.05
-Kd 0.49 0.678 0.8
-Ks 0.12 0.12 0.12
-Ns 32
-map_Kd shoulder_0.png

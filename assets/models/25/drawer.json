@@ -1,17 +1,32 @@
 {
   "semantic_properties": {
     "object_name": "drawer",
+    "object_name_Chinese": "抽屉柜",
     "object_id": 25,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "light,wooden,double",
+    "tag": "抽屉柜,家具,双层抽屉,木制,方形矮款,抽屉",
     "can_place": true
   },
   "geometric_properties": {
-    "AABB": [0.150933666, -0.169210041, 0.198076262, -0.198080812, 0.396233110, -0.000002945]
+    "AABB": [
+      0.150933666,
+      -0.169210041,
+      0.198076262,
+      -0.198080812,
+      0.39623311,
+      -2.945e-06
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": true,
     "mass_kg": 2.5,
     "friction": {
       "format": "[sliding, torsional, rolling]",

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RuntimeConfig } from "../../contracts/types";
-import type { FetchLike } from "./library";
+import type { ByteStore, CacheStorageLike, FetchLike } from "./library";
 import {
+  CACHE_STORAGE_MIN_BYTES,
+  cacheStorageBytes,
+  chineseAssetName,
   discoverReferences,
   LibraryClient,
   LibraryError,
@@ -36,7 +39,7 @@ function json(status: number, value: unknown): Response {
   return new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } });
 }
 
-function client(value: RuntimeConfig, routes: Record<string, Response | (() => Response)>): { library: LibraryClient; called: string[] } {
+function client(value: RuntimeConfig, routes: Record<string, Response | (() => Response)>, store?: ByteStore): { library: LibraryClient; called: string[] } {
   const called: string[] = [];
   const fetchImpl: FetchLike = async (url) => {
     called.push(url);
@@ -44,7 +47,7 @@ function client(value: RuntimeConfig, routes: Record<string, Response | (() => R
     if (entry === undefined) throw new Error(`unexpected request ${url}`);
     return (typeof entry === "function" ? entry() : entry).clone();
   };
-  return { library: new LibraryClient(value, fetchImpl), called };
+  return { library: new LibraryClient(value, fetchImpl, store), called };
 }
 
 function expectLibraryError(action: () => Promise<unknown>, code: string, status: number): Promise<void> {
@@ -239,6 +242,46 @@ describe("LibraryClient URLs", () => {
 });
 
 describe("LibraryClient requests", () => {
+  it.each(["model", "robot", "scene"] as const)("uses Chinese metadata names for %s and preserves fallbacks", async (kind) => {
+    const { library } = client(config(), {
+      [`${OLS}/list?type=${kind}`]: json(200, { items: [
+        { id: 1, name: "apple", category: "category" }, { id: 2, name: "original" },
+        { id: 3, name: "unavailable" }, { id: 4, name: "blank" },
+      ] }),
+      [`${OLS}/${kind}?id=1`]: json(200, { semantic_properties: { object_name_Chinese: "苹果" } }),
+      [`${OLS}/${kind}?id=2`]: json(200, {}),
+      [`${OLS}/${kind}?id=4`]: json(200, { semantic_properties: { object_name_Chinese: " " } }),
+    });
+    expect(await library.list(kind)).toEqual([
+      { id: 1, name: "苹果", category: "category" }, { id: 2, name: "original" },
+      { id: 3, name: "unavailable" }, { id: 4, name: "blank" },
+    ]);
+  });
+
+  it("names a scene from the top-level scene_name_Chinese of its detail (Q155)", async () => {
+    const { library } = client(config(), {
+      [`${OLS}/list?type=scene`]: json(200, { items: [
+        { id: 1, name: "ur5_table_empty", category: "场景.桌面操作" }, { id: 2, name: "ur5_table_apple" },
+        { id: 3, name: "blank" }, { id: 4, name: "not_a_string" },
+      ] }),
+      [`${OLS}/scene?id=1`]: json(200, { scene_id: 1, scene_name: "ur5_table_empty", scene_name_Chinese: "空场景" }),
+      [`${OLS}/scene?id=2`]: json(200, { scene_id: 2, scene_name: "ur5_table_apple" }),
+      [`${OLS}/scene?id=3`]: json(200, { scene_name_Chinese: "  " }),
+      [`${OLS}/scene?id=4`]: json(200, { scene_name_Chinese: 42 }),
+    });
+    expect(await library.list("scene")).toEqual([
+      { id: 1, name: "空场景", category: "场景.桌面操作" }, { id: 2, name: "ur5_table_apple" },
+      { id: 3, name: "blank" }, { id: 4, name: "not_a_string" },
+    ]);
+  });
+
+  it("keeps the object name ahead of a scene name in the same document (Q155)", () => {
+    expect(chineseAssetName({ scene_name_Chinese: "空场景", semantic_properties: { object_name_Chinese: "苹果" } })).toBe("苹果");
+    expect(chineseAssetName({ scene_name_Chinese: "空场景", semantic_properties: { object_name_Chinese: " " } })).toBe("空场景");
+    expect(chineseAssetName({ scene_name: "ur5_table_empty" })).toBeUndefined();
+    expect(chineseAssetName(null)).toBeUndefined();
+  });
+
   it("fetches metadata and lists from the OLS routes", async () => {
     const routes = {
       [`${OLS}/model?id=1`]: json(200, MODEL_DOCUMENT),
@@ -288,6 +331,7 @@ describe("LibraryClient requests", () => {
     const bundle = await library.bundle(robot);
     expect(bundle.entry).toBe("ur5e.urdf");
     expect(called).toEqual([
+      `${OLS}/assetVersion?type=robot&id=0`,
       `${OLS}/robot?id=0`,
       `${OLS}/file?type=robot&id=0&path=ur5e.urdf`,
       `${OLS}/file?type=robot&id=0&path=meshes%2Fbase_link.stl`,
@@ -339,6 +383,113 @@ describe("LibraryClient requests", () => {
   });
 });
 
+describe("LibraryClient long-term cache (Q162)", () => {
+  const V = "0123456789abcdef";
+
+  it("asks the version once, then carries v on the document, its files and the thumbnail", async () => {
+    const { library, called } = client(config(), {
+      [`${OLS}/assetVersion?type=model&id=1`]: json(200, { type: "model", id: 1, version: V }),
+      [`${OLS}/model?id=1&v=${V}`]: json(200, MODEL_DOCUMENT),
+      [`${OLS}/file?type=model&id=1&path=apple.obj&v=${V}`]: respond(200, "v 0 0 0\n"),
+      [`${OLS}/file?type=model&id=1&path=apple.mtl&v=${V}`]: respond(200, "newmtl m0\n"),
+      [`${OLS}/file?type=model&id=1&path=texture.png&v=${V}`]: respond(200, "png"),
+    });
+    const model = await library.model(1);
+    expect(library.fileUrl(1, "apple.obj", false)).toBe(`${OLS}/file?type=model&id=1&path=apple.obj&v=${V}`);
+    expect(library.thumbnailUrl("model", 1)).toBe(`${OLS}/thumbnail?type=model&id=1&v=${V}`);
+    await library.bundle(model);
+    await library.model(1);
+    expect(called).toEqual([
+      `${OLS}/assetVersion?type=model&id=1`,
+      `${OLS}/model?id=1&v=${V}`,
+      `${OLS}/file?type=model&id=1&path=apple.obj&v=${V}`,
+      `${OLS}/file?type=model&id=1&path=apple.mtl&v=${V}`,
+      `${OLS}/file?type=model&id=1&path=texture.png&v=${V}`,
+    ]);
+  });
+
+  it("carries v on a scene document too", async () => {
+    const { library, called } = client(config(), {
+      [`${OLS}/assetVersion?type=scene&id=4`]: json(200, { type: "scene", id: 4, version: V }),
+      [`${OLS}/scene?id=4&v=${V}`]: json(200, { scene_id: 4, scene_name: "kitchen" }),
+    });
+    expect(await library.scene(4)).toMatchObject({ scene_id: 4 });
+    expect(library.thumbnailUrl("scene", 4)).toBe(`${OLS}/thumbnail?type=scene&id=4&v=${V}`);
+    expect(called).toEqual([`${OLS}/assetVersion?type=scene&id=4`, `${OLS}/scene?id=4&v=${V}`]);
+  });
+
+  it("seeds the table from /list so the panel needs no per-item version probe", async () => {
+    const { library, called } = client(config(), {
+      [`${OLS}/list?type=model`]: json(200, { items: [
+        { id: 1, name: "apple", category: "模型.抓取物", version: V },
+        { id: 2, name: "basket" },
+      ] }),
+      [`${OLS}/model?id=1&v=${V}`]: json(200, { semantic_properties: { object_name_Chinese: "苹果" } }),
+      [`${OLS}/model?id=2`]: json(200, {}),
+    });
+    expect(await library.list("model")).toEqual([
+      { id: 1, name: "苹果", category: "模型.抓取物", version: V },
+      { id: 2, name: "basket" },
+    ]);
+    expect(library.thumbnailUrl("model", 1)).toBe(`${OLS}/thumbnail?type=model&id=1&v=${V}`);
+    expect(library.thumbnailUrl("model", 2)).toBe(`${OLS}/thumbnail?type=model&id=2`);
+    expect(called.some((url) => url.includes("/assetVersion"))).toBe(false);
+  });
+
+  it("keeps the three id spaces apart in the version table", async () => {
+    const { library } = client(config(), {
+      [`${OLS}/assetVersion?type=model&id=1`]: json(200, { version: "aaaaaaaaaaaaaaaa" }),
+      [`${OLS}/assetVersion?type=robot&id=1`]: json(200, { version: "bbbbbbbbbbbbbbbb" }),
+      [`${OLS}/model?id=1&v=aaaaaaaaaaaaaaaa`]: json(200, MODEL_DOCUMENT),
+      [`${OLS}/robot?id=1&v=bbbbbbbbbbbbbbbb`]: json(200, { path: "ur5e.urdf" }),
+    });
+    await library.model(1);
+    await library.robot(1);
+    expect(library.fileUrl(1, "a.obj", false)).toBe(`${OLS}/file?type=model&id=1&path=a.obj&v=aaaaaaaaaaaaaaaa`);
+    expect(library.fileUrl(1, "a.stl", false, "robot")).toBe(`${OLS}/file?type=robot&id=1&path=a.stl&v=bbbbbbbbbbbbbbbb`);
+    expect(library.thumbnailUrl("scene", 1)).toBe(`${OLS}/thumbnail?type=scene&id=1`);
+  });
+
+  it.each([
+    ["missing route", undefined],
+    ["404", respond(404)],
+    ["500", respond(500)],
+    ["no version key", json(200, { type: "model", id: 1 })],
+    ["non-string version", json(200, { version: 42 })],
+    ["empty version", json(200, { version: "" })],
+  ])("falls back to the pre-Q162 URLs when the version is unavailable (%s)", async (_label, response) => {
+    const routes: Record<string, Response> = { [`${OLS}/model?id=1`]: json(200, MODEL_DOCUMENT) };
+    if (response) routes[`${OLS}/assetVersion?type=model&id=1`] = response;
+    const { library } = client(config(), routes);
+    expect((await library.model(1)).path).toBe("apple.obj");
+    expect(library.fileUrl(1, "apple.obj", false)).toBe(`${OLS}/file?type=model&id=1&path=apple.obj`);
+    expect(library.thumbnailUrl("model", 1)).toBe(`${OLS}/thumbnail?type=model&id=1`);
+  });
+
+  it("leaves the is_on_cos branch without v (OLS cannot set cloud storage headers)", async () => {
+    const { library } = client(config(), {
+      [`${OLS}/list?type=model`]: json(200, { items: [{ id: 1, name: "apple", version: V }] }),
+      [`${OLS}/model?id=1&v=${V}`]: json(200, {}),
+    });
+    await library.list("model");
+    expect(library.fileUrl(1, "meshes/a.obj", true)).toBe(`${COS}/meshes/a.obj`);
+  });
+
+  it("invalidateMetadata drops the version table so a changed asset gets a new cache key", async () => {
+    const url = `${OLS}/assetVersion?type=model&id=1`;
+    const { library, called } = client(config(), {
+      [url]: () => json(200, { version: called.filter((value) => value === url).length === 1 ? V : "ffffffffffffffff" }),
+      [`${OLS}/model?id=1&v=${V}`]: json(200, MODEL_DOCUMENT),
+      [`${OLS}/model?id=1&v=ffffffffffffffff`]: json(200, MODEL_DOCUMENT),
+    });
+    await library.model(1);
+    expect(library.fileUrl(1, "apple.obj", false)).toBe(`${OLS}/file?type=model&id=1&path=apple.obj&v=${V}`);
+    library.invalidateMetadata();
+    await library.model(1);
+    expect(library.fileUrl(1, "apple.obj", false)).toBe(`${OLS}/file?type=model&id=1&path=apple.obj&v=ffffffffffffffff`);
+  });
+});
+
 describe("LibraryClient.bundle", () => {
   it("reports 424 when a referenced file is missing", async () => {
     const model = parseModelMetadata(3, { path: "crate.obj", reference: ["gone.mtl"] });
@@ -376,5 +527,177 @@ describe("LibraryClient.bundle", () => {
     const bundle = await library.bundle(model);
     expect(new TextDecoder().decode(bundle.files.get("model.glb"))).toBe("glTF");
     expect(called).toEqual([`${COS}/model.glb`]);
+  });
+});
+
+describe("LibraryClient oversized geometry in CacheStorage (Q164, §12.47)", () => {
+  const V = "0123456789abcdef";
+  const OLD = "ffffffffffffffff";
+  const FILE = `${OLS}/file?type=robot&id=3&path=d435i.obj&v=${V}`;
+  const OTHER = `${OLS}/file?type=model&id=1&path=table.obj&v=${V}`;
+  const SEED = {
+    [`${OLS}/assetVersion?type=robot&id=3`]: json(200, { type: "robot", id: 3, version: V }),
+    [`${OLS}/robot?id=3&v=${V}`]: json(200, { path: "d435i.obj", is_on_cos: false, reference: [] }),
+  };
+
+  function bigBody(size: number): ArrayBuffer {
+    const bytes = new Uint8Array(new ArrayBuffer(size));
+    bytes.fill(0x61);
+    bytes[0] = 0x76;
+    bytes[size - 1] = 0x0a;
+    return bytes.buffer;
+  }
+
+  function fakeStorage() {
+    const entries = new Map<string, ArrayBuffer>();
+    const puts: string[] = [];
+    const deletes: string[] = [];
+    const storage: CacheStorageLike = {
+      async open() {
+        return {
+          async match(url) {
+            const body = entries.get(url);
+            return body ? new Response(body) : undefined;
+          },
+          async put(url, response) {
+            puts.push(url);
+            entries.set(url, await response.arrayBuffer());
+          },
+          async keys() {
+            return [...entries.keys()].map((url) => new Request(url));
+          },
+          async delete(request) {
+            deletes.push(request.url);
+            return entries.delete(request.url);
+          },
+        };
+      },
+    };
+    return { storage, entries, puts, deletes };
+  }
+
+  function fileRequests(called: string[]): string[] {
+    return called.filter((url) => url.includes("/file?"));
+  }
+
+  /** Vitest's deep equality walks 8M elements one by one; Buffer compares them natively. */
+  function expectBytes(actual: ArrayBuffer | Uint8Array, expected: ArrayBuffer): void {
+    expect(Buffer.from(new Uint8Array(actual)).equals(Buffer.from(expected))).toBe(true);
+  }
+
+  it("answers a stored body without a single request", async () => {
+    const { storage, entries } = fakeStorage();
+    entries.set(FILE, bigBody(CACHE_STORAGE_MIN_BYTES));
+    const { library, called } = client(config(), SEED, cacheStorageBytes(storage));
+    await library.robot(3);
+    expectBytes(await library.fileBytes(3, "d435i.obj", false, "robot"), bigBody(CACHE_STORAGE_MIN_BYTES));
+    expect(fileRequests(called)).toEqual([]);
+  });
+
+  it("stores a body at the threshold, and the next session reads it back byte for byte", async () => {
+    const { storage, puts } = fakeStorage();
+    const body = bigBody(CACHE_STORAGE_MIN_BYTES);
+    const first = client(config(), { ...SEED, [FILE]: new Response(body) }, cacheStorageBytes(storage));
+    await first.library.robot(3);
+    expectBytes(await first.library.fileBytes(3, "d435i.obj", false, "robot"), body);
+    expect(puts).toEqual([FILE]);
+
+    const second = client(config(), SEED, cacheStorageBytes(storage));
+    await second.library.robot(3);
+    expectBytes(await second.library.fileBytes(3, "d435i.obj", false, "robot"), body);
+    expect(fileRequests(second.called)).toEqual([]);
+  });
+
+  it("leaves a body one byte below the threshold to the immutable HTTP cache", async () => {
+    const { storage, puts } = fakeStorage();
+    const { library } = client(config(), { ...SEED, [FILE]: new Response(bigBody(CACHE_STORAGE_MIN_BYTES - 1)) }, cacheStorageBytes(storage));
+    await library.robot(3);
+    await library.fileBytes(3, "d435i.obj", false, "robot");
+    expect(puts).toEqual([]);
+  });
+
+  it("never stores a URL without a version, because that key could never be invalidated", async () => {
+    const { storage, puts } = fakeStorage();
+    const url = `${OLS}/file?type=robot&id=3&path=d435i.obj`;
+    const { library } = client(config(), {
+      [`${OLS}/assetVersion?type=robot&id=3`]: respond(404),
+      [`${OLS}/robot?id=3`]: json(200, { path: "d435i.obj" }),
+      [url]: new Response(bigBody(CACHE_STORAGE_MIN_BYTES)),
+    }, cacheStorageBytes(storage));
+    await library.robot(3);
+    await library.fileBytes(3, "d435i.obj", false, "robot");
+    expect(puts).toEqual([]);
+  });
+
+  it("keeps only the newest version of the same asset and leaves other assets alone", async () => {
+    const { storage, entries, deletes } = fakeStorage();
+    const stale = `${OLS}/file?type=robot&id=3&path=d435i.obj&v=${OLD}`;
+    entries.set(stale, bigBody(16));
+    entries.set(OTHER, bigBody(16));
+    const { library } = client(config(), { ...SEED, [FILE]: new Response(bigBody(CACHE_STORAGE_MIN_BYTES)) }, cacheStorageBytes(storage));
+    await library.robot(3);
+    await library.fileBytes(3, "d435i.obj", false, "robot");
+    expect(deletes).toEqual([stale]);
+    expect([...entries.keys()]).toEqual([OTHER, FILE]);
+  });
+
+  it("reads the bytes once for the text view and the bundle", async () => {
+    const { storage, puts } = fakeStorage();
+    const body = bigBody(CACHE_STORAGE_MIN_BYTES);
+    const { library, called } = client(config(), { ...SEED, [FILE]: new Response(body) }, cacheStorageBytes(storage));
+    const model = await library.robot(3);
+    const text = await library.fileText(3, "d435i.obj", false, "robot");
+    const bundle = await library.bundle(model);
+    expect(text).toBe(new TextDecoder().decode(body));
+    expectBytes(bundle.files.get("d435i.obj")!, body);
+    expect(fileRequests(called)).toEqual([FILE]);
+    expect(puts).toEqual([FILE]);
+  });
+
+  it("behaves exactly as before when CacheStorage is unavailable", async () => {
+    const body = bigBody(CACHE_STORAGE_MIN_BYTES);
+    const { library, called } = client(config(), { ...SEED, [FILE]: new Response(body) }, cacheStorageBytes(undefined));
+    await library.robot(3);
+    expectBytes(await library.fileBytes(3, "d435i.obj", false, "robot"), body);
+    expect(fileRequests(called)).toEqual([FILE]);
+  });
+
+  it("treats a store that throws on read as a miss", async () => {
+    const body = bigBody(CACHE_STORAGE_MIN_BYTES);
+    const store: ByteStore = {
+      get: async () => { throw new Error("quota"); },
+      put: async () => {},
+    };
+    const { library, called } = client(config(), { ...SEED, [FILE]: new Response(body) }, store);
+    await library.robot(3);
+    expectBytes(await library.fileBytes(3, "d435i.obj", false, "robot"), body);
+    expect(fileRequests(called)).toEqual([FILE]);
+  });
+
+  it("returns the bytes even when the store refuses to write", async () => {
+    const body = bigBody(CACHE_STORAGE_MIN_BYTES);
+    const store: ByteStore = {
+      get: async () => undefined,
+      put: async () => { throw new Error("QuotaExceededError"); },
+    };
+    const { library } = client(config(), { ...SEED, [FILE]: new Response(body) }, store);
+    await library.robot(3);
+    expectBytes(await library.fileBytes(3, "d435i.obj", false, "robot"), body);
+  });
+
+  it("invalidateMetadata leaves the stored bytes alone", async () => {
+    const { storage, entries } = fakeStorage();
+    entries.set(FILE, bigBody(CACHE_STORAGE_MIN_BYTES));
+    const { library, called } = client(config(), SEED, cacheStorageBytes(storage));
+    await library.robot(3);
+    library.invalidateMetadata();
+    expect([...entries.keys()]).toEqual([FILE]);
+    await library.robot(3);
+    await library.fileBytes(3, "d435i.obj", false, "robot");
+    expect(fileRequests(called)).toEqual([]);
+  });
+
+  it("opts out entirely when the origin has no caches object", () => {
+    expect(cacheStorageBytes(undefined)).toBeUndefined();
   });
 });

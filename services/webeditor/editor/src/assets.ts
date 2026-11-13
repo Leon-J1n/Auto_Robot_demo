@@ -8,7 +8,25 @@ import type { LibraryItem, LibraryKind } from "./library";
 /** The three groups of the panel are the three id spaces OLS publishes (§6.11). */
 export const LIBRARY_KINDS: LibraryKind[] = ["scene", "model", "robot"];
 
-export const GROUP_LABELS: Record<LibraryKind, string> = { scene: "预设场景", model: "预制模型", robot: "机械臂" };
+/**
+ * §4.7 (Q159): the 大类 are named the way OLS names them - the first level of its own
+ * `category` strings. These are that word for each id space, used until OLS answers and
+ * whenever it cannot be reached; `kindLabel` reads the live one.
+ */
+export const GROUP_LABELS: Record<LibraryKind, string> = { scene: "场景", model: "模型", robot: "机器人" };
+
+/**
+ * §4.7 (Q159): the navigation rail must say what OLS's first level says (`机器人.单臂` -> `机器人`),
+ * not a word the frontend invented. The first dotted category decides, in the order `/listCategory`
+ * published; a list with no dotted category (or no list yet) falls back to the declared name.
+ */
+export function kindLabel(kind: LibraryKind, categories: string[]): string {
+  for (const category of categories) {
+    const dot = category.indexOf(".");
+    if (dot > 0) return category.slice(0, dot);
+  }
+  return GROUP_LABELS[kind];
+}
 
 /** §4.6: an item the index gives no category to is 未分类, which is not an error. */
 export const UNGROUPED = "未分类";

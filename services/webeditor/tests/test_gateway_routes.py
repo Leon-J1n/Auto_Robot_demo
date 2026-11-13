@@ -82,7 +82,7 @@ class GatewayRouteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(config["ghost_pose_opacity"], 0.5)
         # §7.3/Q101: the same for the waypoint spheres' radius and sampling stride -- both
         # are drawn in the browser and have no server-side consumer.
-        self.assertEqual(config["traj_waypoint_radius"], 0.02)
+        self.assertEqual(config["traj_waypoint_radius"], 0.01)
         self.assertEqual(config["traj_waypoint_stride_frames"], 10)
         # §4.8.5/Q118: the shadow default is a browser concern too -- it is what the stage
         # projects once `viewport.shadows` has hidden the toolbar checkbox.
@@ -92,8 +92,14 @@ class GatewayRouteTests(unittest.IsolatedAsyncioTestCase):
         # §4.4/Q145: the viewport clear colour is a browser concern too -- the gateway never
         # renders, it only hands the configured hex string through.
         self.assertEqual(config["viewport_background_color"], "#000000")
+        self.assertIs(config["disable_agent_details"], False)
         # Registered before the catch-all, so this must be JSON, not index.html (§9.1, 坑2).
         self.assertNotIn("<html", json.dumps(config))
+
+    async def test_runtime_config_carries_disable_agent_details(self):
+        self.gateway.config["disable_agent_details"] = True
+        config = await (await self.client.get("/api/runtimeConfig")).json()
+        self.assertIs(config["disable_agent_details"], True)
 
     async def test_runtime_config_carries_the_feature_flags(self):
         config = await (await self.client.get("/api/runtimeConfig")).json()

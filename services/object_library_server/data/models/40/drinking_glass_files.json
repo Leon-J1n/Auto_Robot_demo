@@ -1,0 +1,9 @@
+{
+  "is_on_cos": false,
+  "metadata": "drinking_glass.json",
+  "path": "drinking_glass.obj",
+  "thumbnail": "drinking_glass_thumbnail.png",
+  "reference": [
+    "drinking_glass.mtl"
+  ]
+}

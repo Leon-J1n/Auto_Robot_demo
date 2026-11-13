@@ -1,17 +1,32 @@
 {
   "semantic_properties": {
     "object_name": "basket",
+    "object_name_Chinese": "篮子",
     "object_id": 4,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "blue,woven",
+    "tag": "篮子,容器,编织,带提手",
     "can_place": true
   },
   "geometric_properties": {
-    "AABB": [0.081692, -0.081882, 0.103882, -0.103471, 0.235122, -0.000044]
+    "AABB": [
+      0.081692,
+      -0.081882,
+      0.103882,
+      -0.103471,
+      0.235122,
+      -4.4e-05
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.08,
     "friction": {
       "format": "[sliding, torsional, rolling]",
@@ -43,7 +58,7 @@
         0.0
       ],
       [
-        0.0070,
+        0.007,
         -0.0,
         0.1775,
         -1.57,

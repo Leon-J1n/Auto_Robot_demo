@@ -1,44 +1,52 @@
-[
-  {
-    "id": 1,
-    "name": "ur5_table_empty",
-    "task_category": "空白",
-    "no_display": false
+{
+  "by_name": {
+    "cobotmagic_table_grasp": [
+      5
+    ],
+    "piper_table_twist": [
+      6
+    ],
+    "ur5_table_apple": [
+      2
+    ],
+    "ur5_table_cabinet": [
+      4
+    ],
+    "ur5_table_empty": [
+      1
+    ],
+    "ur5_table_push_pull": [
+      7
+    ],
+    "ur5_table_sorting": [
+      3
+    ]
   },
-  {
-    "id": 2,
-    "name": "ur5_table_apple",
-    "task_category": "抓取",
-    "no_display": false
+  "by_id": {
+    "1": "ur5_table_empty",
+    "2": "ur5_table_apple",
+    "3": "ur5_table_sorting",
+    "4": "ur5_table_cabinet",
+    "5": "cobotmagic_table_grasp",
+    "6": "piper_table_twist",
+    "7": "ur5_table_push_pull"
   },
-  {
-    "id": 3,
-    "name": "ur5_table_sorting",
-    "task_category": "抓取",
-    "no_display": false
+  "category": {
+    "1": "场景.桌面操作",
+    "2": "场景.桌面操作",
+    "3": "场景.桌面操作",
+    "4": "场景.桌面操作",
+    "5": "场景.桌面操作",
+    "6": "场景.桌面操作",
+    "7": "场景.桌面操作"
   },
-  {
-    "id": 4,
-    "name": "ur5_table_cabinet",
-    "task_category": "开柜",
-    "no_display": false
-  },
-  {
-    "id": 5,
-    "name": "cobotmagic_table_grasp",
-    "task_category": "抓取",
-    "no_display": false
-  },
-  {
-    "id": 6,
-    "name": "piper_table_twist",
-    "task_category": "旋转扭动",
-    "no_display": false
-  },
-  {
-    "id": 7,
-    "name": "ur5_table_push_pull",
-    "task_category": "推拉",
-    "no_display": false
+  "no_display": {
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false,
+    "5": false,
+    "6": false,
+    "7": false
   }
-]
+}

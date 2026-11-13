@@ -1,19 +1,47 @@
 {
   "by_name": {
-    "d435i": [3],
-    "d455": [11],
-    "dobot_cr5": [7],
-    "nero": [9],
-    "piper": [8],
-    "pr2": [13],
-    "robot_pedestal": [4],
-    "robotiq_2f140": [10],
-    "robotiq_2f85": [2],
-    "ur10": [6],
-    "ur3": [5],
-    "ur5": [1],
-    "white_background_plane": [14],
-    "xarm_vacuum_gripper": [12]
+    "d435i": [
+      3
+    ],
+    "d455": [
+      11
+    ],
+    "dobot_cr5": [
+      7
+    ],
+    "nero": [
+      9
+    ],
+    "piper": [
+      8
+    ],
+    "pr2": [
+      13
+    ],
+    "robot_pedestal": [
+      4
+    ],
+    "robotiq_2f140": [
+      10
+    ],
+    "robotiq_2f85": [
+      2
+    ],
+    "ur10": [
+      6
+    ],
+    "ur3": [
+      5
+    ],
+    "ur5": [
+      1
+    ],
+    "white_background_plane": [
+      14
+    ],
+    "xarm_vacuum_gripper": [
+      12
+    ]
   },
   "by_id": {
     "1": "ur5",
@@ -32,20 +60,36 @@
     "14": "white_background_plane"
   },
   "category": {
-    "1": "机械臂.UR",
-    "2": "机械臂.夹爪",
-    "3": "机械臂.摄像机",
-    "4": "机械臂.底座",
-    "5": "机械臂.UR",
-    "6": "机械臂.UR",
-    "7": "机械臂.越疆",
-    "8": "机械臂.piper",
-    "9": "机械臂.piper",
-    "10": "机械臂.夹爪",
-    "11": "机械臂.摄像机",
-    "12": "机械臂.夹爪",
-    "13": "机械臂.pr",
-    "14": "机械臂.背景"
+    "1": "机器人.单臂",
+    "2": "机器人.夹爪",
+    "3": "机器人.摄像机",
+    "4": "机器人.底座",
+    "5": "机器人.单臂",
+    "6": "机器人.单臂",
+    "7": "机器人.单臂",
+    "8": "机器人.单臂",
+    "9": "机器人.单臂",
+    "10": "机器人.夹爪",
+    "11": "机器人.摄像机",
+    "12": "机器人.夹爪",
+    "13": "机器人.单臂",
+    "14": "机器人.背景"
+  },
+  "thumbnail": {
+    "1": "1/ur5_thumbnail.png",
+    "2": "2/robotiq_2f85_thumbnail.png",
+    "3": "3/d435i_thumbnail.png",
+    "4": "4/robot_pedestal_thumbnail.png",
+    "5": "5/ur3_thumbnail.png",
+    "6": "6/ur10_thumbnail.png",
+    "7": "7/dobot_cr5_thumbnail.png",
+    "8": "8/piper_thumbnail.png",
+    "9": "9/nero_thumbnail.png",
+    "10": "10/robotiq_2f140_thumbnail.png",
+    "11": "11/d455_thumbnail.png",
+    "12": "12/xarm_vacuum_gripper_thumbnail.png",
+    "13": "13/pr2_thumbnail.png",
+    "14": "14/white_background_plane_thumbnail.png"
   },
   "no_display": {
     "1": false,

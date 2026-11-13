@@ -1,30 +1,140 @@
 {
   "by_name": {
-    "apple": [1],
-    "banana": [2],
-    "baseball": [3],
-    "basket": [4, 12],
-    "pen": [5, 6],
-    "screwdriver": [7, 13],
-    "gum_bottle": [8],
-    "cream": [9],
-    "marker": [10],
-    "test_tube_rack": [11, 20],
-    "mug": [14, 23, 24],
-    "rubiks_cube": [15],
-    "school_bell": [16],
-    "tray": [17],
-    "coffee_table": [18],
-    "sugar_box": [19],
-    "test_tube": [21],
-    "drawer": [25],
-    "can": [26],
-    "button": [27],
-    "cabinet": [28],
-    "table": [29],
-    "bottle": [30],
-    "microwave": [31],
-    "toy_panda": [22]
+    "apple": [
+      1
+    ],
+    "banana": [
+      2
+    ],
+    "baseball": [
+      3
+    ],
+    "basket": [
+      4,
+      12
+    ],
+    "pen": [
+      5,
+      6
+    ],
+    "screwdriver": [
+      7,
+      13
+    ],
+    "gum_bottle": [
+      8
+    ],
+    "cream": [
+      9
+    ],
+    "marker": [
+      10
+    ],
+    "test_tube_rack": [
+      11,
+      20
+    ],
+    "mug": [
+      14,
+      23,
+      24
+    ],
+    "rubiks_cube": [
+      15
+    ],
+    "school_bell": [
+      16
+    ],
+    "tray": [
+      17
+    ],
+    "coffee_table": [
+      18
+    ],
+    "sugar_box": [
+      19
+    ],
+    "test_tube": [
+      21
+    ],
+    "toy_panda": [
+      22
+    ],
+    "drawer": [
+      25
+    ],
+    "can": [
+      26
+    ],
+    "button": [
+      27
+    ],
+    "cabinet": [
+      28
+    ],
+    "table": [
+      29
+    ],
+    "bottle": [
+      30
+    ],
+    "microwave": [
+      31
+    ],
+    "horse_figurine": [
+      32
+    ],
+    "green_apple": [
+      33
+    ],
+    "fork": [
+      34
+    ],
+    "gold_rim_dish": [
+      35
+    ],
+    "white_bowl": [
+      36
+    ],
+    "wooden_spoon": [
+      37
+    ],
+    "pear": [
+      38
+    ],
+    "plate": [
+      39
+    ],
+    "drinking_glass": [
+      40
+    ],
+    "white_peach": [
+      41
+    ],
+    "lemon": [
+      42
+    ],
+    "boxed_drink": [
+      43
+    ],
+    "chips": [
+      44
+    ],
+    "hex_nut": [
+      45
+    ],
+    "digital_thermometer": [
+      46
+    ],
+    "turkey_baster": [
+      47
+    ],
+    "onion": [
+      48
+    ],
+    "clear_tape": [
+      49
+    ]
   },
   "by_id": {
     "1": "apple",
@@ -57,73 +167,76 @@
     "28": "cabinet",
     "29": "table",
     "30": "bottle",
-    "31": "microwave"
+    "31": "microwave",
+    "32": "horse_figurine",
+    "33": "green_apple",
+    "34": "fork",
+    "35": "gold_rim_dish",
+    "36": "white_bowl",
+    "37": "wooden_spoon",
+    "38": "pear",
+    "39": "plate",
+    "40": "drinking_glass",
+    "41": "white_peach",
+    "42": "lemon",
+    "43": "boxed_drink",
+    "44": "chips",
+    "45": "hex_nut",
+    "46": "digital_thermometer",
+    "47": "turkey_baster",
+    "48": "onion",
+    "49": "clear_tape"
   },
   "category": {
-    "1": "模型.抓取物",
-    "2": "模型.抓取物",
-    "3": "模型.抓取物",
-    "4": "模型.放置物",
-    "5": "模型.抓取物",
-    "6": "模型.抓取物",
-    "7": "模型.抓取物",
-    "8": "模型.抓取物",
-    "9": "模型.抓取物",
-    "10": "模型.抓取物",
-    "11": "模型.放置物",
-    "12": "模型.放置物",
-    "13": "模型.抓取物",
-    "14": "模型.抓取物",
-    "15": "模型.抓取物",
-    "16": "模型.抓取物",
-    "17": "模型.放置物",
-    "18": "模型.放置物",
-    "19": "模型.抓取物",
-    "20": "模型.放置物",
-    "21": "模型.抓取物",
-    "22": "模型.抓取物",
-    "23": "模型.抓取物",
-    "24": "模型.抓取物",
-    "25": "模型.放置物",
-    "26": "模型.抓取物",
-    "27": "模型.抓取物",
-    "28": "模型.放置物",
-    "29": "模型.放置物",
-    "30": "模型.抓取物",
-    "31": "模型.放置物"
-  },
-  "thumbnail": {
-    "1": "1/apple_thumbnail.png",
-    "2": "2/banana_thumbnail.png",
-    "3": "3/baseball_thumbnail.png",
-    "4": "4/basket_thumbnail.png",
-    "5": "5/pen_thumbnail.png",
-    "6": "6/pen_thumbnail.png",
-    "7": "7/screwdriver_thumbnail.png",
-    "8": "8/gum_bottle_thumbnail.png",
-    "9": "9/cream_thumbnail.png",
-    "10": "10/marker_thumbnail.png",
-    "11": "11/test_tube_rack_thumbnail.png",
-    "12": "12/basket_thumbnail.png",
-    "13": "13/screwdriver_thumbnail.png",
-    "14": "14/mug_thumbnail.png",
-    "15": "15/rubiks_cube_thumbnail.png",
-    "16": "16/school_bell_thumbnail.png",
-    "17": "17/tray_thumbnail.png",
-    "18": "18/coffee_table_thumbnail.png",
-    "19": "19/sugar_box_thumbnail.png",
-    "20": "20/test_tube_rack_thumbnail.png",
-    "21": "21/test_tube_thumbnail.png",
-    "22": "22/toy_panda_thumbnail.png",
-    "23": "23/mug_thumbnail.png",
-    "24": "24/mug_thumbnail.png",
-    "25": "25/drawer_thumbnail.png",
-    "26": "26/can_thumbnail.png",
-    "27": "27/button_thumbnail.png",
-    "28": "28/cabinet_thumbnail.png",
-    "29": "29/table_thumbnail.png",
-    "30": "30/bottle_thumbnail.png",
-    "31": "31/microwave_thumbnail.png"
+    "1": "模型.果蔬",
+    "2": "模型.果蔬",
+    "3": "模型.玩具",
+    "4": "模型.生活用品",
+    "5": "模型.生活用品",
+    "6": "模型.生活用品",
+    "7": "模型.工具",
+    "8": "模型.食品",
+    "9": "模型.生活用品",
+    "10": "模型.生活用品",
+    "11": "模型.实验器材",
+    "12": "模型.生活用品",
+    "13": "模型.工具",
+    "14": "模型.生活用品",
+    "15": "模型.玩具",
+    "16": "模型.玩具",
+    "17": "模型.生活用品",
+    "18": "模型.家具",
+    "19": "模型.食品",
+    "20": "模型.实验器材",
+    "21": "模型.实验器材",
+    "22": "模型.玩具",
+    "23": "模型.生活用品",
+    "24": "模型.生活用品",
+    "25": "模型.家具",
+    "26": "模型.食品",
+    "27": "模型.工具",
+    "28": "模型.家具",
+    "29": "模型.家具",
+    "30": "模型.食品",
+    "31": "模型.家具",
+    "32": "模型.玩具",
+    "33": "模型.果蔬",
+    "34": "模型.餐具",
+    "35": "模型.餐具",
+    "36": "模型.餐具",
+    "37": "模型.餐具",
+    "38": "模型.果蔬",
+    "39": "模型.餐具",
+    "40": "模型.生活用品",
+    "41": "模型.果蔬",
+    "42": "模型.果蔬",
+    "43": "模型.食品",
+    "44": "模型.食品",
+    "45": "模型.工具",
+    "46": "模型.工具",
+    "47": "模型.实验器材",
+    "48": "模型.果蔬",
+    "49": "模型.生活用品"
   },
   "no_display": {
     "1": false,
@@ -156,6 +269,24 @@
     "28": false,
     "29": true,
     "30": false,
-    "31": false
+    "31": false,
+    "32": false,
+    "33": false,
+    "34": false,
+    "35": false,
+    "36": false,
+    "37": false,
+    "38": false,
+    "39": false,
+    "40": false,
+    "41": false,
+    "42": false,
+    "43": false,
+    "44": false,
+    "45": false,
+    "46": false,
+    "47": false,
+    "48": false,
+    "49": false
   }
 }

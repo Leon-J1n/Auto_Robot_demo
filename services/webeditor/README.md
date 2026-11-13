@@ -42,6 +42,14 @@ WEB_GATEWAY_URL=http://127.0.0.1:8099 npm run dev
 
 Agent 面板走任务制（规格 §5.15）：浏览器把 `{command, scene}` 交给 gateway，gateway 转发给 `agent_service_url` 指向的上游 Agent 服务并轮询到终态。完整四服务栈（OLS :8000、QwenMock :8080、gateway :8099、AgentBrain :8500）的启动命令与端口分配见 `docs/各服务启动命令.md` 与 `docs/服务占用端口清单.md`；通信协议定稿见 `docs/gateway与Agent新通信流程.md`（brain-web/2）。不接上游时 Agent 面板回 `501 AGENT_UNAVAILABLE`，其余接口不受影响。
 
+### 本地语音输入（可选，streaming-speech）
+
+`streaming-speech` 是独立项目，默认监听 `127.0.0.1:8600`，需要单独启动；`start-dev.ps1`、`launch_gateway.bat` 和 `tools/restart_stack.ps1` 不会启动它。在语音项目目录运行 `./start.ps1` 或 `./start.bat`；首次安装、模型下载和 GPU 依赖按该项目 README 操作。语音服务及模型不包含在 WebEditor 发布包内。
+
+Gateway 从 `config/constant_config.json` 读取已有配置 `"speech_service_url": "http://127.0.0.1:8600"`。这是 **Gateway 访问语音服务的地址**；服务部署到别的主机或端口时修改该值并重启 Gateway，同时按需修改语音项目 config.json 的监听地址与端口。浏览器始终经同源 WebSocket `/speech` → Gateway → 语音服务 `/stream`，无需直连 8600。
+
+服务使用 Zipformer 流式预览、Paraformer 句末复核和 Silero VAD 静音过滤；发送按钮与回车等待最终识别结果后发送。支持 CPU，匹配的 NVIDIA 环境可使用 CUDA，无需 PyTorch。健康检查为语音服务 `GET /health`，返回 provider 和 two_pass。词表由语音项目 `vocabulary.json` 维护，修改后重启语音服务，字段说明见该项目 `VOCABULARY.md`。跨电脑访问麦克风需要 HTTPS 或浏览器认可的可信来源。语音服务未启动时语音输入会报错，普通文字输入仍可使用。
+
 ## 调用方接口（§5.9 速览）
 
 8 条根路径接口（无 `/api` 前缀，snake_case 参数，JSON 错误体 `{"error":{code,message,request_id}}`）。**它们需要有一个打开的浏览器页签**，否则一律 `503 NO_BROWSER_CONNECTED`（仅 `/getWorld` 回落到缓存并带 `X-World-Source: cache`）：

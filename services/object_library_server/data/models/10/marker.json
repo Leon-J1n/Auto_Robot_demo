@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "marker",
+    "object_name_Chinese": "记号笔",
     "object_id": 10,
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "black,white",
+    "tag": "记号笔,文具,圆柱,粗笔划,马克笔",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.06329066,
       0.009550167,
       -0.009238141
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.0158,
     "friction": {
       "format": "[sliding, torsional, rolling]",

@@ -4,6 +4,7 @@
     "port": 8099
   },
   "library_server_url": "http://127.0.0.1:8000",
+  "speech_service_url": "http://127.0.0.1:8600",
   "cos_base_url": "",
   "max_payload_bytes": 104857600,
   "browser_request_timeout_seconds": 10,
@@ -15,12 +16,13 @@
     "max_hz": 30
   },
   "ghost_pose_opacity": 0.5,
-  "traj_waypoint_radius": 0.02,
+  "traj_waypoint_radius": 0.01,
   "traj_waypoint_stride_frames": 10,
   "shadows_enabled": true,
   "urdf_bounding_box_per_link": false,
   "viewport_background_color": "#000000",
   "agent_service_url": "http://127.0.0.1:8500",
   "agent_poll_interval_seconds": 5,
+  "disable_agent_details": true,
   "agent_request_timeout_seconds": 10
 }

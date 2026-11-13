@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "lemon.json",
+  "path": "lemon.obj",
+  "thumbnail": "lemon_thumbnail.png",
+  "reference": [
+    "lemon.mtl",
+    "lemon.png"
+  ]
+}

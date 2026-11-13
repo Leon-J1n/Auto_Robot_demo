@@ -5,6 +5,7 @@ Pure-stdlib HTTP server providing scene / model / robot asset data.
 Implements the interface contract in docs/OLS接口.md.
 """
 import argparse
+import hashlib
 import json
 import mimetypes
 import os
@@ -46,6 +47,10 @@ CREATE INDEX IF NOT EXISTS idx_assets_name ON assets(name);
 
 PACKAGE_RE = re.compile(r"^package://[^/]+/")
 DRIVE_RE = re.compile(r"^[A-Za-z]:")
+
+# Q162: these three answer "what exists / what version", so they must always revalidate.
+ORACLE_ROUTES = ("/list", "/listCategory", "/assetVersion")
+IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable"
 
 EXTRA_MIME = {
     ".obj": "application/octet-stream",
@@ -216,11 +221,28 @@ def next_upload_id(data_dir, typ, uid):
     return (row["m"] or 0) + 1
 
 
+def asset_version(data_dir, typ, row):
+    """Q162: 16-hex token over the asset's file stats plus its index row. Stat only, never reads bytes."""
+    asset_dir = Path(data_dir) / TYPE_DIR[typ] / str(row["id"])
+    entries = []
+    for path in asset_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        st = path.stat()
+        entries.append((path.relative_to(asset_dir).as_posix(), st.st_size, st.st_mtime_ns))
+    entries.sort()
+    payload = json.dumps({"name": row["name"], "category": row["category"], "files": entries},
+                         ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
 class OLSHandler(BaseHTTPRequestHandler):
     server_version = "OLS/1.0"
     config = None
 
     protocol_version = "HTTP/1.1"
+
+    cache_version = ""
 
     # ---- plumbing -------------------------------------------------------
 
@@ -238,11 +260,37 @@ class OLSHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
+    def _cache_control(self):
+        if self.cache_version:
+            return IMMUTABLE_CACHE_CONTROL
+        return "no-cache"
+
+    def _etag_matches(self, etag):
+        header = self.headers.get("If-None-Match")
+        if not header:
+            return False
+        if header.strip() == "*":
+            return True
+        candidates = [c.strip() for c in header.split(",")]
+        return etag in candidates or "W/" + etag in candidates
+
+    def _send_not_modified(self, etag):
+        self.send_response(304)
+        self._cors_headers()
+        self.send_header("ETag", etag)
+        self.send_header("Cache-Control", self._cache_control())
+        self.end_headers()
+
     def _send_json(self, obj, status=200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        etag = '"j-%s"' % hashlib.sha256(body).hexdigest()[:32]
+        if status == 200 and self._etag_matches(etag):
+            return self._send_not_modified(etag)
         self.send_response(status)
         self._cors_headers()
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("ETag", etag)
+        self.send_header("Cache-Control", self._cache_control())
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -253,10 +301,16 @@ class OLSHandler(BaseHTTPRequestHandler):
     def _send_file(self, target):
         if not target.is_file():
             raise ApiError(404, "not_found", "file not found")
+        st = target.stat()
+        etag = '"f-%x-%x"' % (st.st_size, st.st_mtime_ns)
+        if self._etag_matches(etag):
+            return self._send_not_modified(etag)
         data = target.read_bytes()
         self.send_response(200)
         self._cors_headers()
         self.send_header("Content-Type", guess_content_type(target.name))
+        self.send_header("ETag", etag)
+        self.send_header("Cache-Control", self._cache_control())
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -282,19 +336,37 @@ class OLSHandler(BaseHTTPRequestHandler):
             path = path.rstrip("/")
         table = ROUTES_GET if method == "GET" else ROUTES_POST
         handler_name = table.get(path)
+        qs = parse_qs(parsed.query, keep_blank_values=True)
+        # Q162: v is only a cache key; validating it would cost a directory walk per file request.
+        self.cache_version = (qs.get("v", [""])[0]
+                              if method == "GET" and path not in ORACLE_ROUTES else "")
         if handler_name is None:
             return self._send_error(404, "not_found", f"unknown endpoint: {method} {parsed.path}")
-        qs = parse_qs(parsed.query, keep_blank_values=True)
         try:
             getattr(self, "api_" + handler_name)(qs)
         except ApiError as e:
             try:
                 self._send_error(e.status, e.code, e.message)
-            except BrokenPipeError:
-                pass
+            except ConnectionError:
+                self.close_connection = True
+        except ConnectionError:
+            # Q163: the client hung up mid-response. Windows raises 10053, which is a
+            # sibling of BrokenPipeError, not a subclass - answering 500 on the same dead
+            # socket only raises a second time and buries the log in two tracebacks.
+            self.close_connection = True
         except Exception:
             traceback.print_exc()
             self._send_error(500, "internal_error", "unexpected server error")
+
+    def handle_one_request(self):
+        # Q163: a cancelled request can also die before dispatch (reading the request line
+        # or headers) or on a route that writes directly, e.g. OPTIONS. The dispatch guard
+        # is still needed on its own: without it the generic handler would try to answer
+        # 500 on the dead socket first.
+        try:
+            super().handle_one_request()
+        except ConnectionError:
+            self.close_connection = True
 
     def do_GET(self):
         self._dispatch("GET")
@@ -344,7 +416,15 @@ class OLSHandler(BaseHTTPRequestHandler):
                              "WHERE is_deleted = 0 AND no_display = 0 AND upload_user_id IN (0, ?) ORDER BY id",
                              (uid,))
         self._send_json({"type": typ,
-                         "items": [{"id": r["id"], "name": r["name"], "category": r["category"]} for r in rows]})
+                         "items": [{"id": r["id"], "name": r["name"], "category": r["category"],
+                                    "version": asset_version(self.data_dir(), typ, r)} for r in rows]})
+
+    def api_assetVersion(self, qs):
+        typ = validate_type(self.p(qs, "type"))
+        uid = self.uid(qs)
+        rid = parse_id(self.p(qs, "id"))
+        row = find_visible_by_id(self.data_dir(), typ, rid, uid)
+        self._send_json({"type": typ, "id": rid, "version": asset_version(self.data_dir(), typ, row)})
 
     def api_listCategory(self, qs):
         typ = validate_type(self.p(qs, "type"))
@@ -555,6 +635,7 @@ class OLSHandler(BaseHTTPRequestHandler):
 ROUTES_GET = {
     "/list": "list",
     "/listCategory": "listCategory",
+    "/assetVersion": "assetVersion",
     "/scene": "scene",
     "/sceneByName": "sceneByName",
     "/model": "model",

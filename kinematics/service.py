@@ -32,6 +32,20 @@ class KinematicsService:
         """Registered names/aliases; native availability is checked on first use."""
         return self.registry.names
 
+    def quick_reachability(self, target_pose, *, timeout=0.03):
+        """Ordering hint only: verify analytic IK without numerical fallback.
+
+        False never proves unreachability; unsupported models and solver errors
+        must still be allowed through the ordinary full planning chain later.
+        """
+        if 'eaik' not in self.registry.names:
+            return None
+        try:
+            self.solve_one(target_pose, backend='eaik', timeout=timeout)
+        except IKError:
+            return False
+        return True
+
     def solve_one(self, target_pose, *, seed=None, backend="auto", backends=None,
                   policy="nearest", timeout=1.0, max_joint_step=None) -> IKResult:
         return self._solve(target_pose, seed=seed, backend=backend, backends=backends,

@@ -1,4 +1,5 @@
 import "./styles.css";
+import { SpeechInput } from "./speech";
 import {
   Activity, Bot, Box, Boxes, Camera, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Circle, CircleDot, Crosshair, Download, FileUp, Focus, Info, Lightbulb, ListTree, LoaderCircle, Mic,
@@ -8,14 +9,14 @@ import {
 } from "lucide";
 import type { AgentJob, AgentOutcome, AgentTaskSubmission, BrowserHello, BrowserRequest, BrowserResponse, CaptureSceneResult, FeatureFlags, GatewayFrame, GatewayHealthView, Get2DAabbResult, PlaybackState, RuntimeConfig, SceneApplied, ServiceHealthView, SessionPhase, SessionStateView, UpdateTrajResult, Vec3 } from "../../contracts/types";
 import {
-  agentPlanItemsFromEvent, boundingBoxesEnabled, cameraRig, cameraWallEnabled, cameraWallModeFor, cameraWallPace,
+  agentDetailsDisabled, agentPanelVisible, agentPlanItemsFromEvent, boundingBoxesEnabled, cameraRig, cameraWallEnabled, cameraWallModeFor, cameraWallPace,
   depthPalette, enterSendsAgentMessage, featureEnabled,
   ghostOpacity, leafArmIds,
-  localAxesEnabled, mergeSpeech, panelMarkupChanged, pickRecordMime, recordVideoName, shadowsEnabled, urdfLinkBoxesEnabled, viewportBackground, waypointColor, waypointFrames, waypointSettings,
+  localAxesEnabled, panelMarkupChanged, panelTabActive, panelTabPress, pickRecordMime, recordVideoName, shadowsEnabled, urdfLinkBoxesEnabled, viewportBackground, waypointColor, waypointFrames, waypointSettings,
   type AgentPlanItem, type SensorViewMode,
 } from "./logic";
 import { applySceneRequest, applyTrajRequest, isWriteAction, type SceneRequestResult } from "./scene_requests";
-import { GROUP_LABELS, LIBRARY_KINDS, UNGROUPED, categoryLabel, groupAssets, type AssetGroup } from "./assets";
+import { GROUP_LABELS, LIBRARY_KINDS, categoryLabel, groupAssets, kindLabel, type AssetGroup } from "./assets";
 import { applyFrameJointPositions, declaredJointPositions, TrajDriver } from "./drivers";
 import { applyAabbRequest, applyCaptureRequest, pngBase64, type CaptureView } from "./capture";
 import { NATIVE_SENSOR, ThreeRendererAdapter, type WaypointPath } from "./renderer";
@@ -59,6 +60,8 @@ type LibrarySection = { items: LibraryItem[]; categories: string[] };
 type TrajEntry = { traj: Traj; name: string | null };
 /** §9.3: which `navigation.assets.*` flag gates which group. */
 const GROUP_FEATURES: Record<LibraryKind, string> = { scene: "presets", model: "prefabs", robot: "robots" };
+/** §4.7 (Q156): the rail carries the three 大类, so each needs its own icon. */
+const GROUP_ICONS: Record<LibraryKind, string> = { scene: "boxes", model: "box", robot: "bot" };
 
 const state = {
   // The viewport draws this world; Load Scene (M1-5) and /getWorld (M2-3) feed it.
@@ -200,7 +203,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
 <div class="workbench">
   <main class="workspace">
-    <nav class="rail" data-feature="navigation"><button data-panel="scene" data-feature="navigation.scene" data-requires-feature="panels.scene" aria-controls="context-panel" aria-expanded="false"><i data-lucide="list-tree"></i><span>Scene</span></button><button data-panel="details" data-feature="navigation.details" data-requires-feature="panels.details" aria-controls="context-panel" aria-expanded="false"><i data-lucide="sliders-horizontal"></i><span>Details</span></button><button data-panel="assets" data-feature="navigation.assets" data-requires-feature="panels.assets" aria-controls="context-panel" aria-expanded="false"><i data-lucide="boxes"></i><span>Assets</span></button></nav>
+    <nav class="rail" data-feature="navigation"><button data-panel="scene" data-feature="navigation.scene" data-requires-feature="panels.scene" aria-controls="context-panel" aria-expanded="false"><i data-lucide="list-tree"></i><span>Scene</span></button><button data-panel="details" data-feature="navigation.details" data-requires-feature="panels.details" aria-controls="context-panel" aria-expanded="false"><i data-lucide="sliders-horizontal"></i><span>Details</span></button>${LIBRARY_KINDS.map((kind) => `<button data-panel="assets" data-asset-kind-nav="${kind}" data-feature="navigation.assets.${GROUP_FEATURES[kind]}" data-requires-feature="panels.assets" aria-controls="context-panel" aria-expanded="false"><i data-lucide="${GROUP_ICONS[kind]}"></i><span>${GROUP_LABELS[kind]}</span></button>`).join("")}</nav>
     <aside id="context-panel" class="context-panel collapsed" data-feature="panels.context" aria-hidden="true"><header class="panel-heading" data-feature="panels.heading"><div><small id="panel-eyebrow">SCENE</small><h2 id="panel-title">Hierarchy</h2></div><span id="panel-count" data-feature="panels.heading.count">0</span></header><div id="context-content" class="context-content"></div></aside>
     <section class="viewport-shell">
       <div class="viewport-toolbar" data-feature="viewport.toolbar"><button class="button" data-action="load-scene" data-feature="viewport.loadScene" title="Load Scene (local json)"><i data-lucide="file-up"></i><b>加载场景</b></button><button class="button" data-action="load-traj" data-feature="viewport.loadTraj" title="Load Traj (local .traj)"><i data-lucide="file-up"></i><b>加载轨迹</b></button><select id="traj-select" data-feature="playback.trajSelector" aria-label="Trajectory selector" title="Trajectory to play" hidden></select><label class="toolbar-check" data-feature="playback.trajWaypoints" title="Show the waypoints of every loaded trajectory"><input type="checkbox" id="waypoint-all-trajs"><b>显示轨迹</b></label><button data-action="focus" data-feature="viewport.focusSelection" title="Focus Selection"><i data-lucide="focus"></i></button><button data-action="frame" data-feature="viewport.frameScene" title="Frame Scene"><i data-lucide="crosshair"></i></button><button data-action="snapshot" data-feature="viewport.snapshot" title="Copy viewport screenshot to clipboard"><i data-lucide="camera"></i></button><button data-action="record" data-feature="viewport.record" title="Record the viewport to an MP4 file"><i data-lucide="circle-dot"></i></button><label class="toolbar-check" data-feature="viewport.record" title="Include the auxiliary layers in the recording"><input type="checkbox" id="record-overlays"><b>录制辅助图层</b></label><span id="selection-label" data-feature="viewport.selectionLabel">World</span><select id="lighting-preset" data-feature="viewport.lightingPreset" aria-label="Lighting preset" title="Lighting preset"><option value="">Scene lights</option>${LIGHTING_PRESETS.map((preset) => `<option value="${preset.id}">${preset.label}</option>`).join("")}</select><label class="toolbar-check" data-feature="viewport.shadows" title="Projected shadows"><input type="checkbox" id="shadows-toggle" checked><b>投射阴影</b></label><label class="toolbar-check" data-feature="viewport.boundingBoxes" title="Draw one bounding box per object"><input type="checkbox" id="bbox-toggle"><b>显示包围盒</b></label><label class="toolbar-check" data-feature="viewport.localAxesToggle" title="Draw the local frame each object declares"><input type="checkbox" id="local-axes-toggle"><b>显示坐标轴</b></label><label class="toolbar-check" data-feature="viewport.cameraWall" title="Show what every camera in the scene sees"><input type="checkbox" id="camera-wall-toggle"><b>相机画面</b></label><button data-action="export-scene" data-feature="viewport.exportScene" title="Export scene JSON"><i data-lucide="download"></i></button><div class="segmented" data-feature="viewport.tools"><button data-tool="select" class="active" title="Select only"><i data-lucide="mouse-pointer-2"></i></button></div></div>
@@ -290,14 +293,28 @@ function ensureEnabledPanel(): void {
     .find((panel) => enabled(panelFeatures[panel])) ?? "scene";
 }
 
+/**
+ * §7.5 (Q157): the Agent column is lent to the asset panel while that panel is open. Both the
+ * feature pass at start() and every renderContext() ask this one question, so opening and closing
+ * the panel restore the column by the same rule that took it away.
+ */
+function applyAgentVisibility(): void {
+  const visible = agentPanelVisible({
+    agentEnabled: enabled("agent.conversation"), contextEnabled: enabled("panels.context"),
+    panel: state.panel, panelOpen: state.panelOpen,
+  });
+  document.querySelector<HTMLElement>(".agent-panel")!.hidden = !visible;
+  const workspace = document.querySelector<HTMLElement>(".workspace")!;
+  if (visible) workspace.style.removeProperty("--agent-track"); else workspace.style.setProperty("--agent-track", "0px");
+}
+
 function applyFeatureVisibility(): void {
   ensureEnabledPanel();
   document.querySelectorAll<HTMLElement>("[data-feature]").forEach((element) => {
     element.hidden = !enabled(element.dataset.feature!)
       || Boolean(element.dataset.requiresFeature && !enabled(element.dataset.requiresFeature));
   });
-  document.querySelector<HTMLElement>(".agent-panel")!.hidden =
-    !enabled("agent.conversation");
+  applyAgentVisibility();
   const track = (element: HTMLElement, name: string, visible: boolean): void => {
     if (visible) element.style.removeProperty(name); else element.style.setProperty(name, "0px");
   };
@@ -306,7 +323,6 @@ function applyFeatureVisibility(): void {
   const workspace = document.querySelector<HTMLElement>(".workspace")!;
   track(workspace, "--rail-track", enabled("navigation"));
   track(workspace, "--context-track", enabled("panels.context") && state.panelOpen);
-  track(workspace, "--agent-track", enabled("agent.conversation"));
   const viewport = document.querySelector<HTMLElement>(".viewport-shell")!;
   track(viewport, "--toolbar-track", enabled("viewport.toolbar"));
   track(viewport, "--diagnostics-track", enabled("diagnostics"));
@@ -865,15 +881,13 @@ function renderDetails(): string {
   return `<div class="inspector">${identity}${transform}${model}${semantic}${light}${camera}${robot}</div>`;
 }
 
-/** §4.6 (Q93): a row is one object or one scene - the picture OLS publishes, its name, `id · category`. */
+/** §4.6 (Q154): a row shows the picture and name; categories belong to navigation. */
 function assetRow(kind: LibraryKind, item: LibraryItem): string {
   const client = state.client;
   const thumb = client
     ? `<span class="thumb-frame"><img class="asset-thumb" src="${escapeHtml(client.thumbnailUrl(kind, item.id))}" alt="" loading="lazy"></span>`
     : "";
-  const meta = when("panels.assets.metadata", `<small>${item.id} · ${escapeHtml(item.category ?? UNGROUPED)}</small>`);
-  // The column is too narrow for both the name and the dotted category, so the row carries them in full.
-  return `<button type="button" class="asset-card" title="${escapeHtml(`${item.name} · ${item.category ?? UNGROUPED}`)}" data-asset-kind="${kind}" data-asset-id="${item.id}">${thumb}<span>${when("panels.assets.name", `<strong>${escapeHtml(item.name)}</strong>`)}${meta}</span></button>`;
+  return `<button type="button" class="asset-card" title="${escapeHtml(item.name)}" data-asset-kind="${kind}" data-asset-id="${item.id}">${thumb}<span>${when("panels.assets.name", `<strong>${escapeHtml(item.name)}</strong>`)}</span></button>`;
 }
 
 /** §4.6: the first level is the three id spaces, minus any group the flags switch off. */
@@ -881,7 +895,13 @@ function assetKinds(): LibraryKind[] {
   return LIBRARY_KINDS.filter((kind) => enabled(`navigation.assets.${GROUP_FEATURES[kind]}`));
 }
 
-/** §4.6 (Q93): the second level lists the categories that actually have items, in `/listCategory` order. */
+/** §4.6 (Q156): the 大类 the panel actually shows - a flag can switch the stored choice off. */
+function currentKind(): LibraryKind | null {
+  const kinds = assetKinds();
+  return kinds.includes(state.library.kind) ? state.library.kind : kinds[0] ?? null;
+}
+
+/** §4.6 (Q93/Q156): the one rail left in the panel lists the categories that have items, in `/listCategory` order. */
 function assetGroups(kind: LibraryKind): AssetGroup[] {
   const section = state.library.sections[kind];
   return groupAssets(section.items, section.categories);
@@ -892,23 +912,21 @@ function currentCategory(kind: LibraryKind, groups: AssetGroup[]): string | null
   return groups.some((group) => group.category === state.library.category) ? state.library.category : groups[0]?.category ?? null;
 }
 
-/** §4.6 (Q93): two vertical hierarchy rails on the left, one item per row on the right. */
+/** §4.6 (Q156): one vertical category rail on the left, the items of that category on the right. */
 function renderAssets(): string {
-  const kinds = assetKinds();
-  if (!kinds.length) return "";
-  const kind = kinds.includes(state.library.kind) ? state.library.kind : kinds[0]!;
+  const kind = currentKind();
+  if (!kind) return "";
   const groups = assetGroups(kind);
   const selected = currentCategory(kind, groups);
   const rows = groups.find((group) => group.category === selected)?.items ?? [];
   const empty = state.library.error ? "OLS 不可用" : state.library.loading ? "读取中…" : "这个类别没有条目";
   const notice = state.library.error ? `<p class="asset-notice">资产列表读取失败：${escapeHtml(state.library.error)}</p>` : "";
-  const levelOne = kinds.map((entry) => `<button type="button" class="asset-kind${entry === kind ? " active" : ""}" data-asset-kind-nav="${entry}" aria-current="${String(entry === kind)}"><span>${GROUP_LABELS[entry]}</span><em>${state.library.sections[entry].items.length}</em></button>`).join("");
-  const levelTwo = groups.map((group) => `<button type="button" class="asset-category${group.category === selected ? " active" : ""}" data-asset-category="${escapeHtml(group.category)}" aria-current="${String(group.category === selected)}"><span title="${escapeHtml(group.category)}">${escapeHtml(categoryLabel(group.category))}</span><em>${group.items.length}</em></button>`).join("");
+  const categories = groups.map((group) => `<button type="button" class="asset-category${group.category === selected ? " active" : ""}" data-asset-category="${escapeHtml(group.category)}" aria-current="${String(group.category === selected)}"><span title="${escapeHtml(group.category)}">${escapeHtml(categoryLabel(group.category))}</span><em>${group.items.length}</em></button>`).join("");
   // §4.6: the panel only reads OLS - upload, delete and the dependency dialog are gone (§10.4).
   const list = enabled("panels.assets.list")
     ? `<div class="asset-rows">${rows.map((item) => assetRow(kind, item)).join("") || `<p class="empty-line">${empty}</p>`}</div>`
     : "";
-  return `<div class="asset-browser"><nav class="asset-kinds">${levelOne}</nav><nav class="asset-categories">${levelTwo}</nav><div class="asset-list">${notice}${list}</div></div>`;
+  return `<div class="asset-browser"><nav class="asset-categories">${categories}</nav><div class="asset-list">${notice}${list}</div></div>`;
 }
 
 /** §4.6: a failed read only says so in the panel; the live world is never touched. */
@@ -1073,10 +1091,18 @@ function renderContext(): void {
   contextPanel.setAttribute("aria-hidden", String(!panelVisible));
   const workspace = document.querySelector<HTMLElement>(".workspace")!;
   if (panelVisible) workspace.style.removeProperty("--context-track"); else workspace.style.setProperty("--context-track", "0px");
+  // §4.6 (Q158): the two-column list needs the width Q157 borrows from the Agent column.
+  workspace.classList.toggle("assets-open", panelVisible && state.panel === "assets");
+  applyAgentVisibility();
   document.querySelectorAll<HTMLElement>("[data-panel]").forEach((item) => {
-    const active = item.dataset.panel === state.panel && panelVisible;
+    // §7.2 (Q156): the three asset buttons share one `data-panel`, so the 大类 decides which is lit.
+    const active = panelTabActive({ panel: item.dataset.panel!, kind: item.dataset.assetKindNav },
+      { panel: state.panel, open: panelVisible, kind: currentKind() ?? state.library.kind });
     item.classList.toggle("active", active);
     item.setAttribute("aria-expanded", String(active));
+    // §4.7 (Q159): the rail's word is OLS's own first level, which only arrives with /listCategory.
+    const kind = item.dataset.assetKindNav as LibraryKind | undefined;
+    if (kind) item.querySelector("span")!.textContent = kindLabel(kind, state.library.sections[kind].categories);
   });
   // §4 (S4-c): the panel has just been rebuilt, so the cards it did not have a second ago are
   // tagged with whatever the phase says now.
@@ -2157,6 +2183,7 @@ function updateAgentJob(job: AgentJob): void {
 }
 /** §5.15/Q87: one job's row -- the parts come from `jobRow`, and this only formats them. */
 function agentMessageMarkup(message: AgentMessage): string {
+  const hideDetails = message.role === "agent" && agentDetailsDisabled(state.runtime);
   const row = message.row;
   const hasStream = message.role === "agent" && (message.planKey ?? message.jobId) === state.agentPlanKey && state.agentPlan.length > 0;
   // Two sources for a skill order: the debug stream's steps carry per-step status and win while
@@ -2171,13 +2198,14 @@ function agentMessageMarkup(message: AgentMessage): string {
   const files = row && row.artifacts.length
     ? `<p class="message-artifacts">${row.artifacts.map((item) => `<a href="${item.url}" download>${escapeHtml(item.name)}</a>`).join("")}</p>`
     : "";
-  const body = hasStream && jobWorking(message) ? "" : `<p>${escapeHtml(message.text)}</p>`;
+  const text = hideDetails ? message.text.replace(/（[^（）]*；诊断 task-\d+）/g, "") : message.text;
+  const body = !hideDetails && hasStream && jobWorking(message) ? "" : `<p>${escapeHtml(text)}</p>`;
   // §7.4: the badge quotes `agent_state` exactly as the service called itself; the colour comes
   // from `terminal` + `outcome`, never from the name (§8).
   const footer = message.agentState !== undefined
     ? `<footer><span class="${jobBadgeClass(message)}">${escapeHtml(message.agentState)}</span>${message.jobId ? `<code>${escapeHtml(message.jobId.slice(0, 8))}</code>` : ""}</footer>`
     : "";
-  return `<article class="message ${message.role}"><header><strong>${message.role === "user" ? "You" : "Agent"}</strong><time>${new Date(message.time).toLocaleTimeString()}</time></header>${body}${steps}${detail}${files}${footer}</article>`;
+  return `<article class="message ${message.role}"><header><strong>${message.role === "user" ? "You" : "Agent"}</strong><time>${new Date(message.time).toLocaleTimeString()}</time></header>${body}${hideDetails ? "" : steps + detail + files + footer}</article>`;
 }
 /**
  * §8 (R9): the one source behind the service bar. §5.3 keeps `GET /api/health` answering 200 about
@@ -2265,7 +2293,7 @@ async function submitAgent(text: string): Promise<void> {
   const captured: AgentSubmissionContext = { sessionID, conversationId, sceneJSON: JSON.stringify(scene) };
   state.agentPlan = [];
   state.agentPlanKey = null;
-  const clientRequestID = crypto.randomUUID();
+  const clientRequestID = generateBrowserID(crypto);
   state.messages.push({ role: "user", text: value, time: Date.now() });
   updateAgent();
   await appendConversationMessage("user", value, clientRequestID, conversationId);
@@ -2295,16 +2323,35 @@ async function submitAgent(text: string): Promise<void> {
   }
 }
 
-type Speech = { start(): void; stop(): void; continuous: boolean; interimResults: boolean; lang: string; onresult: ((event: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null; onerror: ((event: { error: string }) => void) | null; onend: (() => void) | null };
-let recognition: Speech | null = null, speechActive = false, speechPrefix = "", speechFinal = "";
-function toggleSpeech(): void { if (!enabled("agent.input.voiceInput")) return; if (speechActive) { recognition?.stop(); return; } const api = window as Window & { SpeechRecognition?: new () => Speech; webkitSpeechRecognition?: new () => Speech }; const Constructor = api.SpeechRecognition ?? api.webkitSpeechRecognition; if (!Constructor) { showError("Speech recognition is not available in this browser"); return; } recognition = new Constructor(); const input = document.querySelector<HTMLTextAreaElement>("#agent-input")!; speechPrefix = input.value; speechFinal = ""; speechActive = true; recognition.continuous = true; recognition.interimResults = true; recognition.lang = navigator.language || "en-US"; recognition.onresult = (event) => { let interim = ""; for (let i = event.resultIndex; i < event.results.length; i += 1) { const result = event.results[i]!; if (result.isFinal) speechFinal += result[0].transcript; else interim += result[0].transcript; } input.value = mergeSpeech(speechPrefix, speechFinal, interim); }; recognition.onerror = (event) => { showError(`Speech recognition failed: ${event.error}`); speechActive = false; }; recognition.onend = () => { speechActive = false; }; recognition.start(); showAgentToast("正在聆听…"); }
+const speechInput = new SpeechInput(
+  document.querySelector<HTMLTextAreaElement>("#agent-input")!,
+  document.querySelector<HTMLButtonElement>('[data-action="speech"]')!,
+  showError, () => showAgentToast("正在聆听…"),
+);
+function toggleSpeech(): void {
+  if (!enabled("agent.input.voiceInput") || speechSubmissionPending) return;
+  void speechInput.toggle();
+  document.querySelector<HTMLTextAreaElement>("#agent-input")!.focus();
+}
 
 app.addEventListener("click", async (event) => {
   const target = (event.target as HTMLElement).closest<HTMLElement>("button, [data-entity], [data-seek-frame]"); if (!target) return;
   if ((target as HTMLButtonElement).disabled) return;
   const featureElement = target.closest<HTMLElement>("[data-feature]");
   if (featureElement && !enabled(featureElement.dataset.feature!)) return;
-  if (target.dataset.panel) { const panel = target.dataset.panel as Panel; if (!enabled(panelFeatures[panel])) return; state.panelOpen = state.panel !== panel || !state.panelOpen; state.panel = panel; renderContext(); return; }
+  if (target.dataset.panel) {
+    const panel = target.dataset.panel as Panel;
+    if (!enabled(panelFeatures[panel])) return;
+    // §7.2 (Q156): the three asset buttons share `data-panel="assets"`, so the 大类 is part of the tab.
+    const pressed = panelTabPress({ panel: state.panel, open: state.panelOpen, kind: state.library.kind }, panel, target.dataset.assetKindNav);
+    const switched = pressed.open && pressed.kind !== state.library.kind;
+    state.panelOpen = pressed.open;
+    state.panel = panel;
+    state.library.kind = pressed.kind as LibraryKind;
+    if (switched) state.library.category = null;
+    renderContext();
+    return;
+  }
   // §7.3 (Q90): a mark is a manual read of the clip, so it stops the clock like the step buttons do.
   if (target.dataset.seekFrame !== undefined) { pausePlayback(); showFrame(Number(target.dataset.seekFrame)); return; }
   if (target.dataset.timeline) { playbackControl(target.dataset.timeline); return; }
@@ -2315,8 +2362,7 @@ app.addEventListener("click", async (event) => {
   // `data-feature` guard a few lines up, so one key still decides one capability.
   if (target.dataset.cameraWallMode) { chooseCameraWallMode(target.dataset.cameraWallMode as SensorViewMode); return; }
   if (target.dataset.entity && enabled("panels.scene.selectEntity")) { selectEntity(Number(target.dataset.entity)); return; }
-  // §4.6 (Q93): the first rail picks the id space, the second picks one of its categories.
-  if (target.dataset.assetKindNav) { state.library.kind = target.dataset.assetKindNav as LibraryKind; state.library.category = null; renderContext(); return; }
+  // §4.6 (Q156): the 大类 lives on the rail now, so only the category rail is left in here.
   if (target.dataset.assetCategory) { state.library.category = target.dataset.assetCategory; renderContext(); return; }
   const assetKind = target.dataset.assetKind as LibraryKind | undefined;
   if (assetKind) { await chooseLibraryItem(assetKind, Number(target.dataset.assetId)); return; }
@@ -2348,7 +2394,23 @@ app.addEventListener("click", async (event) => {
   else if (action === "toggle-history") await toggleConversationHistory();
   else if (action === "speech") toggleSpeech();
 });
-app.addEventListener("submit", (event) => { event.preventDefault(); const form = event.target as HTMLFormElement; if (form.id === "agent-form" && enabled("agent.input.send")) { const input = document.querySelector<HTMLTextAreaElement>("#agent-input")!; void submitAgent(input.value); input.value = ""; } });
+let speechSubmissionPending = false;
+app.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.target as HTMLFormElement;
+  if (form.id !== "agent-form" || !enabled("agent.input.send") || speechSubmissionPending) return;
+  speechSubmissionPending = true;
+  const input = document.querySelector<HTMLTextAreaElement>("#agent-input")!;
+  input.readOnly = true;
+  try {
+    if (!await speechInput.stop()) return;
+    void submitAgent(input.value);
+    input.value = "";
+  } finally {
+    input.readOnly = false;
+    speechSubmissionPending = false;
+  }
+});
 // §7.1 (Q139): the wall's header is its handle. A pointer listener, not a mouse one, so a pen or a touch
 // drags it the same way - and these events never reach the canvas, because the panel floats above it.
 app.addEventListener("pointerdown", dragCameraWall);
@@ -2357,7 +2419,8 @@ app.addEventListener("pointerdown", dragCameraWall);
 // Shift+Enter, an IME candidate, a held key and a hidden button all keep the browser's newline.
 app.addEventListener("keydown", (event) => {
   const box = event.target as HTMLElement;
-  if (box.id !== "agent-input" || !enterSendsAgentMessage(state.features, event)) return;
+  const voiceButton = box.closest<HTMLElement>('[data-action="speech"]');
+  if ((box.id !== "agent-input" && !voiceButton) || !enterSendsAgentMessage(state.features, event)) return;
   event.preventDefault();
   box.closest("form")!.requestSubmit();
 });
@@ -2430,7 +2493,7 @@ async function loadTrajFiles(files: File[]): Promise<void> {
   }
   const request: BrowserRequest = {
     type: "browser.request",
-    request_id: crypto.randomUUID(),
+    request_id: generateBrowserID(crypto),
     action: "updateTraj",
     // §5.3: N hand-picked files are a batch of N, described the same way the gateway
     // describes a multipart push, so the decoder sees one shape.

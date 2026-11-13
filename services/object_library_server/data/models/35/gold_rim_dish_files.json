@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "gold_rim_dish.json",
+  "path": "gold_rim_dish.obj",
+  "thumbnail": "gold_rim_dish_thumbnail.png",
+  "reference": [
+    "gold_rim_dish.mtl",
+    "gold_rim_dish.png"
+  ]
+}

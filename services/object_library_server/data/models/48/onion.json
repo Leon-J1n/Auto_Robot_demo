@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "onion",
+    "object_name_Chinese": "洋葱",
+    "object_id": 48,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "半颗紫洋葱,洋葱,紫洋葱,切开洋葱",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.03599981963634491,
+      -0.03548334911465645,
+      0.04144647344946861,
+      -0.04437476024031639,
+      0.061704181134700775,
+      0.0003069974482059479
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.1,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.4,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.1,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.028,
+        3.1415,
+        0.0,
+        1.57,
+        0,
+        1,
+        0,
+        1.0471
+      ],
+      [
+        0.0,
+        0.0,
+        0.028,
+        3.1415,
+        0.0,
+        3.14,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

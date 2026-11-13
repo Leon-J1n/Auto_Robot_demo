@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "nero",
+    "object_name_Chinese": "Nero机械臂",
     "object_id": 9,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "nero"
+    "tag": "Nero机械臂,机械臂,七轴,Piper机械臂"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.04652875,
       0.74013456,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 4.8,
     "friction": {
       "format": "[sliding, torsional, rolling]",
@@ -127,13 +135,13 @@
         ]
       },
       "initial_joint_positions_rad": {
-         "joint1": 0.0,
-              "joint2": -0.8,
-              "joint3": 0.0,
-              "joint4": 1.5,
-              "joint5": -1.57,
-              "joint6": 0.0,
-              "joint7": 1.57
+        "joint1": 0.0,
+        "joint2": -0.8,
+        "joint3": 0.0,
+        "joint4": 1.5,
+        "joint5": -1.57,
+        "joint6": 0.0,
+        "joint7": 1.57
       },
       "available_connect_joints": [
         "joint7"

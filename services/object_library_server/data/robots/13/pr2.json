@@ -1,16 +1,31 @@
 {
   "semantic_properties": {
     "object_name": "pr2",
+    "object_name_Chinese": "PR2移动机器人",
     "object_id": 13,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "pr2,mobile,dual,arm"
+    "tag": "PR2移动机器人,移动机器人,双机械臂"
   },
   "geometric_properties": {
-    "AABB": [0.970504400, -0.342938308, 0.333375006, -0.333375006, 1.327124998, -0.005000000]
+    "AABB": [
+      0.9705044,
+      -0.342938308,
+      0.333375006,
+      -0.333375006,
+      1.327124998,
+      -0.005
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 170.0,
     "friction": {
       "format": "[sliding, torsional, rolling]",

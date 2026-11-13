@@ -1,16 +1,31 @@
 {
   "semantic_properties": {
     "object_name": "robotiq_2f140",
+    "object_name_Chinese": "2F-140夹爪",
     "object_id": 10,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "robotiq2f140gripper"
+    "tag": "2F-140夹爪,夹爪,电动二指大行程"
   },
   "geometric_properties": {
-    "AABB": [0.101222901, -0.101222901, 0.037500000, -0.037500000, 0.212202884, 0]
+    "AABB": [
+      0.101222901,
+      -0.101222901,
+      0.0375,
+      -0.0375,
+      0.212202884,
+      0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.3638485410356241,
     "friction": {
       "format": "[sliding, torsional, rolling]",

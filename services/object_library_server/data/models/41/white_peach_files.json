@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "white_peach.json",
+  "path": "white_peach.obj",
+  "thumbnail": "white_peach_thumbnail.png",
+  "reference": [
+    "white_peach.mtl",
+    "white_peach.png"
+  ]
+}

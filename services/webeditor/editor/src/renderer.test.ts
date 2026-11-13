@@ -816,6 +816,12 @@ describe("world sync", () => {
       // Three families on one stage have to be told apart at a glance (§4.8.6).
       const material = helpers(adapter).get(2)!.material as THREE.LineBasicMaterial;
       expect(material.color.getHex()).toBe(BOX_WIRE_COLOR);
+      expect(material.color.getHex()).toBe(0xc084fc);
+      adapter.select(2);
+      const selection = scene.children.find((child) => child.type === "Box3Helper"
+        && (child as THREE.Box3Helper).material instanceof THREE.LineBasicMaterial
+        && ((child as THREE.Box3Helper).material as THREE.LineBasicMaterial).color.getHex() === 0xfacc15);
+      expect(selection).toBeDefined();
       debug.mockRestore();
     });
 
@@ -2486,6 +2492,42 @@ describe("trajectory waypoint spheres (§7.3, Q101, Q102)", () => {
 
   const path = (key: string, trajectoryIndex: number, objectId: number, color: number, points: [number, number, number][] = [[0, 0, 0]]) =>
     ({ key, trajectoryIndex, objectId, color, points });
+
+  it("joins adjacent points in order with a thin matching translucent line", async () => {
+    const { adapter } = await stage();
+    const points: [number, number, number][] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+    adapter.setWaypointPaths([path("0:1", 0, 1, 0xff5d5d, points)], 0.01);
+    const mesh = layerMap(adapter).get("0:1")!.mesh;
+    const line = mesh.children[0] as THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
+    expect(line.isLine).toBe(true);
+    expect(line.type).toBe("Line");
+    expect(Array.from(line.geometry.getAttribute("position").array)).toEqual(points.flat());
+    expect(line.geometry.drawRange.count).toBe(3);
+    expect(line.userData.waypoint).toBe(true);
+    expect(line.material.linewidth).toBe(1);
+    const spheres = mesh.material as THREE.MeshBasicMaterial;
+    expect(line.material.color.getHex()).toBe(spheres.color.getHex());
+    for (const material of [spheres, line.material]) {
+      expect(material.transparent).toBe(true);
+      expect(material.opacity).toBe(0.5);
+      expect(material.depthWrite).toBe(false);
+    }
+    expect((mesh.geometry as THREE.SphereGeometry).parameters.radius).toBe(0.01);
+    adapter.setWaypointVisibility(new Set());
+    expect(line.parent!.visible).toBe(false);
+    adapter.setWaypointVisibility(new Set(["0:1"]));
+    expect(line.parent!.visible).toBe(true);
+    adapter.setWaypointPaths([path("0:1", 0, 1, 0xff5d5d, [[9, 8, 7]])], 0.01);
+    expect(layerMap(adapter).get("0:1")!.mesh.children[0]).toBe(line);
+    expect(line.geometry.drawRange.count).toBe(1);
+    expect(Array.from(line.geometry.getAttribute("position").array).slice(0, 3)).toEqual([9, 8, 7]);
+    const geometryDispose = vi.spyOn(line.geometry, "dispose");
+    const materialDispose = vi.spyOn(line.material, "dispose");
+    adapter.setWaypointPaths([path("0:1", 0, 1, 0xff5d5d, [])], 0.01);
+    expect(mesh.parent).toBeNull();
+    expect(geometryDispose).toHaveBeenCalledTimes(1);
+    expect(materialDispose).toHaveBeenCalledTimes(1);
+  });
 
   it("takes the mean of the deepest leaf links in the world file's own axes (§7.3, Q102)", async () => {
     const { adapter } = await stage();

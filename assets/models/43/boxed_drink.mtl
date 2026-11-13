@@ -1,0 +1,6 @@
+# Texture supplies the base color; neutral Kd prevents duplicate tint.
+
+newmtl m_opaque__cardboard__boxeddrink_e01
+Ka 1 1 1
+Kd 1 1 1
+map_Kd boxed_drink.png

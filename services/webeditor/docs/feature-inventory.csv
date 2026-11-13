@@ -18,7 +18,7 @@ diagnostics,False,absent,literal,Chrome and status,WIRED
 diagnostics.entries,True,absent,literal,Chrome and status,WIRED
 diagnostics.toggle,True,absent,literal,Chrome and status,WIRED
 navigation,True,absent,literal,Left rail,WIRED
-navigation.assets,True,absent,literal,Left rail,WIRED
+navigation.assets,True,absent,interpolated,Left rail,WIRED
 navigation.assets.prefabs,True,absent,interpolated,Left rail,WIRED
 navigation.assets.presets,True,absent,interpolated,Left rail,WIRED
 navigation.assets.robots,True,absent,interpolated,Left rail,WIRED

@@ -1,0 +1,244 @@
+# Blender 5.2.3 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl baked_Backlit_LCD_72_5_F
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_0.png
+map_Bump -bm 1.000000 digital_thermometer_tex_2.png
+
+newmtl baked_Face_panel
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_4.png
+map_Bump -bm 1.000000 digital_thermometer_tex_6.png
+
+newmtl baked_Face_panel_reveal
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_7.png
+map_Bump -bm 1.000000 digital_thermometer_tex_9.png
+
+newmtl baked_Fastener_well_1
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_12.png
+map_Bump -bm 1.000000 digital_thermometer_tex_14.png
+
+newmtl baked_Fastener_well_2
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_16.png
+map_Bump -bm 1.000000 digital_thermometer_tex_18.png
+
+newmtl baked_Grip_ribs_Lower
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_20.png
+map_Bump -bm 1.000000 digital_thermometer_tex_22.png
+
+newmtl baked_Grip_ribs_Upper
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_24.png
+map_Bump -bm 1.000000 digital_thermometer_tex_26.png
+
+newmtl baked_LCD_inner_gasket
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_28.png
+map_Bump -bm 1.000000 digital_thermometer_tex_30.png
+
+newmtl baked_LCD_pocket_liner
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_32.png
+map_Bump -bm 1.000000 digital_thermometer_tex_34.png
+
+newmtl baked_Left_arrow_button_FIXED
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_36.png
+map_Bump -bm 1.000000 digital_thermometer_tex_38.png
+
+newmtl baked_Left_arrow_button_FIXED_Seat
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_40.png
+map_Bump -bm 1.000000 digital_thermometer_tex_42.png
+
+newmtl baked_Lower_shell
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_44.png
+map_Bump -bm 1.000000 digital_thermometer_tex_46.png
+
+newmtl baked_Probe_collar_bushing
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_48.png
+map_Bump -bm 1.000000 digital_thermometer_tex_50.png
+
+newmtl baked_Recessed_assembly_screw_1
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_52.png
+map_Bump -bm 1.000000 digital_thermometer_tex_54.png
+
+newmtl baked_Recessed_assembly_screw_2
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_56.png
+map_Bump -bm 1.000000 digital_thermometer_tex_58.png
+
+newmtl baked_Right_arrow_button_FIXED
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_60.png
+map_Bump -bm 1.000000 digital_thermometer_tex_62.png
+
+newmtl baked_Right_arrow_button_FIXED_Seat
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_64.png
+map_Bump -bm 1.000000 digital_thermometer_tex_66.png
+
+newmtl baked_Shaft_entry_seal
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_68.png
+map_Bump -bm 1.000000 digital_thermometer_tex_70.png
+
+newmtl baked_Shell_parting_line
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_72.png
+map_Bump -bm 1.000000 digital_thermometer_tex_74.png
+
+newmtl baked_Silver_LCD_bezel
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_76.png
+map_Bump -bm 1.000000 digital_thermometer_tex_78.png
+
+newmtl baked_Stainless_steel_probe
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_80.png
+map_Bump -bm 1.000000 digital_thermometer_tex_82.png
+
+newmtl baked_Upper_shell
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd digital_thermometer_tex_84.png
+map_Bump -bm 1.000000 digital_thermometer_tex_86.png

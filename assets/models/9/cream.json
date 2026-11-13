@@ -1,17 +1,32 @@
 {
   "semantic_properties": {
     "object_name": "cream",
+    "object_name_Chinese": "护发霜",
     "object_id": 9,
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "yellow",
+    "tag": "护发霜,洗护用品,长方体盒,护肤霜",
     "can_place": false
   },
   "geometric_properties": {
-    "AABB": [0.027845, -0.028156, 0.042623, -0.041480, 0.223457, -0.000007]
+    "AABB": [
+      0.027845,
+      -0.028156,
+      0.042623,
+      -0.04148,
+      0.223457,
+      -7e-06
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.2,
     "friction": {
       "format": "[sliding, torsional, rolling]",

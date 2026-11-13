@@ -32,12 +32,14 @@ ROOT = Path(__file__).resolve().parent
 NAME = "WebEditor"
 RELEASE_FILES = [
     "local_gateway.py",
+    "speech_relay.py",
     "digest.py",
     "gateway_state.py",
     "features.json",
     "requirements.txt",
     "README.md",
     "launch_gateway.bat",
+    "launch_gateway.py",
 ]
 RELEASE_DIRS = ["dist", "config", "docs", "examples"]
 IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store")

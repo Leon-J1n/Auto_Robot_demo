@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "green_apple.json",
+  "path": "green_apple.obj",
+  "thumbnail": "green_apple_thumbnail.png",
+  "reference": [
+    "green_apple.mtl",
+    "green_apple.png"
+  ]
+}

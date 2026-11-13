@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "pear",
+    "object_name_Chinese": "梨",
+    "object_id": 38,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "梨,水果,生鲜,梨子",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.0237255,
+      -0.0237255,
+      0.0236215,
+      -0.0236215,
+      0.077079001,
+      0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.2,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.4,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.2,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0.0,
+        0.0,
+        0.026,
+        3.1415,
+        0.0,
+        0.0,
+        0,
+        1,
+        0,
+        1.0471
+      ],
+      [
+        0.0,
+        0.0,
+        0.026,
+        3.1415,
+        0.0,
+        1.5707,
+        0,
+        1,
+        0,
+        1.0471
+      ]
+    ]
+  }
+}

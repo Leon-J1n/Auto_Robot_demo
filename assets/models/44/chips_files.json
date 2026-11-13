@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "chips.json",
+  "path": "chips.obj",
+  "thumbnail": "chips_thumbnail.png",
+  "reference": [
+    "chips.mtl",
+    "chips.png"
+  ]
+}

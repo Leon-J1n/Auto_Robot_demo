@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "white_bowl.json",
+  "path": "white_bowl.obj",
+  "thumbnail": "white_bowl_thumbnail.png",
+  "reference": [
+    "white_bowl.mtl",
+    "white_bowl.png"
+  ]
+}

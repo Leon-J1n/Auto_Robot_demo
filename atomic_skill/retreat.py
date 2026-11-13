@@ -6,6 +6,7 @@ from scipy.spatial.transform import Rotation
 
 from atomic_action.motion.common.interaction import planning_failed_without_motion
 from planning import candidate_pose, run_candidate_search, search_distances
+from atomic_skill.pose_precheck import ordered_distances
 
 
 class RetreatSkill:
@@ -113,11 +114,14 @@ class RetreatSkill:
         except (TypeError, ValueError) as exc:
             return self._fail("INVALID_RETREAT_REQUEST", str(exc))
 
-        def attempt(distance):
-            candidate_transform = self.candidate_pose(
+        def transform_for(distance):
+            return self.candidate_pose(
                 np.block([[rotation, position[:, None]],
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance
             )
+
+        def attempt(distance):
+            candidate_transform = transform_for(distance)
             before = e.backend.physics_steps
             moved = e._move(
                 f"retreat_{int(round(float(distance) * 1000))}mm",
@@ -133,13 +137,16 @@ class RetreatSkill:
                     "strategy_params": {"max_joint_step": 0.8},
                 })
             if moved:
+                e.successful_distance_m = float(distance)
                 return True
             failed = e.phases[-1]
             if not planning_failed_without_motion(failed, e.backend, before):
                 return False
             return None
         return run_candidate_search(
-            search_distances(params, minimum=minimum, maximum=maximum, step=step, label='retreat'),
+            ordered_distances(e,
+                search_distances(params, minimum=minimum, maximum=maximum, step=step, label='retreat'),
+                transform_for, preferred=params.get('_preferred_distance_m')),
             attempt)
 
 

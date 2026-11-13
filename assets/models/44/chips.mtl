@@ -1,0 +1,6 @@
+# Texture supplies the base color; neutral Kd prevents duplicate tint.
+
+newmtl m_opaque__plastic__chips_a01
+Ka 1 1 1
+Kd 1 1 1
+map_Kd chips.png

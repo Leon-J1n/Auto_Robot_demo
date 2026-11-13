@@ -1,6 +1,0 @@
-newmtl surface
-Ka 0.05 0.05 0.05
-Kd 0.22 0.23 0.25
-Ks 0.12 0.12 0.12
-Ns 32
-map_Kd leg.png

@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "plate.json",
+  "path": "plate.obj",
+  "thumbnail": "plate_thumbnail.png",
+  "reference": [
+    "plate.mtl",
+    "plate.png"
+  ]
+}

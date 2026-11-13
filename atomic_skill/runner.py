@@ -433,6 +433,8 @@ class TaskSkillExecutor:
                 reference['world_from_control'])[:3, :3].tolist()
             parameters['grasp_offset_local'] = np.asarray(
                 reference['control_from_grasp'])[:3, 3].tolist()
+            parameters['_preferred_distance_m'] = getattr(
+                self, '_pose_search_distances', {}).get(str(target))
             row['retreat_reference'] = {'target_id': target, **deepcopy(reference)}
         elif command['skill_name'] == 'approach':
             if self.resolver is None:
@@ -500,6 +502,10 @@ class TaskSkillExecutor:
             if isinstance(execution_result, dict):
                 execution_result.pop('frames', None)
         row.update(result, **({'target_resolution': resolved} if resolved is not None else {}))
+        if result.get('success') and result.get('successful_distance_m') is not None:
+            if not hasattr(self, '_pose_search_distances'):
+                self._pose_search_distances = {}
+            self._pose_search_distances[str(command['parameters']['target'])] = result['successful_distance_m']
         if result.get('success') and command['skill_name'] == 'approach':
             refine = getattr(self.resolver, 'refine_after_approach', None)
             if (callable(refine) and (resolved or {}).get('visual_estimate')

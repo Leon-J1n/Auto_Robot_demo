@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GROUP_LABELS, LIBRARY_KINDS, UNGROUPED, categoryLabel, groupAssets } from "./assets";
+import { GROUP_LABELS, LIBRARY_KINDS, UNGROUPED, categoryLabel, groupAssets, kindLabel } from "./assets";
 import type { LibraryItem } from "./library";
 
 const item = (id: number, name: string, category?: string): LibraryItem =>
@@ -51,6 +51,39 @@ describe("categoryLabel", () => {
 describe("the panel's groups", () => {
   it("covers the three id spaces in display order", () => {
     expect(LIBRARY_KINDS).toEqual(["scene", "model", "robot"]);
-    expect(LIBRARY_KINDS.map((kind) => GROUP_LABELS[kind])).toEqual(["预设场景", "预制模型", "机械臂"]);
+    expect(LIBRARY_KINDS.map((kind) => GROUP_LABELS[kind])).toEqual(["场景", "模型", "机器人"]);
+  });
+});
+
+/**
+ * §4.7 (Q159): the rail says OLS's first level, not a word the frontend made up. The strings
+ * below are the ones the installed library actually publishes - note `机器人`, which the
+ * interface doc still calls `机械臂`: the data is the authority, not the prose.
+ */
+describe("the rail's word comes from OLS's first level (§4.7, Q159)", () => {
+  it("reads the first level of the categories OLS published, per id space", () => {
+    expect(kindLabel("scene", ["场景.桌面操作"])).toBe("场景");
+    expect(kindLabel("model", ["模型.果蔬", "模型.玩具", "模型.生活用品"])).toBe("模型");
+    expect(kindLabel("robot", ["机器人.单臂", "机器人.夹爪", "机器人.摄像机"])).toBe("机器人");
+    // The declared fallback happens to be the same word today, so a renamed first level is the
+    // only case that proves the label was read from OLS rather than from the constant.
+    expect(kindLabel("scene", ["现场.桌面操作"])).toBe("现场");
+  });
+
+  it("follows OLS when it renames a 大类, instead of keeping the frontend's word", () => {
+    expect(kindLabel("robot", ["机械臂.单臂"])).toBe("机械臂");
+    expect(kindLabel("model", ["零件.紧固件"])).toBe("零件");
+  });
+
+  it("falls back to the declared name when there is no first level to read", () => {
+    // No answer yet, an unreachable library, or categories published without a dot.
+    expect(kindLabel("robot", [])).toBe("机器人");
+    expect(kindLabel("model", ["自定义"])).toBe("模型");
+    expect(kindLabel("scene", [".桌面操作"])).toBe("场景");
+  });
+
+  it("takes the first dotted category, so an unclassified entry cannot rename the tab", () => {
+    expect(kindLabel("model", ["自定义", "零件.紧固件"])).toBe("零件");
+    expect(kindLabel("robot", ["机械臂.单臂", "零件.紧固件"])).toBe("机械臂");
   });
 });

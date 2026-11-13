@@ -244,6 +244,8 @@ def _write_command_planning_timing(output_dir, index, row):
         'success': row.get('success'),
         'target_resolution_timing_s': target_resolution_timing or {},
         'wrist_observation': row.get('wrist_observation'),
+        'pose_search_precheck': row.get('pose_search_precheck', []),
+        'successful_distance_m': row.get('successful_distance_m'),
         'target_resolution_diagnostics': {
             key: target_resolution[key] for key in
             ('resolution_timing_s', 'placement_height_attempts', 'grasp_depth_attempts',

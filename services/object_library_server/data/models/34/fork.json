@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "fork",
+    "object_name_Chinese": "餐叉",
+    "object_id": 34,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "餐叉,餐具,刀叉,叉子",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.0147385,
+      -0.0147385,
+      0.096423,
+      -0.096423,
+      0.028129,
+      0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.106,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.3,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.5,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        -0.0,
+        0.01,
+        0.022,
+        3.1415,
+        0.0,
+        1.57,
+        0,
+        1,
+        0,
+        1.04
+      ],
+      [
+        -0.0,
+        0.01,
+        0.022,
+        3.1415,
+        0.0,
+        -1.57,
+        0,
+        1,
+        0,
+        1.04
+      ]
+    ]
+  }
+}

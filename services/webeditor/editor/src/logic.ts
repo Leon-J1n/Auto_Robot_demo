@@ -1,4 +1,8 @@
 import type { CameraProps, FeatureFlags, LocalAxesProps, PixelBox, RuntimeConfig, Vec3 } from "../../contracts/types";
+
+export function agentDetailsDisabled(runtime: Pick<RuntimeConfig, "disable_agent_details"> | null | undefined): boolean {
+  return runtime?.disable_agent_details === true;
+}
 export type AgentPlanItem = { step: string; status: "completed" | "in_progress" | "pending" | "failed" };
 
 /** §7.3/Q97: what a missing or unusable `ghost_pose_opacity` reads as. */
@@ -57,7 +61,7 @@ export function ghostOpacity(runtime: Pick<RuntimeConfig, "ghost_pose_opacity"> 
 }
 
 /** §7.3/Q101: what a missing or unusable `traj_waypoint_radius` reads as, in world metres. */
-export const DEFAULT_WAYPOINT_RADIUS = 0.02;
+export const DEFAULT_WAYPOINT_RADIUS = 0.01;
 /** §7.3/Q101: what a missing or unusable `traj_waypoint_stride_frames` reads as. */
 export const DEFAULT_WAYPOINT_STRIDE_FRAMES = 10;
 
@@ -472,6 +476,39 @@ export function localAxesEnabled(features: FeatureFlags, checked: boolean): bool
  */
 export function panelMarkupChanged(previous: string | null, next: string): boolean {
   return previous !== next;
+}
+
+/** Which rail tab is pressed, and what the panel is showing. `kind` names one 大类 of the asset view. */
+export interface PanelTabState { panel: string; open: boolean; kind: string }
+
+/**
+ * §7.2 (**Q156**): a rail press toggles the tab it names. The three asset buttons all name the
+ * `assets` panel and differ only by `kind`, so "the tab I am already on" has to include the 大类 -
+ * otherwise switching from 预设场景 to 机械臂 would read as a second press on the same tab and
+ * close the panel the user just asked to look at.
+ */
+export function panelTabPress(current: PanelTabState, panel: string, kind?: string): { open: boolean; kind: string } {
+  const same = current.panel === panel && (kind === undefined || kind === current.kind);
+  const open = !same || !current.open;
+  return { open, kind: open && kind !== undefined ? kind : current.kind };
+}
+
+/**
+ * §7.2 (**Q156**): the same judgement read the other way, for the `active` class. Without the `kind`
+ * half all three asset buttons light up together, because they share one `data-panel`.
+ */
+export function panelTabActive(tab: { panel: string; kind?: string }, current: PanelTabState): boolean {
+  return current.open && tab.panel === current.panel && (tab.kind === undefined || tab.kind === current.kind);
+}
+
+/**
+ * §7.5 (**Q157**): the asset panel borrows the Agent column while it is open. `contextEnabled`
+ * is part of the question because a switched-off context panel shows no assets either - collapsing
+ * the Agent panel then would leave the workspace with two empty columns.
+ */
+export function agentPanelVisible(view: { agentEnabled: boolean; contextEnabled: boolean; panel: string; panelOpen: boolean }): boolean {
+  const assetsShown = view.contextEnabled && view.panelOpen && view.panel === "assets";
+  return view.agentEnabled && !assetsShown;
 }
 
 /**

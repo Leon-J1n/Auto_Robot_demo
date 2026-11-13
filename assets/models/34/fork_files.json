@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "fork.json",
+  "path": "fork.obj",
+  "thumbnail": "fork_thumbnail.png",
+  "reference": [
+    "fork.mtl",
+    "fork.png"
+  ]
+}

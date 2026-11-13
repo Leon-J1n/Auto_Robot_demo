@@ -64,6 +64,15 @@ class RetreatFromCurrentPoseTests(unittest.TestCase):
         self.assertFalse(e.checker.allow_gripper_environment_contact)
         self.assertEqual(self.command['parameters'], {'target': 8})
 
+    def test_retreat_prefers_previous_successful_target_distance_and_validates_again(self):
+        self.executor._pose_search_distances = {'8': .09}
+        self.assertTrue(self.run_retreat()['success'])
+        request = self.executor.execute_motion.call_args.args[0]
+        np.testing.assert_allclose(list(request['target']['position'].values()), [.44, -.20, .99])
+        self.assertEqual(request['motion']['path_constraint'], 'hard')
+        self.assertTrue(request['constraints']['avoid_collision'])
+        self.assertEqual(self.executor._pose_search_distances['8'], .09)
+
     def test_direction_uses_original_frame_even_when_current_tcp_has_rotated(self):
         current_rotation = np.eye(3)
         self.executor.backend.get_end_effector_pose.return_value['rotation_matrix'] = current_rotation

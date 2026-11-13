@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "horse_figurine.json",
+  "path": "horse_figurine.obj",
+  "thumbnail": "horse_figurine_thumbnail.png",
+  "reference": [
+    "horse_figurine.mtl",
+    "horse_figurine.png"
+  ]
+}

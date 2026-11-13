@@ -28,6 +28,7 @@ from aiohttp import WSMsgType, web
 from aiohttp.http_exceptions import HttpProcessingError
 
 from digest import scene_digest
+from speech_relay import SpeechRelay
 from gateway_state import (
     MAX_ALLOCATE_COUNT,
     MAX_UINT32,
@@ -67,6 +68,7 @@ UNANSWERED_CODES = frozenset({"NO_BROWSER_CONNECTED", "BROWSER_TIMEOUT"})
 DEFAULT_CONSTANT_CONFIG: dict[str, Any] = {
     "gateway": {"host": "0.0.0.0", "port": 8099},
     "library_server_url": "http://127.0.0.1:8000",
+    "speech_service_url": "http://127.0.0.1:8600",
     "cos_base_url": "",
     "max_payload_bytes": 104857600,
     "browser_request_timeout_seconds": 10,
@@ -78,7 +80,7 @@ DEFAULT_CONSTANT_CONFIG: dict[str, Any] = {
     "ghost_pose_opacity": 0.5,
     # §7.3/Q101: the trajectory waypoint spheres -- radius in world metres and one point every
     # N frames. Browser-only, like the opacity above.
-    "traj_waypoint_radius": 0.02,
+    "traj_waypoint_radius": 0.01,
     "traj_waypoint_stride_frames": 10,
     # §4.8.5/Q118: whether the stage projects shadows when `viewport.shadows` has hidden the
     # toolbar checkbox. Browser-only, like the three above, and the browser's own default is
@@ -97,6 +99,7 @@ DEFAULT_CONSTANT_CONFIG: dict[str, Any] = {
     # browser never calls the Agent service, so they are not fields of RuntimeConfig.
     "agent_service_url": "http://127.0.0.1:8500",
     "agent_poll_interval_seconds": 5,
+    "disable_agent_details": False,
     "agent_request_timeout_seconds": 10,
 }
 NESTED_CONFIG_KEYS = ("gateway", "camera_preview")
@@ -2240,9 +2243,11 @@ class StandaloneGateway:
     def _cache_world(self, document: dict[str, Any]) -> None:
         """§1.4: keep the last world this gateway saw, for the record and for restart diagnostics.
 
-        It is not a read source. 流程文档 §5.1 (2026-11-05) closed the `/getWorld` fallback: a late
-        browser report can move the persisted identity onto an older scene, and replaying the cache
-        would hand that older scene to a reader that is looking at something else.
+        It is not a read source for callers. 流程文档 §5.1 (2026-11-05) closed that `/getWorld`
+        fallback: a late browser report can move the persisted identity onto an older scene, and
+        replaying the cache would hand that older scene to a reader that is looking at something
+        else. Q160 reopened it for exactly one reader -- the bound browser reclaiming its own last
+        report after a refresh (`_reclaimed_world`).
         """
         self.world_cache = document
 
@@ -2406,9 +2411,9 @@ class StandaloneGateway:
 
     def _world_response(self, document: dict[str, Any], *,
                         identity: dict[str, Any], browser_id: str | None,
-                        playback_state: Any = None) -> web.Response:
-        """§5.1: every header describes this body, from this read -- and this read is always live."""
-        headers = {"X-World-Source": "live",
+                        playback_state: Any = None, source: str = "live") -> web.Response:
+        """§5.1: every header describes this body, from this read -- live, or Q160's self-claimed snapshot."""
+        headers = {"X-World-Source": source,
                    "X-Scene-Sub-Version": f"{identity['scene_sub_version']}",
                    "X-Scene-Digest": str(identity["sceneDigest"]),
                    "X-Next-Object-ID": f"{self.state.next_object_id}",
@@ -3573,13 +3578,14 @@ class StandaloneGateway:
         return identity
 
     async def get_world(self, request: web.Request) -> web.Response:
-        """§5.8/§5.9: read the world back, live from the bound browser -- and only live.
+        """§5.8/§5.9: read the world back, live from the bound browser -- live first, always.
 
         §5.1's headers are the point of this route: an integer header, a digest and a body have to
-        come out of the *same* read. There is no cache branch any more (流程文档 §5.1, 2026-11-05):
-        a browser report that arrives late can move the persisted identity onto an older scene
-        (换场景是无条件采纳，§1.2 第 ④ 条), and the cache would then answer the reader that is
-        looking at something else with that older scene -- once as a race, once as a fact.
+        come out of the *same* read. There is no cache branch for a caller (流程文档 §5.1,
+        2026-11-05): a browser report that arrives late can move the persisted identity onto an
+        older scene (换场景是无条件采纳，§1.2 第 ④ 条), and the cache would then answer the reader
+        that is looking at something else with that older scene. Q160's `_reclaimed_world` is the
+        one exception, and its reader is the bound browser itself.
         """
         background = self._background_context(request)
         if background is not None:
@@ -3604,9 +3610,45 @@ class StandaloneGateway:
         # now" means; nothing here pretends a stored document is one.
         browser_id = request.query.get("browser_id") or self.state.browser_id
         use_lease_snapshot = request.query.get("lease_snapshot") == "1"
-        read = await self._read_live_world(browser_id, use_lease_snapshot=use_lease_snapshot)
+        try:
+            read = await self._read_live_world(browser_id, use_lease_snapshot=use_lease_snapshot)
+        except BrowserError as error:
+            snapshot = self._reclaimed_world(request, browser_id, error)
+            if snapshot is None:
+                raise
+            return snapshot
         return self._world_response(read.document, identity=read.identity,
                                     browser_id=browser_id, playback_state=read.playback_state)
+
+    def _reclaimed_world(self, request: web.Request, browser_id: str | None,
+                         error: BrowserError) -> web.Response | None:
+        """§5.8 (Q160): the one reader a 503 must not silence -- the bound browser itself.
+
+        `start()` reads the authoritative world *before* it opens its socket, so that read always
+        finds no browser connected. Q111 removed the cache behind it, which left a refresh with an
+        empty world that it then reported, and an unconditional scene switch adopted that empty
+        world over the scene on disk. The document handed back here is the one this very browser
+        last reported, so there is no other 现场 it could be standing in for.
+
+        Every guard is a way for this to stay 503: a caller carries no `X-WebEditor-Browser-ID`, a
+        browser that is connected but silent is a 504, and a cache whose four-tuple has drifted from
+        the persisted identity describes something nobody agreed to.
+        """
+        if error.status != 503 or error.code != "NO_BROWSER_CONNECTED":
+            return None
+        if browser_id is None or browser_id != self.state.browser_id:
+            return None
+        if request.headers.get("X-WebEditor-Browser-ID") != browser_id:
+            return None
+        document = self.world_cache
+        if not isinstance(document, dict):
+            return None
+        identity = scene_identity(document)
+        if identity != self.state.scene_identity:
+            return None
+        return self._world_response(self._copy_json(document), identity=identity,
+                                    browser_id=browser_id, playback_state="stopped",
+                                    source="snapshot")
 
     async def static(self, request: web.Request) -> web.StreamResponse:
         # §11.7 (Q95): a release bundle serves the built SPA. Real files under dist/
@@ -3684,6 +3726,9 @@ def create_app(config: dict[str, Any] | None = None, *,
     # Registered before the catch-all below, or the SPA shell would answer it with index.html (坑 2).
     app.router.add_get("/tasks/{taskID}/artifacts/{name}", gateway.task_artifact)
     # §5.15/§10.1: no cancel route -- the Agent service has no cancel interface.
+    speech = SpeechRelay(gateway.config)
+    app.router.add_get("/speech", speech.handle)
+    app.on_shutdown.append(speech.cleanup)
     app.router.add_get("/events", gateway.events)
     app.router.add_get("/", gateway.static)
     app.router.add_get("/{route:.*}", gateway.static)

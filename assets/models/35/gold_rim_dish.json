@@ -1,0 +1,62 @@
+{
+  "semantic_properties": {
+    "object_name": "gold_rim_dish",
+    "object_name_Chinese": "金边瓷盘",
+    "object_id": 35,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "菜盘,餐具,盘,盘子,瓷盘",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.123191502,
+      -0.123191502,
+      0.123156998,
+      -0.123156998,
+      0.052856,
+      0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 0.606,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.3,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.2,
+    "scale": [
+      1.0,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 1,
+    "poses": [
+      [
+        0,
+        0,
+        0.1,
+        3.14,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ]
+    ]
+  }
+}

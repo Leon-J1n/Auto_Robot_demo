@@ -299,7 +299,7 @@ function depthAt(bytes, width, column, row) {
 
     // §4.6 - the asset panel reads three OLS id spaces and a preset scene replaces
     // the world through the same pipeline as Load Scene.
-    await page.locator('[data-panel="assets"]').click();
+    await page.locator('.rail [data-asset-kind-nav="scene"]').click();
     await page.waitForFunction(() => document.querySelectorAll('.asset-card').length > 0);
     // The panel must show the whole library, so the expected total is counted from
     // OLS rather than pinned: the library grows when the asset side adds scenes.
@@ -318,19 +318,18 @@ function depthAt(bytes, width, column, row) {
       }
       throw new Error(`OLS did not answer /list?type=${kind}`);
     }
-    // §4.6 (Q93): the list shows one category at a time, so reaching a row means picking
-    // its 大类 on the first rail and its category on the second. The rails are only on show
-    // while the context panel is on Assets - and its own tab is a toggle (main.ts:1077), so
-    // the click is only an undo of the panel another check left open, never a blind press.
-    async function showAssetsPanel() {
-      if (await page.locator('.asset-kinds').isVisible()) return;
-      await page.locator('[data-panel="assets"]').click();
-      await page.locator('.asset-kinds').waitFor({ state: 'visible' });
+    // §4.6 (Q156): the 大类 is a rail button now, and the panel keeps one category rail.
+    // Reaching a row means picking its 大类 on the left rail and its category in the panel.
+    // The rail button is a toggle keyed on (panel, 大类) - main.ts:panelTabPress - so it is
+    // only pressed when that 大类 is not already the lit one, never blindly.
+    async function showAssetKind(kind) {
+      const tab = page.locator(`.rail [data-asset-kind-nav="${kind}"]`);
+      if (!(await tab.evaluate(node => node.classList.contains('active')))) await tab.click();
+      await page.locator('.asset-categories').waitFor({ state: 'visible' });
     }
     async function openAssetRow(kind, id) {
       const category = ((await libraryItems(kind)).find(item => item.id === id) || {}).category || '未分类';
-      await showAssetsPanel();
-      await page.locator(`.asset-kind[data-asset-kind-nav="${kind}"]`).click();
+      await showAssetKind(kind);
       await page.locator(`.asset-category[data-asset-category="${category}"]`).click();
       const row = page.locator(`[data-asset-kind="${kind}"][data-asset-id="${id}"]`);
       await row.waitFor();
@@ -342,20 +341,29 @@ function depthAt(bytes, width, column, row) {
     );
     assert.equal((await page.locator('#panel-count').textContent()).trim(), String(libraryTotal),
       `${libraryTotal} = every scene + model + robot OLS lists`);
-    // §4.6/§7.1 (Q92/Q93): two vertical rails, one item per row, no search box, no
-    // refresh button and no command bar left in the DOM.
-    assert.deepEqual(await page.locator('.asset-kinds .asset-kind span').allTextContents(),
-      ['预设场景', '预制模型', '机械臂'], 'the first rail is the three id spaces (§4.6)');
+    // §4.6/§4.7 (Q92/Q93/Q156): the three 大类 are rail buttons, the panel keeps one category
+    // rail, and no search box, refresh button or command bar is left in the DOM.
+    assert.deepEqual(await page.locator('.rail [data-asset-kind-nav] span').allTextContents(),
+      ['场景', '模型', '机器人'], 'the rail says OLS\'s own first level (§4.7 Q156/Q159)');
     const shape = await page.evaluate(() => ({
-      kinds: document.querySelectorAll('.asset-kinds > button').length,
+      kinds: document.querySelectorAll('.rail [data-asset-kind-nav]').length,
       categories: document.querySelectorAll('.asset-categories > button').length,
       rows: document.querySelectorAll('.asset-rows > .asset-card').length,
       gridCells: document.querySelectorAll('.asset-cards').length,
+      // §4.6 (Q158): the list is a two-column grid, so the column count is a computed style, not a class.
+      columns: getComputedStyle(document.querySelector('.asset-rows')).gridTemplateColumns.split(' ').length,
+      cardStacked: getComputedStyle(document.querySelector('.asset-card')).flexDirection,
+      wider: document.querySelector('.workspace').classList.contains('assets-open'),
+      innerKindRail: document.querySelectorAll('.asset-kinds, .asset-kind').length,
       withdrawn: document.querySelectorAll('#asset-search, [data-action="refresh-assets"]').length,
       topBar: document.querySelectorAll('.command-bar, #connection-label, #connection-dot').length,
     }));
-    assert.ok(shape.categories >= 1 && shape.rows >= 1, `the second rail and the list render: ${JSON.stringify(shape)}`);
-    assert.equal(shape.gridCells, 0, 'a row is a row, not a card grid cell');
+    assert.ok(shape.categories >= 1 && shape.rows >= 1, `the category rail and the list render: ${JSON.stringify(shape)}`);
+    assert.equal(shape.innerKindRail, 0, 'Q156: the 大类 rail moved out of the panel');
+    assert.equal(shape.gridCells, 0, 'the withdrawn .asset-cards host stays out of the DOM');
+    assert.equal(shape.columns, 2, 'Q158: the list is two columns');
+    assert.equal(shape.cardStacked, 'column', 'Q158: thumbnail over name');
+    assert.equal(shape.wider, true, 'Q158: the open asset panel borrows the Agent width');
     assert.equal(shape.withdrawn, 0, 'Q93: the filter box and the refresh button are gone');
     assert.equal(shape.topBar, 0, 'Q92: the command bar is gone');
     await openAssetRow('scene', 2);
@@ -827,8 +835,6 @@ function depthAt(bytes, width, column, row) {
     // follower/spring links now declare `<mimic>` against `robotiq_2f85_right_driver_joint`,
     // so the scene still commands exactly one joint. OLS serves the scene, and its
     // `joint_sequence` names that same driver joint.
-    await page.locator('[data-panel="assets"]').click();
-    await page.waitForFunction(() => document.querySelectorAll('.asset-card').length > 0);
     await openAssetRow('scene', 1);
     await page.waitForFunction(() => /ur5e_table_empty/.test(document.querySelector('#status-primary')?.textContent || ''));
     const objFetched = fetched.filter(item => /type=robot&id=2/.test(item.url) && /\.obj$/i.test(item.url) && item.status === 200);

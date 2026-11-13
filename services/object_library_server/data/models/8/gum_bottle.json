@@ -1,17 +1,32 @@
 {
   "semantic_properties": {
     "object_name": "gum_bottle",
+    "object_name_Chinese": "口香糖",
     "object_id": 8,
     "deformable": false,
     "scalable": false,
     "interactable": true,
-    "tag": "pink",
+    "tag": "口香糖,容器,整盒装,胶瓶",
     "can_place": false
   },
   "geometric_properties": {
-    "AABB": [0.035054, -0.034523, 0.105430, -0.104976, 0.119399, -0.000010]
+    "AABB": [
+      0.035054,
+      -0.034523,
+      0.10543,
+      -0.104976,
+      0.119399,
+      -1e-05
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
+    ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.2,
     "friction": {
       "format": "[sliding, torsional, rolling]",

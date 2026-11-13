@@ -1,2 +1,2 @@
-AppVersion 1.0.4-dev
-build at 2026-10-22T10:37:19
+AppVersion 1.0.8-8f84f1f
+built from web-frontend-frontend-dev (2).zip

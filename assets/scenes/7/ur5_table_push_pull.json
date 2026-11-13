@@ -3,6 +3,7 @@
   "scene_version": 3,
   "scene_id": 7,
   "scene_name": "ur5_table_push_pull",
+  "scene_name_Chinese": "拉抽屉",
   "objects": [
     {
       "object_id_in_scene": 0,
@@ -140,6 +141,22 @@
             ],
             "show_labels": false
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": true,
+            "mass_kg": 22.0,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.8,
+                0.01,
+                0.001
+              ]
+            },
+            "restitution": 0.05
+          }
         }
       ]
     },
@@ -240,6 +257,22 @@
             "length": 0.3,
             "show_labels": false
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 20.9949,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                1.0,
+                0.005,
+                0.0001
+              ]
+            },
+            "restitution": 0.05
+          }
         }
       ]
     },
@@ -292,14 +325,14 @@
             "connection_type": "fixed",
             "transform": {
               "position": [
-                2.679489213841535E-09,
+                2.679489213841535e-09,
                 0.0999999837652335,
-                9.719897775539721E-09
+                9.719897775539721e-09
               ],
               "quaternion_xyzw": [
                 -0.7071067556514947,
-                9.473426349705847E-09,
-                -9.47342713345485E-09,
+                9.473426349705847e-09,
+                -9.47342713345485e-09,
                 0.7071068067215996
               ],
               "reference_frame": "parent_link"
@@ -319,6 +352,22 @@
           "properties": {
             "length": 0.3,
             "show_labels": false
+          }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 0.901,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.7,
+                0.01,
+                0.001
+              ]
+            },
+            "restitution": 0.05
           }
         }
       ]
@@ -380,6 +429,22 @@
             "category": "sensor",
             "support": null
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 0.055,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.55,
+                0.005,
+                0.0005
+              ]
+            },
+            "restitution": 0.12
+          }
         }
       ]
     },
@@ -440,6 +505,22 @@
             "category": "sensor",
             "support": null
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 0.055,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.55,
+                0.005,
+                0.0005
+              ]
+            },
+            "restitution": 0.12
+          }
         }
       ]
     },
@@ -487,6 +568,22 @@
             "category": "support",
             "support": null
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": true,
+            "mass_kg": 8.0,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.8,
+                0.01,
+                0.001
+              ]
+            },
+            "restitution": 0.05
+          }
         }
       ]
     },
@@ -505,8 +602,8 @@
             "quaternion_xyzw": [
               0.0,
               0.0,
-              -0.678907,
-              -0.8766
+              -0.612314,
+              -0.790615
             ],
             "scale": [
               1,
@@ -548,6 +645,22 @@
             "semantic_name": "microwave",
             "category": "articulated_object",
             "support": 1
+          }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": true,
+            "mass_kg": 12.0,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.65,
+                0.01,
+                0.001
+              ]
+            },
+            "restitution": 0.05
           }
         }
       ]
@@ -616,6 +729,22 @@
             "category": "articulated_object",
             "support": 1
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": true,
+            "mass_kg": 2.5,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.7,
+                0.01,
+                0.001
+              ]
+            },
+            "restitution": 0.05
+          }
         }
       ]
     },
@@ -663,6 +792,22 @@
             "category": "graspable",
             "support": 1
           }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 0.068,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.8,
+                0.005,
+                0.0005
+              ]
+            },
+            "restitution": 0.05
+          }
         }
       ]
     },
@@ -709,6 +854,22 @@
             "semantic_name": "ToyPanda",
             "category": "graspable",
             "support": 1
+          }
+        },
+        {
+          "component_type": "PhysicalProperties",
+          "properties": {
+            "is_static": false,
+            "mass_kg": 0.03,
+            "friction": {
+              "format": "[sliding, torsional, rolling]",
+              "values": [
+                0.65,
+                0.006,
+                0.0006
+              ]
+            },
+            "restitution": 0.18
           }
         }
       ]

@@ -1,0 +1,10 @@
+{
+  "is_on_cos": false,
+  "metadata": "wooden_spoon.json",
+  "path": "wooden_spoon.obj",
+  "thumbnail": "wooden_spoon_thumbnail.png",
+  "reference": [
+    "wooden_spoon.mtl",
+    "wooden_spoon_tex_0.png"
+  ]
+}

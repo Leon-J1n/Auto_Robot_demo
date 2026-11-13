@@ -18,7 +18,7 @@ import type {
   WorldComponent,
 } from "../../contracts/types";
 import type { Aabb6, LibraryFileKind, ModelMetadata } from "./library";
-import { resolveMetadataTarget } from "./library";
+import { chineseAssetName, resolveMetadataTarget } from "./library";
 import { objVertexBounds } from "./logic";
 import { parseUrdf, toolTipLinks, type UrdfRobot } from "./urdf";
 import type { World, WorldObjectNode } from "./world";
@@ -31,6 +31,12 @@ export const BASELINE_SCENE_ID = 1;
  * table, arm included. It is what makes a model's local +X point along world +Y.
  */
 export const TABLE_YAW: QuatXyzw = [0, 0, Math.SQRT1_2, Math.SQRT1_2];
+
+export function placementQuaternion(asset: AssetInfo): QuatXyzw {
+  const geometric = dictionary(asset.metadata.raw.geometric_properties);
+  const quaternion = asQuat(geometric?.placement_quaternion_xyzw);
+  return quaternion?.some((value) => value !== 0) ? quaternion : TABLE_YAW;
+}
 
 const UNIT_SCALE: Vec3 = [1, 1, 1];
 const IDENTITY_QUATERNION: QuatXyzw = [0, 0, 0, 1];
@@ -162,7 +168,7 @@ export async function readAsset(source: AssetSource, kind: LibraryFileKind, id: 
   const asset: AssetInfo = {
     kind,
     id,
-    name: name ?? (typeof metadata.semantic?.object_name === "string" && metadata.semantic.object_name
+    name: chineseAssetName(metadata.raw) ?? name ?? (typeof metadata.semantic?.object_name === "string" && metadata.semantic.object_name
       ? metadata.semantic.object_name
       : `object_${id}`),
     role: "prop",
@@ -226,9 +232,11 @@ function classify(asset: AssetInfo): AssetRole {
   return "prop";
 }
 
+/** Both spellings: the live index tags its two cameras in Chinese (`D435i相机,深度相机,…`). */
 function hasCameraTag(metadata: ModelMetadata): boolean {
   const tag = dictionary(metadata.raw.semantic_properties)?.tag;
-  return typeof tag === "string" && tag.toLowerCase().includes("camera");
+  if (typeof tag !== "string") return false;
+  return tag.toLowerCase().includes("camera") || tag.includes("相机");
 }
 
 /** `robot_attachment` is lifted out: that is what the `RobotAttachment` component carries. */
@@ -435,10 +443,10 @@ function multiplyQuaternion(left: QuatXyzw, right: QuatXyzw): QuatXyzw {
  * declared number's business, not something to correct here.
  */
 export function pedestalPose(armAt: Vec3, armBox: Box | null, pedestalBox: Box | null, scale: Vec3,
-                             baseBottomZ: number | null = null): { position: Vec3; scale: Vec3 } {
+                             baseBottomZ: number | null = null, quaternion: QuatXyzw = TABLE_YAW): { position: Vec3; scale: Vec3 } {
   const top = baseBottomZ !== null && Number.isFinite(baseBottomZ)
     ? armAt[2]! + baseBottomZ
-    : (armBox ? orientedBox(armBox, armAt, TABLE_YAW, UNIT_SCALE).min[2]! : armAt[2]!);
+    : (armBox ? orientedBox(armBox, armAt, quaternion, UNIT_SCALE).min[2]! : armAt[2]!);
   if (!pedestalBox) return { position: [armAt[0]!, armAt[1]!, top] as Vec3, scale };
   return {
     position: [armAt[0]!, armAt[1]!, top - pedestalBox.max[2]! * scale[2]!] as Vec3,
@@ -577,6 +585,19 @@ function meshRenderer(): WorldComponent {
   return { component_type: "MeshRenderer", properties: {} };
 }
 
+/** §4.10 (Q165): the asset's `physical_properties` verbatim minus `scale`; keys it lacks keep the instance's own. */
+function physicalProperties(asset: AssetInfo, node?: WorldObjectNode | null): WorldComponent {
+  const current = node?.rawComponents.find((component) => component?.component_type === "PhysicalProperties");
+  const properties: Record<string, unknown> = { ...dictionary(current?.properties) };
+  const declared = dictionary(asset.metadata.raw.physical_properties);
+  if (declared) {
+    const copy = structuredClone(declared);
+    delete copy.scale;
+    Object.assign(properties, copy);
+  }
+  return { component_type: "PhysicalProperties", properties };
+}
+
 /** The driver component, or nothing at all for a model with no joints to drive. */
 function robotDriver(asset: AssetInfo): WorldComponent | null {
   return asset.driver ? { component_type: "RobotDriver", properties: { ...asset.driver } } : null;
@@ -630,10 +651,11 @@ function mountsOfNode(node: WorldObjectNode): AssetMounts {
 export function armComponents(asset: AssetInfo, position: Vec3): WorldComponent[] {
   const driver = robotDriver(asset);
   return [
-    transform(position, TABLE_YAW, UNIT_SCALE, null),
+    transform(position, placementQuaternion(asset), UNIT_SCALE, null),
     metadataRef(asset),
     ...(driver ? [driver] : []),
     semantic(asset, "robot", null),
+    physicalProperties(asset),
   ];
 }
 
@@ -646,18 +668,20 @@ export function gripperComponents(asset: AssetInfo, mount: WorldComponent<Props<
     ...(driver ? [driver] : []),
     mount,
     semantic(asset, "end_effector", null),
+    physicalProperties(asset),
   ];
 }
 
 export function propComponents(asset: AssetInfo, position: Vec3, support: number, camera = false): WorldComponent[] {
   const driver = robotDriver(asset);
   return [
-    transform(position, TABLE_YAW, UNIT_SCALE, null),
+    transform(position, placementQuaternion(asset), UNIT_SCALE, null),
     metadataRef(asset),
     meshRenderer(),
     ...(driver ? [driver] : []),
     ...(camera ? [{ component_type: "Camera", properties: { ...DEFAULT_CAMERA_PROPS } } as WorldComponent] : []),
     semantic(asset, camera ? "sensor" : "object", support),
+    physicalProperties(asset),
   ];
 }
 
@@ -667,6 +691,7 @@ export function pedestalComponents(asset: AssetInfo, position: Vec3, scale: Vec3
     metadataRef(asset),
     meshRenderer(),
     semantic(asset, "support", null),
+    physicalProperties(asset),
   ];
 }
 
@@ -819,7 +844,7 @@ export async function placeAsset(
     const cameras = findCameraObjects(world);
     if (cameras.length > 0) {
       for (const node of cameras) {
-        write(world, node.id, { object_name_in_scene: node.name, components: rewriteComponents(node, [metadataRef(asset)]) }, report);
+        write(world, node.id, { object_name_in_scene: node.name, components: rewriteComponents(node, [metadataRef(asset), physicalProperties(asset, node)]) }, report);
       }
       report.selected = cameras[0]!.id;
       report.notice = cameras.length === 1
@@ -883,14 +908,20 @@ async function placeArms(
     ? await readAsset(source, "robot", placement.pedestalId)
     : null;
   const first = armOrigin(table.box, percent, 1);
+  // A library arm replaces the assembly with one instance, including integrated dual arms.
+  for (const id of armIds.splice(1)) {
+    report.removed.push(...world.subtreeOf(id));
+    world.removeLocalSubtree(id);
+  }
   armIds.forEach((id, index) => {
     const node = world.get(id);
     if (!node) return;
     const position = armOrigin(table.box, percent, index % 2 === 0 ? 1 : -1);
     const patches: WorldComponent[] = [
-      transform(position, TABLE_YAW, UNIT_SCALE, node.transform.parent),
+      transform(position, placementQuaternion(asset), UNIT_SCALE, node.transform.parent),
       metadataRef(asset),
       semantic(asset, "robot", null),
+      physicalProperties(asset, node),
     ];
     const driver = robotDriver(asset);
     if (driver) patches.push(driver);
@@ -916,10 +947,16 @@ function remountGrippers(world: World, arm: AssetInfo, armId: number, report: Pl
   const attached = world.objects
     .filter((node) => node.attachment?.parent_object_id === armId)
     .map((node) => node.id);
-  for (const id of attached) {
+  const slots = Math.max(1, arm.connectJoints.length, arm.connectLinks.length);
+  for (const [ordinal, id] of attached.entries()) {
     const node = world.get(id);
     if (!node?.attachment) continue;
-    const index = Math.max(0, arm.connectJoints.indexOf(node.attachment.parent_joint ?? ""));
+    if (ordinal >= slots) {
+      report.removed.push(...world.subtreeOf(id));
+      world.removeLocalSubtree(id);
+      continue;
+    }
+    const index = ordinal;
     // The child link belongs to the gripper's own tree, so the one it wrote stays.
     const mount = mountOn(arm, node.attachment.child_link ?? null, armId, index);
     const patches: WorldComponent[] = [
@@ -945,11 +982,12 @@ function placePedestal(world: World, arm: AssetInfo, pedestal: AssetInfo | null,
     }
     return;
   }
-  const pose = pedestalPose(armAt, arm.box, pedestal.box, placement.pedestalScale, arm.baseBottomZ ?? null);
+  const pose = pedestalPose(armAt, arm.box, pedestal.box, placement.pedestalScale, arm.baseBottomZ ?? null, placementQuaternion(arm));
   const patches: WorldComponent[] = [
     transform(pose.position, IDENTITY_QUATERNION, pose.scale, null),
     metadataRef(pedestal),
     semantic(pedestal, "support", null),
+    physicalProperties(pedestal),
   ];
   if (existing.length === 0) {
     report.added.push(world.addLocalObject({ object_name_in_scene: pedestal.name, components: rewriteComponents(null, patches) }));
@@ -964,6 +1002,7 @@ function placePedestal(world: World, arm: AssetInfo, pedestal: AssetInfo | null,
         transform(pose.position, IDENTITY_QUATERNION, pose.scale, node.transform.parent),
         metadataRef(pedestal),
         semantic(pedestal, "support", null),
+        physicalProperties(pedestal, node),
       ]),
     }, report);
   }
@@ -1015,7 +1054,7 @@ async function placeGrippers(
   for (const id of attached) {
     const node = world.get(id);
     if (!node?.attachment) continue;
-    const patches: WorldComponent[] = [metadataRef(asset)];
+    const patches: WorldComponent[] = [metadataRef(asset), physicalProperties(asset, node)];
     const driver = robotDriver(asset);
     if (driver) patches.push(driver);
     const parent = world.get(node.attachment.parent_object_id as number);
@@ -1061,7 +1100,7 @@ async function placeProp(
       // The browser box wins; only an object the renderer has not measured yet falls back to the
       // metadata AABB - OLS's box, or the OBJ vertices Q144 measures - exactly as before.
       const measured = measure?.sceneAABB(provisional) ?? null;
-      const footprint = measured ?? (asset.box ? orientedBox(asset.box, ORIGIN, TABLE_YAW, UNIT_SCALE) : null);
+      const footprint = measured ?? (asset.box ? orientedBox(asset.box, ORIGIN, placementQuaternion(asset), UNIT_SCALE) : null);
       if (!footprint) throw new PlacementError(`「${asset.name}」的元数据里没有包围盒，放不上桌`);
       const occupied = await occupiedBoxes(world, source, table.id, cache, measure, provisional);
       const spot = spotOnTable(table.box, footprint, occupied, options);

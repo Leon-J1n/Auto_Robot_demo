@@ -1,0 +1,74 @@
+{
+  "semantic_properties": {
+    "object_name": "horse_figurine",
+    "object_name_Chinese": "马摆件",
+    "object_id": 32,
+    "deformable": false,
+    "scalable": false,
+    "interactable": true,
+    "tag": "马摆件,摆件,四足关节,马,玩具",
+    "can_place": false
+  },
+  "geometric_properties": {
+    "AABB": [
+      0.166982993,
+      -0.185501993,
+      0.039140999,
+      -0.036185998,
+      0.281762004,
+      -1.7e-05
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "physical_properties": {
+    "is_static": false,
+    "mass_kg": 1.2,
+    "friction": {
+      "format": "[sliding, torsional, rolling]",
+      "values": [
+        0.3799999952316284,
+        0.005,
+        0.0005
+      ]
+    },
+    "restitution": 0.3499999940395355,
+    "scale": [
+      0.3,
+      1.0
+    ]
+  },
+  "grasp_properties": {
+    "pose_count": 2,
+    "poses": [
+      [
+        0,
+        0,
+        0.16,
+        3.14,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.4
+      ],
+      [
+        0.08,
+        0,
+        0.19,
+        3.14,
+        -0.7,
+        0,
+        0,
+        1,
+        0,
+        0.2
+      ]
+    ]
+  }
+}

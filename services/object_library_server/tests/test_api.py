@@ -5,15 +5,19 @@ Builds a temporary data directory with a small fixture library, starts the
 real HTTP server on an ephemeral port, and exercises every endpoint through
 urllib. Run with:  python tests/test_api.py
 """
+import io
 import json
+import os
 import shutil
 import sqlite3
 import sys
 import tempfile
 import threading
 import unittest
-from contextlib import closing
+from contextlib import closing, redirect_stderr
+from email.message import Message
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -30,6 +34,15 @@ def http(method, url, body=None):
             return resp.status, resp.read(), resp.headers.get("Content-Type", "")
     except HTTPError as e:
         return e.code, e.read(), (e.headers.get("Content-Type", "") if e.headers else "")
+
+
+def http_with_headers(method, url, headers=None):
+    req = Request(url, method=method, headers=headers or {})
+    try:
+        with urlopen(req) as resp:
+            return resp.status, resp.read(), resp.headers
+    except HTTPError as e:
+        return e.code, e.read(), e.headers
 
 
 class APITestCase(unittest.TestCase):
@@ -113,6 +126,9 @@ class APITestCase(unittest.TestCase):
     def get(self, endpoint, **params):
         return http("GET", self.url(endpoint, **params))
 
+    def get_with_headers(self, endpoint, headers=None, **params):
+        return http_with_headers("GET", self.url(endpoint, **params), headers=headers)
+
     def get_json(self, endpoint, **params):
         status, body, ctype = self.get(endpoint, **params)
         return status, json.loads(body) if body else None, ctype
@@ -150,7 +166,8 @@ class TestQueryEndpoints(APITestCase):
         self.assertTrue(ctype.startswith("application/json"))
         self.assertEqual(data["type"], "model")
         self.assertEqual([i["id"] for i in data["items"]], [1, 2])
-        self.assertEqual(data["items"][0], {"id": 1, "name": "apple", "category": "模型.抓取物"})
+        self.assertEqual({k: v for k, v in data["items"][0].items() if k != "version"},
+                         {"id": 1, "name": "apple", "category": "模型.抓取物"})
 
     def test_list_category_filter(self):
         _, data, __ = self.get_json("/list", type="model", category="模型.容器")
@@ -540,6 +557,175 @@ class TestDeleteAsset(APITestCase):
         self.assertEqual(st, 404)
 
 
+class TestCaching(APITestCase):
+    """Q162: ETag/304 on every GET, v decides immutable, three oracle routes always revalidate."""
+
+    def probe_asset(self, uid=0):
+        rid = self.presign("model", f"probe{self.max_id('model') + 1}", "probe.obj", uid=uid)
+        self.assertEqual(self.upload("model", rid, "probe.obj", b"v 0 0 0\n", uid)[0], 200)
+        return rid
+
+    def test_json_etag_round_trip(self):
+        for endpoint, params in (("/model", {"id": 1}), ("/robot", {"id": 1}), ("/scene", {"id": 1}),
+                                 ("/modelByName", {"name": "apple"}),
+                                 ("/list", {"type": "model"}), ("/listCategory", {"type": "model"}),
+                                 ("/assetVersion", {"type": "model", "id": 1})):
+            with self.subTest(endpoint=endpoint):
+                status, body, headers = self.get_with_headers(endpoint, **params)
+                self.assertEqual(status, 200)
+                etag = headers.get("ETag")
+                self.assertTrue(etag)
+                status, empty, headers = self.get_with_headers(
+                    endpoint, headers={"If-None-Match": etag}, **params)
+                self.assertEqual(status, 304)
+                self.assertEqual(empty, b"")
+                self.assertEqual(headers.get("Access-Control-Allow-Origin"), "*")
+                self.assertIsNone(headers.get("Content-Length"))
+                self.assertEqual(headers.get("ETag"), etag)
+                status, again, _ = self.get_with_headers(
+                    endpoint, headers={"If-None-Match": '"stale"'}, **params)
+                self.assertEqual((status, again), (200, body))
+
+    def test_file_and_thumbnail_etag_round_trip(self):
+        for endpoint, params in (("/file", {"type": "model", "id": 1, "path": "apple.obj"}),
+                                 ("/fileByName", {"type": "model", "name": "apple", "path": "apple.obj"}),
+                                 ("/thumbnail", {"type": "model", "id": 1})):
+            with self.subTest(endpoint=endpoint):
+                status, body, headers = self.get_with_headers(endpoint, **params)
+                self.assertEqual(status, 200)
+                etag = headers.get("ETag")
+                status, empty, headers = self.get_with_headers(
+                    endpoint, headers={"If-None-Match": etag}, **params)
+                self.assertEqual((status, empty), (304, b""))
+                self.assertEqual(headers.get("Access-Control-Allow-Origin"), "*")
+                self.assertIsNone(headers.get("Content-Length"))
+                status, again, _ = self.get_with_headers(
+                    endpoint, headers={"If-None-Match": '"stale"'}, **params)
+                self.assertEqual((status, again), (200, body))
+
+    def test_file_etag_follows_the_bytes_on_disk(self):
+        rid = self.probe_asset()
+        params = {"type": "model", "id": rid, "path": "probe.obj"}
+        _, _, headers = self.get_with_headers("/file", **params)
+        first = headers.get("ETag")
+        target = self.data / "models" / str(rid) / "probe.obj"
+        target.write_bytes(b"v 1 1 1\nv 2 2 2\n")
+        status, body, headers = self.get_with_headers("/file", **params)
+        self.assertEqual(status, 200)
+        self.assertNotEqual(headers.get("ETag"), first)
+        self.assertEqual(body, b"v 1 1 1\nv 2 2 2\n")
+
+    def test_v_decides_cache_strength(self):
+        cases = (("/model", {"id": 1}), ("/robot", {"id": 1}), ("/scene", {"id": 1}),
+                 ("/modelByName", {"name": "apple"}),
+                 ("/file", {"type": "model", "id": 1, "path": "apple.obj"}),
+                 ("/fileByName", {"type": "model", "name": "apple", "path": "apple.obj"}),
+                 ("/thumbnail", {"type": "model", "id": 1}))
+        for endpoint, params in cases:
+            with self.subTest(endpoint=endpoint):
+                _, _, plain = self.get_with_headers(endpoint, **params)
+                self.assertEqual(plain.get("Cache-Control"), "no-cache")
+                status, _, tagged = self.get_with_headers(endpoint, v="deadbeefdeadbeef", **params)
+                self.assertEqual(status, 200)
+                self.assertEqual(tagged.get("Cache-Control"), "public, max-age=31536000, immutable")
+
+    def test_304_keeps_the_cache_strength_of_its_request(self):
+        params = {"type": "model", "id": 1, "path": "apple.obj"}
+        _, _, headers = self.get_with_headers("/file", v="deadbeefdeadbeef", **params)
+        status, _, again = self.get_with_headers(
+            "/file", v="deadbeefdeadbeef", headers={"If-None-Match": headers.get("ETag")}, **params)
+        self.assertEqual(status, 304)
+        self.assertEqual(again.get("Cache-Control"), "public, max-age=31536000, immutable")
+
+    def test_oracle_routes_never_go_immutable(self):
+        for endpoint, params in (("/list", {"type": "model"}), ("/listCategory", {"type": "model"}),
+                                 ("/assetVersion", {"type": "model", "id": 1})):
+            with self.subTest(endpoint=endpoint):
+                _, _, headers = self.get_with_headers(endpoint, v="deadbeefdeadbeef", **params)
+                self.assertEqual(headers.get("Cache-Control"), "no-cache")
+
+    def test_v_is_a_cache_key_not_a_credential(self):
+        params = {"type": "model", "id": 1, "path": "apple.obj"}
+        status, body, _ = self.get_with_headers("/file", v="not-the-real-version", **params)
+        self.assertEqual((status, body), (200, b"v 0 0 0\n"))
+
+    def test_assetVersion_agrees_with_list(self):
+        for typ in ("scene", "model", "robot"):
+            with self.subTest(type=typ):
+                items = self.get_json("/list", type=typ)[1]["items"]
+                self.assertTrue(items)
+                for item in items:
+                    status, data, _ = self.get_json("/assetVersion", type=typ, id=item["id"])
+                    self.assertEqual(status, 200)
+                    self.assertEqual(data["type"], typ)
+                    self.assertEqual(data["id"], item["id"])
+                    self.assertRegex(data["version"], r"^[0-9a-f]{16}$")
+                    self.assertEqual(data["version"], item["version"])
+
+    def test_assetVersion_errors_and_uid_visibility(self):
+        self.assertEqual(self.get_json("/assetVersion", type="car", id=1)[0], 400)
+        self.assertEqual(self.get_json("/assetVersion", type="model", id="abc")[0], 400)
+        self.assertEqual(self.get_json("/assetVersion", type="model")[0], 400)
+        self.assertEqual(self.get_json("/assetVersion", type="model", id=99999)[0], 404)
+        rid = self.probe_asset(uid=7)
+        self.assertEqual(self.get_json("/assetVersion", type="model", id=rid, uid=7)[0], 200)
+        self.assertEqual(self.get_json("/assetVersion", type="model", id=rid, uid=8)[0], 404)
+
+    def test_version_tracks_files_and_index_row(self):
+        rid = self.probe_asset()
+        asset_dir = self.data / "models" / str(rid)
+
+        def version():
+            return self.get_json("/assetVersion", type="model", id=rid)[1]["version"]
+
+        base = version()
+        self.assertEqual(version(), base)  # reading does not change it
+
+        target = asset_dir / "probe.obj"
+        target.write_bytes(b"v 3 3 3\n")
+        changed_bytes = version()
+        self.assertNotEqual(changed_bytes, base)
+
+        st = target.stat()
+        os.utime(target, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
+        changed_mtime = version()
+        self.assertNotEqual(changed_mtime, changed_bytes)
+
+        nested = asset_dir / "meshes"
+        nested.mkdir()
+        (nested / "part.obj").write_bytes(b"v 4 4 4\n")
+        changed_added = version()
+        self.assertNotEqual(changed_added, changed_mtime)
+
+        (nested / "part.obj").unlink()
+        nested.rmdir()
+        self.assertEqual(version(), changed_mtime)  # removing the added file restores that token
+
+        with closing(server.get_conn(self.data, "model")) as con, con:
+            con.execute("UPDATE assets SET category = ? WHERE id = ?", ("模型.容器", rid))
+        self.assertNotEqual(version(), changed_mtime)
+
+    def test_version_is_stat_only(self):
+        with tempfile.TemporaryDirectory(prefix="ols_ver_") as tmp:
+            data = Path(tmp)
+            asset_dir = data / "models" / "1"
+            asset_dir.mkdir(parents=True)
+            target = asset_dir / "a.obj"
+            target.write_bytes(b"aaaa")
+            st = target.stat()
+            row = {"id": 1, "name": "a", "category": "模型.抓取物"}
+            before = server.asset_version(data, "model", row)
+            target.write_bytes(b"bbbb")
+            os.utime(target, ns=(st.st_atime_ns, st.st_mtime_ns))
+            self.assertEqual(server.asset_version(data, "model", row), before)
+
+    def test_version_does_not_leak_into_the_asset_documents(self):
+        _, data, _ = self.get_json("/model", id=1)
+        self.assertNotIn("version", data)
+        _, scene, _ = self.get_json("/scene", id=1)
+        self.assertNotIn("version", scene)
+
+
 class TestIndexSchema(unittest.TestCase):
     def test_existing_database_is_migrated_without_losing_records(self):
         with tempfile.TemporaryDirectory(prefix="ols_schema_") as tmp:
@@ -572,6 +758,139 @@ class TestIndexSchema(unittest.TestCase):
                 with closing(sqlite3.connect(data / f"{typ}_index.db")) as con, con:
                     self.assertEqual(con.execute("SELECT id, no_display FROM assets ORDER BY id").fetchall(),
                                      [(1, 0), (2, 1)])
+
+
+class HangupWriter:
+    """Lets `ok_writes` writes through, then raises the way a hung-up client does."""
+
+    def __init__(self, error, ok_writes):
+        self.error = error
+        self.ok_writes = ok_writes
+        self.writes = []
+
+    def write(self, data):
+        self.writes.append(data)
+        if len(self.writes) > self.ok_writes:
+            raise self.error
+        return len(data)
+
+    def flush(self):
+        pass
+
+
+class TestClientHangup(APITestCase):
+    """Q163: a cancelled request is not a server error (§12.46)."""
+
+    HANGUPS = (BrokenPipeError("pipe"), ConnectionAbortedError("10053"), ConnectionResetError("10054"))
+
+    def dispatch(self, path, error=None, ok_writes=99):
+        handler = object.__new__(server.OLSHandler)
+        handler.config = self.config
+        handler.path = path
+        handler.command = "GET"
+        handler.request_version = "HTTP/1.1"
+        handler.requestline = f"GET {path} HTTP/1.1"
+        handler.client_address = ("127.0.0.1", 40000)
+        handler.headers = Message()
+        handler.cache_version = ""
+        handler.close_connection = False
+        handler.wfile = HangupWriter(error, ok_writes)
+        handler.rfile = io.BytesIO(b"")
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            handler._dispatch("GET")
+        return handler, stderr.getvalue()
+
+    def test_hangup_while_writing_the_body_is_silent(self):
+        for error in self.HANGUPS:
+            with self.subTest(error=type(error).__name__):
+                handler, stderr = self.dispatch("/list?type=model", error, ok_writes=1)
+                self.assertNotIn("Traceback", stderr)
+                self.assertEqual(len(handler.wfile.writes), 2, "a 500 must not be attempted on the dead socket")
+                self.assertIn(b"200", handler.wfile.writes[0])
+                self.assertTrue(handler.close_connection)
+
+    def test_hangup_while_writing_the_headers_is_silent(self):
+        for error in self.HANGUPS:
+            with self.subTest(error=type(error).__name__):
+                handler, stderr = self.dispatch("/list?type=model", error, ok_writes=0)
+                self.assertNotIn("Traceback", stderr)
+                self.assertEqual(len(handler.wfile.writes), 1)
+                self.assertTrue(handler.close_connection)
+
+    def test_hangup_while_answering_an_api_error_is_silent(self):
+        for error in self.HANGUPS:
+            with self.subTest(error=type(error).__name__):
+                handler, stderr = self.dispatch("/model?id=999999", error, ok_writes=0)
+                self.assertNotIn("Traceback", stderr)
+                self.assertEqual(len(handler.wfile.writes), 1)
+                self.assertIn(b"404", handler.wfile.writes[0])
+                self.assertTrue(handler.close_connection)
+
+    def test_hangup_while_sending_a_file_is_silent(self):
+        handler, stderr = self.dispatch("/file?type=model&id=1&path=apple.obj",
+                                        ConnectionAbortedError("10053"), ok_writes=1)
+        self.assertNotIn("Traceback", stderr)
+        self.assertEqual(len(handler.wfile.writes), 2)
+        self.assertTrue(handler.close_connection)
+
+    def test_a_real_failure_still_reports_500(self):
+        with patch.object(server.OLSHandler, "api_list", MagicMock(side_effect=ValueError("boom"))):
+            handler, stderr = self.dispatch("/list?type=model")
+        self.assertIn("Traceback", stderr)
+        self.assertIn("ValueError", stderr)
+        self.assertIn(b"500", handler.wfile.writes[0])
+        self.assertFalse(handler.close_connection)
+
+    def test_a_hangup_does_not_change_a_successful_response(self):
+        handler, stderr = self.dispatch("/list?type=model")
+        self.assertEqual(stderr.count('"GET /list?type=model HTTP/1.1" 200'), 1)
+        self.assertEqual(len(handler.wfile.writes), 2)
+        self.assertIn(b"ETag", handler.wfile.writes[0])
+        self.assertFalse(handler.close_connection)
+
+
+class TestHangupOutsideDispatch(APITestCase):
+    """Q163 §12.46 ②: the request can also die before dispatch, or on a direct-writing route."""
+
+    def handler(self, rfile, error=None, ok_writes=99):
+        handler = object.__new__(server.OLSHandler)
+        handler.config = self.config
+        handler.client_address = ("127.0.0.1", 40001)
+        handler.headers = Message()
+        handler.cache_version = ""
+        handler.close_connection = False
+        handler.wfile = HangupWriter(error, ok_writes)
+        handler.rfile = rfile
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            handler.handle_one_request()
+        return handler, stderr.getvalue()
+
+    def test_hangup_while_reading_the_request_line_is_silent(self):
+        for error in TestClientHangup.HANGUPS:
+            with self.subTest(error=type(error).__name__):
+                rfile = MagicMock()
+                rfile.readline.side_effect = error
+                handler, stderr = self.handler(rfile)
+                self.assertNotIn("Traceback", stderr)
+                self.assertEqual(handler.wfile.writes, [])
+                self.assertTrue(handler.close_connection)
+
+    def test_hangup_while_answering_a_preflight_is_silent(self):
+        request = b"OPTIONS /list HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"
+        handler, stderr = self.handler(io.BytesIO(request), ConnectionAbortedError("10053"), ok_writes=0)
+        self.assertNotIn("Traceback", stderr)
+        self.assertEqual(len(handler.wfile.writes), 1)
+        self.assertIn(b"204", handler.wfile.writes[0])
+        self.assertTrue(handler.close_connection)
+
+    def test_a_complete_preflight_is_untouched(self):
+        request = b"OPTIONS /list HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"
+        handler, stderr = self.handler(io.BytesIO(request))
+        self.assertIn(b"204", handler.wfile.writes[0])
+        self.assertIn(b"Access-Control-Max-Age: 86400", handler.wfile.writes[0])
+        self.assertFalse(handler.close_connection)
 
 
 if __name__ == "__main__":

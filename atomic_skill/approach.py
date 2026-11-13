@@ -8,6 +8,7 @@ from atomic_action.motion.common.interaction import planning_failed_without_moti
 from atomic_action.motion.common.interaction import pose_request
 from demo.task_commands.converter import _deep_merge
 from planning import candidate_distances, candidate_pose, run_candidate_search, search_distances
+from atomic_skill.pose_precheck import ordered_distances
 
 
 class PoseSearchExecutor:
@@ -71,6 +72,8 @@ class PoseSearchExecutor:
         self.params = deepcopy(params)
         self.phases = []
         self.phase = skill
+        self.pose_search_precheck = []
+        self.successful_distance_m = None
         self.wrist_observation = None
         from atomic_skill.approach import ApproachSkill
         from atomic_skill.retreat import RetreatSkill
@@ -80,6 +83,8 @@ class PoseSearchExecutor:
         return {'success': bool(success), 'status': 'success' if success else 'error',
                 'error': None if success else (failed or {}).get('error'),
                 'substeps': self.phases,
+                'pose_search_precheck': self.pose_search_precheck,
+                'successful_distance_m': self.successful_distance_m,
                 **({'wrist_observation': self.wrist_observation}
                    if self.wrist_observation is not None else {})}
 
@@ -184,6 +189,16 @@ class ApproachSkill:
         if observation is not None:
             e.wrist_observation = {'status': 'searching', 'rejected': []}
 
+        def transform_for(distance, *, align_camera=False):
+            transform = self.candidate_pose(
+                np.block([[rotation, position[:, None]],
+                          [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance)
+            if align_camera:
+                from atomic_skill.wrist_observation import camera_aligned_pose
+                transform, _ = camera_aligned_pose(transform, observation['control_from_camera'],
+                                                    observation['target_world'])
+            return transform
+
         def attempt(distance, *, align_camera=False):
             # Derive a complete pre-grasp transform from the final grasp pose.
             # The rotation is part of the candidate: IK and collision planning
@@ -217,6 +232,8 @@ class ApproachSkill:
                 if moved:
                     e.wrist_observation.update(status='camera_aligned', **alignment)
             if moved:
+                if not align_camera:
+                    e.successful_distance_m = float(distance)
                 return True
             failed = e.phases[-1]
             if not planning_failed_without_motion(failed, e.backend, before):
@@ -225,7 +242,9 @@ class ApproachSkill:
         before_search = e.backend.physics_steps
         distances = search_distances(params, minimum=minimum, maximum=maximum, step=step, label='approach')
         if observation is not None:
-            if run_candidate_search(distances, lambda distance: attempt(distance, align_camera=True)):
+            if run_candidate_search(
+                    ordered_distances(e, distances, lambda d: transform_for(d, align_camera=True)),
+                    lambda distance: attempt(distance, align_camera=True)):
                 return True
             # Never retry after motion or an execution failure.
             if e.phases and not planning_failed_without_motion(e.phases[-1], e.backend, before_search):
@@ -233,7 +252,7 @@ class ApproachSkill:
                 return False
             e.wrist_observation['status'] = 'fallback_to_gripper_approach'
         if run_candidate_search(
-            distances,
+            ordered_distances(e, distances, transform_for),
             attempt):
             return True
         failed = e.phases[-1] if e.phases else {}

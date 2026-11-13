@@ -1,0 +1,571 @@
+{
+  "command_id": "5",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 3.055717600043863,
+    "candidate_selection": 3.451145299943164
+  },
+  "wrist_observation": null,
+  "target_resolution_diagnostics": {
+    "placement_height_attempts": [
+      {
+        "placement_height_offset_m": -0.03,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.3058776000980288,
+        "rejected": []
+      },
+      {
+        "placement_height_offset_m": -0.02,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": -0.01,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.0,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.01,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.02,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.03,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.04,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.05,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      }
+    ],
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 395,
+        "y": 328
+      },
+      "world_point": {
+        "x": -0.191920448568095,
+        "y": 0.20504075851650122,
+        "z": 0.817507
+      },
+      "depth_m": 1.056686520576477,
+      "frame": "world",
+      "confidence": null,
+      "timestamp": 6.82999999999947,
+      "sequence": 1,
+      "placement_center_fallback": {
+        "used": true,
+        "radius_fraction_xy": 0.2,
+        "max_points": 3,
+        "sample_index": 0,
+        "trigger": "vlm_point_infeasible",
+        "attempts": [
+          {
+            "world_point": {
+              "x": -0.191920448568095,
+              "y": 0.20504075851650122,
+              "z": 0.817507
+            },
+            "height_attempts": [
+              {
+                "placement_height_offset_m": -0.03,
+                "success": true,
+                "evaluated": true,
+                "elapsed_s": 0.3058776000980288,
+                "rejected": []
+              },
+              {
+                "placement_height_offset_m": -0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": -0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.0,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.03,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.04,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.05,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              }
+            ],
+            "success": true,
+            "elapsed_s": 0.30616299994289875
+          }
+        ],
+        "primary_height_attempts": [
+          {
+            "placement_height_offset_m": -0.03,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 1.5491188000887632,
+            "error": {
+              "error_code": "TARGET_POSE_UNREACHABLE",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.009542'}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "ik_failed",
+                  "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.009542"
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": -0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": -0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.0,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.04,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.05,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 1.593570000026375,
+            "error": {
+              "error_code": "TARGET_POSE_UNREACHABLE",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.048469'}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "ik_failed",
+                  "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.048469"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "crop_origin_pixel": {
+        "x": 340,
+        "y": 251
+      },
+      "rgbd_world_point": {
+        "x": -0.191920448568095,
+        "y": 0.20504075851650122,
+        "z": 0.618432105661689
+      },
+      "placement_aabb_top_world": {
+        "x": -0.191920448568095,
+        "y": 0.20504075851650122,
+        "z": 0.817507
+      },
+      "held_object": "Apple",
+      "placement_cycle_id": "6",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05
+      ],
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "placement_height_offset_m": -0.03,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.3058776000980288,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.04,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.05,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        }
+      ],
+      "target_point_world": {
+        "x": -0.191920448568095,
+        "y": 0.20504075851650122,
+        "z": 0.787507
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": null,
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0018192999996244907,
+        "context": 0.00022469996474683285,
+        "selection": 1.0399846360087395e-05,
+        "path_generation": 1.5100004998967052
+      },
+      "planner_diagnostics": {}
+    },
+    {
+      "phase": "approach_approach_95mm",
+      "planner": null,
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0009550999384373426,
+        "context": 0.00011330004781484604,
+        "selection": 5.400041118264198e-06,
+        "path_generation": 1.516088099917397
+      },
+      "planner_diagnostics": {}
+    },
+    {
+      "phase": "approach_approach_90mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0014289000537246466,
+        "context": 0.00015320000238716602,
+        "selection": 6.3998159021139145e-06,
+        "path_generation": 0.003522000042721629,
+        "planning": 0.9033991999458522,
+        "trajectory_preparation": 0.8376399001572281,
+        "posture_scoring": 3.100140020251274e-06,
+        "pre_execution_total": 1.746161000104621
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 0.00011250004172325134,
+          "direct_path_collision_check": 0.02302570012398064,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 6.351731418481158,
+          "total_joint_travel_rad": 5.580304069728099,
+          "maximum_joint_travel_rad": 1.9189653696406064,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.7714273487530595,
+          "joint_travel_by_joint_rad": [
+            0.8748328636641254,
+            1.1661452726089638,
+            1.9189653696406064,
+            0.7533311526361521,
+            0.0001299941055623588,
+            0.8668994170726889
+          ],
+          "normalized_joint_travel": [
+            0.2784677412792309,
+            0.3711952917575193,
+            1.2216873274808888,
+            0.23979257435670484,
+            4.13783780412048e-05,
+            0.27594244868377016
+          ],
+          "candidate_count": 4,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 0,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 3,
+          "budget_exhausted": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                0.07605026669901782,
+                -0.6475917210129021,
+                0.07035555796317626,
+                -0.9935600941758962,
+                -1.5707962945900837,
+                0.07605026990412123
+              ],
+              "endpoint_check_s": 0.021540399873629212,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.07605026669901782,
+                -0.5800791128896674,
+                -0.07035555796317623,
+                -0.9203615863727784,
+                -1.5707962945900837,
+                0.07605026990412123
+              ],
+              "endpoint_check_s": 0.022402799921110272,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.7198147064985494,
+                -2.561513571622323,
+                0.07035561841766146,
+                -2.2212310825153563,
+                1.5707963808088656,
+                0.4217779502963469
+              ],
+              "endpoint_check_s": 0.028823199914768338,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.7198147064985494,
+                -2.4940009054894805,
+                -0.07035561841766143,
+                -2.148032511812876,
+                1.5707963808088656,
+                0.4217779502963469
+              ],
+              "endpoint_check_s": 0.02308459999039769,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.07605026669901782,
+                -0.6475917210129021,
+                0.07035555796317626,
+                -0.9935600941758962,
+                -1.5707962945900837,
+                0.07605026990412123
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.7841609001625329,
+              "fine_direct_plan_s": 0.02322519989684224,
+              "direct_success": true,
+              "direct_elapsed_s": 0.8074495999608189
+            },
+            {
+              "goal": [
+                0.07605026669901782,
+                -0.5800791128896674,
+                -0.07035555796317623,
+                -0.9203615863727784,
+                -1.5707962945900837,
+                0.07605026990412123
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 5.861726301580804
+            },
+            {
+              "goal": [
+                -2.7198147064985494,
+                -2.561513571622323,
+                0.07035561841766146,
+                -2.2212310825153563,
+                1.5707963808088656,
+                0.4217779502963469
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.41620361118163
+            },
+            {
+              "goal": [
+                -2.7198147064985494,
+                -2.4940009054894805,
+                -0.07035561841766143,
+                -2.148032511812876,
+                1.5707963808088656,
+                0.4217779502963469
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.41620361118163
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.001190100098028779,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.8359045998658985,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 97,
+          "planner_waypoint_count": 49,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

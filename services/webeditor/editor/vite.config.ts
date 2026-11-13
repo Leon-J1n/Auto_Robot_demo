@@ -41,6 +41,7 @@ export default defineConfig({
     proxy: {
       "/api": gatewayTarget,
       "/events": eventsProxy,
+      "/speech": eventsProxy,
       ...Object.fromEntries(callerRoutes.map((route) => [route, gatewayTarget])),
     },
   },

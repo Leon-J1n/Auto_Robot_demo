@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "table",
+    "object_name_Chinese": "桌子",
     "object_id": 29,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "brown,small",
+    "tag": "桌子,家具,长方形,四条腿,红木,桌面",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.375,
       0.6,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": true,
     "mass_kg": 22.0,
     "friction": {
       "format": "[sliding, torsional, rolling]",

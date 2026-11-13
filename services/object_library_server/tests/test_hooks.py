@@ -80,7 +80,7 @@ class HookIntegrationTests(unittest.TestCase):
         env = dict(os.environ)
         env.pop(rv.GUARD, None)
         return subprocess.run(["git", *args], cwd=self.repo, check=True,
-                              capture_output=True, text=True, env=env).stdout.strip()
+                              capture_output=True, encoding="utf-8", errors="replace", env=env).stdout.strip()
 
     def commit_all(self, message):
         self.git("add", "-A")
@@ -120,6 +120,19 @@ class HookIntegrationTests(unittest.TestCase):
         self.assertEqual(line, f"AppVersion 1.0.0-{trigger}")
         self.assertEqual(self.git("show", "--name-only", "--pretty=format:", "HEAD"), "VERSION.txt")
         self.assertEqual((self.repo / "data" / "VERSION.txt").read_text("utf-8"), before_res)
+
+    def test_non_ascii_paths_refresh_both_versions(self):
+        # regression: UTF-8 paths must not be decoded with the locale encoding (GBK)
+        self.git("config", "core.quotepath", "false")
+        (self.repo / "data" / "scenes").mkdir()
+        (self.repo / "data" / "scenes" / "场景.txt").write_text("x\n", "utf-8")
+        (self.repo / "工具.py").write_text("print(1)\n", "utf-8")
+        count = self.commit_count()
+        self.commit_all("non-ascii paths")
+        self.assertEqual(self.commit_count(), count + 2)
+        trigger = self.git("rev-parse", "--short", "HEAD~1")
+        self.assertEqual(self.version_line("VERSION.txt"), f"AppVersion 1.0.0-{trigger}")
+        self.assertEqual(self.version_line("data/VERSION.txt"), f"ResVersion 1.0.0-{trigger}")
 
     def test_doc_change_does_not_touch_versions(self):
         before_root = (self.repo / "VERSION.txt").read_text("utf-8")

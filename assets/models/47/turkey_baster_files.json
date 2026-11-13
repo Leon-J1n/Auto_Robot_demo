@@ -1,0 +1,11 @@
+{
+  "is_on_cos": false,
+  "metadata": "turkey_baster.json",
+  "path": "turkey_baster.obj",
+  "thumbnail": "turkey_baster_thumbnail.png",
+  "reference": [
+    "turkey_baster.mtl",
+    "turkey_baster_tex_0.png",
+    "turkey_baster_tex_2.png"
+  ]
+}

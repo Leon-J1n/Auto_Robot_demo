@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "piper",
+    "object_name_Chinese": "Piper机械臂",
     "object_id": 8,
     "deformable": false,
     "scalable": false,
     "interactable": false,
-    "tag": "piper"
+    "tag": "Piper机械臂标准款,机械臂,六轴"
   },
   "geometric_properties": {
     "AABB": [
@@ -15,9 +16,16 @@
       -0.048500018,
       0.241500665,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 4.2,
     "friction": {
       "format": "[sliding, torsional, rolling]",

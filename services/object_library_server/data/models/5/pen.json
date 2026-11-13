@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "pen",
+    "object_name_Chinese": "水笔",
     "object_id": 5,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "orange,slim",
+    "tag": "笔,文具,细长,水笔",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.004523826,
       0.005743476,
       -0.004603183
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
     ]
   },
   "physical_properties": {
+    "is_static": false,
     "mass_kg": 0.008,
     "friction": {
       "format": "[sliding, torsional, rolling]",
@@ -38,9 +46,9 @@
     "pose_count": 2,
     "poses": [
       [
-        -0.0060,
+        -0.006,
         0.0,
-        0.0160,
+        0.016,
         3.1415,
         0.0,
         0.0,
@@ -50,9 +58,9 @@
         1.04
       ],
       [
-        -0.0060,
-        0.00,
-        0.0160,
+        -0.006,
+        0.0,
+        0.016,
         3.1415,
         0.0,
         3.14,

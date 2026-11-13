@@ -1,11 +1,12 @@
 {
   "semantic_properties": {
     "object_name": "coffee_table",
+    "object_name_Chinese": "茶几",
     "object_id": 18,
     "deformable": false,
     "scalable": true,
     "interactable": true,
-    "tag": "yellow,open",
+    "tag": "茶几,家具,方形矮桌",
     "can_place": false
   },
   "geometric_properties": {
@@ -16,9 +17,16 @@
       -0.3,
       0.345,
       0.0
+    ],
+    "placement_quaternion_xyzw": [
+      0,
+      0,
+      0.7071,
+      0.7071
     ]
   },
   "physical_properties": {
+    "is_static": true,
     "mass_kg": 0.25,
     "friction": {
       "format": "[sliding, torsional, rolling]",
