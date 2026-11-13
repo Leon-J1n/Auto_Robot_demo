@@ -162,11 +162,9 @@ class ObjectLibraryGraspResolver:
                 rejected.append({'grasp_index': candidate['grasp_index'], 'reason': 'ik_failed', 'message': str(exc)})
                 continue
             for q in result.solutions:
-                hit = checker.check(q, safety_distance=safety_distance)
-                if hit.in_collision:
-                    rejected.append({'grasp_index': candidate['grasp_index'], 'reason': 'goal_collision', 'contacts': hit.contacts})
-                    continue
-                options.append((float(np.linalg.norm(_periodic_joint_delta(q, seed))), candidate, q, result.solver))
+                travel = float(np.linalg.norm(_periodic_joint_delta(q, seed)))
+                cost = configuration_cost(kin, q, seed, norm=2)
+                options.append((cost, travel, candidate, q, result.solver))
         if not options:
             error = GraspResolutionError(f'No reachable collision-free grasp candidate: {rejected}')
             reasons = {item['reason'] for item in rejected}
@@ -179,27 +177,51 @@ class ObjectLibraryGraspResolver:
                 'rejected': rejected,
             }
             raise error
-        options.sort(key=lambda item: configuration_cost(kin, item[2], seed, norm=2))
+        options.sort(key=lambda item: item[0])
+        collision_free = []
+        had_collision_free = False
         closure_evidence = None
-        if candidate_validator is not None:
-            for option in options:
-                evidence = candidate_validator(option[2], option[1])
-                if evidence['success']:
-                    options = [option]
-                    closure_evidence = evidence
-                    break
-                rejected.append({'grasp_index': option[1]['grasp_index'], 'joint_positions': option[2].tolist(), **evidence})
-            else:
-                error = GraspResolutionError('候选抓取位姿的几何或接触路径检查均未通过')
-                error.details = {'error_code': 'GRASP_PRECHECK_FAILED', 'failed_stage': 'grasp_precheck',
-                                 'recoverable': True, 'rejected': rejected}
-                raise error
+        for option in options:
+            _, _, candidate, q, _ = option
+            hit = checker.check(q, safety_distance=safety_distance)
+            if hit.in_collision:
+                rejected.append({'grasp_index': candidate['grasp_index'], 'reason': 'goal_collision', 'contacts': hit.contacts})
+                continue
+            had_collision_free = True
+            if candidate_validator is not None:
+                evidence = candidate_validator(q, candidate)
+                if not evidence['success']:
+                    rejected.append({'grasp_index': candidate['grasp_index'],
+                                     'joint_positions': q.tolist(), **evidence})
+                    continue
+                closure_evidence = evidence
+            collision_free.append(option)
+            if candidate_validator is not None or not prefer_direct:
+                break
+        if not collision_free and candidate_validator is not None and had_collision_free:
+            error = GraspResolutionError('候选抓取位姿的几何或接触路径检查均未通过')
+            error.details = {'error_code': 'GRASP_PRECHECK_FAILED', 'failed_stage': 'grasp_precheck',
+                             'recoverable': True, 'rejected': rejected}
+            raise error
+        if not collision_free:
+            error = GraspResolutionError(f'No reachable collision-free grasp candidate: {rejected}')
+            reasons = {item['reason'] for item in rejected}
+            error.details = {
+                'error_code': ('TARGET_POSE_UNREACHABLE' if reasons == {'ik_failed'} else
+                               'TARGET_POSE_COLLISION' if reasons == {'goal_collision'} else
+                               'NO_VALID_TARGET_POSE'),
+                'failed_stage': 'target_resolution',
+                'error_message': str(error),
+                'rejected': rejected,
+            }
+            raise error
+        options = collision_free
         choice = options[0]
         for option in options if prefer_direct else ():
-            if not checker.check_path([seed, option[2]], resolution=.04, safety_distance=safety_distance).in_collision:
+            if not checker.check_path([seed, option[3]], resolution=.04, safety_distance=safety_distance).in_collision:
                 choice = option
                 break
-        travel, selected, joints, solver = choice
+        _, travel, selected, joints, solver = choice
         posture = preference_for(kin)
         return {**resolved, 'selected': selected, 'joint_positions': joints.tolist(),
                 'ik_solver': solver, 'joint_travel_rad': travel, 'rejected': rejected,

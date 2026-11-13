@@ -7,6 +7,7 @@ import numpy as np
 from control.continuous_trajectory import ContinuousJointPath
 from planning.collision_sampling import collision_sampling_settings, spline_collision_samples
 from planning.direct_planner import DirectPlanner
+from planning.collision_free_planner import CollisionFreePlanner, _Tree
 from planning.time_parameterization import prepare_continuous_trajectory
 from planning.errors import PlanningError
 from atomic_action.motion.common.utils.validation import validate_move_request
@@ -14,7 +15,7 @@ from atomic_action.motion.common.utils.validation import validate_move_request
 
 class CollisionSamplingTests(unittest.TestCase):
     def test_settings_default_override_and_invalid_values(self):
-        self.assertEqual(collision_sampling_settings({}), (.02, 2))
+        self.assertEqual(collision_sampling_settings({}), (.04, 2))
         for config in ({'resolution_rad': 0}, {'resolution_rad': True},
                        {'resolution_rad': float('nan')}, {'spline_subdivisions': 1.5},
                        {'spline_subdivisions': 0}, {'spline_subdivisions': False}):
@@ -33,6 +34,17 @@ class CollisionSamplingTests(unittest.TestCase):
         self.assertLessEqual(np.max(np.abs(np.diff(sampled, axis=0))), .02 + 1e-12)
         self.assertLess(len(sampled), len(spline_collision_samples(profile, .01, 4)))
 
+    def test_relaxed_default_bounds_joint_step_and_reduces_samples(self):
+        points = np.zeros((50, 6))
+        points[:, 0] = np.linspace(0, 2., len(points))
+        points[:, 1] = np.sin(points[:, 0]) * .35
+        distance = np.max(np.abs(np.diff(points, axis=0)), axis=1)
+        profile = ContinuousJointPath(points, np.r_[0., np.cumsum(distance)])
+        baseline = spline_collision_samples(profile, .02, 2)
+        relaxed = spline_collision_samples(profile, .04, 2)
+        self.assertLess(len(relaxed), len(baseline))
+        self.assertLessEqual(np.max(np.abs(np.diff(relaxed, axis=0))), .04 + 1e-12)
+
     def request(self):
         return {'motion': {'path_type': 'joint'},
                 'constraints': {'velocity_scale': .4, 'acceleration_scale': .8},
@@ -46,10 +58,10 @@ class CollisionSamplingTests(unittest.TestCase):
         request = self.request()
         result = prepare_continuous_trajectory({'waypoints': points.tolist()}, request,
                                               collision_checker=checker)
-        self.assertEqual(checker.check_path.call_args.kwargs['resolution'], .02)
+        self.assertEqual(checker.check_path.call_args.kwargs['resolution'], .04)
         diag = result['diagnostics']['time_parameterization']
         self.assertFalse(diag['path_validation_cache_enabled'])
-        self.assertEqual(diag['collision_resolution_rad'], .02)
+        self.assertEqual(diag['collision_resolution_rad'], .04)
         self.assertFalse(diag['validation_waypoints_identical_to_planner'])
         default_count = diag['validation_waypoint_count']
         request['planning']['collision_validation'] = {'resolution_rad': .01, 'spline_subdivisions': 4}
@@ -74,6 +86,18 @@ class CollisionSamplingTests(unittest.TestCase):
         np.testing.assert_array_equal(result['waypoints'][0], source[0])
         np.testing.assert_array_equal(result['waypoints'][-1], source[-1])
         self.assertLessEqual(np.max(np.abs(np.diff(result['waypoints'], axis=0))), .04 + 1e-12)
+
+    def test_rrt_extension_uses_moderately_relaxed_resolution(self):
+        checker = SimpleNamespace(check_path=Mock(return_value=SimpleNamespace(
+            in_collision=False, contacts=[])))
+        planner = CollisionFreePlanner(collision_checker=checker,
+            joint_limits=np.tile([-3., 3.], (6, 1)))
+        tree = _Tree(np.zeros(6))
+
+        planner._extend_once(tree, np.full(6, .01), safety_distance=.003)
+
+        self.assertEqual(planner.rrt_collision_resolution, .03)
+        self.assertEqual(checker.check_path.call_args.kwargs['resolution'], .03)
 
 
 if __name__ == '__main__':

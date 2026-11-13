@@ -105,7 +105,7 @@ except CollisionPlanningError:
 
 碰撞检测器需提供 `check(q, *, safety_distance=...)`、`check_path(waypoints, *, resolution=..., safety_distance=..., allowed_geom_ids=...)`；返回对象至少有 `in_collision`、`contacts`。保持姿态服务需提供 `forward(q)`、`solve_one(...)`，结果通过 `.solution` 读取。
 
-当前默认碰撞检查按关节插值采样，`resolution` 表示单关节采样增量（弧度）。普通 RRT 扩展默认 0.02；直接规划、普通避障规划最终复核及平滑轨迹验证默认使用 `planning.collision_validation.resolution_rad=0.02`。平滑轨迹每区间至少二等分，按局部导数上界增加采样，保留全部样条节点。终点和碰撞裕量不变；采样放宽可能漏掉采样点间短暂碰撞，详细配置见 [碰撞说明](../collision/README.md)。
+当前默认碰撞检查按关节插值采样，`resolution` 表示单关节采样增量（弧度）。普通 RRT 扩展默认 0.03；直接规划、普通避障规划最终复核及平滑轨迹验证默认使用 `planning.collision_validation.resolution_rad=0.04`。平滑轨迹保持原有样条与每区间至少二分，只按局部导数上界调整碰撞验证点密度，并保留全部样条节点。终点和碰撞裕量不变；采样放宽可能漏掉采样点间短暂碰撞，详细配置见 [碰撞说明](../collision/README.md)。
 
 ## 扩展边界
 
@@ -114,6 +114,10 @@ except CollisionPlanningError:
 相关接口：[_MoveExecutor](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/skill.py)、[Skill 接口](C:/Users/21474/Desktop/robot-agent/SKILL_INTERFACES.md)、[MuJoCo 依赖清单](C:/Users/21474/Desktop/robot-agent/MUJOCO_DEPENDENCIES.md)。
 
 ## 时间参数化
+
+普通关节 RRT 的后处理将 shortcut 的软时间预算分为节点连接和线段内部连接两部分，后者可在原节点直连失败时切去局部绕行。TrajOpt 使用最大关节步长 `0.16 rad` 的控制点，优先调整较大拐角；代价只计算受修改影响的局部项，无收益的修改不查询碰撞，连续两轮无收益则提前结束。所有新连接仍使用原碰撞分辨率检查，最终加密至 `0.04 rad` 并独立验证。样条与执行限值保持原实现。
+
+每个 command 的 `planning_timing.json` 中，`path_quality` 记录 RRT、shortcut 与最终路径的路点数、L2 关节路径长度、总关节行程和最大关节空间转角；它们衡量几何路径，不代表末端笛卡尔曲率或执行样条曲率。`trajopt` 还记录优化点数、碰撞查询次数（含末尾复检）和碰撞前代价淘汰次数。优化点密度改变后，新旧 `initial_cost` / `final_cost` 不适合直接跨版本比较，应结合实际路径长度和时间比较。
 
 当前 demo 统一使用 `planning.time_parameterization.prepare_continuous_trajectory()`：先对已经通过 RRT、shortcut 和 TrajOpt 检查的关节路点建立自然三次 C2 路径，再为整段运动分配连续时间表，只在阶段起止处停稳。时间估算直接计算复合轨迹的速度、加速度和 jerk；配置了 `max_jerk` 时会满足 jerk 上限。三次路径在狭窄空间内若超出 FCL 安全走廊，会自动回退到同一路点的 PCHIP，并重新做 FCL 复检。每关节速度基准由 URDF limit.velocity 读取，加速度优先读取 limit.acceleration；缺失时按约定采用速度上限数值作为加速度基准，并在报告中标记回退来源。两者分别乘 `velocity_scale` 和 `acceleration_scale`，所有关节使用同一全局缩放规则。执行采样点位于同一条稠密几何验证路径上，因此只进行一次 FCL 路径检查，避免重复遍历。推拉共用同一连续轨迹实现和全局限值；夹爪开合独立控制。Ruckig 接口仍保留为显式调用的本地后端，不会在默认 demo 执行链中把每个路点停住。
 

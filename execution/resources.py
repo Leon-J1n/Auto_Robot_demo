@@ -28,7 +28,7 @@ DEFAULT_SCENE_SETTINGS = {
             'mode': 'auto',
             'planning_time': 10.0,
             'allow_replan': True,
-            'collision_validation': {'resolution_rad': .02, 'spline_subdivisions': 2},
+            'collision_validation': {'resolution_rad': .04, 'spline_subdivisions': 2},
         },
     },
     'object_library': {
@@ -293,6 +293,14 @@ class SceneResourceCoordinator:
                 if asset_path.suffix.lower() not in {'.urdf', '.obj', '.stl'}:
                     raise ValueError('Supported environment assets: URDF, OBJ, STL')
                 digest.update(asset_path.read_bytes())
+            collision_mesh = collider.get('collision_mesh')
+            if collision_mesh:
+                collision_path = (root / collision_mesh).resolve()
+                if not collision_path.is_file():
+                    raise FileNotFoundError(collision_path)
+                if collision_path.suffix.lower() not in {'.obj', '.stl'}:
+                    raise ValueError('Supported collision mesh assets: OBJ, STL')
+                digest.update(collision_path.read_bytes())
         digest.update(json.dumps(record['backend_resources'][backend], sort_keys=True).encode())
         return ResolvedResources(path, scene, robots[0], urdf, root, names, q,
                                  backend, record['backend_resources'][backend], digest.hexdigest(), assembled)

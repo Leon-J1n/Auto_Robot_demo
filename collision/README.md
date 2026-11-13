@@ -6,7 +6,7 @@
 
 每次复用前读取 SDK 实际实体层级、局部/世界变换和 Collider 描述；场景发生变化会清空缓存，包括绕过适配器直接修改 SDK 实体的情况。不能只依赖 SDK revision，因为部分位姿写入不更新该值。零裕量实时构型检查继续直接查询原生库。机器人模型/关节定义更换仍需重建 checker；同一个实例应串行使用。
 
-`validate_execution_path(points, resolution=.02, safety_distance=..., allowed_geom_ids=...)` 默认按 0.02 rad 的单关节最大增量进行离散碰撞验证；直接规划、普通 RRT 规划最终复核和平滑轨迹验证共用 `planning.collision_validation.resolution_rad`（默认 `0.02`）。RRT 扩展及 TrajOpt 局部查询仍保留各自分辨率。安全间距和终点检查不变。离散采样不能保证发现采样点之间的短暂碰撞，增大步长会降低碰撞检出能力。
+`validate_execution_path(points, resolution=.02, safety_distance=..., allowed_geom_ids=...)` 默认按 0.02 rad 的单关节最大增量进行离散碰撞验证；直接规划、普通 RRT 规划最终复核和平滑轨迹验证共用 `planning.collision_validation.resolution_rad`（默认 `0.04`）。RRT 扩展查询另用 0.03 rad，TrajOpt 局部查询保留原有分辨率。平滑轨迹保留原有每区间至少二分（`spline_subdivisions=2`），只按新的采样分辨率调整碰撞验证点密度。安全间距和终点检查不变。离散采样不能保证发现采样点之间的短暂碰撞，增大步长会降低碰撞检出能力。
 
 `checker.cache_stats` 记录 `native_queries`、`configuration_hits`、`path_hits`、`invalidations`；统一 demo 的报告包含 `collision_cache_stats`。诊断时可设置 `checker.cache_enabled=False` 禁止缓存复用。
 
@@ -50,6 +50,11 @@ must provide an `AssetRef`/`Collider` mesh or primitive. `MeshRenderer` alone is
 and is intentionally ignored. The robot is loaded from its `RobotModelRef` URDF; the gripper is
 parented to the UR5e `attachment_site` so SimPlatform's FCL robot query treats its colliders as
 robot-side geometry.
+
+Scene 3's Basket keeps its detailed visual asset and uses `models/12/basket_collision.obj` as a
+coarser floor-and-wall collision proxy. This preserves the open interior and outer dimensions while
+replacing 176 convex collision parts with 19. The continuous proxy walls intentionally ignore
+weave gaps, so very narrow gaps near the basket wall are treated as occupied.
 
 SimPlatform 返回的 URDF 关节列表可能包含 `attachment_site_fixed`，并且顺序与项目关节顺序不同。
 适配器会将项目的六维顺序

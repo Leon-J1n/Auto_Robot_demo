@@ -180,6 +180,10 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         for a, b in component(backend.resources.robot_object, 'RobotModelRef').get('allowed_collision_link_pairs', []):
             self.excluded.add(frozenset((self.body_names.index(a), self.body_names.index(b))))
         self.support_geoms = set()
+        self._tool_environment_pairs = np.asarray([
+            (tool, other) for tool in self.tool_geoms for other in self.geoms
+            if other not in self.tool_geoms
+            and int(model.geom_bodyid[other]) not in self.robot_bodies], dtype=int).reshape(-1, 2)
 
     def set_entity_transform(self, name, **pose):
         dynamic = getattr(self, 'dynamic_names', set())
@@ -226,6 +230,109 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             return float(np.linalg.norm(tcp - np.asarray(position, dtype=float))) <= 0.012
         except (AttributeError, IndexError, TypeError, ValueError):
             return False
+
+    def check_gripper_pose(self, world_from_control, *, safety_distance=0.0,
+                           gripper_width=None, floor_z=None):
+        """Precheck only the articulated gripper at a known TCP pose, without IK."""
+        from types import SimpleNamespace
+        from demo.interaction.table_clearance import gripper_clearance, set_static_gripper_width
+
+        backend, model = self.backend, self.backend.model
+        pose = np.asarray(world_from_control, dtype=float)
+        if pose.shape != (4, 4) or not np.isfinite(pose).all():
+            raise ValueError('Gripper pose precheck requires a finite 4x4 transform')
+        if getattr(self, 'allow_gripper_environment_contact', False):
+            return CollisionResult(False, float('inf'), ())
+        data = getattr(self, '_gripper_pose_probe', None)
+        if data is None:
+            data = self._gripper_pose_probe = mujoco.MjData(model)
+        data.qpos[:] = backend.data.qpos
+        data.qvel[:] = 0
+        if gripper_width is not None:
+            set_static_gripper_width(model, data, gripper_width)
+        mujoco.mj_kinematics(model, data)
+        if self.tcp_site_id < 0:
+            raise ValueError('Gripper pose precheck requires the configured TCP site')
+        world_from_current = np.eye(4)
+        world_from_current[:3, :3] = data.site_xmat[self.tcp_site_id].reshape(3, 3)
+        world_from_current[:3, 3] = data.site_xpos[self.tcp_site_id]
+        delta = pose @ np.linalg.inv(world_from_current)
+        tool_ids = np.asarray(sorted(self.tool_geoms), dtype=int)
+        if not len(tool_ids):
+            return CollisionResult(False, float('inf'), ())
+        tool_positions = data.geom_xpos[tool_ids].copy()
+        tool_rotations = data.geom_xmat[tool_ids].reshape(-1, 3, 3).copy()
+        data.geom_xpos[tool_ids] = tool_positions @ delta[:3, :3].T + delta[:3, 3]
+        data.geom_xmat[tool_ids] = np.einsum('ij,njk->nik', delta[:3, :3], tool_rotations).reshape(-1, 9)
+
+        if floor_z is not None:
+            from demo.interaction.table_clearance import TABLE_FLOOR_OFFSET_M
+            floor_limit = float(floor_z) + TABLE_FLOOR_OFFSET_M
+            clearance = gripper_clearance(SimpleNamespace(model=model, data=data), floor_limit)
+            if not clearance['success']:
+                return CollisionResult(True, float(clearance['clearance_m']), ({
+                    'geom1': clearance['lowest_link'], 'geom2': 'table_floor',
+                    'distance': float(clearance['clearance_m']), 'self_collision': False},))
+
+        pairs = getattr(self, '_tool_environment_pairs', None)
+        if pairs is None:
+            pairs = np.asarray([(tool, other) for tool in self.tool_geoms for other in self.geoms
+                                if other not in self.tool_geoms
+                                and int(model.geom_bodyid[other]) not in self.robot_bodies], dtype=int).reshape(-1, 2)
+        if not len(pairs):
+            return CollisionResult(False, float('inf'), ())
+        tool_ids, other_ids = pairs[:, 0], pairs[:, 1]
+        target = (getattr(backend.gripper_controller, 'held_name', None)
+                  or getattr(backend, 'contact_target', None)
+                  or getattr(self, '_physical_closure_target', None))
+        if target:
+            target_id = (getattr(backend, 'contact_target_object_id', None)
+                         or getattr(self, '_physical_closure_target', None))
+            target_bodies = set()
+            if target_id is not None:
+                for obj in backend.resources.scene['objects']:
+                    if str(obj.get('object_id_in_scene')) == str(target_id):
+                        root = backend.object_ids.get(obj.get('object_name_in_scene'))
+                        if root is not None:
+                            target_bodies.add(int(root))
+                            changed = True
+                            while changed:
+                                changed = False
+                                for body in range(1, model.nbody):
+                                    if int(model.body_parentid[body]) in target_bodies and body not in target_bodies:
+                                        target_bodies.add(body)
+                                        changed = True
+                        break
+            other_bodies = model.geom_bodyid[other_ids]
+            if target_bodies:
+                pairs = pairs[~np.isin(other_bodies, tuple(target_bodies))]
+            else:
+                target_text = str(target)
+                target_prefix = target_text.rsplit('_', 1)[0]
+                names = np.asarray([self.body_names[int(body)] for body in other_bodies])
+                matches = np.asarray([name == target_text or name.startswith(target_text + '_')
+                                      or target_text.startswith(name + '_')
+                                      or name.startswith(target_prefix + '_')
+                                      for name in names])
+                pairs = pairs[~matches]
+            tool_ids, other_ids = pairs[:, 0], pairs[:, 1]
+        if not len(pairs):
+            return CollisionResult(False, float('inf'), ())
+        gap = (np.linalg.norm(data.geom_xpos[tool_ids] - data.geom_xpos[other_ids], axis=1)
+               - model.geom_rbound[tool_ids] - model.geom_rbound[other_ids])
+        threshold = float(safety_distance)
+        candidate_indices = np.flatnonzero(gap <= max(threshold, .005))
+        contacts, minimum = [], float('inf')
+        for index in candidate_indices:
+            tool, other = int(tool_ids[index]), int(other_ids[index])
+            distance = float(mujoco.mj_geomDistance(
+                model, data, tool, other, max(.005, threshold + .001), None))
+            minimum = min(minimum, distance)
+            if distance <= threshold + 1e-9:
+                contacts.append({'geom1': self.body_names[int(model.geom_bodyid[tool])],
+                                 'geom2': self.body_names[int(model.geom_bodyid[other])],
+                                 'distance': distance, 'self_collision': False})
+        return CollisionResult(bool(contacts), minimum, tuple(contacts))
 
     def capture_support(self):
         """Allow existing resting contact while the initial retreat lifts away."""

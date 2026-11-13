@@ -37,6 +37,7 @@ class MujocoCamera(Camera):
         width: int = 640,
         height: int = 480,
         camera_id: str | None = None,
+        renderer: Any = None,
     ) -> None:
         if width <= 0 or height <= 0:
             raise ValueError("Camera width and height must be positive.")
@@ -61,7 +62,8 @@ class MujocoCamera(Camera):
         self._camera_identifier = camera_id or self._camera_name
         self.width = int(width)
         self.height = int(height)
-        self._renderer = mujoco.Renderer(model, height=self.height, width=self.width)
+        self._owns_renderer = renderer is None
+        self._renderer = renderer or mujoco.Renderer(model, height=self.height, width=self.width)
         self._sequence = 0
         self._closed = False
 
@@ -115,5 +117,6 @@ class MujocoCamera(Camera):
 
     def close(self) -> None:
         if not self._closed:
-            self._renderer.close()
+            if self._owns_renderer:
+                self._renderer.close()
             self._closed = True

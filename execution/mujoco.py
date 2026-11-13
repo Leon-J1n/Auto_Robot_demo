@@ -269,6 +269,7 @@ class MuJoCoExecutionBackend:
         self.resources = resources
         self.scene_path = compile_scene(resources, output_dir)
         self._cameras = None
+        self._camera_renderers = {}
         self._camera_resolutions = {}
         from sensors.camera_mujoco.scene import load_scene_with_cameras
         self.model, self._camera_resolutions = load_scene_with_cameras(
@@ -355,10 +356,18 @@ class MuJoCoExecutionBackend:
 
         name = {'global': 'global_camera', 'wrist': 'wrist_camera'}.get(camera_id, camera_id)
         if self._cameras is None:
-            self._cameras = CameraManager({
-                key: MujocoCamera(self.model, self.data, key, width=size[0], height=size[1])
-                for key, size in self._camera_resolutions.items()
-            })
+            renderers = {}
+            cameras = {}
+            for key, size in self._camera_resolutions.items():
+                dimensions = tuple(size)
+                renderer = renderers.get(dimensions)
+                if renderer is None:
+                    renderer = mujoco.Renderer(self.model, height=dimensions[1], width=dimensions[0])
+                    renderers[dimensions] = renderer
+                cameras[key] = MujocoCamera(self.model, self.data, key, width=dimensions[0],
+                                            height=dimensions[1], renderer=renderer)
+            self._camera_renderers = renderers
+            self._cameras = CameraManager(cameras)
         return self._cameras.get_current_frame(name)
 
     def set_frame_callback(self, callback):
@@ -628,6 +637,9 @@ class MuJoCoExecutionBackend:
         if getattr(self, '_cameras', None) is not None:
             self._cameras.close()
             self._cameras = None
+        for renderer in getattr(self, '_camera_renderers', {}).values():
+            renderer.close()
+        self._camera_renderers = {}
         if getattr(self, 'viewer', None) is not None:
             self.viewer.close()
         self.viewer = None

@@ -255,7 +255,7 @@ class RelativePlacementCycleTests(unittest.TestCase):
         self.estimator.estimate_frame.return_value = {
             'world_point': {'x': .01, 'y': 0., 'z': .7}, 'pixel': {'x': 1, 'y': 1}}
         normal = self.resolve(5)
-        np.testing.assert_allclose(np.asarray(normal['candidates'][0]['world_from_grasp'])[:3, 3], [.01, 0., .7])
+        np.testing.assert_allclose(np.asarray(normal['candidates'][0]['world_from_grasp'])[:3, 3], [.01, 0., .72])
         self.assertNotIn('relative_placement', normal['visual_estimate'])
         self.assertNotIn('instruction', self.estimator.estimate_frame.call_args.kwargs)
 

@@ -7,7 +7,8 @@ import numpy as np
 
 from demo.interaction.visual_targets import (
     infer_command_point_types, infer_command_place_cycles, infer_visual_targets)
-from demo.interaction.vlm_grasp import VLMGraspResolver, GraspResolutionError, PLACEMENT_HEIGHTS_M
+from demo.interaction.vlm_grasp import (VLMGraspResolver, GraspResolutionError,
+                                        PLACEMENT_HEIGHTS_M, _world_aabb_top_z)
 from execution.blackboard import TargetBlackboard
 from sensors.camera import CameraFrame, CameraIntrinsics, CameraPose
 
@@ -32,7 +33,8 @@ class PlacementCycleTests(unittest.TestCase):
             'components': [{'component_type': 'MetadataRef', 'properties': {
                 'type': 'model', 'path': '$LIBRARY_SERVER/12'}}]}]})
         self.resolver = VLMGraspResolver(
-            SimpleNamespace(base_url='http://unused', get_model=Mock(return_value={})),
+            SimpleNamespace(base_url='http://unused', get_model=Mock(return_value={
+                'geometric_properties': {'AABB': [.2, -.2, .2, -.2, 0., -.2]}})),
             self.board, self.backend, estimator=self.estimator,
             visual_targets=infer_visual_targets(self.commands),
             command_point_types=infer_command_point_types(self.commands),
@@ -53,6 +55,20 @@ class PlacementCycleTests(unittest.TestCase):
         stack.enter_context(patch('demo.interaction.vlm_grasp.control_from_grasp_frame', return_value=np.eye(4)))
         return stack
 
+    def test_aabb_top_height_uses_world_z_for_rotated_target(self):
+        from itertools import product
+        from scipy.spatial.transform import Rotation
+
+        lower = np.array([-.2, -.1, -.05])
+        upper = np.array([.2, .1, .05])
+        rotation = Rotation.from_euler('y', 30, degrees=True).as_matrix()
+        pose = {'position': [.1, -.2, .6],
+                'quaternion_xyzw': Rotation.from_matrix(rotation).as_quat()}
+        corners = np.asarray(list(product(*zip(lower, upper))))
+        expected = np.max(corners @ rotation.T + pose['position'], axis=0)[2]
+
+        self.assertAlmostEqual(_world_aabb_top_z(pose, lower, upper), expected)
+
     def test_bindings_separate_each_put_including_direct_put(self):
         self.assertEqual(infer_command_place_cycles(self.commands), {
             '1': '2', '2': '2', '3': '2', '5': '6', '6': '6', '7': '6', '8': '8'})
@@ -65,11 +81,15 @@ class PlacementCycleTests(unittest.TestCase):
             'world_point': point.copy(), 'pixel': {'x': 8, 'y': 3}}
         with self.patches():
             resolved = self.resolve('1')
-        self.assertEqual(resolved['visual_estimate']['world_point'], point)
+        self.assertEqual(resolved['visual_estimate']['world_point'],
+                         {'x': .3, 'y': -.12, 'z': .6})
+        self.assertEqual(resolved['visual_estimate']['rgbd_world_point'], point)
+        self.assertEqual(resolved['visual_estimate']['placement_aabb_top_world'],
+                         {'x': .3, 'y': -.12, 'z': .6})
         self.assertNotIn('floor_pixel', resolved['visual_estimate'])
         for offset, candidate in zip(PLACEMENT_HEIGHTS_M, resolved['candidates']):
             np.testing.assert_allclose(np.asarray(candidate['world_from_grasp'])[:3, 3],
-                                       [.3, -.12, .67 + offset])
+                                       [.3, -.12, .6 + offset])
 
     def test_each_put_refreshes_but_approach_and_put_share_one_estimate(self):
         with self.patches():
@@ -87,7 +107,7 @@ class PlacementCycleTests(unittest.TestCase):
             self.assertEqual(second['visual_estimate']['placement_cycle_id'], '6')
             self.assertEqual(second['visual_estimate']['held_object'], 'Banana')
             pose = np.asarray(second['candidates'][0]['world_from_grasp'])
-            np.testing.assert_allclose(pose[:3, 3], [.02, 0., .6])
+            np.testing.assert_allclose(pose[:3, 3], [.02, 0., .57])
             direct_put = self.resolve('8')
             self.assertEqual(direct_put['visual_estimate']['placement_cycle_id'], '8')
             self.assertEqual(self.backend.get_camera_frame.call_count, 3)
@@ -138,11 +158,11 @@ class PlacementCycleTests(unittest.TestCase):
             self.assertEqual([a['placement_height_offset_m'] for a in selected['placement_height_attempts']],
                              list(PLACEMENT_HEIGHTS_M))
             self.assertEqual([a['placement_height_offset_m'] for a in selected['placement_height_attempts']
-                              if a['evaluated']], [0., .02, .03, .04, .08])
+                              if a['evaluated']], [-.03, .01, .02, .03, .05])
             self.assertTrue(all(a['inferred_by_monotonicity'] for a in
                                 selected['placement_height_attempts'] if not a['evaluated']))
             np.testing.assert_allclose([call.args[0]['position'][2] for call in kin.solve_all.call_args_list[:5]],
-                                       [.60, .68, .64, .62, .63])
+                                       [.57, .65, .61, .63, .62])
             self.resolver.remember_selection(selected)
             evidence = self.board.visual_place_evidence('Basket')
             self.assertTrue(evidence['placement_height_selected'])
@@ -165,33 +185,33 @@ class PlacementCycleTests(unittest.TestCase):
             next_cycle = self.resolve('5')
             self.assertTrue(next_cycle['placement_height_search_pending'])
             np.testing.assert_allclose(np.asarray(next_cycle['candidates'][0]['world_from_grasp'])[:3, 3],
-                                       [.02, 0., .60])
+                                       [.02, 0., .57])
             self.assertEqual(self.estimator.estimate_frame.call_count, 2)
         checker.check_path.assert_not_called()
 
     def test_cached_height_failure_researches_without_perception_or_offset_accumulation(self):
-        kin, checker = self.selection_tools(.63)
+        kin, checker = self.selection_tools(.59)
         with self.patches():
             selected = self.resolver.select(self.resolve('1'), kin, checker, np.zeros(1))
             self.resolver.remember_selection(selected)
             # Simulate a changed physical payload pose making the prior height unsafe.
             checker.check.side_effect = lambda q, **kwargs: SimpleNamespace(
-                in_collision=q[0] < .64 - 1e-9, contacts=[])
+                in_collision=q[0] < .60 - 1e-9, contacts=[])
             cached = self.resolve('2')
             recovered = self.resolver.select(cached, kin, checker, np.zeros(1))
-            self.assertEqual(recovered['selected']['placement_height_offset_m'], .04)
+            self.assertEqual(recovered['selected']['placement_height_offset_m'], 0.)
             np.testing.assert_allclose(np.asarray(recovered['selected']['world_from_grasp'])[:3, 3],
-                                       [.01, 0, .64])
-            self.assertEqual(recovered['placement_revalidation']['previous_height_offset_m'], .03)
+                                       [.01, 0, .60])
+            self.assertEqual(recovered['placement_revalidation']['previous_height_offset_m'], -.01)
             self.resolver.remember_selection(recovered)
             again = self.resolve('2')
             np.testing.assert_allclose(np.asarray(again['candidates'][0]['world_from_grasp'])[:3, 3],
-                                       [.01, 0, .64])
+                                       [.01, 0, .60])
             self.estimator.estimate_frame.assert_called_once()
             self.backend.get_camera_frame.assert_called_once()
 
     def test_cached_height_recovery_failure_reports_search_and_preserves_cache(self):
-        kin, checker = self.selection_tools(.63)
+        kin, checker = self.selection_tools(.59)
         with self.patches():
             selected = self.resolver.select(self.resolve('1'), kin, checker, np.zeros(1))
             self.resolver.remember_selection(selected)
@@ -200,11 +220,11 @@ class PlacementCycleTests(unittest.TestCase):
                 self.resolver.select(self.resolve('2'), kin, checker, np.zeros(1))
             self.assertEqual(caught.exception.details['error_code'], 'PLACEMENT_HEIGHT_SEARCH_FAILED')
             self.assertIn('placement_revalidation', caught.exception.details['details'])
-            self.assertEqual(self.board.visual_place_evidence('Basket')['placement_height_offset_m'], .03)
+            self.assertEqual(self.board.visual_place_evidence('Basket')['placement_height_offset_m'], -.01)
             self.estimator.estimate_frame.assert_called_once()
 
-    def test_height_search_includes_zero_and_eight_cm_and_stops_at_first_feasible(self):
-        for minimum_z, offset, calls in ((.60, 0., 1), (.68, .08, 5)):
+    def test_height_search_includes_minus_three_to_plus_three_cm(self):
+        for minimum_z, offset, calls in ((.57, -.03, 1), (.63, .03, 5)):
             with self.subTest(offset=offset), self.patches():
                 kin, checker = self.selection_tools(minimum_z)
                 selected = self.resolver.select(self.resolve('1'), kin, checker, np.zeros(1))
@@ -214,13 +234,13 @@ class PlacementCycleTests(unittest.TestCase):
 
     def test_all_height_failures_report_all_attempts_without_locking_height(self):
         from demo.error_messages import describe_error
-        kin, checker = self.selection_tools(.71)
+        kin, checker = self.selection_tools(.67)
         with self.patches():
             with self.assertRaises(GraspResolutionError) as caught:
                 self.resolver.select(self.resolve('1'), kin, checker, np.zeros(1))
         error = caught.exception.details
         self.assertEqual(error['error_code'], 'PLACEMENT_HEIGHT_SEARCH_FAILED')
-        self.assertEqual(len(error['details']['height_attempts']), 9)
+        self.assertEqual(len(error['details']['height_attempts']), len(PLACEMENT_HEIGHTS_M))
         self.assertIn('未找到可用放置位姿', describe_error(error, '放置失败'))
         for hidden in ('兜底', '随机', '中央'):
             self.assertNotIn(hidden, describe_error(error, '放置失败'))
@@ -304,9 +324,9 @@ class PlacementFallbackTests(unittest.TestCase):
             selected = self.resolver.select(self.resolve('1'), kin, checker, np.zeros(3))
             evidence = selected['visual_estimate']['placement_center_fallback']
             self.assertEqual(evidence['trigger'], 'vlm_point_infeasible')
-            self.assertEqual(len(evidence['primary_height_attempts']), 9)
-            self.assertEqual(selected['selected']['placement_height_offset_m'], .02)
-            self.assertEqual(kin.solve_all.call_count, 7)
+            self.assertEqual(len(evidence['primary_height_attempts']), len(PLACEMENT_HEIGHTS_M))
+            self.assertEqual(selected['selected']['placement_height_offset_m'], -.03)
+            self.assertEqual(kin.solve_all.call_count, 3)
             self.resolver.remember_selection(selected)
             put = self.resolve('2')
             np.testing.assert_allclose(put['candidates'][0]['world_from_grasp'],

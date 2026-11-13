@@ -116,3 +116,20 @@ def path_cost(kinematics, path):
     travel = float(np.sum(np.abs(np.diff(np.asarray(path, dtype=float), axis=0))))
     preference = preference_for(kinematics)
     return travel + (preference.path_penalty(path) if preference is not None else 0.)
+
+
+def joint_motion_balance_penalty(joint_travel, limits, *, weight_rad=1.0):
+    """Penalize path travel concentrated in a small number of joints."""
+    travel = np.asarray(joint_travel, dtype=float)
+    bounds = (np.tile([-np.pi, np.pi], (travel.size, 1)) if limits is None
+              else np.asarray(limits, dtype=float))
+    if travel.ndim != 1 or bounds.shape != (travel.size, 2):
+        raise ValueError('Joint travel and limits must have matching dimensions')
+    widths = bounds[:, 1] - bounds[:, 0]
+    widths = np.where(np.isfinite(widths) & (widths > 1e-9), widths, 2. * np.pi)
+    reference_travel = np.maximum(widths * .25, 1e-9)
+    normalized = np.maximum(travel, 0.) / reference_travel
+    total = float(normalized.sum())
+    penalty = (float(weight_rad) * float(np.dot(normalized, normalized)) / total
+               if total > 1e-12 else 0.)
+    return penalty, normalized

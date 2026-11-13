@@ -1,0 +1,1401 @@
+{
+  "command_id": "14",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 3.1883195999544114,
+    "candidate_selection": 0.3474866000469774
+  },
+  "wrist_observation": null,
+  "target_resolution_diagnostics": {
+    "placement_height_attempts": [
+      {
+        "placement_height_offset_m": -0.03,
+        "success": false,
+        "evaluated": true,
+        "elapsed_s": 0.21645109984092414,
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619275222873009, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619267383401556, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.000561236775035601, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612375589827461, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191271383155, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.01005899624208909, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280266364085, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236108832004, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619275222873009, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619267383401556, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.000561236775035712, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612375589828571, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191271383042, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.01005899624208898, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280266363974, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236108831891, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.03514773782829613, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.014830406133665331, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02439576288477889, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02738114705185211, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.018246213596272258, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0015379120549413922, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0014903460750756564, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0007696087165864296, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0014187138079504121, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619271571519345, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619263649971325, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612364134098716, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612372055646736, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191597385934, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.010058996612412975, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280679269793, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236550633929, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619271571518236, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619263649970215, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612364134097606, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612372055645626, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191597385824, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.010058996612412975, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280679269793, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236550633821, 'self_collision': False})}]",
+          "rejected": [
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619275222873009,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619267383401556,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.000561236775035601,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612375589827461,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.009935191271383155,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.01005899624208909,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011139280266364085,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011513236108832004,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619275222873009,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619267383401556,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.000561236775035712,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612375589828571,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.009935191271383042,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.01005899624208898,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011139280266363974,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011513236108831891,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.03514773782829613,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.014830406133665331,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.02439576288477889,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.02738114705185211,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.018246213596272258,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.0015379120549413922,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.0014903460750756564,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.0007696087165864296,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0014187138079504121,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619271571519345,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619263649971325,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612364134098716,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612372055646736,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.009935191597385934,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.010058996612412975,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011139280679269793,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011513236550633929,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619271571518236,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005619263649970215,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612364134097606,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "robotiq_2f85_left_pad",
+                  "geom2": "Tray",
+                  "distance": 0.0005612372055645626,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.009935191597385824,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.010058996612412975,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011139280679269793,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.011513236550633821,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "placement_height_offset_m": -0.02,
+        "success": false,
+        "evaluated": true,
+        "elapsed_s": 0.07170019997283816,
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480872861696587e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899624208897218e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392802663639653, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001513236108831883, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480872861696585e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899624208897218e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392802663639653, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001513236108831883, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.030203864982160204, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.012378342262685527, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.021012860825116227, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.023582019351650173, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.015552811231639532, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0004720852887243016, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0005619903862944211, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0015079718726945138, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480840261429677e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.8996612412743844e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001139280679269564, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0015132365506337006, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480840261407471e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899661241296589e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392806792697861, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0015132365506339226, 'self_collision': False})}]",
+          "rejected": [
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": 6.480872861696587e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -5.899624208897218e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.0011392802663639653,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.001513236108831883,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": 6.480872861696585e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -5.899624208897218e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.0011392802663639653,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.001513236108831883,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.030203864982160204,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.012378342262685527,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.021012860825116227,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.023582019351650173,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": -0.015552811231639532,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0004720852887243016,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0005619903862944211,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Marker",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0015079718726945138,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": 6.480840261429677e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -5.8996612412743844e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.001139280679269564,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.0015132365506337006,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": 6.480840261407471e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -5.899661241296589e-05,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.0011392806792697861,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Tray",
+                  "distance": -0.0015132365506339226,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "placement_height_offset_m": -0.01,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.015694500179961324,
+        "rejected": []
+      },
+      {
+        "placement_height_offset_m": 0.0,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.025535200024023652,
+        "rejected": []
+      },
+      {
+        "placement_height_offset_m": 0.01,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.02,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.03,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.018056799890473485,
+        "rejected": []
+      }
+    ],
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 200,
+        "y": 317
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "depth_m": 1.0543148517608643,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6749999999999999
+      },
+      "frame": "world",
+      "confidence": 0.92,
+      "camera_id": "global_camera",
+      "timestamp": 22.233999999998556,
+      "sequence": 3,
+      "visual_estimation_s": 3.1808418999426067,
+      "crop_origin_pixel": {
+        "x": 96,
+        "y": 245
+      },
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "rgbd_world_point": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6158354129909069
+      },
+      "placement_aabb_top_world": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6749999999999999
+      },
+      "held_object": "Banana",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03
+      ],
+      "target_point_world": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6649999999999999
+      },
+      "placement_cycle_id": "15",
+      "placement_height_offset_m": -0.01,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.21645109984092414,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619275222873009, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619267383401556, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.000561236775035601, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612375589827461, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191271383155, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.01005899624208909, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280266364085, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236108832004, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619275222873009, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619267383401556, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.000561236775035712, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612375589828571, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191271383042, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.01005899624208898, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280266363974, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236108831891, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.03514773782829613, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.014830406133665331, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02439576288477889, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02738114705185211, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.018246213596272258, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0015379120549413922, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0014903460750756564, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0007696087165864296, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0014187138079504121, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619271571519345, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619263649971325, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612364134098716, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612372055646736, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191597385934, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.010058996612412975, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280679269793, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236550633929, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619271571518236, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': 0.0005619263649970215, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612364134097606, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': 0.0005612372055645626, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.009935191597385824, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.010058996612412975, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011139280679269793, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.011513236550633821, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619275222873009,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619267383401556,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.000561236775035601,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612375589827461,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.009935191271383155,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.01005899624208909,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011139280266364085,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011513236108832004,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619275222873009,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619267383401556,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.000561236775035712,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612375589828571,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.009935191271383042,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.01005899624208898,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011139280266363974,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011513236108831891,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.03514773782829613,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.014830406133665331,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.02439576288477889,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.02738114705185211,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.018246213596272258,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.0015379120549413922,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.0014903460750756564,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.0007696087165864296,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0014187138079504121,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619271571519345,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619263649971325,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612364134098716,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612372055646736,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.009935191597385934,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.010058996612412975,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011139280679269793,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011513236550633929,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619271571518236,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005619263649970215,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612364134097606,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": 0.0005612372055645626,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.009935191597385824,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.010058996612412975,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011139280679269793,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.011513236550633821,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.07170019997283816,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480872861696587e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899624208897218e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392802663639653, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001513236108831883, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480872861696585e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899624208897218e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392802663639653, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001513236108831883, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.030203864982160204, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.012378342262685527, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.021012860825116227, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.023582019351650173, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.015552811231639532, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0004720852887243016, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0005619903862944211, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.0015079718726945138, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480840261429677e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.8996612412743844e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.001139280679269564, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0015132365506337006, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Tray', 'distance': 6.480840261407471e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -5.899661241296589e-05, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0011392806792697861, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Tray', 'distance': -0.0015132365506339226, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": 6.480872861696587e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -5.899624208897218e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.0011392802663639653,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.001513236108831883,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": 6.480872861696585e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -5.899624208897218e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.0011392802663639653,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.001513236108831883,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.030203864982160204,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.012378342262685527,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.021012860825116227,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.023582019351650173,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": -0.015552811231639532,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0004720852887243016,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0005619903862944211,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0015079718726945138,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": 6.480840261429677e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -5.8996612412743844e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.001139280679269564,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.0015132365506337006,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": 6.480840261407471e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -5.899661241296589e-05,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.0011392806792697861,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Tray",
+                    "distance": -0.0015132365506339226,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.015694500179961324,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.025535200024023652,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.018056799890473485,
+          "rejected": []
+        }
+      ]
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0010188999585807323,
+        "context": 0.00012829992920160294,
+        "selection": 6.700167432427406e-06,
+        "path_generation": 0.0034388001076877117,
+        "planning": 0.6173231999855489,
+        "trajectory_preparation": 0.4798179999925196,
+        "posture_scoring": 2.700136974453926e-06,
+        "pre_execution_total": 1.1017441998701543
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 8.590007200837135e-05,
+          "direct_path_collision_check": 0.017519100103527308,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 3.868748715496971,
+          "total_joint_travel_rad": 3.490114599318771,
+          "maximum_joint_travel_rad": 1.1726096728085018,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.3786341161781997,
+          "joint_travel_by_joint_rad": [
+            0.5447076809126544,
+            0.5782515631333469,
+            0.8792527317248384,
+            0.31443191595055864,
+            0.0008610347888704517,
+            1.1726096728085018
+          ],
+          "normalized_joint_travel": [
+            0.17338571041545917,
+            0.18406305177253812,
+            0.5597661828584042,
+            0.10008671262545256,
+            0.00027407568094246765,
+            0.37325297271242847
+          ],
+          "candidate_count": 4,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 0,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 3,
+          "budget_exhausted": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                -0.5661856308392031,
+                -0.831705367416864,
+                0.7200180125406408,
+                -1.4591088970019412,
+                -1.5707963429234437,
+                -0.5661856276340979
+              ],
+              "endpoint_check_s": 0.017189000034704804,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -0.5661856308392031,
+                -0.14209292751606276,
+                -0.7200180125406408,
+                -0.7086853118214609,
+                -1.5707963429234437,
+                -0.5661856276340979
+              ],
+              "endpoint_check_s": 0.035461500054225326,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -3.3657228535112194,
+                -2.9994997262005603,
+                0.720018012199956,
+                -2.4329073431672366,
+                1.570796336867196,
+                -0.22413019671632226
+              ],
+              "endpoint_check_s": 0.0375129000749439,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -3.3657228535112194,
+                -2.309887286624737,
+                -0.720018012199956,
+                -1.6824837583431471,
+                1.570796336867196,
+                -0.22413019671632226
+              ],
+              "endpoint_check_s": 0.019891300005838275,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -0.5661856308392031,
+                -0.831705367416864,
+                0.7200180125406408,
+                -1.4591088970019412,
+                -1.5707963429234437,
+                -0.5661856276340979
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.48939290014095604,
+              "fine_direct_plan_s": 0.017687999876216054,
+              "direct_success": true,
+              "direct_elapsed_s": 0.5071425000205636
+            },
+            {
+              "goal": [
+                -0.5661856308392031,
+                -0.14209292751606276,
+                -0.7200180125406408,
+                -0.7086853118214609,
+                -1.5707963429234437,
+                -0.5661856276340979
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 6.370186649481335
+            },
+            {
+              "goal": [
+                -3.3657228535112194,
+                -2.9994997262005603,
+                0.720018012199956,
+                -2.4329073431672366,
+                1.570796336867196,
+                -0.22413019671632226
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.354277486582466
+            },
+            {
+              "goal": [
+                -3.3657228535112194,
+                -2.309887286624737,
+                -0.720018012199956,
+                -1.6824837583431471,
+                1.570796336867196,
+                -0.22413019671632226
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.536391595801172
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0009665999095886946,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.4783171000890434,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 61,
+          "planner_waypoint_count": 31,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

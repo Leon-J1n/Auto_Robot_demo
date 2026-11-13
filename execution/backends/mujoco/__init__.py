@@ -350,7 +350,7 @@
 
 依赖安装：`.\.venv\Scripts\python.exe -m pip install -r collision/requirements.txt`。默认采用按模型尺寸归一化的分解阈值 `0.05`，参数集中在 `collision/mesh_assets.py` 的 `SETTINGS` 中；需要米制阈值时可设置 `real_metric=True`。更小的阈值通常需要更多凸块和更长的首次处理时间。设置环境变量 `COACD_LOG_LEVEL=info` 可查看分解阶段日志。凸分解是近似，细缝或薄壁是否保留仍取决于源网格质量与分解精度，需要验证新容器的有效开口。
 
-已有 box/cylinder 等基础碰撞体及大部分 URDF 碰撞定义保持原样。Robotiq 左右 `spring_link` 的凹形 mesh 在运行时使用同一缓存流程拆成凸块，保留原始视觉网格、关节、惯量和碰撞局部变换；源 URDF 不改写，不生成组合 URDF。活动夹爪和活动机构链接由 MuJoCo 提供实时变换，并在 FCL 中使用同步代理几何参与规划和执行碰撞检查。其他 URDF mesh 不自动分解。独立网格可用 `Collider.collision_mesh`（相对于资产根目录的路径）指定碰撞源，外观仍取自 `AssetRef`。动态物体的配置总质量按凸块体积分配，惯量由这些凸块近似计算。
+已有 box/cylinder 等基础碰撞体及大部分 URDF 碰撞定义保持原样。Robotiq 左右 `spring_link` 的凹形 mesh 在运行时使用同一缓存流程拆成凸块，保留原始视觉网格、关节、惯量和碰撞局部变换；源 URDF 不改写，不生成组合 URDF。活动夹爪和活动机构链接由 MuJoCo 提供实时变换，并在 FCL 中使用同步代理几何参与规划和执行碰撞检查。其他 URDF mesh 不自动分解。独立网格可用 `Collider.collision_mesh`（相对于资产根目录的路径）指定碰撞源，外观仍取自 `AssetRef`。场景 3 的 Basket 使用五面盒式碰撞代理，保留开口和外包络，将凸碰撞块从 176 个降到 19 个；编织孔隙按实心墙处理。动态物体的配置总质量按凸块体积分配，惯量由这些凸块近似计算。
 
 
 ### 场景与运行配置分离

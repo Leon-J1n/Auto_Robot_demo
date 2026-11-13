@@ -22,7 +22,8 @@ from demo.interaction.relative_placement import (
     validate_relative_point, random_region_estimates)
 
 
-PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(9))
+PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(-3, 6))
+RELATIVE_PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(9))
 # Rz(+90 degrees) @ Rx(180 degrees), expressed in the world frame.
 _DOWNWARD_GRASP_ROTATION = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., -1.]])
 _DOWNWARD_PLACE_ROTATION = _DOWNWARD_GRASP_ROTATION.copy()
@@ -39,6 +40,33 @@ def _model_bounds(metadata):
     if np.any(upper <= lower):
         raise GraspResolutionError('Model AABB bounds must have positive extent')
     return lower, upper
+
+
+def _world_aabb_top_z(object_pose, lower, upper):
+    """Return the highest world-Z corner of the object's local AABB."""
+    world_from_object = rigid_pose(object_pose['position'], object_pose['quaternion_xyzw'])
+    corners = np.asarray(list(product(*zip(lower, upper))), dtype=float)
+    world = corners @ world_from_object[:3, :3].T + world_from_object[:3, 3]
+    return float(np.max(world[:, 2]))
+
+
+def _placement_heights(estimate):
+    if 'placement_height_candidates_m' in estimate:
+        return tuple(float(value) for value in estimate['placement_height_candidates_m'])
+    if 'relative_placement' in estimate:
+        return RELATIVE_PLACEMENT_HEIGHTS_M
+    return PLACEMENT_HEIGHTS_M
+
+
+def _anchor_to_aabb_top(estimate, object_pose, metadata):
+    """Keep the observed XY and use the world-space AABB top as height zero."""
+    lower, upper = _model_bounds(metadata)
+    source = dict(estimate['world_point'])
+    anchor = dict(source)
+    anchor['z'] = _world_aabb_top_z(object_pose, lower, upper)
+    estimate['rgbd_world_point'] = source
+    estimate['placement_aabb_top_world'] = anchor.copy()
+    estimate['world_point'] = anchor
 
 
 def _downward_grasp_rotation(estimate):
@@ -148,7 +176,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 retry = deepcopy(resolved)
                 evidence = retry['visual_estimate']
                 selected_height = float(evidence['placement_height_offset_m'])
-                heights = evidence.get('placement_height_candidates_m', PLACEMENT_HEIGHTS_M)
+                heights = _placement_heights(evidence)
                 candidates = []
                 for candidate in resolved['candidates']:
                     surface = np.asarray(candidate['world_from_grasp'], dtype=float).copy()
@@ -208,6 +236,45 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 group = [c for c in resolved['candidates'] if c['grasp_depth_offset_m'] == depth]
                 if not group:
                     continue
+                precheck = getattr(checker, 'check_gripper_pose', None)
+                precheck_results = []
+                if callable(precheck):
+                    from demo.interaction.table_clearance import DEFAULT_OPEN_WIDTH_M, table_floor
+                    survivors = []
+                    is_handle = resolved.get('visual_estimate', {}).get('grasp_type') == 'handle'
+                    for candidate in group:
+                        started = perf_counter()
+                        try:
+                            floor_z = None
+                            if not is_handle and hasattr(getattr(checker, 'backend', None), 'model'):
+                                floor_z = table_floor(checker.backend,
+                                    np.asarray(candidate['world_from_grasp'], dtype=float)[:3, 3])
+                            hit = precheck(candidate['world_from_control'],
+                                safety_distance=kwargs.get('safety_distance', .003),
+                                gripper_width=DEFAULT_OPEN_WIDTH_M, floor_z=floor_z)
+                        except Exception as exc:
+                            survivors.append(candidate)
+                            precheck_results.append({'status': 'unavailable',
+                                'error_type': type(exc).__name__, 'elapsed_s': perf_counter() - started})
+                            continue
+                        if hit.in_collision:
+                            precheck_results.append({'status': 'rejected',
+                                'contacts': list(hit.contacts), 'elapsed_s': perf_counter() - started})
+                        else:
+                            survivors.append(candidate)
+                            precheck_results.append({'status': 'clear',
+                                'elapsed_s': perf_counter() - started})
+                    group = survivors
+                    if not group:
+                        attempts.append({'grasp_depth_offset_m': depth, 'success': False,
+                            'gripper_pose_precheck': precheck_results,
+                            'error': {'error_code': 'TARGET_POSE_COLLISION',
+                                'failed_stage': 'target_resolution',
+                                'error_message': 'Gripper geometry collides at this grasp depth',
+                                'rejected': [{'reason': 'gripper_pose_collision',
+                                    'contacts': result['contacts']}
+                                    for result in precheck_results if result['status'] == 'rejected']}})
+                        continue
                 try:
                     choice = super().select(
                         {**resolved, 'candidates': group}, kin, checker, seed,
@@ -215,9 +282,11 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 except GraspResolutionError as exc:
                     details = getattr(exc, 'details', {})
                     attempts.append({'grasp_depth_offset_m': depth, 'success': False,
+                                     'gripper_pose_precheck': precheck_results,
                                      'error': details or {'error_message': str(exc)}})
                     continue
                 attempts.append({'grasp_depth_offset_m': depth, 'success': True,
+                                 'gripper_pose_precheck': precheck_results,
                                  'rejected': choice.get('rejected', [])})
                 choice['grasp_depth_attempts'] = attempts
                 return choice
@@ -257,11 +326,11 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
     def _search_place_heights(self, resolved, kin, checker, seed, **kwargs):
         """Find the lowest feasible offset using the monotone-height assumption."""
         attempts = []
+        heights = sorted({float(c['placement_height_offset_m']) for c in resolved['candidates']})
         groups = {
             height: [c for c in resolved['candidates'] if c['placement_height_offset_m'] == height]
-            for height in PLACEMENT_HEIGHTS_M
+            for height in heights
         }
-        heights = [height for height in PLACEMENT_HEIGHTS_M if groups[height]]
         tested = {}
 
         def test(index):
@@ -393,10 +462,13 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             estimate = points.pop(0)
             context = self._placement_contexts[str(resolved['target_id'])]
             estimate = self._restore_crop_pixel(estimate, context['crop_origin'])
+            if 'relative_placement' not in resolved['visual_estimate']:
+                _anchor_to_aabb_top(estimate, context['object_pose'], context['metadata'])
+            heights = _placement_heights(resolved['visual_estimate'])
             estimate.update(held_object=resolved['visual_estimate']['held_object'],
                             placement_cycle_id=self.place_cycle_id,
                             placement_height_selected=False,
-                            placement_height_candidates_m=list(PLACEMENT_HEIGHTS_M))
+                            placement_height_candidates_m=list(heights))
             if 'relative_placement' in resolved['visual_estimate']:
                 estimate['relative_placement'] = deepcopy(resolved['visual_estimate']['relative_placement'])
             estimate['placement_request'] = deepcopy(resolved['visual_estimate'].get(
@@ -412,7 +484,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             pose[:3, 3] = [estimate['world_point'][axis] for axis in 'xyz']
             transform = np.asarray(resolved['control_from_grasp'], dtype=float)
             candidates = []
-            for height in PLACEMENT_HEIGHTS_M:
+            for height in heights:
                 shifted = pose.copy()
                 shifted[2, 3] += height
                 candidates.append({**base, 'placement_height_offset_m': height,
@@ -712,11 +784,14 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 held_name = gripper.get('object_id')
                 if not gripper.get('holding') or not held_name:
                     raise GraspResolutionError('VLM placement requires a confirmed held object')
-                # Preserve the exact VLM RGB-D point. Height selection only
-                # adds a world-Z offset; it never reselects a floor pixel.
+                heights = ([0.] if vertical_place else
+                           _placement_heights(estimate))
+                if region is None and not vertical_place:
+                    _anchor_to_aabb_top(estimate, object_pose, place_metadata)
+                surface_point = np.array([estimate['world_point'][axis] for axis in 'xyz'], dtype=float)
                 grasp[:3, 3] = surface_point
                 estimate.update(held_object=held_name, placement_height_selected=False,
-                                placement_height_candidates_m=[0.] if vertical_place else list(PLACEMENT_HEIGHTS_M))
+                                placement_height_candidates_m=list(heights))
             estimate['target_point_world'] = {
                 axis: float(grasp[index, 3]) for index, axis in enumerate('xyz')}
             if point_type == 'grasp':
@@ -763,7 +838,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         placement_pending = point_type == 'place' and not evidence.get('placement_height_selected')
         if placement_pending:
             candidates = []
-            for height in evidence.get('placement_height_candidates_m', PLACEMENT_HEIGHTS_M):
+            for height in _placement_heights(evidence):
                 pose = grasp.copy()
                 pose[2, 3] += height  # World Z, independent of the tool's orientation.
                 candidates.append({**candidate, 'placement_height_offset_m': height,

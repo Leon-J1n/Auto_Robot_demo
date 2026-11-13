@@ -25,7 +25,7 @@ class CollisionFreePlanner:
         self.joint_limits = np.asarray(joint_limits, dtype=float)
         self.kinematics = kinematics
         collision_free_config = self.config.get("planning", {}).get("collision_free", {})
-        self.rrt_collision_resolution = max(1e-4, float(collision_free_config.get("rrt_collision_resolution", 0.02)))
+        self.rrt_collision_resolution = max(1e-4, float(collision_free_config.get("rrt_collision_resolution", 0.03)))
         trajopt_config = dict(collision_free_config.get("trajopt", {}))
         trajopt_config["enabled"] = (
             bool(collision_free_config.get("optimize_path", True))
@@ -90,13 +90,16 @@ class CollisionFreePlanner:
                     details={"planner": "rrt_connect", "attempts": attempts, "planning_time": float(move_request["planning"]["planning_time"])},
                 )
             search_s = time.perf_counter() - search_started
+            raw_metrics = _path_metrics(path)
             shortcut_diagnostics: dict[str, Any] = {}
             shortcut = self._shortcut(path, rng, safety_distance, iterations=120, diagnostics=shortcut_diagnostics)
             if preference_for(self.kinematics) is not None and path_cost(self.kinematics, shortcut) > path_cost(self.kinematics, path) + 1e-9:
                 shortcut_diagnostics.update(arm_posture_preserved=True)
             else:
                 path = shortcut
-            trajopt_seed = _densify(np.asarray(path), 0.04)
+            # Optimize control points, not the dense validation samples. All
+            # modified edges still use TrajOpt's unchanged collision resolution.
+            trajopt_seed = _densify(np.asarray(path), 0.16)
             trajopt_started = time.perf_counter()
             optimized_path, trajopt_diagnostics = self.trajopt.optimize(
                 trajopt_seed,
@@ -145,6 +148,11 @@ class CollisionFreePlanner:
                 "shortcut": shortcut_diagnostics,
                 "collision_state_cache": getattr(self.collision_checker, "last_planning_cache_stats", None),
                 "trajopt": trajopt_diagnostics,
+                "path_quality": {
+                    "rrt": raw_metrics,
+                    "shortcut": _path_metrics(path),
+                    "final": _path_metrics(waypoints),
+                },
                 "planning_stages_s": {
                     "endpoint_collision_checks": endpoint_check_s,
                     "rrt_search": search_s,
@@ -523,23 +531,23 @@ class CollisionFreePlanner:
         deadline = started + budget
         stats = diagnostics if diagnostics is not None else {}
         stats.update(time_budget_s=budget, checks=0, cache_hits=0, accepted_shortcuts=0,
-                     stopped_by_time_limit=False)
+                     stopped_by_time_limit=False, interior_shortcuts=0,
+                     input_waypoints=len(path))
         cache: dict[tuple[bytes, bytes], bool] = {}
         result = list(path)
+        vertex_deadline = started + budget * 0.5
         # Deterministic rope-style pass: try long-range connections first,
         # which is substantially more effective on RRT-Connect paths than
         # spending the whole budget on random adjacent choices.
         for gap in range(len(result) - 1, 1, -1):
-            if time.perf_counter() >= deadline or len(result) < 3:
-                stats["stopped_by_time_limit"] = time.perf_counter() >= deadline
+            if time.perf_counter() >= vertex_deadline or len(result) < 3:
                 break
             changed = True
             while changed and len(result) >= 3:
                 changed = False
                 for first in range(0, len(result) - gap):
                     second = first + gap
-                    if time.perf_counter() >= deadline:
-                        stats["stopped_by_time_limit"] = True
+                    if time.perf_counter() >= vertex_deadline:
                         break
                     key = (np.asarray(result[first], dtype=np.float64).tobytes(),
                            np.asarray(result[second], dtype=np.float64).tobytes())
@@ -555,7 +563,7 @@ class CollisionFreePlanner:
                         stats["accepted_shortcuts"] += 1
                         changed = True
                         break
-                if stats["stopped_by_time_limit"]:
+                if time.perf_counter() >= vertex_deadline:
                     break
         # Partial-shortcut pass: sample interior points so a shortcut can
         # remove a bend even when neither endpoint is an original RRT vertex.
@@ -565,24 +573,39 @@ class CollisionFreePlanner:
             if time.perf_counter() >= deadline:
                 stats["stopped_by_time_limit"] = True
                 break
-            first, second = sorted(rng.choice(len(result), size=2, replace=False).tolist())
-            if second - first < 2:
+            points = np.asarray(result)
+            distances = np.r_[0., np.cumsum(np.linalg.norm(np.diff(points, axis=0), axis=1))]
+            if distances[-1] <= 1e-12:
+                break
+            begin, end = sorted(rng.uniform(0., distances[-1], size=2))
+            first = min(int(np.searchsorted(distances, begin, side='right') - 1), len(result) - 2)
+            second = min(int(np.searchsorted(distances, end, side='right') - 1), len(result) - 2)
+            if first == second:
                 continue
-            key = (np.asarray(result[first], dtype=np.float64).tobytes(),
-                   np.asarray(result[second], dtype=np.float64).tobytes())
+            def interpolate(index, distance):
+                fraction = (distance - distances[index]) / max(distances[index + 1] - distances[index], 1e-12)
+                return points[index] + fraction * (points[index + 1] - points[index])
+            start_point = interpolate(first, begin)
+            end_point = interpolate(second, end)
+            if end - begin - np.linalg.norm(end_point - start_point) <= 1e-6:
+                continue
+            key = (start_point.astype(np.float64).tobytes(), end_point.astype(np.float64).tobytes())
             if key in cache:
                 in_collision = cache[key]
                 stats["cache_hits"] += 1
             else:
                 in_collision = self.collision_checker.check_path(
-                    [result[first], result[second]], resolution=self.rrt_collision_resolution,
+                    [start_point, end_point], resolution=self.rrt_collision_resolution,
                     safety_distance=safety_distance,
                 ).in_collision
                 cache[key] = in_collision
                 stats["checks"] += 1
             if not in_collision:
-                result = result[:first + 1] + result[second:]
+                result = result[:first + 1] + [start_point, end_point] + result[second + 1:]
                 stats["accepted_shortcuts"] += 1
+                stats["interior_shortcuts"] += 1
+        stats["output_waypoints"] = len(result)
+        stats["stopped_by_time_limit"] = time.perf_counter() >= deadline
         stats["elapsed_s"] = time.perf_counter() - started
         return result
 
@@ -603,6 +626,17 @@ class _Tree:
             result.append(self.nodes[index])
             index = self.parents[index]
         return list(reversed(result))
+
+
+def _path_metrics(points):
+    points = np.asarray(points, dtype=float)
+    edges = np.diff(points, axis=0)
+    lengths = np.linalg.norm(edges, axis=1)
+    directions = edges[lengths > 1e-10] / lengths[lengths > 1e-10, None]
+    turns = np.arccos(np.clip(np.sum(directions[:-1] * directions[1:], axis=1), -1., 1.))
+    return {"waypoints": len(points), "joint_length_l2_rad": float(lengths.sum()),
+            "total_joint_travel_rad": float(np.abs(edges).sum()),
+            "max_turn_rad": float(turns.max()) if len(turns) else 0.}
 
 
 def _densify(points: np.ndarray, max_step: float) -> np.ndarray:

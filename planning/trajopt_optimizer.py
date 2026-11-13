@@ -66,16 +66,19 @@ class TrajOptOptimizer:
         initial_cost = self._objective(current, smoothness_weight)
         current_cost = initial_cost
         accepted_steps = 0
+        collision_checks = 0
+        cost_rejections = 0
+        stalled_sweeps = 0
+        diagnostics["optimization_waypoints"] = len(seed)
 
         for iteration in range(max_iterations):
             if time.perf_counter() >= deadline:
                 diagnostics["stopped_by_time_limit"] = True
                 break
             sweep_improvement = 0.0
-            # Alternating sweep direction avoids a systematic start/goal bias.
-            indices = range(1, len(current) - 1)
-            if iteration % 2:
-                indices = reversed(range(1, len(current) - 1))
+            # Spend the bounded collision budget on the largest bends first.
+            bends = np.linalg.norm(np.diff(current, n=2, axis=0), axis=1)
+            indices = 1 + np.argsort(-bends, kind='stable')
             for index in indices:
                 if time.perf_counter() >= deadline:
                     diagnostics["stopped_by_time_limit"] = True
@@ -90,7 +93,15 @@ class TrajOptOptimizer:
                         self.joint_limits[:, 0],
                         self.joint_limits[:, 1],
                     )
+                    improvement = self._local_improvement(current, index, candidate_point, smoothness_weight)
+                    if improvement <= convergence_tolerance:
+                        cost_rejections += 1
+                        continue
+                    if time.perf_counter() >= deadline:
+                        diagnostics["stopped_by_time_limit"] = True
+                        break
                     local_path = np.vstack((current[index - 1], candidate_point, current[index + 1]))
+                    collision_checks += 1
                     collision = self.collision_checker.check_path(
                         local_path,
                         resolution=collision_resolution,
@@ -99,21 +110,20 @@ class TrajOptOptimizer:
                     )
                     if collision.in_collision:
                         continue
-                    candidate = current.copy()
-                    candidate[index] = candidate_point
-                    candidate_cost = self._objective(candidate, smoothness_weight)
-                    improvement = current_cost - candidate_cost
-                    if improvement > convergence_tolerance:
-                        current = candidate
-                        current_cost = candidate_cost
-                        sweep_improvement += improvement
-                        accepted_steps += 1
-                        break
+                    current[index] = candidate_point
+                    current_cost -= improvement
+                    sweep_improvement += improvement
+                    accepted_steps += 1
+                    break
             diagnostics["iterations"] = iteration + 1
             if sweep_improvement <= convergence_tolerance:
+                stalled_sweeps += 1
                 trust_region *= 0.5
-                if trust_region < minimum_trust_region:
+                if stalled_sweeps >= 2 or trust_region < minimum_trust_region:
+                    diagnostics["stopped_by_low_improvement"] = True
                     break
+            else:
+                stalled_sweeps = 0
 
         final_collision = self.collision_checker.check_path(
             current,
@@ -128,12 +138,23 @@ class TrajOptOptimizer:
             initial_cost=initial_cost,
             final_cost=current_cost if improved else initial_cost,
             cost_reduction=(initial_cost - current_cost) if improved else 0.0,
+            collision_checks=collision_checks + 1,
+            cost_rejections_before_collision=cost_rejections,
         )
         if not improved:
             diagnostics["fallback_to_rrt"] = True
             diagnostics["reason"] = "no_safe_improvement" if not final_collision.in_collision else "final_collision_check_failed"
             return seed.copy(), diagnostics
         return current, diagnostics
+
+    @classmethod
+    def _local_improvement(cls, path, index, candidate_point, smoothness_weight):
+        # A moved point changes two first differences and at most three second
+        # differences. Unaffected terms in this window cancel exactly.
+        local = path[max(0, index - 2):min(len(path), index + 3)]
+        candidate = local.copy()
+        candidate[index - max(0, index - 2)] = candidate_point
+        return cls._objective(local, smoothness_weight) - cls._objective(candidate, smoothness_weight)
 
     @staticmethod
     def _objective(path: np.ndarray, smoothness_weight: float) -> float:

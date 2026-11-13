@@ -7,7 +7,7 @@ def collision_sampling_settings(request):
     config = request.get('planning', {}).get('collision_validation', {})
     if not isinstance(config, Mapping):
         raise ValueError('planning.collision_validation must be an object')
-    resolution = config.get('resolution_rad', .02)
+    resolution = config.get('resolution_rad', .04)
     subdivisions = config.get('spline_subdivisions', 2)
     if (isinstance(resolution, bool) or not isinstance(resolution, (int, float))
             or not np.isfinite(resolution) or resolution <= 0):

@@ -763,6 +763,13 @@
           "properties": {}
         },
         {
+          "component_type": "Collider",
+          "properties": {
+            "enabled": true,
+            "collision_mesh": "models/12/basket_collision.obj"
+          }
+        },
+        {
           "component_type": "Semantic",
           "properties": {
             "semantic_name": "Basket",

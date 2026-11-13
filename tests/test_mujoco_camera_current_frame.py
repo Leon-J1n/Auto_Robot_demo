@@ -10,9 +10,33 @@ import numpy as np
 
 from sensors.camera_mujoco import MujocoCamera
 from sensors.camera_mujoco.scene import load_scene_with_cameras
+from execution.mujoco import MuJoCoExecutionBackend
 
 
 class MujocoCameraTests(unittest.TestCase):
+    def test_backend_shares_renderer_for_cameras_with_same_resolution(self):
+        model = mujoco.MjModel.from_xml_string(
+            '<mujoco><worldbody><camera name="global_camera" pos="0 0 2" '
+            'xyaxes="1 0 0 0 1 0"/><camera name="wrist_camera" pos="0 0 2" '
+            'xyaxes="1 0 0 0 1 0"/></worldbody></mujoco>')
+        backend = MuJoCoExecutionBackend.__new__(MuJoCoExecutionBackend)
+        backend.model = model
+        backend.data = mujoco.MjData(model)
+        backend._cameras = None
+        backend._camera_renderers = {}
+        backend._camera_resolutions = {
+            'global_camera': (64, 64), 'wrist_camera': (64, 64),
+        }
+        global_frame = backend.get_camera_frame('global')
+        wrist_frame = backend.get_camera_frame('wrist')
+        self.assertEqual(global_frame.rgb.shape, (64, 64, 3))
+        self.assertEqual(wrist_frame.depth.shape, (64, 64))
+        self.assertIs(backend._cameras['global_camera']._renderer,
+                      backend._cameras['wrist_camera']._renderer)
+        self.assertEqual(len(backend._camera_renderers), 1)
+        backend.close()
+        self.assertEqual(backend._camera_renderers, {})
+
     def test_scene_camera_housings_are_textured_and_follow_mount(self):
         scene = Path(__file__).resolve().parents[1] / "assets/scenes/2/ur5e_table_apple.json"
         with tempfile.TemporaryDirectory() as directory:

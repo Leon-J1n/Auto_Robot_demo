@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 
 
-GRASP_DEPTHS_M = tuple(mm / 1000. for mm in range(30, -1, -2))
+GRASP_DEPTHS_M = tuple(mm / 1000. for mm in range(30, -1, -5))
 
 
 def floor_fallback_candidates(resolved, checker, seed):

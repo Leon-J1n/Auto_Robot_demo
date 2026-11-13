@@ -91,10 +91,9 @@ class Commands002VLMGraspTests(unittest.TestCase):
         self.assertEqual(evidence['confidence'], 0.9)
         self.assertEqual(evidence['world_point'], {'x': 0.1, 'y': 0., 'z': 0.5998})
         self.assertFalse(evidence['depth_selected'])
-        self.assertEqual(len(first['candidates']), 16)
+        self.assertEqual(len(first['candidates']), 7)
         self.assertEqual([c['grasp_depth_offset_m'] for c in first['candidates']],
-                         [.03, .028, .026, .024, .022, .020, .018, .016, .014, .012,
-                          .010, .008, .006, .004, .002, 0.])
+                         [.03, .025, .020, .015, .010, .005, 0.])
         self.assertAlmostEqual(first['candidates'][-1]['world_from_grasp'][2][3], .5998)
 
     def test_rgbd_axis_controls_yaw_without_model_bounds(self):

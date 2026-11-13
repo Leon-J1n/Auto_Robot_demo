@@ -84,7 +84,7 @@ class WristRefinementTests(unittest.TestCase):
         def select(candidate, *args, **kwargs):
             self.assertFalse(candidate['fixed_grasp_validation_pending'])
             self.assertTrue(candidate['depth_search_pending'])
-            self.assertEqual(len(candidate['candidates']), 16)
+            self.assertEqual(len(candidate['candidates']), 7)
             self.assertEqual(candidate['visual_estimate']['axis_status'], resolved['visual_estimate']['axis_status'])
             for item in candidate['candidates']:
                 pose = np.asarray(item['world_from_grasp'])

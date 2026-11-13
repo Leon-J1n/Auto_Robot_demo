@@ -6,7 +6,8 @@ from unittest.mock import Mock
 import mujoco
 import numpy as np
 
-from planning.arm_posture import ArmPosturePreference, configuration_cost, preference_for
+from planning.arm_posture import (ArmPosturePreference, configuration_cost,
+                                  joint_motion_balance_penalty, preference_for)
 from planning.collision_free_planner import CollisionFreePlanner
 from atomic_action.motion.common.action import _MoveExecutor
 from demo.interaction.object_library import ObjectLibraryGraspResolver
@@ -77,7 +78,8 @@ class ArmPostureTests(unittest.TestCase):
         e, request, path = self.make_search()
         result = e._plan_joint_candidates(request, {}, {}, path)
         np.testing.assert_allclose(result['waypoints'][-1], self.up)
-        self.assertEqual(result['diagnostics']['configuration_selection']['objective'], 'joint_travel_plus_arm_posture')
+        self.assertEqual(result['diagnostics']['configuration_selection']['objective'],
+                         'joint_travel_plus_motion_balance_plus_arm_posture')
 
     def test_colliding_raised_configuration_falls_back_to_lower_arm(self):
         e, request, path = self.make_search(collide_up=True)
@@ -103,7 +105,37 @@ class ArmPostureTests(unittest.TestCase):
         e, request, path = self.make_search()
         result = e._plan_joint_candidates(request, {}, {}, path)
         np.testing.assert_allclose(result['waypoints'][-1], self.down)
-        self.assertEqual(result['diagnostics']['configuration_selection']['objective'], 'total_joint_travel_rad')
+        self.assertEqual(result['diagnostics']['configuration_selection']['objective'],
+                         'joint_travel_plus_motion_balance')
+
+    def test_joint_motion_balance_prefers_shared_travel_without_more_candidate_checks(self):
+        limits = np.tile([-np.pi, np.pi], (4, 1))
+        executor = _MoveExecutor.__new__(_MoveExecutor)
+        executor.kinematics = SimpleNamespace(arm_posture=None, limits=limits)
+        executor.collision_checker = SimpleNamespace(
+            check=Mock(return_value=SimpleNamespace(in_collision=False, contacts=[])),
+            check_path=Mock(return_value=SimpleNamespace(in_collision=False)))
+        executor.direct_planner = SimpleNamespace(plan=Mock(side_effect=lambda path, *args: {
+            'waypoints': np.vstack((path['start'], path['goal'])).tolist()}))
+        executor.collision_free_planner = SimpleNamespace(plan=Mock())
+        request = {'planning': {'planning_time': 5., 'mode': 'collision_free', 'allow_replan': True},
+                   'motion': {'path_constraint': 'soft'}, 'constraints': {'avoid_collision': True}}
+        concentrated = np.array([.8, 0., 0., 0.])
+        shared = np.array([.4, .4, 0., 0.])
+        result = executor._plan_joint_candidates(request, {}, {}, {
+            'path_type': 'joint', 'start': np.zeros(4), 'candidate_goals': [concentrated, shared]})
+
+        np.testing.assert_allclose(result['waypoints'][-1], shared)
+        diagnostics = result['diagnostics']['configuration_selection']
+        np.testing.assert_allclose(diagnostics['joint_travel_by_joint_rad'], [.4, .4, 0., 0.])
+        self.assertGreater(diagnostics['joint_motion_balance_penalty_rad'], 0.)
+        self.assertEqual(executor.direct_planner.plan.call_count, 2)
+
+    def test_joint_motion_balance_penalty_is_lower_for_even_distribution(self):
+        limits = np.tile([-np.pi, np.pi], (3, 1))
+        concentrated, _ = joint_motion_balance_penalty([.8, 0., 0.], limits)
+        distributed, _ = joint_motion_balance_penalty([.4, .4, 0.], limits)
+        self.assertLess(distributed, concentrated)
 
     def test_rrt_retains_goal_bias_unbiased_sampling_and_preferred_sampling(self):
         planner = CollisionFreePlanner.__new__(CollisionFreePlanner)

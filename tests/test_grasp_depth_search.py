@@ -30,7 +30,9 @@ class GraspDepthSearchTests(unittest.TestCase):
                          'visual_estimate': {'depth_selected': False, 'long_axis_aligned': False}}
         self.kin = SimpleNamespace(forward=lambda seed: {'position': [0., 0., 0.]},
             solve_all=Mock(return_value=SimpleNamespace(solutions=[np.zeros(6)], solver='test')))
-        self.checker = SimpleNamespace(check=Mock(return_value=SimpleNamespace(in_collision=False)))
+        self.checker = SimpleNamespace(
+            check=Mock(return_value=SimpleNamespace(in_collision=False)),
+            check_gripper_pose=Mock(return_value=SimpleNamespace(in_collision=False, contacts=[])))
 
     def select(self):
         return self.resolver.select(self.resolved, self.kin, self.checker, np.zeros(6))
@@ -43,13 +45,13 @@ class GraspDepthSearchTests(unittest.TestCase):
             return {'success': depth <= .01, 'reason': 'grasp_confirmation_failed'}
         with patch('demo.interaction.vlm_grasp.validate_depth_candidate', side_effect=validate):
             result = self.select()
-        self.assertEqual(seen, [.03, .028, .026, .024, .022, .020, .018, .016, .014, .012, .010])
+        self.assertEqual(seen, [.03, .025, .020, .015, .010])
         self.assertEqual(result['selected']['grasp_depth_offset_m'], .010)
         self.resolver.remember_selection(result)
         evidence = self.board.visual_grasp_evidence('Apple')
         self.assertTrue(evidence['depth_selected'])
         self.assertEqual(evidence['grasp_depth_offset_m'], .010)
-        self.assertEqual(len(evidence['grasp_depth_attempts']), 11)
+        self.assertEqual(len(evidence['grasp_depth_attempts']), 5)
         self.assertAlmostEqual(self.board.visual_grasp('Apple')[2, 3], .690)
         self.assertEqual(self.backend.contact_target, 'previous')
 
@@ -59,16 +61,31 @@ class GraspDepthSearchTests(unittest.TestCase):
             SimpleNamespace(in_collision=False)]
         with patch('demo.interaction.vlm_grasp.validate_depth_candidate', return_value={'success': True}) as validate:
             result = self.select()
-        self.assertEqual(result['selected']['grasp_depth_offset_m'], .028)
+        self.assertEqual(result['selected']['grasp_depth_offset_m'], .025)
         validate.assert_called_once()
         self.assertEqual(result['grasp_depth_attempts'][0]['error']['error_code'], 'TARGET_POSE_COLLISION')
+
+    def test_gripper_pose_collision_skips_ik_for_that_depth(self):
+        self.resolved['visual_estimate']['grasp_type'] = 'handle'
+        self.checker.check_gripper_pose.side_effect = lambda pose, **kwargs: SimpleNamespace(
+            in_collision=np.asarray(pose)[2, 3] < .677, contacts=[{'geom1': 'finger', 'geom2': 'table'}]
+            if np.asarray(pose)[2, 3] < .677 else [])
+        self.kin.solve_all.reset_mock()
+        with patch('demo.interaction.vlm_grasp.validate_depth_candidate', return_value={'success': True}):
+            result = self.select()
+        self.assertEqual(result['selected']['grasp_depth_offset_m'], .020)
+        self.assertEqual(self.kin.solve_all.call_count, 1)
+        self.assertEqual([attempt['grasp_depth_offset_m'] for attempt in result['grasp_depth_attempts'][:2]],
+                         [.03, .025])
+        self.assertTrue(all(attempt['gripper_pose_precheck'][0]['status'] == 'rejected'
+                            for attempt in result['grasp_depth_attempts'][:2]))
 
     def test_surface_zero_is_included(self):
         with patch('demo.interaction.vlm_grasp.validate_depth_candidate', side_effect=lambda r, c, *a: {
                 'success': c['grasp_depth_offset_m'] == 0., 'reason': 'grasp_confirmation_failed'}):
             result = self.select()
         self.assertEqual(result['selected']['grasp_depth_offset_m'], 0.)
-        self.assertEqual(len(result['grasp_depth_attempts']), 16)
+        self.assertEqual(len(result['grasp_depth_attempts']), 7)
 
     def test_all_fail_reports_attempts_and_does_not_lock_depth(self):
         with patch('demo.interaction.vlm_grasp.validate_depth_candidate', return_value={
@@ -79,7 +96,7 @@ class GraspDepthSearchTests(unittest.TestCase):
                 self.select()
         error = caught.exception.details
         self.assertEqual(error['error_code'], 'GRASP_DEPTH_SEARCH_FAILED')
-        self.assertEqual(len(error['details']['depth_attempts']), 16)
+        self.assertEqual(len(error['details']['depth_attempts']), 7)
         self.assertFalse(error['details']['floor_fallback']['success'])
         from demo.run_demo import step_message
         message = step_message({'skill_name': 'pick', 'parameters': {'target': 7}},

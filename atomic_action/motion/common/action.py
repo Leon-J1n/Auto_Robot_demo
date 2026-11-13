@@ -17,7 +17,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from collision import SimPlatformFCLCollisionChecker
 from kinematics import IKError, KinematicsService
 from planning.prepared_trajectory import PreparedTrajectory, planning_state_signature
-from planning.arm_posture import ArmPosturePreference, configuration_cost, preference_for
+from planning.arm_posture import (ArmPosturePreference, configuration_cost,
+                                  joint_motion_balance_penalty, preference_for)
 from planning import CollisionFreePlanner, CollisionPlanningError, DirectPlanner, PlanningError
 from atomic_action.motion.common.selector import StrategySelectionError, StrategySelector
 from atomic_action.motion.common.strategies import CircularMove, JointMove, LinearMove
@@ -257,6 +258,7 @@ class _MoveExecutor:
         goals = sorted(path_request["candidate_goals"], key=lambda q: configuration_cost(kinematics, q, start))
         validator = path_request.get("candidate_validator")
         best = None
+        best_base_cost = float('inf')
         pending = []
         failures = []
         evaluated = 0
@@ -267,11 +269,19 @@ class _MoveExecutor:
         candidate_timings = []
 
         def consider(trajectory, candidate_selection):
-            nonlocal best
+            nonlocal best, best_base_cost
             travel = np.sum(np.abs(np.diff(np.asarray(trajectory["waypoints"]), axis=0)), axis=0)
             penalty = posture.path_penalty(trajectory['waypoints']) if posture is not None else 0.
-            score = (float(np.sum(travel)) + penalty, float(np.sum(travel)), float(np.max(travel)), penalty)
+            base_cost = float(np.sum(travel)) + penalty
+            balance_penalty, normalized_travel = joint_motion_balance_penalty(
+                travel, getattr(kinematics, 'limits', None))
+            score = (base_cost + balance_penalty, float(np.sum(travel)),
+                     float(np.max(travel)), penalty, balance_penalty, base_cost)
+            best_base_cost = min(best_base_cost, base_cost)
             if best is None or score < best[0]:
+                candidate_selection = dict(candidate_selection)
+                candidate_selection['joint_travel_by_joint_rad'] = travel.tolist()
+                candidate_selection['normalized_joint_travel'] = normalized_travel.tolist()
                 best = (score, trajectory, candidate_selection)
 
         def bypass(entry, budget):
@@ -332,7 +342,7 @@ class _MoveExecutor:
                 untested = viable_goals[goal_index:]
                 break
             lower_bound = float(np.sum(np.abs(periodic_delta(goal))))
-            if best is not None and lower_bound > best[0][0] + 1e-9:
+            if best is not None and lower_bound > best_base_cost + 1e-9:
                 pruned += 1
                 candidate_timings.append({'goal': np.asarray(goal).tolist(),
                     'status': 'pruned_by_lower_bound', 'lower_bound_cost': lower_bound})
@@ -406,7 +416,7 @@ class _MoveExecutor:
             evaluated += 1
         for pending_index, entry in enumerate(pending):
             lower_bound = entry[0]
-            if best is not None and lower_bound > best[0][0] + 1e-9:
+            if best is not None and lower_bound > best_base_cost + 1e-9:
                 continue
             remaining = deadline - time.perf_counter()
             if remaining <= 0:
@@ -433,9 +443,13 @@ class _MoveExecutor:
         selection.update(chosen)
         trajectory["planning_time"] = time.perf_counter() - started
         trajectory.setdefault("diagnostics", {})["configuration_selection"] = {
-            "objective": "joint_travel_plus_arm_posture" if posture is not None else "total_joint_travel_rad",
+            "objective": ("joint_travel_plus_motion_balance_plus_arm_posture" if posture is not None
+                          else "joint_travel_plus_motion_balance"),
             "selection_cost_rad": score[0], "total_joint_travel_rad": score[1],
             "maximum_joint_travel_rad": score[2], "arm_posture_penalty_rad": score[3],
+            "joint_motion_balance_penalty_rad": score[4],
+            "joint_travel_by_joint_rad": chosen['joint_travel_by_joint_rad'],
+            "normalized_joint_travel": chosen['normalized_joint_travel'],
             "candidate_count": len(goals),
             "direct_candidates_evaluated": evaluated,
             "endpoint_rejected_count": len(goals) - len(viable_goals),

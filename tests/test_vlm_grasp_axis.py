@@ -199,7 +199,7 @@ class VLMAxisSelectionTests(unittest.TestCase):
         with (patch('demo.interaction.vlm_grasp.control_from_grasp_frame', return_value=np.eye(4)),
               patch('demo.interaction.vlm_grasp.validate_depth_candidate', return_value={'success': True})):
             resolved = resolver.resolve(7, resources, state)
-            self.assertEqual(len(resolved['candidates']), 32)
+            self.assertEqual(len(resolved['candidates']), 14)
             first, opposite = [np.asarray(c['world_from_grasp']) for c in resolved['candidates'][:2]]
             np.testing.assert_allclose(first[:3, :2], -opposite[:3, :2])
             np.testing.assert_allclose(first[:3, 2:], opposite[:3, 2:])

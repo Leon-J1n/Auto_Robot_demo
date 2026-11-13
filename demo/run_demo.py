@@ -199,7 +199,7 @@ def _write_command_planning_timing(output_dir, index, row):
         }
         planner_details = {
             key: diagnostics[key] for key in
-            ('algorithm', 'planning_stages_s', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache',
+            ('algorithm', 'planning_stages_s', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
              'configuration_selection')
             if key in diagnostics
         }

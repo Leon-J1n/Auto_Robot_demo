@@ -24,6 +24,7 @@ class PlanningTimingOutputTest(unittest.TestCase):
                     'trajectory': {'planner': 'collision_free', 'diagnostics': {
                         'algorithm': 'rrt_connect+trajopt',
                         'planning_stages_s': {'rrt_search': 0.2, 'trajopt': 0.1},
+                        'path_quality': {'final': {'joint_length_l2_rad': 1.2}},
                         'configuration_selection': {'candidate_timings': [
                             {'direct_elapsed_s': .15, 'direct_success': True}]},
                     }},
@@ -42,6 +43,8 @@ class PlanningTimingOutputTest(unittest.TestCase):
 
         self.assertEqual([motion['phase'] for motion in payload['motions']], ['approach', 'contact'])
         self.assertEqual(payload['motions'][0]['planner_diagnostics']['planning_stages_s']['rrt_search'], 0.2)
+        self.assertEqual(payload['motions'][0]['planner_diagnostics']['path_quality']
+                         ['final']['joint_length_l2_rad'], 1.2)
         self.assertEqual(payload['target_resolution_timing_s']['resolve_total'], .4)
         self.assertEqual(payload['target_resolution_diagnostics']['placement_height_attempts'][0]['elapsed_s'], .1)
         self.assertEqual(payload['motions'][0]['planner_diagnostics']['configuration_selection']

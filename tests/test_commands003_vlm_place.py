@@ -99,16 +99,17 @@ class Commands003VLMPlaceTests(unittest.TestCase):
         np.testing.assert_allclose(basket_again['candidates'][0]['world_from_grasp'],
                                    basket['candidates'][0]['world_from_grasp'])
         estimate = board.snapshot()['visual_places']['Basket']['estimate']
-        self.assertAlmostEqual(estimate['world_point']['z'], .62, delta=.005)
+        self.assertAlmostEqual(estimate['world_point']['z'], .817471, delta=.005)
+        self.assertAlmostEqual(estimate['rgbd_world_point']['z'], .62, delta=.005)
         self.assertAlmostEqual(estimate['target_point_world']['z'],
                                estimate['world_point']['z'])
         self.assertNotIn('held_bottom_offset_m', estimate)
         self.assertNotIn('placement_clearance_m', estimate)
         self.assertNotIn('placement_world_z_offset_m', estimate)
-        self.assertEqual(estimate['placement_height_candidates_m'], [cm / 100. for cm in range(9)])
+        self.assertEqual(estimate['placement_height_candidates_m'], [cm / 100. for cm in range(-3, 6)])
         self.assertEqual(estimate['held_object'], 'Apple')
         self.assertNotIn('floor_pixel', estimate)
-        self.assertEqual(estimate['world_point'], {'x': -.2, 'y': .15, 'z': .62})
+        self.assertEqual(estimate['world_point'], {'x': -.2, 'y': .15, 'z': .817471})
 
     def test_retreat_after_visual_place_uses_current_pose(self):
         executor = TaskSkillExecutor.__new__(TaskSkillExecutor)

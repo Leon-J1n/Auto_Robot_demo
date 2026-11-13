@@ -1,0 +1,1112 @@
+{
+  "command_id": "6",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 3.426923700142652,
+    "candidate_selection": 1.4907421998213977
+  },
+  "wrist_observation": null,
+  "target_resolution_diagnostics": {
+    "placement_height_attempts": [
+      {
+        "placement_height_offset_m": -0.03,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.010092299897223711,
+        "rejected": []
+      },
+      {
+        "placement_height_offset_m": -0.02,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": -0.01,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.0,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.01,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.02,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.03,
+        "success": true,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred feasible above the selected height"
+      }
+    ],
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 419,
+        "y": 304
+      },
+      "world_point": {
+        "x": -0.25127350614318517,
+        "y": 0.14270290717694112,
+        "z": 0.817507
+      },
+      "depth_m": 1.0497732162475586,
+      "frame": "world",
+      "confidence": null,
+      "timestamp": 6.5419999999995015,
+      "sequence": 1,
+      "placement_center_fallback": {
+        "used": true,
+        "radius_fraction_xy": 0.2,
+        "max_points": 3,
+        "sample_index": 0,
+        "trigger": "vlm_point_infeasible",
+        "attempts": [
+          {
+            "world_point": {
+              "x": -0.25127350614318517,
+              "y": 0.14270290717694112,
+              "z": 0.817507
+            },
+            "height_attempts": [
+              {
+                "placement_height_offset_m": -0.03,
+                "success": true,
+                "evaluated": true,
+                "elapsed_s": 0.010092299897223711,
+                "rejected": []
+              },
+              {
+                "placement_height_offset_m": -0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": -0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.0,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.03,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              }
+            ],
+            "success": true,
+            "elapsed_s": 0.010472000110894442
+          }
+        ],
+        "primary_height_attempts": [
+          {
+            "placement_height_offset_m": -0.03,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 0.18627559999004006,
+            "error": {
+              "error_code": "TARGET_POSE_COLLISION",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -0.00015637866362726004, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00034639630232533573, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000810459976166269, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00026555911170611133, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0007518969696653598, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033630501331878104, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00039331525586175435, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00031074824608823964, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0007991018423782506, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005770433350217514, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005830842644799477, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000534147207356259, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005727845737091435, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0004722147521285165, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005444037228457053, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002572793750049466, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0006206146785150174, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -4.688220472331035e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005156053576842693, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008540551913709169, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000455759401459733, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002177073688027868, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033535769640178324, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -0.0001563786636269825, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00034639630232566874, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008104599761666019, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000265559111706389, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0007518969696656927, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033630501331905854, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0003933152558620873, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00031074824608862817, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000799101842378528, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005770433350220288, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005830842644802807, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005341472073565366, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005727845737094208, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000472214752128794, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005444037228459828, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002572793750052797, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0006206146785152951, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -4.6882204722977106e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005156053576846023, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008540551913711942, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00045575940146006617, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00021770736880311991, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033535769640217176, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -0.0001563785936298835, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0003463963629917559, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008104600368470997, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002655591826442352, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000751897038688731, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033630505778583787, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00039331531404290066, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00031074829915732474, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0007991018859664268, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005770433932200219, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005830843219616119, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005341472554417556, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005727846217953296, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0004722148051828289, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005444037669525745, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00025727942935823073, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0006206147229533339, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -4.688217531170363e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005156053993784833, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008540552300558825, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00045575943343163143, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00021770741143688503, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0003353577407868494, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -0.0001563785936298835, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0003463963629918114, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008104600368471001, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002655591826442352, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000751897038688731, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00033630505778583787, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0003933153140428452, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00031074829915738025, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0007991018859664826, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005770433932201331, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005830843219616119, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000534147255441811, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005727846217953295, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00047221480518288433, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005444037669526299, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0002572794293582863, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0006206147229533894, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': -4.688217531164793e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0005156053993784832, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.0008540552300558825, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00045575943343168705, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.00021770741143694054, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Basket', 'distance': 0.000335357740786905, 'self_collision': False})}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -0.00015637866362726004,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00034639630232533573,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000810459976166269,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00026555911170611133,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0007518969696653598,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033630501331878104,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00039331525586175435,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00031074824608823964,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0007991018423782506,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005770433350217514,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005830842644799477,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000534147207356259,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005727845737091435,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0004722147521285165,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005444037228457053,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002572793750049466,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0006206146785150174,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -4.688220472331035e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005156053576842693,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008540551913709169,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000455759401459733,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002177073688027868,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033535769640178324,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -0.0001563786636269825,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00034639630232566874,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008104599761666019,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000265559111706389,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0007518969696656927,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033630501331905854,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0003933152558620873,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00031074824608862817,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000799101842378528,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005770433350220288,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005830842644802807,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005341472073565366,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005727845737094208,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000472214752128794,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005444037228459828,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002572793750052797,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0006206146785152951,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -4.6882204722977106e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005156053576846023,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008540551913711942,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00045575940146006617,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00021770736880311991,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033535769640217176,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -0.0001563785936298835,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0003463963629917559,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008104600368470997,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002655591826442352,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000751897038688731,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033630505778583787,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00039331531404290066,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00031074829915732474,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0007991018859664268,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005770433932200219,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005830843219616119,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005341472554417556,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005727846217953296,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0004722148051828289,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005444037669525745,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00025727942935823073,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0006206147229533339,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -4.688217531170363e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005156053993784833,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008540552300558825,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00045575943343163143,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00021770741143688503,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0003353577407868494,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -0.0001563785936298835,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0003463963629918114,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008104600368471001,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002655591826442352,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000751897038688731,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00033630505778583787,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0003933153140428452,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00031074829915738025,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0007991018859664826,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005770433932201331,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005830843219616119,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000534147255441811,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005727846217953295,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00047221480518288433,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005444037669526299,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0002572794293582863,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0006206147229533894,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": -4.688217531164793e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0005156053993784832,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.0008540552300558825,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00045575943343168705,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.00021770741143694054,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Basket",
+                      "distance": 0.000335357740786905,
+                      "self_collision": false
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": -0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": -0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.0,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 1.2923879001755267,
+            "error": {
+              "error_code": "TARGET_POSE_UNREACHABLE",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.028897'}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "ik_failed",
+                  "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.028897"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "crop_origin_pixel": {
+        "x": 340,
+        "y": 251
+      },
+      "rgbd_world_point": {
+        "x": -0.25127350614318517,
+        "y": 0.14270290717694112,
+        "z": 0.6144601847502094
+      },
+      "placement_aabb_top_world": {
+        "x": -0.25127350614318517,
+        "y": 0.14270290717694112,
+        "z": 0.817507
+      },
+      "held_object": "RubiksCube",
+      "placement_cycle_id": "7",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03
+      ],
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "placement_height_offset_m": -0.03,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.010092299897223711,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        }
+      ],
+      "target_point_world": {
+        "x": -0.25127350614318517,
+        "y": 0.14270290717694112,
+        "z": 0.787507
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": null,
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0009753999765962362,
+        "context": 0.00010930001735687256,
+        "selection": 6.600050255656242e-06,
+        "path_generation": 0.0035672998055815697,
+        "planning": 0.23096419987268746,
+        "trajectory_preparation": 0.1441943000536412
+      },
+      "planner_diagnostics": {}
+    },
+    {
+      "phase": "approach_approach_95mm",
+      "planner": "collision_free",
+      "planning_mode": "collision_free",
+      "timing_s": {
+        "validation": 0.001036499859765172,
+        "context": 0.00014659995213150978,
+        "selection": 5.90016134083271e-06,
+        "path_generation": 0.0036776999477297068,
+        "planning": 1.705171100096777,
+        "trajectory_preparation": 0.23046420002356172,
+        "posture_scoring": 2.300133928656578e-06,
+        "pre_execution_total": 1.940512599889189
+      },
+      "planner_diagnostics": {
+        "algorithm": "rrt_connect+trajopt",
+        "planning_stages_s": {
+          "endpoint_collision_checks": 3.609992563724518e-05,
+          "rrt_search": 0.29363369988277555,
+          "shortcut": 0.5021672998555005,
+          "trajopt": 0.751465099863708,
+          "final_collision_validation": 0.000838099978864193,
+          "collision_resolution_rad": 0.04
+        },
+        "shortcut": {
+          "time_budget_s": 0.5,
+          "checks": 5,
+          "cache_hits": 0,
+          "accepted_shortcuts": 0,
+          "stopped_by_time_limit": true,
+          "elapsed_s": 0.5021672998555005
+        },
+        "trajopt": {
+          "algorithm": "trajopt",
+          "backend": "numpy_sequential_convex",
+          "enabled": true,
+          "applied": true,
+          "fallback_to_rrt": false,
+          "iterations": 2,
+          "stopped_by_time_limit": true,
+          "accepted_steps": 12,
+          "initial_cost": 0.08634485430038907,
+          "final_cost": 0.07639365846742231,
+          "cost_reduction": 0.009951195832966761,
+          "elapsed_s": 0.751465099863708
+        },
+        "collision_state_cache": null,
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 3.6010998649450254,
+          "total_joint_travel_rad": 3.2219152181385646,
+          "maximum_joint_travel_rad": 0.978859028906403,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.3791846468064609,
+          "joint_travel_by_joint_rad": [
+            0.5315693566877805,
+            0.40578173996151,
+            0.978859028906403,
+            0.6536896255161748,
+            0.12078674297248937,
+            0.5312287240942067
+          ],
+          "normalized_joint_travel": [
+            0.16920365505031057,
+            0.12916424299170007,
+            0.6231793913139602,
+            0.20807571488883028,
+            0.03844758569213707,
+            0.16909522840920194
+          ],
+          "candidate_count": 4,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 0,
+          "untested_direct_count": 0,
+          "bypass_attempts": 1,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 3,
+          "budget_exhausted": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                0.16511418013711185,
+                -0.920437377114071,
+                0.5632373709940441,
+                -1.2135962542474599,
+                -1.57079628849332,
+                0.16511418334221514
+              ],
+              "endpoint_check_s": 0.014253899920731783,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.16511418013711185,
+                -0.3805701865571401,
+                -0.5632373709940441,
+                -0.6269887028163026,
+                -1.57079628849332,
+                0.16511418334221514
+              ],
+              "endpoint_check_s": 0.011111199855804443,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                3.6724429308708086,
+                -2.7610224739088074,
+                0.5632373806755678,
+                -2.5146039362806314,
+                1.5707963864668275,
+                0.5308502804861187
+              ],
+              "endpoint_check_s": 0.021441500168293715,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                3.6724429308708086,
+                -2.2211552740940785,
+                -0.5632373806755678,
+                -1.9279963747442246,
+                1.5707963864668275,
+                0.5308502804861187
+              ],
+              "endpoint_check_s": 0.018315199995413423,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.16511418013711185,
+                -0.920437377114071,
+                0.5632373709940441,
+                -1.2135962542474599,
+                -1.57079628849332,
+                0.16511418334221514
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.09075649990700185,
+              "direct_success": false,
+              "direct_collision": true,
+              "direct_elapsed_s": 0.09076709998771548
+            },
+            {
+              "goal": [
+                0.16511418013711185,
+                -0.920437377114071,
+                0.5632373709940441,
+                -1.2135962542474599,
+                -1.57079628849332,
+                0.16511418334221514
+              ],
+              "elapsed_s": 1.5491186000872403,
+              "success": true,
+              "budget_s": 2.461010350030847
+            },
+            {
+              "goal": [
+                0.16511418013711185,
+                -0.3805701865571401,
+                -0.5632373709940441,
+                -0.6269887028163026,
+                -1.57079628849332,
+                0.16511418334221514
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 5.222345822054238
+            },
+            {
+              "goal": [
+                3.6724429308708086,
+                -2.7610224739088074,
+                0.5632373806755678,
+                -2.5146039362806314,
+                1.5707963864668275,
+                0.5308502804861187
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.423803945688757
+            },
+            {
+              "goal": [
+                3.6724429308708086,
+                -2.2211552740940785,
+                -0.5632373806755678,
+                -1.9279963747442246,
+                1.5707963864668275,
+                0.5308502804861187
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.423803945688759
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0012056000996381044,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.22799499984830618,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 65,
+          "planner_waypoint_count": 33,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1464 @@
+[
+  {
+    "command": "1",
+    "skill": "approach",
+    "phase": "approach_approach_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0009261001832783222,
+      "context": 0.00011530006304383278,
+      "selection": 6.09993003308773e-06,
+      "path_generation": 0.00766750006005168,
+      "planning": 0.34543779981322587,
+      "trajectory_preparation": 0.054384399903938174,
+      "posture_scoring": 2.299901098012924e-06,
+      "pre_execution_total": 0.4085478000342846
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 0.0,
+        "endpoint_collision_prechecked": true,
+        "path_densification": 7.599988020956516e-05,
+        "direct_path_collision_check": 0.0005561001598834991,
+        "collision_resolution_rad": 0.04
+      },
+      "configuration_selection": {
+        "objective": "joint_travel_plus_motion_balance",
+        "selection_cost_rad": 3.9593644527154743,
+        "total_joint_travel_rad": 3.672892136925001,
+        "maximum_joint_travel_rad": 0.8230449445380289,
+        "arm_posture_penalty_rad": 0.0,
+        "joint_motion_balance_penalty_rad": 0.2864723157904733,
+        "joint_travel_by_joint_rad": [
+          0.7516017476310154,
+          0.7302616390697747,
+          0.6163820127510035,
+          0.8230449445380289,
+          4.2096623742438055e-08,
+          0.751601750838555
+        ],
+        "normalized_joint_travel": [
+          0.23924208805750435,
+          0.23244932560364231,
+          0.39241254989718505,
+          0.2619831469486133,
+          1.3399761504088864e-08,
+          0.23924208907849515
+        ],
+        "candidate_count": 8,
+        "direct_candidates_evaluated": 1,
+        "endpoint_rejected_count": 2,
+        "untested_direct_count": 0,
+        "bypass_attempts": 0,
+        "contact_candidates_validated": 0,
+        "contact_candidates_rejected": 0,
+        "candidates_pruned_by_lower_bound": 5,
+        "budget_exhausted": false,
+        "candidate_timings": [
+          {
+            "goal": [
+              0.7516017476334506,
+              -1.364133360942936,
+              1.6163820127465343,
+              -1.8230449445379224,
+              -1.5707962579033647,
+              0.7516017508385539
+            ],
+            "endpoint_check_s": 0.11302669998258352,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -3.118840627572419,
+              0.8829621792983948,
+              0.6650821210970284,
+              -1.5707964038291553,
+              -1.9256879959389914
+            ],
+            "endpoint_check_s": 0.03939500008709729,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              0.16774649069278735,
+              -1.616382012746534,
+              -0.1221607706805774,
+              -1.5707962579033647,
+              0.7516017508385539
+            ],
+            "endpoint_check_s": 0.029477700125426054,
+            "endpoint_collision": true,
+            "status": "endpoint_collision"
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -2.2740513095598702,
+              -0.8829621792983948,
+              1.5862171616812692,
+              -1.5707964038291553,
+              -1.9256879959389914
+            ],
+            "endpoint_check_s": 0.023630499839782715,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -1.777459295085125,
+              -1.6163820193408975,
+              -1.3185476663407665,
+              -4.712388903350431,
+              1.2159046576508017
+            ],
+            "endpoint_check_s": 0.024452299810945988,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -3.3093391527580573,
+              1.6163820193408975,
+              -3.019431847349629,
+              -4.712388903350431,
+              1.2159046576508017
+            ],
+            "endpoint_check_s": 0.0290349000133574,
+            "endpoint_collision": true,
+            "status": "endpoint_collision"
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              -0.8675413442781207,
+              0.8829621878245625,
+              1.5553755173090273,
+              1.5707962579033647,
+              -2.3899909027512396
+            ],
+            "endpoint_check_s": 0.006777100032195449,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              -0.022752018160553188,
+              -0.8829621878245625,
+              -3.8066747403390013,
+              1.5707962579033647,
+              -2.3899909027512396
+            ],
+            "endpoint_check_s": 0.028759200125932693,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              -1.364133360942936,
+              1.6163820127465343,
+              -1.8230449445379224,
+              -1.5707962579033647,
+              0.7516017508385539
+            ],
+            "status": "direct_pending",
+            "coarse_path_check_s": 0.04995110002346337,
+            "fine_direct_plan_s": 0.000699999975040555,
+            "direct_success": true,
+            "direct_elapsed_s": 0.050720299826934934
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -3.118840627572419,
+              0.8829621792983948,
+              0.6650821210970284,
+              -1.5707964038291553,
+              -1.9256879959389914
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 6.657941668268455
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -2.2740513095598702,
+              -0.8829621792983948,
+              1.5862171616812692,
+              -1.5707964038291553,
+              -1.9256879959389914
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 8.500211749436936
+          },
+          {
+            "goal": [
+              -1.925687999144096,
+              -1.777459295085125,
+              -1.6163820193408975,
+              -1.3185476663407665,
+              -4.712388903350431,
+              1.2159046576508017
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.535050650752664
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              -0.8675413442781207,
+              0.8829621878245625,
+              1.5553755173090273,
+              1.5707962579033647,
+              -2.3899909027512396
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 10.182452193500087
+          },
+          {
+            "goal": [
+              0.7516017476334506,
+              -0.022752018160553188,
+              -0.8829621878245625,
+              -3.8066747403390013,
+              1.5707962579033647,
+              -2.3899909027512396
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 13.044465118296966
+          }
+        ]
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0010027000680565834,
+        "linear_path_validation_s": 0.0,
+        "collision_validation_s": 0.05293600005097687,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 43,
+        "planner_waypoint_count": 22,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "2",
+    "skill": "pick",
+    "phase": "contact",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0008292999118566513,
+      "context": 0.00010629999451339245,
+      "selection": 5.600042641162872e-06,
+      "path_generation": 0.028520700056105852,
+      "planning": 0.0003875000402331352,
+      "trajectory_preparation": 0.02039610012434423,
+      "posture_scoring": 2.00001522898674e-06,
+      "pre_execution_total": 0.05025440012104809
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.2900057956576347e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 8.719996549189091e-05,
+        "direct_path_collision_check": 0.00022529996931552887,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0007678999099880457,
+        "linear_path_validation_s": 0.002745700068771839,
+        "collision_validation_s": 0.016447499860078096,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 13,
+        "planner_waypoint_count": 7,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "3",
+    "skill": "lift_up",
+    "phase": "move",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.001012100139632821,
+      "context": 0.00013160007074475288,
+      "selection": 5.5998098105192184e-06,
+      "path_generation": 0.08574089989997447,
+      "planning": 0.0004669001791626215,
+      "trajectory_preparation": 0.013399099931120872,
+      "posture_scoring": 2.600019797682762e-06,
+      "pre_execution_total": 0.10076680011115968
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.9099872335791588e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 3.910018131136894e-05,
+        "direct_path_collision_check": 0.00033989991061389446,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.000754200154915452,
+        "linear_path_validation_s": 0.001325300196185708,
+        "collision_validation_s": 0.010965499794110656,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 5,
+        "planner_waypoint_count": 3,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "4",
+    "skill": "retreat",
+    "phase": "retreat_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.000987200066447258,
+      "context": 0.00011360016651451588,
+      "selection": 5.500158295035362e-06,
+      "path_generation": 0.14854060020297766,
+      "planning": 0.0005018999800086021,
+      "trajectory_preparation": 0.03334260010160506,
+      "posture_scoring": 2.100132405757904e-06,
+      "pre_execution_total": 0.18350140005350113
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.2600172087550163e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 8.829985745251179e-05,
+        "direct_path_collision_check": 0.0003394999075680971,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0007943999953567982,
+        "linear_path_validation_s": 0.00439279992133379,
+        "collision_validation_s": 0.0277666999027133,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 21,
+        "planner_waypoint_count": 11,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "6",
+    "skill": "approach",
+    "phase": "approach_approach_100mm",
+    "planner": null,
+    "timing_s": {
+      "validation": 0.0009753999765962362,
+      "context": 0.00010930001735687256,
+      "selection": 6.600050255656242e-06,
+      "path_generation": 0.0035672998055815697,
+      "planning": 0.23096419987268746,
+      "trajectory_preparation": 0.1441943000536412
+    },
+    "diagnostics": {}
+  },
+  {
+    "command": "6",
+    "skill": "approach",
+    "phase": "approach_approach_95mm",
+    "planner": "collision_free",
+    "timing_s": {
+      "validation": 0.001036499859765172,
+      "context": 0.00014659995213150978,
+      "selection": 5.90016134083271e-06,
+      "path_generation": 0.0036776999477297068,
+      "planning": 1.705171100096777,
+      "trajectory_preparation": 0.23046420002356172,
+      "posture_scoring": 2.300133928656578e-06,
+      "pre_execution_total": 1.940512599889189
+    },
+    "diagnostics": {
+      "algorithm": "rrt_connect+trajopt",
+      "planning_stages_s": {
+        "endpoint_collision_checks": 3.609992563724518e-05,
+        "rrt_search": 0.29363369988277555,
+        "shortcut": 0.5021672998555005,
+        "trajopt": 0.751465099863708,
+        "final_collision_validation": 0.000838099978864193,
+        "collision_resolution_rad": 0.04
+      },
+      "shortcut": {
+        "time_budget_s": 0.5,
+        "checks": 5,
+        "cache_hits": 0,
+        "accepted_shortcuts": 0,
+        "stopped_by_time_limit": true,
+        "elapsed_s": 0.5021672998555005
+      },
+      "trajopt": {
+        "algorithm": "trajopt",
+        "backend": "numpy_sequential_convex",
+        "enabled": true,
+        "applied": true,
+        "fallback_to_rrt": false,
+        "iterations": 2,
+        "stopped_by_time_limit": true,
+        "accepted_steps": 12,
+        "initial_cost": 0.08634485430038907,
+        "final_cost": 0.07639365846742231,
+        "cost_reduction": 0.009951195832966761,
+        "elapsed_s": 0.751465099863708
+      },
+      "collision_state_cache": null,
+      "configuration_selection": {
+        "objective": "joint_travel_plus_motion_balance",
+        "selection_cost_rad": 3.6010998649450254,
+        "total_joint_travel_rad": 3.2219152181385646,
+        "maximum_joint_travel_rad": 0.978859028906403,
+        "arm_posture_penalty_rad": 0.0,
+        "joint_motion_balance_penalty_rad": 0.3791846468064609,
+        "joint_travel_by_joint_rad": [
+          0.5315693566877805,
+          0.40578173996151,
+          0.978859028906403,
+          0.6536896255161748,
+          0.12078674297248937,
+          0.5312287240942067
+        ],
+        "normalized_joint_travel": [
+          0.16920365505031057,
+          0.12916424299170007,
+          0.6231793913139602,
+          0.20807571488883028,
+          0.03844758569213707,
+          0.16909522840920194
+        ],
+        "candidate_count": 4,
+        "direct_candidates_evaluated": 1,
+        "endpoint_rejected_count": 0,
+        "untested_direct_count": 0,
+        "bypass_attempts": 1,
+        "contact_candidates_validated": 0,
+        "contact_candidates_rejected": 0,
+        "candidates_pruned_by_lower_bound": 3,
+        "budget_exhausted": false,
+        "candidate_timings": [
+          {
+            "goal": [
+              0.16511418013711185,
+              -0.920437377114071,
+              0.5632373709940441,
+              -1.2135962542474599,
+              -1.57079628849332,
+              0.16511418334221514
+            ],
+            "endpoint_check_s": 0.014253899920731783,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              0.16511418013711185,
+              -0.3805701865571401,
+              -0.5632373709940441,
+              -0.6269887028163026,
+              -1.57079628849332,
+              0.16511418334221514
+            ],
+            "endpoint_check_s": 0.011111199855804443,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              3.6724429308708086,
+              -2.7610224739088074,
+              0.5632373806755678,
+              -2.5146039362806314,
+              1.5707963864668275,
+              0.5308502804861187
+            ],
+            "endpoint_check_s": 0.021441500168293715,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              3.6724429308708086,
+              -2.2211552740940785,
+              -0.5632373806755678,
+              -1.9279963747442246,
+              1.5707963864668275,
+              0.5308502804861187
+            ],
+            "endpoint_check_s": 0.018315199995413423,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              0.16511418013711185,
+              -0.920437377114071,
+              0.5632373709940441,
+              -1.2135962542474599,
+              -1.57079628849332,
+              0.16511418334221514
+            ],
+            "status": "direct_pending",
+            "coarse_path_check_s": 0.09075649990700185,
+            "direct_success": false,
+            "direct_collision": true,
+            "direct_elapsed_s": 0.09076709998771548
+          },
+          {
+            "goal": [
+              0.16511418013711185,
+              -0.920437377114071,
+              0.5632373709940441,
+              -1.2135962542474599,
+              -1.57079628849332,
+              0.16511418334221514
+            ],
+            "elapsed_s": 1.5491186000872403,
+            "success": true,
+            "budget_s": 2.461010350030847
+          },
+          {
+            "goal": [
+              0.16511418013711185,
+              -0.3805701865571401,
+              -0.5632373709940441,
+              -0.6269887028163026,
+              -1.57079628849332,
+              0.16511418334221514
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 5.222345822054238
+          },
+          {
+            "goal": [
+              3.6724429308708086,
+              -2.7610224739088074,
+              0.5632373806755678,
+              -2.5146039362806314,
+              1.5707963864668275,
+              0.5308502804861187
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.423803945688757
+          },
+          {
+            "goal": [
+              3.6724429308708086,
+              -2.2211552740940785,
+              -0.5632373806755678,
+              -1.9279963747442246,
+              1.5707963864668275,
+              0.5308502804861187
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.423803945688759
+          }
+        ]
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0012056000996381044,
+        "linear_path_validation_s": 0.0,
+        "collision_validation_s": 0.22799499984830618,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 65,
+        "planner_waypoint_count": 33,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "7",
+    "skill": "put",
+    "phase": "contact",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0010055999737232924,
+      "context": 0.00011019990779459476,
+      "selection": 5.600042641162872e-06,
+      "path_generation": 0.15796680003404617,
+      "planning": 0.0005429999437183142,
+      "trajectory_preparation": 0.13795919995754957,
+      "posture_scoring": 3.00002284348011e-06,
+      "pre_execution_total": 0.29760079993866384
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.6900088414549828e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 9.269989095628262e-05,
+        "direct_path_collision_check": 0.0003649999853223562,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0009197001345455647,
+        "linear_path_validation_s": 0.004869099939242005,
+        "collision_validation_s": 0.13177229999564588,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 23,
+        "planner_waypoint_count": 12,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "8",
+    "skill": "retreat",
+    "phase": "retreat_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0009525001514703035,
+      "context": 0.00011900020763278008,
+      "selection": 5.299923941493034e-06,
+      "path_generation": 0.19538080017082393,
+      "planning": 0.0007229999173432589,
+      "trajectory_preparation": 0.15239809988997877,
+      "posture_scoring": 3.00002284348011e-06,
+      "pre_execution_total": 0.34958979999646544
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 4.850002005696297e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 0.00015810015611350536,
+        "direct_path_collision_check": 0.00039499998092651367,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0008918000385165215,
+        "linear_path_validation_s": 0.005921200150623918,
+        "collision_validation_s": 0.1451411999296397,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 27,
+        "planner_waypoint_count": 14,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "9",
+    "skill": "move_to",
+    "phase": "move",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0009056997951120138,
+      "context": 0.00011979998089373112,
+      "selection": 5.300156772136688e-06,
+      "path_generation": 2.659996971487999e-05,
+      "planning": 0.28082330012694,
+      "trajectory_preparation": 0.1847695999313146,
+      "posture_scoring": 3.2999087125062943e-06,
+      "pre_execution_total": 0.4666609999258071
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 0.104890399845317,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 0.000143800163641572,
+        "direct_path_collision_check": 0.17573120002634823,
+        "collision_resolution_rad": 0.04
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0009492000099271536,
+        "linear_path_validation_s": 0.0,
+        "collision_validation_s": 0.18333379994146526,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 61,
+        "planner_waypoint_count": 31,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "10",
+    "skill": "approach",
+    "phase": "approach_approach_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.001001299824565649,
+      "context": 0.00012989994138479233,
+      "selection": 5.700159817934036e-06,
+      "path_generation": 0.007896000053733587,
+      "planning": 0.5452137999236584,
+      "trajectory_preparation": 0.2411815000232309,
+      "posture_scoring": 2.6999041438102722e-06,
+      "pre_execution_total": 0.7954385001212358
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 0.0,
+        "endpoint_collision_prechecked": true,
+        "path_densification": 8.950009942054749e-05,
+        "direct_path_collision_check": 0.0006796999368816614,
+        "collision_resolution_rad": 0.04
+      },
+      "configuration_selection": {
+        "objective": "joint_travel_plus_motion_balance",
+        "selection_cost_rad": 4.2084098261171485,
+        "total_joint_travel_rad": 3.8938935512470296,
+        "maximum_joint_travel_rad": 1.081388429804522,
+        "arm_posture_penalty_rad": 0.0,
+        "joint_motion_balance_penalty_rad": 0.3145162748701192,
+        "joint_travel_by_joint_rad": [
+          1.081388429804522,
+          0.679694349396238,
+          0.6684657278818846,
+          0.8243583747644323,
+          2.7558903981095284e-07,
+          0.6399863938109132
+        ],
+        "normalized_joint_travel": [
+          0.3442163709213065,
+          0.2163532694049481,
+          0.4255710506967274,
+          0.2624012244622341,
+          8.772265037694319e-08,
+          0.20371384402219672
+        ],
+        "candidate_count": 8,
+        "direct_candidates_evaluated": 1,
+        "endpoint_rejected_count": 2,
+        "untested_direct_count": 0,
+        "bypass_attempts": 0,
+        "contact_candidates_validated": 0,
+        "contact_candidates_rejected": 0,
+        "candidates_pruned_by_lower_bound": 5,
+        "budget_exhausted": false,
+        "candidate_timings": [
+          {
+            "goal": [
+              -1.0813354780030568,
+              -1.4146978532781909,
+              1.6682855471765679,
+              -1.824383979174253,
+              -1.5707962621712348,
+              0.6399934169133938
+            ],
+            "endpoint_check_s": 0.12737040012143552,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -3.147678498520021,
+              0.9793402672868737,
+              0.5975418968110254,
+              -1.570796403490349,
+              -2.019876273343293
+            ],
+            "endpoint_check_s": 0.047939199954271317,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              0.16457718900100465,
+              -1.6682855471765679,
+              -0.06708792710031286,
+              -1.5707962621712348,
+              0.6399934169133938
+            ],
+            "endpoint_check_s": 0.03829100006259978,
+            "endpoint_collision": true,
+            "status": "endpoint_collision"
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -2.2113862424848345,
+              -0.9793402672868737,
+              1.619930175349587,
+              -1.570796403490349,
+              -2.019876273343293
+            ],
+            "endpoint_check_s": 0.005623699864372611,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -1.7268948027806548,
+              -1.668285553906945,
+              -1.3172086313243148,
+              -4.712388903689237,
+              1.1217163802465002
+            ],
+            "endpoint_check_s": 0.0027536998968571424,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              -0.9302064110319355,
+              0.979340275355995,
+              1.5216625039898575,
+              -4.712389045008352,
+              -2.5015992366763995
+            ],
+            "endpoint_check_s": 0.01406909991055727,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -3.306169851189089,
+              1.668285553906945,
+              -3.0745046907297704,
+              -4.712388903689237,
+              1.1217163802465002
+            ],
+            "endpoint_check_s": 0.03825219999998808,
+            "endpoint_collision": true,
+            "status": "endpoint_collision"
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              0.0060858526540615125,
+              -0.979340275355995,
+              -3.7391345161637357,
+              -4.712389045008352,
+              -2.5015992366763995
+            ],
+            "endpoint_check_s": 0.038378800032660365,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              -1.4146978532781909,
+              1.6682855471765679,
+              -1.824383979174253,
+              -1.5707962621712348,
+              0.6399934169133938
+            ],
+            "status": "direct_pending",
+            "coarse_path_check_s": 0.23148160008713603,
+            "fine_direct_plan_s": 0.0008435999043285847,
+            "direct_success": true,
+            "direct_elapsed_s": 0.23237990005873144
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -3.147678498520021,
+              0.9793402672868737,
+              0.5975418968110254,
+              -1.570796403490349,
+              -2.019876273343293
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 7.233143966908324
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -2.2113862424848345,
+              -0.9793402672868737,
+              1.619930175349587,
+              -1.570796403490349,
+              -2.019876273343293
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.277920523985447
+          },
+          {
+            "goal": [
+              2.5419801389198415,
+              -1.7268948027806548,
+              -1.668285553906945,
+              -1.3172086313243148,
+              -4.712388903689237,
+              1.1217163802465002
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 10.158014710201256
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              -0.9302064110319355,
+              0.979340275355995,
+              1.5216625039898575,
+              -4.712389045008352,
+              -2.5015992366763995
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 10.430940640812338
+          },
+          {
+            "goal": [
+              -1.0813354780030568,
+              0.0060858526540615125,
+              -0.979340275355995,
+              -3.7391345161637357,
+              -4.712389045008352,
+              -2.5015992366763995
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 13.543334258564563
+          }
+        ]
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0010066002141684294,
+        "linear_path_validation_s": 0.0,
+        "collision_validation_s": 0.23970829998143017,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 57,
+        "planner_waypoint_count": 29,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "11",
+    "skill": "pick",
+    "phase": "contact",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0010349999647587538,
+      "context": 0.00012099999003112316,
+      "selection": 5.600042641162872e-06,
+      "path_generation": 0.2448335001245141,
+      "planning": 0.0005640001036226749,
+      "trajectory_preparation": 0.22813080018386245,
+      "posture_scoring": 3.400025889277458e-06,
+      "pre_execution_total": 0.4747007000260055
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 3.0199997127056122e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 0.00010930001735687256,
+        "direct_path_collision_check": 0.0003599999472498894,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0008375998586416245,
+        "linear_path_validation_s": 0.005100300069898367,
+        "collision_validation_s": 0.22169860010035336,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 25,
+        "planner_waypoint_count": 13,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "12",
+    "skill": "lift_up",
+    "phase": "move",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0012576999142765999,
+      "context": 0.00014870008453726768,
+      "selection": 6.00004568696022e-06,
+      "path_generation": 0.19047699985094368,
+      "planning": 0.0002932001370936632,
+      "trajectory_preparation": 0.05975720006972551,
+      "posture_scoring": 3.2999087125062943e-06,
+      "pre_execution_total": 0.2519512998405844
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.9099872335791588e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 3.8300175219774246e-05,
+        "direct_path_collision_check": 0.00016950001008808613,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0008018000517040491,
+        "linear_path_validation_s": 0.0013910999987274408,
+        "collision_validation_s": 0.05722000007517636,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 5,
+        "planner_waypoint_count": 3,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "13",
+    "skill": "retreat",
+    "phase": "retreat_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0009578999597579241,
+      "context": 0.00011070002801716328,
+      "selection": 5.500158295035362e-06,
+      "path_generation": 0.27036449988372624,
+      "planning": 0.0005969998892396688,
+      "trajectory_preparation": 0.22193329990841448,
+      "posture_scoring": 3.200024366378784e-06,
+      "pre_execution_total": 0.49398009991273284
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 3.450014628469944e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 0.00011410005390644073,
+        "direct_path_collision_check": 0.0003790999762713909,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0008636999409645796,
+        "linear_path_validation_s": 0.005342100048437715,
+        "collision_validation_s": 0.2152589000761509,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 25,
+        "planner_waypoint_count": 13,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "14",
+    "skill": "approach",
+    "phase": "approach_approach_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0010188999585807323,
+      "context": 0.00012829992920160294,
+      "selection": 6.700167432427406e-06,
+      "path_generation": 0.0034388001076877117,
+      "planning": 0.6173231999855489,
+      "trajectory_preparation": 0.4798179999925196,
+      "posture_scoring": 2.700136974453926e-06,
+      "pre_execution_total": 1.1017441998701543
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 0.0,
+        "endpoint_collision_prechecked": true,
+        "path_densification": 8.590007200837135e-05,
+        "direct_path_collision_check": 0.017519100103527308,
+        "collision_resolution_rad": 0.04
+      },
+      "configuration_selection": {
+        "objective": "joint_travel_plus_motion_balance",
+        "selection_cost_rad": 3.868748715496971,
+        "total_joint_travel_rad": 3.490114599318771,
+        "maximum_joint_travel_rad": 1.1726096728085018,
+        "arm_posture_penalty_rad": 0.0,
+        "joint_motion_balance_penalty_rad": 0.3786341161781997,
+        "joint_travel_by_joint_rad": [
+          0.5447076809126544,
+          0.5782515631333469,
+          0.8792527317248384,
+          0.31443191595055864,
+          0.0008610347888704517,
+          1.1726096728085018
+        ],
+        "normalized_joint_travel": [
+          0.17338571041545917,
+          0.18406305177253812,
+          0.5597661828584042,
+          0.10008671262545256,
+          0.00027407568094246765,
+          0.37325297271242847
+        ],
+        "candidate_count": 4,
+        "direct_candidates_evaluated": 1,
+        "endpoint_rejected_count": 0,
+        "untested_direct_count": 0,
+        "bypass_attempts": 0,
+        "contact_candidates_validated": 0,
+        "contact_candidates_rejected": 0,
+        "candidates_pruned_by_lower_bound": 3,
+        "budget_exhausted": false,
+        "candidate_timings": [
+          {
+            "goal": [
+              -0.5661856308392031,
+              -0.831705367416864,
+              0.7200180125406408,
+              -1.4591088970019412,
+              -1.5707963429234437,
+              -0.5661856276340979
+            ],
+            "endpoint_check_s": 0.017189000034704804,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -0.5661856308392031,
+              -0.14209292751606276,
+              -0.7200180125406408,
+              -0.7086853118214609,
+              -1.5707963429234437,
+              -0.5661856276340979
+            ],
+            "endpoint_check_s": 0.035461500054225326,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -3.3657228535112194,
+              -2.9994997262005603,
+              0.720018012199956,
+              -2.4329073431672366,
+              1.570796336867196,
+              -0.22413019671632226
+            ],
+            "endpoint_check_s": 0.0375129000749439,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -3.3657228535112194,
+              -2.309887286624737,
+              -0.720018012199956,
+              -1.6824837583431471,
+              1.570796336867196,
+              -0.22413019671632226
+            ],
+            "endpoint_check_s": 0.019891300005838275,
+            "endpoint_collision": false,
+            "status": "pending"
+          },
+          {
+            "goal": [
+              -0.5661856308392031,
+              -0.831705367416864,
+              0.7200180125406408,
+              -1.4591088970019412,
+              -1.5707963429234437,
+              -0.5661856276340979
+            ],
+            "status": "direct_pending",
+            "coarse_path_check_s": 0.48939290014095604,
+            "fine_direct_plan_s": 0.017687999876216054,
+            "direct_success": true,
+            "direct_elapsed_s": 0.5071425000205636
+          },
+          {
+            "goal": [
+              -0.5661856308392031,
+              -0.14209292751606276,
+              -0.7200180125406408,
+              -0.7086853118214609,
+              -1.5707963429234437,
+              -0.5661856276340979
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 6.370186649481335
+          },
+          {
+            "goal": [
+              -3.3657228535112194,
+              -2.9994997262005603,
+              0.720018012199956,
+              -2.4329073431672366,
+              1.570796336867196,
+              -0.22413019671632226
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.354277486582466
+          },
+          {
+            "goal": [
+              -3.3657228535112194,
+              -2.309887286624737,
+              -0.720018012199956,
+              -1.6824837583431471,
+              1.570796336867196,
+              -0.22413019671632226
+            ],
+            "status": "pruned_by_lower_bound",
+            "lower_bound_cost": 9.536391595801172
+          }
+        ]
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0009665999095886946,
+        "linear_path_validation_s": 0.0,
+        "collision_validation_s": 0.4783171000890434,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 61,
+        "planner_waypoint_count": 31,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "15",
+    "skill": "put",
+    "phase": "contact",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.001013200031593442,
+      "context": 0.00012199999764561653,
+      "selection": 5.600042641162872e-06,
+      "path_generation": 0.18019199999980628,
+      "planning": 0.000506300013512373,
+      "trajectory_preparation": 0.21103330003097653,
+      "posture_scoring": 3.200024366378784e-06,
+      "pre_execution_total": 0.3928830998484045
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.7999980375170708e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 9.289989247918129e-05,
+        "direct_path_collision_check": 0.0003250997979193926,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0009455999825149775,
+        "linear_path_validation_s": 0.004945100052282214,
+        "collision_validation_s": 0.20465210010297596,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 21,
+        "planner_waypoint_count": 11,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  },
+  {
+    "command": "16",
+    "skill": "retreat",
+    "phase": "retreat_100mm",
+    "planner": "direct",
+    "timing_s": {
+      "validation": 0.0009774998761713505,
+      "context": 0.00012880004942417145,
+      "selection": 5.7998113334178925e-06,
+      "path_generation": 0.22761719999834895,
+      "planning": 0.0005073000211268663,
+      "trajectory_preparation": 0.2038322000298649,
+      "posture_scoring": 2.8999056667089462e-06,
+      "pre_execution_total": 0.43308020010590553
+    },
+    "diagnostics": {
+      "planning_stages_s": {
+        "endpoint_collision_check": 2.719997428357601e-05,
+        "endpoint_collision_prechecked": false,
+        "path_densification": 0.00010549998842179775,
+        "direct_path_collision_check": 0.00031320005655288696,
+        "collision_resolution_rad": 0.04
+      },
+      "ik_branch_selection": {
+        "candidate_count": 1,
+        "evaluated_count": 1,
+        "selected_branch": 0,
+        "explicit_seed": false,
+        "search_mode": "fast",
+        "ik_cache_hits": 0,
+        "collision_cache_hits": 0
+      },
+      "time_parameterization": {
+        "backend": "continuous_precomputed",
+        "path_interpolator": "cubic_c2",
+        "collision_fallback": null,
+        "trajectory_sampling_s": 0.0008459999226033688,
+        "linear_path_validation_s": 0.004881700035184622,
+        "collision_validation_s": 0.197714600013569,
+        "circular_path_validation_s": 0.0,
+        "validation_waypoint_count": 21,
+        "planner_waypoint_count": 11,
+        "collision_resolution_rad": 0.04,
+        "spline_subdivisions": 2,
+        "path_validation_cache_enabled": false,
+        "validation_waypoints_identical_to_planner": false,
+        "path_validation_cache": {}
+      }
+    }
+  }
+]
