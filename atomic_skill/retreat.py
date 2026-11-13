@@ -10,7 +10,7 @@ from atomic_skill.pose_precheck import ordered_distances
 
 
 class RetreatSkill:
-    MIN_DISTANCE = 0.03
+    MIN_DISTANCE = 0.02
     MAX_DISTANCE = 0.10
     STEP = 0.005
     DEFAULT_AXIS = "-z"

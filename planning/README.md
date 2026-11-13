@@ -115,6 +115,9 @@ except CollisionPlanningError:
 
 ## 时间参数化
 
+关节候选搜索找到可行解后不再启动新的 RRT 绕障尝试，包括重试此前失败的分支；剩余候选的直达比较使用默认 `0.15 s` 追加软预算（`planning.collision_free.post_solution_search_time`，运动执行器配置）。正在进行的验证不会被中断，因此不构成硬时间上限。报告的 `configuration_selection` 记录追加预算和是否留下未继续搜索的候选。
+
+
 任务级 approach / retreat 按需调用解析 EAIK 做目标位姿预检（单次请求预算 0.03 秒，每轮候选预检累计软预算 0.15 秒）。只用通过限位与 FK 回代检查的解析解调整尝试顺序；无解析解的距离延后，但仍保留原数值 IK 与完整路径规划机会。不支持 EAIK 时保留原搜索行为。相机观察 approach 预检使用实际相机对准后的目标。预检不能证明整段路径可行，所有实际运动仍通过完整路径和碰撞验证。
 
 同一任务内按目标保存实际成功的 approach / retreat 距离，retreat 优先尝试该距离（须属于当前请求的候选集合）；pick / put 不会覆盖此距离，相机对准 approach 的距离不用于此提示。command 的计时文件记录 `pose_search_precheck`（每次状态和耗时）与 `successful_distance_m`，便于统计额外预检成本和避开的完整失败尝试。

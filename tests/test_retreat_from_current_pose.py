@@ -136,7 +136,7 @@ class RetreatFromCurrentPoseTests(unittest.TestCase):
         result = self.run_retreat()
         self.assertFalse(result['success'])
         self.assertEqual(result['error']['error_code'], 'PATH_CONSTRAINT_INFEASIBLE')
-        self.assertEqual(e.execute_motion.call_count, 15)
+        self.assertEqual(e.execute_motion.call_count, 17)
         e.resolver.select.assert_not_called()
         self.assertFalse(e.checker.allow_gripper_environment_contact)
 

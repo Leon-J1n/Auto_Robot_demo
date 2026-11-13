@@ -1,0 +1,227 @@
+{
+  "command_id": "10",
+  "skill_name": "pick",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 0.0005340001080185175,
+    "candidate_selection": 0.005806799978017807,
+    "adapter_prepare_total": 0.007854799972847104
+  },
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "visual_estimate": {
+      "point_type": "grasp",
+      "pixel": {
+        "x": 299,
+        "y": 238
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "depth_m": 0.19546712934970856,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": -0.47973200360371354,
+        "y": -0.1853844898273145,
+        "z": 0.6554187034561119
+      },
+      "frame": "world",
+      "confidence": 0.95,
+      "is_elongated": false,
+      "axis_points": null,
+      "axis_status": "not_elongated",
+      "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+      "camera_id": "wrist_camera",
+      "timestamp": 16.410000000001784,
+      "sequence": 1,
+      "visual_estimation_s": 4.358139600139111,
+      "crop_origin_pixel": {
+        "x": 232,
+        "y": 172
+      },
+      "long_axis_aligned": false,
+      "orientation_source": "fixed_downward",
+      "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+      "depth_selected": true,
+      "grasp_depth_candidates_m": [
+        0.03,
+        0.025,
+        0.02,
+        0.015,
+        0.01,
+        0.005,
+        0.0
+      ],
+      "depth_search_enabled": true,
+      "target_point_world": {
+        "x": -0.47973200360314083,
+        "y": -0.18538448982703745,
+        "z": 0.6254187034561118
+      },
+      "grasp_point_world": {
+        "x": -0.47973200360314083,
+        "y": -0.18538448982703745,
+        "z": 0.6254187034561118
+      },
+      "yaw_selected": true,
+      "grasp_depth_offset_m": 0.03,
+      "selected_yaw_offset_rad": 0.0,
+      "grasp_rotation_world": [
+        [
+          -0.00018308546252959648,
+          0.9999999832398567,
+          1.9092072041873242e-11
+        ],
+        [
+          0.9999999832398568,
+          0.00018308546252940409,
+          9.235193643747584e-12
+        ],
+        [
+          9.231697629960197e-12,
+          1.9093764688823634e-11,
+          -1.0000000000000002
+        ]
+      ],
+      "surface_normal_world": [
+        -1.9092072041873242e-11,
+        -9.235193643747584e-12,
+        1.0000000000000002
+      ],
+      "wrist_refinement": {
+        "camera_id": "wrist_camera",
+        "timestamp": 16.410000000001784,
+        "sequence": 1,
+        "coarse_surface_world": [
+          -0.489416213584647,
+          -0.18465667293007795,
+          0.6551038988894498
+        ],
+        "refined_surface_world": [
+          -0.47973200360371354,
+          -0.1853844898273145,
+          0.6554187034561119
+        ],
+        "correction_world_m": [
+          0.009684209980933445,
+          -0.0007278168972365551,
+          0.000314804566662108
+        ],
+        "correction_distance_m": 0.0097166219596064,
+        "image_region": "target_aabb_crop",
+        "coarse_point_in_full_image": {
+          "in_front": true,
+          "optical_depth_m": 0.1957806632904965,
+          "pixel": {
+            "x": 319.5947364477934,
+            "y": 239.5507242164561
+          },
+          "in_frame": true,
+          "distance_from_principal_point_px": 0.10746134502974354
+        },
+        "crop_origin_pixel": {
+          "x": 232,
+          "y": 172
+        },
+        "status": "validated",
+        "timing_s": {
+          "capture": 0.006980700185522437,
+          "vlm": 3.565872199833393,
+          "validation": 0.7142835999839008
+        },
+        "elapsed_s": 4.28719099983573
+      },
+      "grasp_depth_attempts": [
+        {
+          "grasp_depth_offset_m": 0.03,
+          "success": true,
+          "gripper_pose_precheck": [
+            {
+              "status": "clear",
+              "elapsed_s": 0.007675300119444728
+            }
+          ],
+          "rejected": []
+        }
+      ],
+      "grasp_depth_preflight": {
+        "success": true,
+        "reason": "static_geometry_valid",
+        "contacts": [],
+        "table_clearance": {
+          "success": true,
+          "table_height_m": 0.6000000238418585,
+          "gripper_lowest_z_m": 0.6184529212774936,
+          "clearance_m": 0.0014528974356351476,
+          "lowest_link": "robotiq_2f85_right_pad",
+          "table_floor_z_m": 0.6170000238418585,
+          "table_floor_offset_m": 0.017,
+          "gripper_configuration": "preclosure_open",
+          "open_width_m": 0.08
+        },
+        "validation_mode": "static_open_geometry",
+        "contact_preflight": {
+          "distance_m": 0.1,
+          "rejected": []
+        }
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "contact",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.000901099992915988,
+        "context": 0.00011070002801716328,
+        "selection": 5.19980676472187e-06,
+        "path_generation": 0.04198829992674291,
+        "planning": 0.00042349984869360924,
+        "trajectory_preparation": 0.027785199927166104,
+        "posture_scoring": 2.499902620911598e-06,
+        "pre_execution_total": 0.07122339983470738
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 2.4999957531690598e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 9.069987572729588e-05,
+          "direct_path_collision_check": 0.0002536000683903694,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0008137000259011984,
+          "linear_path_validation_s": 0.002840599976480007,
+          "collision_validation_s": 0.02378549985587597,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 13,
+          "planner_waypoint_count": 7,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

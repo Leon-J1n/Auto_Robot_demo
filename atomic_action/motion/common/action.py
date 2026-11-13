@@ -267,9 +267,17 @@ class _MoveExecutor:
         direct_check_time = 0.0
         untested = []
         candidate_timings = []
+        first_solution_at = None
+        extra_budget = max(0., float(getattr(self, 'config', {}).get('planning', {})
+                                   .get('collision_free', {}).get('post_solution_search_time', .15)))
+
+        def search_deadline():
+            return min(deadline, first_solution_at + extra_budget) if first_solution_at is not None else deadline
 
         def consider(trajectory, candidate_selection):
-            nonlocal best, best_base_cost
+            nonlocal best, best_base_cost, first_solution_at
+            if first_solution_at is None:
+                first_solution_at = time.perf_counter()
             travel = np.sum(np.abs(np.diff(np.asarray(trajectory["waypoints"]), axis=0)), axis=0)
             penalty = posture.path_penalty(trajectory['waypoints']) if posture is not None else 0.
             base_cost = float(np.sum(travel)) + penalty
@@ -329,7 +337,7 @@ class _MoveExecutor:
                 'endpoint_collision': False, 'status': 'pending'})
 
         for goal_index, goal in enumerate(viable_goals):
-            remaining = deadline - time.perf_counter()
+            remaining = search_deadline() - time.perf_counter()
             # One slow direct probe must not starve all known blocked paths of
             # avoidance time. Reserve the remainder when another probe is likely
             # to consume it, rather than finishing every direct branch first.
@@ -398,9 +406,9 @@ class _MoveExecutor:
                 # Try the nearer blocked goal before finely validating distant
                 # branches. A feasible detour supplies an upper bound for pruning.
                 candidate_timing['direct_elapsed_s'] = time.perf_counter() - direct_started
-                remaining = deadline - time.perf_counter()
+                remaining = search_deadline() - time.perf_counter()
                 entry = (lower_bound, path, exc)
-                if remaining > 0:
+                if remaining > 0 and best is None:
                     budget = min(remaining, max(.25, remaining / (len(viable_goals) - goal_index)))
                     if not bypass(entry, budget):
                         pending.append(entry)
@@ -418,8 +426,8 @@ class _MoveExecutor:
             lower_bound = entry[0]
             if best is not None and lower_bound > best_base_cost + 1e-9:
                 continue
-            remaining = deadline - time.perf_counter()
-            if remaining <= 0:
+            remaining = search_deadline() - time.perf_counter()
+            if remaining <= 0 or best is not None:
                 break
             bypass(entry, remaining / (len(pending) - pending_index))
         if best is None:
@@ -457,6 +465,8 @@ class _MoveExecutor:
             "contact_candidates_validated": validated, "contact_candidates_rejected": rejected,
             "candidates_pruned_by_lower_bound": pruned,
             "budget_exhausted": time.perf_counter() >= deadline,
+            "post_solution_search_budget_s": extra_budget,
+            "stopped_after_feasible_solution": best is not None and (bool(pending) or bool(untested)),
             "candidate_timings": candidate_timings,
         }
         return trajectory

@@ -1,0 +1,491 @@
+{
+  "command_id": "9",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 4.363993000006303,
+    "candidate_selection": 0.7517078998498619
+  },
+  "wrist_observation": {
+    "status": "camera_aligned",
+    "rejected": [],
+    "target_world": [
+      -0.48941156789151086,
+      -0.18465363506607377,
+      0.6551038988896666
+    ],
+    "translation_world_m": [
+      -1.4423014669610782e-10,
+      -0.044999982715467984,
+      3.25008026047513e-09
+    ],
+    "translation_distance_m": 0.0449999827154681,
+    "optical_depth_m": 0.19579998376523283,
+    "world_from_camera": [
+      [
+        -1.0,
+        -3.205103571430656e-09,
+        -6.633171275070957e-16,
+        -0.48941156789151097
+      ],
+      [
+        3.2051035714483287e-09,
+        -0.9999999999999973,
+        7.22240353174703e-08,
+        -0.18465362092460885
+      ],
+      [
+        -8.948094724658251e-16,
+        7.222403508824273e-08,
+        0.9999999999999972,
+        0.8509038826548988
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "pose_search_precheck": [
+    {
+      "distance_m": 0.1,
+      "elapsed_s": 0.0017886999994516373,
+      "status": "analytic_solution"
+    }
+  ],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "grasp_depth_attempts": [
+      {
+        "grasp_depth_offset_m": 0.03,
+        "success": true,
+        "gripper_pose_precheck": [
+          {
+            "status": "clear",
+            "elapsed_s": 0.007675300119444728
+          }
+        ],
+        "rejected": []
+      }
+    ],
+    "visual_estimate": {
+      "point_type": "grasp",
+      "pixel": {
+        "x": 299,
+        "y": 238
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "depth_m": 0.19546712934970856,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": -0.47973200360371354,
+        "y": -0.1853844898273145,
+        "z": 0.6554187034561119
+      },
+      "frame": "world",
+      "confidence": 0.95,
+      "is_elongated": false,
+      "axis_points": null,
+      "axis_status": "not_elongated",
+      "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+      "camera_id": "wrist_camera",
+      "timestamp": 16.410000000001784,
+      "sequence": 1,
+      "visual_estimation_s": 4.358139600139111,
+      "crop_origin_pixel": {
+        "x": 232,
+        "y": 172
+      },
+      "long_axis_aligned": false,
+      "orientation_source": "fixed_downward",
+      "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+      "depth_selected": true,
+      "grasp_depth_candidates_m": [
+        0.03,
+        0.025,
+        0.02,
+        0.015,
+        0.01,
+        0.005,
+        0.0
+      ],
+      "depth_search_enabled": true,
+      "target_point_world": {
+        "x": -0.4797320036031408,
+        "y": -0.18538448982703745,
+        "z": 0.6254187034561118
+      },
+      "grasp_point_world": {
+        "x": -0.4797320036031408,
+        "y": -0.18538448982703745,
+        "z": 0.6254187034561118
+      },
+      "yaw_selected": true,
+      "grasp_depth_offset_m": 0.03,
+      "selected_yaw_offset_rad": 0.0,
+      "grasp_rotation_world": [
+        [
+          -0.00018308546252959648,
+          0.9999999832398567,
+          1.9092072041873242e-11
+        ],
+        [
+          0.9999999832398568,
+          0.00018308546252940409,
+          9.235193643747584e-12
+        ],
+        [
+          9.231697629960197e-12,
+          1.9093764688823634e-11,
+          -1.0000000000000002
+        ]
+      ],
+      "surface_normal_world": [
+        -1.9092072041873242e-11,
+        -9.235193643747584e-12,
+        1.0000000000000002
+      ],
+      "wrist_refinement": {
+        "camera_id": "wrist_camera",
+        "timestamp": 16.410000000001784,
+        "sequence": 1,
+        "coarse_surface_world": [
+          -0.489416213584647,
+          -0.18465667293007795,
+          0.6551038988894498
+        ],
+        "refined_surface_world": [
+          -0.47973200360371354,
+          -0.1853844898273145,
+          0.6554187034561119
+        ],
+        "correction_world_m": [
+          0.009684209980933445,
+          -0.0007278168972365551,
+          0.000314804566662108
+        ],
+        "correction_distance_m": 0.0097166219596064,
+        "image_region": "target_aabb_crop",
+        "coarse_point_in_full_image": {
+          "in_front": true,
+          "optical_depth_m": 0.1957806632904965,
+          "pixel": {
+            "x": 319.5947364477934,
+            "y": 239.5507242164561
+          },
+          "in_frame": true,
+          "distance_from_principal_point_px": 0.10746134502974354
+        },
+        "crop_origin_pixel": {
+          "x": 232,
+          "y": 172
+        },
+        "status": "validated",
+        "timing_s": {
+          "capture": 0.006980700185522437,
+          "vlm": 3.565872199833393,
+          "validation": 0.7142835999839008
+        },
+        "elapsed_s": 4.28719099983573
+      },
+      "grasp_depth_attempts": [
+        {
+          "grasp_depth_offset_m": 0.03,
+          "success": true,
+          "gripper_pose_precheck": [
+            {
+              "status": "clear",
+              "elapsed_s": 0.007675300119444728
+            }
+          ],
+          "rejected": []
+        }
+      ],
+      "grasp_depth_preflight": {
+        "success": true,
+        "reason": "static_geometry_valid",
+        "contacts": [],
+        "table_clearance": {
+          "success": true,
+          "table_height_m": 0.6000000238418585,
+          "gripper_lowest_z_m": 0.6184529212774936,
+          "clearance_m": 0.0014528974356351476,
+          "lowest_link": "robotiq_2f85_right_pad",
+          "table_floor_z_m": 0.6170000238418585,
+          "table_floor_offset_m": 0.017,
+          "gripper_configuration": "preclosure_open",
+          "open_width_m": 0.08
+        },
+        "validation_mode": "static_open_geometry",
+        "contact_preflight": {
+          "distance_m": 0.1,
+          "rejected": []
+        }
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.001118500018492341,
+        "context": 0.0001455999445170164,
+        "selection": 5.899928510189056e-06,
+        "path_generation": 0.007918999996036291,
+        "planning": 0.4536468998994678,
+        "trajectory_preparation": 0.08473060000687838,
+        "posture_scoring": 2.800021320581436e-06,
+        "pre_execution_total": 0.5475783001165837
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 7.229996845126152e-05,
+          "direct_path_collision_check": 0.000560099957510829,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 3.9741248604752117,
+          "total_joint_travel_rad": 3.68821415341954,
+          "maximum_joint_travel_rad": 0.8221674792255211,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.28591070705567184,
+          "joint_travel_by_joint_rad": [
+            0.7600014068999885,
+            0.7362610567259158,
+            0.6097373055038668,
+            0.8221674792255211,
+            6.820020195252852e-07,
+            0.7600462230622288
+          ],
+          "normalized_joint_travel": [
+            0.2419157806464514,
+            0.23435899812863076,
+            0.38818227312039905,
+            0.26170384127346813,
+            2.1708782307244732e-07,
+            0.24193004606329865
+          ],
+          "candidate_count": 8,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 2,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 5,
+          "budget_exhausted": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                0.7600871811934472,
+                -1.3581359682592788,
+                1.6095572682026305,
+                -1.822217593263484,
+                -1.570796257613349,
+                0.7600871843985507
+              ],
+              "endpoint_check_s": 0.18652520002797246,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -3.1144706593858125,
+                0.8700689466472685,
+                0.6736053860592358,
+                -1.5707964038273659,
+                -1.9192273400455633
+              ],
+              "endpoint_check_s": 0.03870769985951483,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                0.16749371449274944,
+                -1.6095572682026305,
+                -0.12873273961025156,
+                -1.570796257613349,
+                0.7600871843985507
+              ],
+              "endpoint_check_s": 0.025887600146234035,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -2.2819396364831976,
+                -0.8700689466472685,
+                1.581212256451158,
+                -1.5707964038273659,
+                -1.9192273400455633
+              ],
+              "endpoint_check_s": 0.026161900022998452,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -1.783456687756527,
+                -1.609557274773782,
+                -1.319375017738792,
+                -4.71238890335222,
+                1.2223653135442298
+              ],
+              "endpoint_check_s": 0.016556400107219815,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -3.309086376528439,
+                1.609557274773782,
+                -3.012859878514444,
+                -4.71238890335222,
+                1.2223653135442298
+              ],
+              "endpoint_check_s": 0.034923600032925606,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                -0.8596530174064736,
+                0.8700689552375939,
+                1.5603804224385405,
+                -4.712389049566237,
+                -2.3815054691912425
+              ],
+              "endpoint_check_s": 0.012977499980479479,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                -0.027121986335299927,
+                -0.8700689552375939,
+                -3.815198005337032,
+                -4.712389049566237,
+                -2.3815054691912425
+              ],
+              "endpoint_check_s": 0.032801999943330884,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                -1.3581359682592788,
+                1.6095572682026305,
+                -1.822217593263484,
+                -1.570796257613349,
+                0.7600871843985507
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.0782065000385046,
+              "fine_direct_plan_s": 0.0006979000754654408,
+              "direct_success": true,
+              "direct_elapsed_s": 0.0789578000549227
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -3.1144706593858125,
+                0.8700689466472685,
+                0.6736053860592358,
+                -1.5707964038273659,
+                -1.9192273400455633
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 6.662062105263326
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -2.2819396364831976,
+                -0.8700689466472685,
+                1.581212256451158,
+                -1.5707964038273659,
+                -1.9192273400455633
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 8.47727584604717
+            },
+            {
+              "goal": [
+                -1.919227343250668,
+                -1.783456687756527,
+                -1.609557274773782,
+                -1.319375017738792,
+                -4.71238890335222,
+                1.2223653135442298
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.52287191189093
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                -0.8596530174064736,
+                0.8700689552375939,
+                1.5603804224385405,
+                -4.712389049566237,
+                -2.3815054691912425
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 10.208065498894817
+            },
+            {
+              "goal": [
+                0.7600871811934472,
+                -0.027121986335299927,
+                -0.8700689552375939,
+                -3.815198005337032,
+                -4.712389049566237,
+                -2.3815054691912425
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 13.035451795263743
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.00092889997176826,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.08339449996128678,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 43,
+          "planner_waypoint_count": 22,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}
