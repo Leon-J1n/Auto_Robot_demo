@@ -313,11 +313,10 @@ VLM 放置位姿从感知表面点沿世界 Z 轴依次向上搜索 0、1、…�
 | `contact_mode` | string | grasp | pull 仅支持 grasp；push 支持 grasp / contact |
 | `grasp.mode` | string | physical | 物理接触与摩擦抓取；contact 时不填写 |
 | `distance` | number | 直线运动必填 | 正数，相对末端行程，m；contact 从首次真实接触处开始计量，不含空行程 |
-| `direction` | number[3] | pull 为 [0,0,-1]；push 为 [0,0,1] | 直线运动方向，非零向量 |
-| `frame` | string | tool | direction、圆弧偏移与轴向所在坐标系：tool / world / grasp |
+| `direction` | number[3] | pull 为 [0,0,-1]；push 为 [0,0,1] | 起始推拉坐标系的直线运动方向，非零向量 |
 | `angle_deg` | number | 相对圆弧必填 | 按右手定则带符号的角度增量，度 |
-| `arc_center_offset` | number[3] | 相对圆弧必填 | 相对起始 TCP 原点的轴心偏移，m |
-| `arc_axis` | number[3] | 相对圆弧必填 | 旋转轴方向，非零向量 |
+| `arc_center` | number[3] | 圆弧必填 | 世界坐标系中的轴心位置，m |
+| `arc_axis` | number[3] | 相对圆弧必填 | 世界坐标系的旋转轴方向，非零向量 |
 | `contact` | object | 可自动生成 | 交互目标位姿；ApproachSkill 从该位姿反向搜索接近位姿 |
 | `approach_search` | object | `2～10 cm`，步长 `5 mm` | 覆盖 ApproachSkill 的搜索区间和步长 |
 | `retreat_search` | object | `3～10 cm`，步长 `5 mm` | 覆盖 RetreatSkill 的搜索区间和步长 |
@@ -330,7 +329,7 @@ VLM 放置位姿从感知表面点沿世界 Z 轴依次向上搜索 0、1、…�
 接口约定：
 
 - 相对运动使用 distance 或 angle_deg，二者只能选一个。contact 编排当前只支持 distance 直线 push。
-- tool 指运动开始时的 TCP 坐标系；显式 direction 就是实际运动方向，不因 pull 再次反转。
+- 推拉坐标系 +Z 沿 tool 原点指向 grasp_center；+X 为抓取 X 轴在垂直于 Z 平面上的投影，+Y = Z × X；X 与 Z 平行时改用抓取 Y 的投影确定 Y。显式 direction 按此坐标系解释，不因 pull 再次反转。
 - grasp 使用实测 `grasp_center` 坐标系；正面抓抽屉时沿 `[0,0,-1]` 拉出，沿 `[0,0,1]` 推回。把手视觉模式和命令示例见 [VLM 把手抓取](../atomic_action/perception/vlm_estimate/README.md#drawer-handle-grasping)。
 - contact 保持现有夹爪开度，不主动张开或闭合；要求当前没有抓持对象，不能同时填写 grasp / grasp_request。
 - contact 自动接近沿用原始把手抓取位姿，不额外增加末端旋转、指垫尺寸补偿或初始间隙偏移；接触方式不同本身不改变目标位姿。

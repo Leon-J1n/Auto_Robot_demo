@@ -5,7 +5,7 @@
   "scene_version": 3,
   "commands": [
     {"command_id": "1", "skill_name": "pick", "parameters": {"target": 9, "hold_force": 10.0}},
-    {"command_id": "2", "skill_name": "pull", "parameters": {"frame": "world", "arc_center": [-0.131939005, 0.153781735, 0.822811], "arc_axis": [0, 0, 1], "angle_deg": 90}},
+    {"command_id": "2", "skill_name": "pull", "parameters": {"arc_center": [-0.131939005, 0.153781735, 0.822811], "arc_axis": [0, 0, 1], "angle_deg": 90}},
     {"command_id": "3", "skill_name": "retreat", "parameters": {"target": 9}},
     {"command_id": "4", "skill_name": "approach", "parameters": {"target": 7}},
     {"command_id": "5", "skill_name": "move_to", "parameters": {"target": 7, "planning_method": "linear"}},
@@ -13,7 +13,7 @@
     {"command_id": "7", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}},
     {"command_id": "8", "skill_name": "approach", "parameters": {"target": 9}},
     {"command_id": "9", "skill_name": "pick", "parameters": {"target": 9, "hold_force": 10.0}},
-    {"command_id": "10", "skill_name": "push", "parameters": {"frame": "world", "arc_center": [-0.131939005, 0.153781735, 0.822811], "arc_axis": [0, 0, 1], "angle_deg": -90}},
+    {"command_id": "10", "skill_name": "push", "parameters": {"arc_center": [-0.131939005, 0.153781735, 0.822811], "arc_axis": [0, 0, 1], "angle_deg": -90}},
     {"command_id": "11", "skill_name": "retreat", "parameters": {"target": 9}},
     {"command_id": "12", "skill_name": "move_to", "parameters": {"target": "home", "planning_method": "joint"}}
   ]

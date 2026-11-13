@@ -39,6 +39,30 @@ def resolve_held_contact(resources, backend, parameters):
     raise ValueError('Held contact is not a registered manipulation target')
 
 
+def push_pull_rotation(backend, pose=None):
+    """World basis: +Z points from control TCP to pinch center; X follows grasp X."""
+    pose = backend.get_end_effector_pose() if pose is None else pose
+    model = getattr(backend, 'model', None)
+    site = (mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, 'grasp_center')
+            if model is not None else -1)
+    if site < 0:
+        raise ValueError('Linear push/pull requires a calibrated grasp_center site')
+    z = np.asarray(backend.data.site_xpos[site], dtype=float) - np.asarray(pose['position'], dtype=float)
+    length = np.linalg.norm(z)
+    if not np.isfinite(length) or length < 1e-9:
+        raise ValueError('Cannot define push/pull +Z: grasp_center coincides with tool origin')
+    z = z / length
+    grasp_rotation = np.asarray(backend.data.site_xmat[site], dtype=float).reshape(3, 3)
+    x = grasp_rotation[:, 0] - z * np.dot(z, grasp_rotation[:, 0])
+    if np.linalg.norm(x) < 1e-8:
+        # A parallel grasp X cannot fix roll; use grasp Y to fix the new Y instead.
+        y = grasp_rotation[:, 1] - z * np.dot(z, grasp_rotation[:, 1])
+        x = np.cross(y, z)
+    x /= np.linalg.norm(x)
+    y = np.cross(z, x)
+    return np.column_stack((x, y, z))
+
+
 def relative_tool_motion(backend, parameters, operation):
     """Build a displacement from the measured TCP, without object joint data."""
     linear = 'distance' in parameters
@@ -46,24 +70,17 @@ def relative_tool_motion(backend, parameters, operation):
         raise ValueError('Specify either distance or angle_deg for relative motion')
     if any(key in parameters for key in ('target_position_m', 'target_angle_deg')):
         raise ValueError('Relative motion cannot include an absolute mechanism goal')
-    frame = parameters.get('frame', 'tool')
-    if frame not in {'tool', 'world', 'grasp'}:
-        raise ValueError('Relative motion frame must be tool, world or grasp')
+    if 'frame' in parameters:
+        raise ValueError('frame is no longer supported: linear direction uses calibrated push/pull axes; arc center/axis use world')
     pose = backend.get_end_effector_pose()
-    origin = np.asarray(pose['position'])
-    rotation = np.asarray(pose['rotation_matrix']) if frame == 'tool' else np.eye(3)
-    if frame == 'grasp':
-        site = mujoco.mj_name2id(backend.model, mujoco.mjtObj.mjOBJ_SITE, 'grasp_center')
-        if site < 0:
-            raise ValueError('grasp frame requires the calibrated grasp_center site')
-        rotation = backend.data.site_xmat[site].reshape(3, 3).copy()
-        origin = backend.data.site_xpos[site].copy()
     def vector(value, name):
         array = np.asarray(value, dtype=float)
         if array.shape != (3,) or not np.all(np.isfinite(array)):
             raise ValueError(f'{name} must be a finite xyz vector')
-        return rotation @ array
+        return push_pull_rotation(backend, pose) @ array
     if linear:
+        if any(key in parameters for key in ('arc_center', 'arc_center_offset', 'arc_axis')):
+            raise ValueError('Linear motion cannot include circular parameters')
         distance = parameters['distance']
         if isinstance(distance, bool) or not isinstance(distance, (int, float)) or not np.isfinite(distance) or distance <= 0:
             raise ValueError('distance must be positive metres')
@@ -75,15 +92,14 @@ def relative_tool_motion(backend, parameters, operation):
     angle = parameters['angle_deg']
     if isinstance(angle, bool) or not isinstance(angle, (int, float)) or not np.isfinite(angle) or angle == 0:
         raise ValueError('angle_deg must be a finite nonzero increment')
-    if 'arc_center' in parameters:
-        if 'arc_center_offset' in parameters:
-            raise ValueError('Specify arc_center or arc_center_offset, not both')
-        center = np.asarray(parameters['arc_center'], dtype=float)
-        if center.shape != (3,) or not np.all(np.isfinite(center)):
-            raise ValueError('arc_center must be a finite world xyz point')
-    else:
-        center = origin + vector(parameters.get('arc_center_offset'), 'arc_center_offset')
-    axis = vector(parameters.get('arc_axis'), 'arc_axis')
+    if 'direction' in parameters or 'arc_center_offset' in parameters:
+        raise ValueError('Circular motion requires world arc_center and arc_axis, without direction or arc_center_offset')
+    center = np.asarray(parameters.get('arc_center'), dtype=float)
+    axis = np.asarray(parameters.get('arc_axis'), dtype=float)
+    if center.shape != (3,) or not np.isfinite(center).all():
+        raise ValueError('arc_center must be a finite world xyz point')
+    if axis.shape != (3,) or not np.isfinite(axis).all():
+        raise ValueError('arc_axis must be a finite world xyz vector')
     if np.linalg.norm(axis) < 1e-12:
         raise ValueError('arc_axis must not be zero')
     return 'circular', {'arc_center':center.tolist(), 'arc_axis':(axis/np.linalg.norm(axis)).tolist(),

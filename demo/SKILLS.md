@@ -405,7 +405,7 @@
 - push/pull 的 `request.manipulation.contact_mode` 为 grasp 或 push_contact。非抓持推送可用 `contact_geom` 指定接触表面；省略时接受所选 link 的真实指垫接触。直线 push_contact 可以先前进、在途中建立接触；grasp 和既有圆弧接触运动仍要求起步前已建立接触。
 - `contact_normal_local` 可显式覆盖自动推导的门板局部向外法向，demo 将其转换到世界坐标；`pose_axis` 可覆盖 ApproachSkill 使用的目标位姿局部轴。圆弧轴线的 arc_center / arc_axis 默认从当前铰链读取。
 - `target_angle_deg` 仍作为兼容接口保留，用于需要绝对机构角度的调用；当前 scene.002 抽屉命令使用相对 `distance`，不依赖绝对开度。
-- 相对推拉用 `distance`（正数，m），默认 `frame: tool`：pull 沿起始 TCP 的 -Z、push 沿 +Z。可显式传 `direction: [x,y,z]` 和 `frame: tool|world`；显式方向就是实际运动方向，不因 push/pull 再反转。圆弧增量可用 `angle_deg`（右手定则有符号角度）、`arc_center_offset`（相对起始 TCP 的轴心偏移，m）、`arc_axis`，向量同样按 frame 解释。目标从当前实测末端位姿计算，不依赖物体开度、类型或滑轨轴向；不能混入绝对机构目标。已抓持时可省略 target/link，接触对象及模式从真实抓持状态解析，没有抓持则报错。scene.002 使用相对拉 0.12 m → release → move home → 保持夹爪张开重新接近 → 连续向前运动，真实接触后推动 0.12 m（contact）；移除了 target_position_m。成功表示请求的末端行程完成，不等同于物体完全打开或关闭。
+- 相对推拉用 `distance`（正数，m），方向使用起始推拉坐标系：+Z 沿 tool 原点指向 grasp_center，+X 由抓取 X 的垂直投影确定，+Y = Z × X；默认 pull 沿 -Z、push 沿 +Z。可显式传 `direction: [x,y,z]`，不再接受 `frame`；显式方向就是实际运动方向，不因 push/pull 再反转。圆弧增量可用 `angle_deg`（右手定则有符号角度）、`arc_center`（世界坐标轴心位置，m）、`arc_axis`（世界坐标旋转轴方向），不接受 `arc_center_offset`。目标从当前实测末端位姿计算，不依赖物体开度、类型或滑轨轴向；不能混入绝对机构目标。已抓持时可省略 target/link，接触对象及模式从真实抓持状态解析，没有抓持则报错。scene.002 使用相对拉 0.12 m → release → move home → 保持夹爪张开重新接近 → 连续向前运动，真实接触后推动 0.12 m（contact）；移除了 target_position_m。成功表示请求的末端行程完成，不等同于物体完全打开或关闭。
 - 柜门开度、接触力和抓取状态写入 report/frames；推拉失败保留实际物理状态，不回滚现场。普通对象命令及 OLS 流程不变。
 
 本场景已使用已知把手/内侧接触点，不需要启动 OLS 服务。相机与灯光暂不参与控制仿真，源场景结构保留。

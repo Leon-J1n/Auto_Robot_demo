@@ -391,23 +391,17 @@ class PullMotionExecutor:
         }
         request['grasp'] = {'mode': 'physical'}
         if 'distance' in p:
-            frame = p.get('frame', 'tool')
-            basis = interaction_pose['rotation_matrix'] if frame == 'tool' else np.eye(3)
-            local = np.asarray(p.get('direction', [0., 0., -1.]), dtype=float)
-            direction = basis @ local
-            direction /= np.linalg.norm(direction)
+            _, linear_params = relative_tool_motion(self.backend, p, operation)
             request['motion'] = {'path_type': 'linear'}
             request['strategy_params'] = {
-                'direction': direction.tolist(), 'distance': float(p['distance'])}
+                **linear_params}
         elif 'angle_deg' in p:
-            frame = p.get('frame', 'tool')
-            basis = interaction_pose['rotation_matrix'] if frame == 'tool' else np.eye(3)
-            offset = basis @ np.asarray(p.get('arc_center_offset', [0., 0., 0.]), dtype=float)
-            axis = basis @ np.asarray(p['arc_axis'], dtype=float)
+            center = np.asarray(p['arc_center'], dtype=float)
+            axis = np.asarray(p['arc_axis'], dtype=float)
             axis /= np.linalg.norm(axis)
             request['motion'] = {'path_type': 'circular'}
             request['strategy_params'] = {
-                'arc_center': (interaction_pose['position'] + offset).tolist(),
+                'arc_center': center.tolist(),
                 'arc_axis': axis.tolist(),
                 'arc_angle': float(np.deg2rad(p['angle_deg'])),
             }

@@ -271,19 +271,19 @@ class GraspMotionFrameTests(unittest.TestCase):
         mujoco.mj_forward(model, data)
         backend = SimpleNamespace(model=model, data=data, get_end_effector_pose=lambda: {
             'position': [0., 0., 0.], 'rotation_matrix': np.eye(3)})
-        _, motion = relative_tool_motion(backend, {'frame': 'grasp', 'distance': .16,
-                                                   'direction': [0., 0., -1.]}, 'pull')
-        np.testing.assert_allclose(motion['direction'], [0., 1., 0.], atol=1e-10)
+        with self.assertRaisesRegex(ValueError, 'frame is no longer supported'):
+            relative_tool_motion(backend, {'frame': 'grasp', 'distance': .16,
+                                           'direction': [0., 0., -1.]}, 'pull')
 
-    def test_grasp_arc_offset_uses_grasp_origin(self):
+    def test_arc_center_uses_world_coordinates(self):
         model = mujoco.MjModel.from_xml_string('<mujoco><worldbody><site name="grasp_center" '
                                               'pos=".1 .2 .3"/></worldbody></mujoco>')
         data = mujoco.MjData(model)
         mujoco.mj_forward(model, data)
         backend = SimpleNamespace(model=model, data=data, get_end_effector_pose=lambda: {
             'position': [0., 0., 0.], 'rotation_matrix': np.eye(3)})
-        _, motion = relative_tool_motion(backend, {'frame': 'grasp', 'angle_deg': 20,
-            'arc_center_offset': [0., .1, 0.], 'arc_axis': [0., 0., 1.]}, 'pull')
+        _, motion = relative_tool_motion(backend, {'angle_deg': 20,
+            'arc_center': [.1, .3, .3], 'arc_axis': [0., 0., 1.]}, 'pull')
         np.testing.assert_allclose(motion['arc_center'], [.1, .3, .3])
 
 

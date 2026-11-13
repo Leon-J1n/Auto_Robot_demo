@@ -69,7 +69,7 @@ Move 的 `target.type` 可取 `pose`、`joint`、`named_state`。位姿的长度
 
 当前转换器识别 `locate`、`move`、`grasp`、`release`、`press`、`push`、`pull`。其中 `push` 和 `pull` 都转换为 `pull_push` 执行步骤（旧 `push_pull` 名称保留兼容）。`locate` 在演示转换器中不生成可执行步骤。`SearchAction` 虽有独立结构化接口，但未接入当前演示命令分发。简化命令的 `parameters.target` 使用对象 ID、别名、命名目标或 `end_effector`；具体可用目标取决于场景注册表。
 
-**当前 demo 的 push / pull 原子技能**直接使用统一的已抓持运动流程：检查 `holding` → 规划并执行普通移动 action → 成功后 release。两者均不解析 target/link、不自动接近或抓取、不读取铰链。直线参数必须提供正数 `distance` 和 `direction`；圆弧参数必须提供世界坐标 `arc_center`、`arc_axis` 和有符号 `angle_deg`。`frame` 为 `tool`（默认）或 `world`，用于方向和轴向；圆心始终是世界坐标。push 不会再额外反转方向或角度。运动失败时不自动释放。旧 contact 推送、机构目标和 fallback 编排不再是 demo 的 push 入口；需要先执行 pick/grasp。commands.004 用 +90° pull 开门，重新抓持后用 -90° push 关门。
+**当前 demo 的 push / pull 原子技能**直接使用统一的已抓持运动流程：检查 `holding` → 规划并执行普通移动 action → 成功后 release。两者均不解析 target/link、不自动接近或抓取、不读取铰链。直线参数必须提供正数 `distance`，`direction` 默认 pull 为 -Z、push 为 +Z；圆弧参数必须提供世界坐标 `arc_center`、`arc_axis` 和有符号 `angle_deg`。不再接受 `frame` 或 `arc_center_offset`；直线 `direction` 固定在起始推拉坐标系解释：+Z 沿 tool 原点指向 grasp_center，+X 为抓取 X 在垂直于 Z 平面上的投影，+Y = Z × X（X 平行 Z 时改用抓取 Y 投影确定 Y），圆弧 `arc_center` 和 `arc_axis` 固定在世界坐标系解释。push 不会再额外反转方向或角度。运动失败时不自动释放。旧 contact 推送、机构目标和 fallback 编排不再是 demo 的 push 入口；需要先执行 pick/grasp。commands.004 用 +90° pull 开门，重新抓持后用 -90° push 关门。
 
 `move` 还可用 `planning_method`/`path_type`（`joint`、`linear`、`circular`）、`keep_end_effector_orientation` 等参数。目标为 `end_effector` 时，可以用 `relation` 和 `distance_m` 表示相对位移，例如 `above` 表示向上移动。
 

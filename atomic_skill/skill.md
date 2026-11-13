@@ -124,16 +124,15 @@
 先用 `approach`、`pick` 抓住抽屉把手，再执行直线 `pull` 拉开或 `push` 推回。推拉从当前实测末端位姿出发，保持末端朝向；动作成功后自动松开夹爪，因此下一次推拉前需要重新抓持。`pull` / `push` 不负责选择把手抓取点。
 
 ```json
-{"command_id": "3", "skill_name": "pull", "parameters": {"frame": "grasp", "distance": 0.16}}
+{"command_id": "3", "skill_name": "pull", "parameters": {"distance": 0.16}}
 ```
 
 | 参数 | 必填 / 默认 | 含义 |
 | --- | --- | --- |
 | `distance` | 必填 | 直线运动距离，单位 m，必须大于 0 |
-| `frame` | `tool` | 运动方向的参考坐标系：`tool` 为当前工具坐标系，`grasp` 为标定的 `grasp_center` 坐标系，`world` 为世界坐标系 |
-| `direction` | `pull` 为 `[0, 0, -1]`；`push` 为 `[0, 0, 1]` | 相对于 `frame` 的非零方向向量；显式指定时即为实际运动方向 |
+| `direction` | `pull` 为 `[0, 0, -1]`；`push` 为 `[0, 0, 1]` | 相对于运动开始时推拉坐标系的非零方向向量；显式指定时即为实际运动方向 |
 
-示例采用 `frame: "grasp"`，要求机器人已标定 `grasp_center`，且其 Z 轴与抽屉进出方向匹配。`distance` 始终填正数；方向不匹配时按实际坐标系显式设置 `direction`。推拉的场景目标由前面的抓持确定，本条 command 无需填写 `target`。
+直线方向使用从资产标定得到的推拉坐标系：+Z 为 tool 原点指向夹爪闭合中心（`grasp_center`）的单位方向；+X 为抓取坐标 X 轴在垂直于 Z 的平面上的归一化投影；+Y = Z × X，构成右手坐标系。若抓取 X 与 Z 平行，则用抓取 Y 的投影确定 +Y，再计算 +X。该坐标系在运动开始时确定，`distance` 始终填正数。缺少闭合中心标定或其与 tool 原点重合时，直线推拉报错。圆弧使用世界坐标 `arc_center`、世界方向 `arc_axis` 和右手定则有符号角度 `angle_deg`，不接受 `frame` 或 `arc_center_offset`。推拉对象由前面的抓持确定，本条 command 无需填写 `target`。
 
 ## 3. Commands 如何装配
 
@@ -189,7 +188,7 @@ approach(destination) → put(destination) → retreat(destination)
 
 ```text
 approach(object) → pick(object) → lift_up(distance) → retreat(object)
-    → approach(destination) → put(destination) → retreat(destination)
+    → approach(destination) → put(destination) → retreat(destination) → move_to(home)
 ```
 
 ### 开关抽屉
@@ -197,8 +196,10 @@ approach(object) → pick(object) → lift_up(distance) → retreat(object)
 `drawer` 为抽屉的场景对象 ID。每次推拉前抓住把手；推拉成功后夹爪已松开，再执行 `retreat`。
 
 ```text
-approach(drawer) → pick(drawer) → pull(frame=grasp, distance=0.16) → retreat(drawer)
-    → approach(drawer) → pick(drawer) → push(frame=grasp, distance=0.16) → retreat(drawer)
+approach(drawer) → pick(drawer) → pull(distance=0.12) → retreat(drawer)
+    → approach(drawer) → pick(drawer) → push(distance=0.12) → retreat(drawer) → move_to(home)
 ```
 
-把图中的每个节点依次写成一条 command 即可。抓取放置的完整装配示例见上一节；抽屉直线推拉的完整命令见 [`commands.007.json`](../demo/task_commands/commands.007/commands.007.json)。
+这里的 ±Z 指推拉坐标系：+Z 沿 tool 原点指向夹爪闭合中心，方向随资产标定自动计算。
+
+把图中的每个节点依次写成一条 command，按箭头顺序执行即可。
