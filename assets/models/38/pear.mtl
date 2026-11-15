@@ -1,6 +1,0 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
-newmtl sharedtexturematerial
-Ka 1 1 1
-Kd 1 1 1
-map_Kd pear.png

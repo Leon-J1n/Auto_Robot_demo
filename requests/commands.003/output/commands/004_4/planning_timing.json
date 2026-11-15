@@ -1,0 +1,67 @@
+{
+  "command_id": "4",
+  "skill_name": "retreat",
+  "success": true,
+  "target_resolution_timing_s": {},
+  "wrist_observation": null,
+  "pose_search_precheck": [
+    {
+      "distance_m": 0.1,
+      "elapsed_s": 0.0021579000167548656,
+      "status": "analytic_solution"
+    }
+  ],
+  "successful_distance_m": 0.1,
+  "target_resolution_diagnostics": {},
+  "motions": [
+    {
+      "phase": "retreat_100mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0009761999826878309,
+        "context": 0.0001493000891059637,
+        "selection": 6.800051778554916e-06,
+        "path_generation": 0.3038967000320554,
+        "planning": 0.0006509998347610235,
+        "trajectory_preparation": 0.13044369989074767,
+        "posture_scoring": 8.539995178580284e-05,
+        "pre_execution_total": 0.43621989991515875
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 3.309990279376507e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 0.00010990002192556858,
+          "direct_path_collision_check": 0.00044139986857771873,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0008807999547570944,
+          "linear_path_validation_s": 0.005053600063547492,
+          "collision_validation_s": 0.12398419994860888,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 25,
+          "planner_waypoint_count": 13,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

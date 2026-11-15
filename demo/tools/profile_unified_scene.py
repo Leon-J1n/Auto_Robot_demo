@@ -24,7 +24,7 @@ def main():
                         help='Diagnostic only: retain the old final-target direct-path preference')
     args = parser.parse_args()
     os.environ['SIM_PLATFORM_LIBRARY'] = str(args.library.resolve())
-    from execution.mujoco import MuJoCoExecutionBackend
+    from execution.backends.mujoco.backend import MuJoCoExecutionBackend
     from execution import SceneResourceCoordinator, SceneStateSynchronizer
     from collision import SimPlatformFCLCollisionChecker
     from kinematics import KinematicsService
@@ -139,6 +139,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 

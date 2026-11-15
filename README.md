@@ -2,16 +2,15 @@
 
 本项目用于机器人原子技能的开发、组合、规划、仿真执行和结果验证。当前统一演示入口是 `demo.run_demo`，主要运行在 MuJoCo 仿真环境中，并可通过对象库服务获取场景对象和交互位姿。
 
-全局速度比例、加速度比例、轨迹采样帧率和首帧停顿在 `config/global.json` 中配置。
+全局速度比例、加速度比例、轨迹采样帧率、碰撞采样分辨率和夹爪开合速度在 `config/global.json` 中配置。
 显式设置优先，否则使用全局默认值；配置格式和覆盖方式见 [全局配置说明](docs/global_config.md)。
 
 ## 根目录模块职责
 
 | 目录 | 职责 |
 | --- | --- |
-| `assets/` | 项目资产库，保存物体模型、机器人模型、场景资源、资源索引和更新后的资产。 |
 | `collision/` | 碰撞模型预处理、碰撞场景管理和碰撞查询，支持独立网格的凸分解以及 FCL/SimPlatform 后端。 |
-| `control/` | 机器人和末端执行器控制逻辑，包括夹爪、连续轨迹、按压、推拉和接触状态控制。 |
+| `execution/backends/mujoco/` | MuJoCo 执行后端与夹爪执行适配器。 |
 | `demo/` | 任务级入口和编排层，负责命令解析、对象查询、交互位姿换算、任务阶段组织、运行报告和诊断工具。 |
 | `execution/` | 执行运行时，负责机器人资源装配、MuJoCo 后端、夹爪模型、运动限制和执行状态管理。 |
 | `hardware/` | 真实机器人、传感器和其他硬件适配接口的预留目录。 |
@@ -23,7 +22,6 @@
 | `atomic_action/` | 原子技能实现，包括运动、抓取、释放、推拉、按压、定位和搜索等技能的接口、配置、校验和策略。 |
 | `tests/` | 单元测试、集成测试、测试配置和测试夹具。运行生成的报告和临时输出不属于源码。 |
 | `utils/` | 跨模块复用的通用工具，目前主要提供仿真运行时辅助功能。 |
-| `assets/` | 当前仿真和对象服务使用的场景、机器人和物体资产。旧的 `world_model/` 场景目录已移除。 |
 | `libraries/simplatform/` | SimPlatform 统一组件目录，包含源码、Python SDK、原生 DLL 和运行时依赖。 |
 
 ### 开发环境和工程元数据
@@ -41,8 +39,8 @@
 
 项目接收两类主要输入。
 
-- 场景文件。通常是 `assets/` 中的场景配置、机器人模型和对象资源。
-- 任务命令文件。通常位于 `demo/task_commands/`，描述 `move`、`pick`、`put`、`push`、`pull`、`pour`、`grasp` 和 `release` 等任务。
+- 场景文件位于 `requests/<request>/`，机器人和物体元数据由 OLS 提供。
+- 任务命令文件。通常位于 `requests/`，描述 `move`、`pick`、`put`、`push`、`pull`、`pour`、`grasp` 和 `release` 等任务。
 
 默认会加载 `libraries/simplatform/bin/sim_platform_c.dll`，通常不需要传 `--library`。只有使用其他构建时才需要显式指定 DLL。
 
@@ -50,13 +48,13 @@
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
-  --commands demo\task_commands\commands.001.json `
+  --commands requests\commands.001\commands.001.json `
   --viewer
 ```
 
 ### 2. 加载场景和资源
 
-`demo.run_demo` 只读场景配置和命令文件。`demo.scene.assembler.SceneAssembler` 在内存中复制场景，按场景中的 `MetadataRef` 向 OLS 查询机器人、夹爪和物体元数据，再从 `assets/` 的本地镜像定位对应 URDF/网格，生成本次运行专用的运行时场景。原始场景 JSON 和任务 JSON 不会被修改。
+`demo.run_demo` 只读场景配置和命令文件。`demo.scene.assembler.SceneAssembler` 在内存中复制场景，按场景中的 `MetadataRef` 向 OLS 查询机器人、夹爪和物体元数据，再从场景文件和 OLS 资源定位对应 URDF/网格，生成本次运行专用的运行时场景。原始场景 JSON 和任务 JSON 不会被修改。
 
 没有显式传入 `--object-library-url` 时，入口会自动启动项目内的 OLS；因此新场景只要使用有效的 OLS `MetadataRef`，就可以直接进入同一条 pipeline。`--start-object-library` 仍然兼容旧命令，但不再是必需参数。
 
@@ -67,7 +65,7 @@
 `collision/` 为场景中的碰撞几何建立查询场景。
 
 - 已有的基础碰撞体和 URDF 碰撞定义直接使用。
-- 独立 OBJ/STL 网格通过 `collision/mesh_preprocessing.py` 预处理。
+- 独立 OBJ/STL 网格通过 `collision/assets/mesh.py` 预处理。
 - 非凸网格由 CoACD 分解为多个凸块。
 - 预处理结果写入 `.cache/collision/`，后续运行在缓存有效时直接复用。
 
@@ -75,7 +73,7 @@
 
 ### 4. 解析任务并组织阶段
 
-`demo/task_commands/` 中的命令由 `demo/` 解析，`atomic_skill/runner.py` 按任务类型组织执行阶段。
+`requests/` 中的命令由 `demo/` 解析，`atomic_skill/runner.py` 按任务类型组织执行阶段。
 
 典型阶段包括：
 
@@ -102,7 +100,7 @@
 
 ### 6. 执行轨迹
 
-`execution/` 接收已准备好的轨迹并驱动 MuJoCo 运行时，`control/` 负责夹爪、接触、推拉、按压和连续轨迹执行。执行期间会同步机器人、物体、夹爪和碰撞场景状态。
+`execution/` 接收已准备好的轨迹并驱动 MuJoCo 运行时，`execution/` 负责轨迹执行和 MuJoCo 夹爪适配。执行期间会同步机器人、物体、夹爪和碰撞场景状态。
 
 对于需要持续接触的操作，控制器还会监控接触保持、力限制、目标位移和停止条件。
 
@@ -118,10 +116,5 @@
 
 统一演示会生成任务结果、阶段状态、轨迹统计、碰撞缓存统计和错误诊断。默认运行输出目录为 `tests/output/`，该目录属于生成物，不作为源码模块使用。
 
-## 相关文档
 
-- [演示和运行说明](demo/readme.md)
-- [技能接口说明](SKILL_INTERFACES.md)
-- [运动学接口说明](KINEMATICS_INTERFACES.md)
-- [规划接口说明](PLANNING_PIPELINE_INTERFACES.md)
-- [MuJoCo 依赖说明](MUJOCO_DEPENDENCIES.md)
+

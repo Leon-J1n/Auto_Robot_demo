@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.spatial.transform import Rotation
 from copy import deepcopy
-from demo.task_commands.converter import _deep_merge
+from demo.interaction.command_converter import _deep_merge
 
 
 def _transform(record):
@@ -165,4 +165,5 @@ class DemoPourExecutor:
                    outlet_xy_tolerance_m=xy_tolerance, opening_down_threshold=opening_down_threshold,
                    waypoint_count=len(row["substeps"]))
         return row
+
 

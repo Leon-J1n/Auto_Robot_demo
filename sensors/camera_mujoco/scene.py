@@ -12,7 +12,8 @@ import numpy as np
 
 
 CAMERA_NAMES = {"OverheadCameraD435i": "global_camera", "WristCameraD435i": "wrist_camera"}
-ASSET_ROOT = Path(__file__).resolve().parents[2] / "assets"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+ASSET_ROOT = PROJECT_ROOT / "services" / "object_library_server" / "data"
 
 
 def _camera_visual_asset(obj: dict) -> tuple[Path, Path | None] | None:
@@ -45,7 +46,7 @@ def find_camera_scene_json(mjcf_path: Path, scene_json_path: str | Path | None =
     scene_id = ET.parse(mjcf_path).getroot().get("model")
     if not scene_id or not scene_id.isdecimal():
         return None
-    directory = Path(__file__).resolve().parents[2] / "assets" / "scenes" / scene_id
+    directory = PROJECT_ROOT / "requests" / f"commands.{int(scene_id):03d}"
     candidates = sorted(directory.glob("ur5e_*.json"))
     candidates = [p for p in candidates if not p.stem.endswith(("_file", "_files"))]
     if len(candidates) > 1:

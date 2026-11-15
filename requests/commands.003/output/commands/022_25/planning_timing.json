@@ -1,0 +1,622 @@
+{
+  "command_id": "25",
+  "skill_name": "put",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 0.0011267000809311867,
+    "candidate_selection": 0.02464359998703003,
+    "adapter_prepare_total": 0.027749300003051758
+  },
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 200,
+        "y": 317
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "depth_m": 1.0543148517608643,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6749999999999999
+      },
+      "frame": "world",
+      "confidence": 0.95,
+      "camera_id": "global_camera",
+      "timestamp": 37.19599999999949,
+      "sequence": 5,
+      "visual_estimation_s": 4.015145200071856,
+      "crop_origin_pixel": {
+        "x": 96,
+        "y": 245
+      },
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "rgbd_world_point": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6158354129909069
+      },
+      "placement_aabb_top_world": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6749999999999999
+      },
+      "held_object": "Marker",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05
+      ],
+      "target_point_world": {
+        "x": 0.30308633806347196,
+        "y": 0.1766563614408288,
+        "z": 0.6549999999999999
+      },
+      "placement_cycle_id": "25",
+      "placement_height_offset_m": -0.02,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.31157789984717965,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_follower', 'geom2': 'Tray', 'distance': 0.002737840139313663, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856387892825747, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856395732297197, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_follower', 'geom2': 'Tray', 'distance': 0.0027375305098244563, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0037861261889952156, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.00378612540504807, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004896731664362995, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0054746721408633365, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005205785254987925, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005012804063275736, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005253888617222855, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.00534640431093717, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005213253993088311, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.00407417642981001, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': 0.0012280524761419634, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_follower', 'geom2': 'Tray', 'distance': 0.0027378401393137746, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856387892824636, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.003785639573229609, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_follower', 'geom2': 'Tray', 'distance': 0.0027375305098245673, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.003786126188995105, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0037861254050479596, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004896731664362995, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0054746721408633365, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005205785254987925, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005012804063275736, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005253888617222855, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.00534640431093717, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005213253993088311, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004074176429810009, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': 0.0012280524761419634, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_follower', 'geom2': 'Tray', 'distance': 0.0027378397701062207, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856391512194995, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856399433741903, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_follower', 'geom2': 'Tray', 'distance': 0.0027375301500317055, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.003786126553819942, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0037861257616651394, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004896732000560175, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005474672526380622, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0052057855669221794, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005012804443732958, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005253889001701637, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005346404613005318, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0052132542956137605, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004074176728750882, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': 0.001228052164623819, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_follower', 'geom2': 'Tray', 'distance': 0.0027378397701062207, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.00378563915121961, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0037856399433743014, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_follower', 'geom2': 'Tray', 'distance': 0.0027375301500315945, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0037861265538200527, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0037861257616652513, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004896732000560397, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005474672526380844, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005205785566922402, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0050128044437331805, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0052538890017018594, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.0053464046130055395, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.005213254295613983, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': -0.004074176728751103, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'Tray', 'distance': 0.0012280521646235972, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_follower",
+                    "geom2": "Tray",
+                    "distance": 0.002737840139313663,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856387892825747,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856395732297197,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027375305098244563,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037861261889952156,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00378612540504807,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004896731664362995,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0054746721408633365,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005205785254987925,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005012804063275736,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005253888617222855,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.00534640431093717,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005213253993088311,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.00407417642981001,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": 0.0012280524761419634,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027378401393137746,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856387892824636,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.003785639573229609,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027375305098245673,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.003786126188995105,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037861254050479596,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004896731664362995,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0054746721408633365,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005205785254987925,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005012804063275736,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005253888617222855,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.00534640431093717,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005213253993088311,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004074176429810009,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": 0.0012280524761419634,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027378397701062207,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856391512194995,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856399433741903,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027375301500317055,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.003786126553819942,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037861257616651394,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004896732000560175,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005474672526380622,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0052057855669221794,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005012804443732958,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005253889001701637,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005346404613005318,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0052132542956137605,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004074176728750882,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": 0.001228052164623819,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027378397701062207,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00378563915121961,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037856399433743014,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_follower",
+                    "geom2": "Tray",
+                    "distance": 0.0027375301500315945,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037861265538200527,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0037861257616652513,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004896732000560397,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005474672526380844,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005205785566922402,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0050128044437331805,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0052538890017018594,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.0053464046130055395,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.005213254295613983,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": -0.004074176728751103,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Marker",
+                    "geom2": "Tray",
+                    "distance": 0.0012280521646235972,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.02443470014259219,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.017099899938330054,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.017867499962449074,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.04,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.05,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.0175520998891443,
+          "rejected": []
+        }
+      ]
+    }
+  },
+  "motions": [
+    {
+      "phase": "contact",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0010691999923437834,
+        "context": 0.00015389989130198956,
+        "selection": 6.200047209858894e-06,
+        "path_generation": 0.22341160010546446,
+        "planning": 0.0005671000108122826,
+        "trajectory_preparation": 0.22099579987116158,
+        "posture_scoring": 2.9001384973526e-06,
+        "pre_execution_total": 0.4462150000035763
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 3.169989213347435e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 9.660003706812859e-05,
+          "direct_path_collision_check": 0.0003736000508069992,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0008502998389303684,
+          "linear_path_validation_s": 0.004556600004434586,
+          "collision_validation_s": 0.21503770002163947,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 21,
+          "planner_waypoint_count": 11,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

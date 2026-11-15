@@ -1,0 +1,15 @@
+{
+  "official_commit": "78fd485fa82d9b9a063fb4985e371814587e666a",
+  "warmup_iterations": 5,
+  "sphere_density": 1.0,
+  "prune_collisions": true,
+  "use_collision_mesh": false,
+  "clip_links": {},
+  "verified_mount_clip": {"robot": 1, "base_link": "base", "axis": "z", "offset": 0.0},
+  "notes": [
+    "RobotBuilder defaults are retained. Fitting uses visual geometry, including links with no collision tag.",
+    "The OLS robot/1 base visual geometry was verified to lie at or above local z=0. Only this verified mounting plane is applied automatically.",
+    "A request safety margin is applied to moving-link sphere radii; the fixed robot root retains zero margin at its mounting contact.",
+    "All planner task YAMLs, seed counts, optimizers, graph search and self-collision checks use upstream defaults."
+  ]
+}

@@ -1,13 +1,46 @@
-# 执行后端与同场景验证
+# Execution 模块
+
+## 1. 职责与边界
+
+运行时执行代码按职责划分如下：
+
+## 2. 目录结构与职责
+
+```text
+execution/
+├── api/                         # 后端协议与注册表
+├── resources/                   # 场景、URDF、Mesh 和装配资源
+├── runtime/                     # 执行状态、同步、到位/超时和轨迹入口
+├── backends/mujoco/             # 唯一的 MuJoCo 后端及场景编译器
+│   ├── gripper.py               # 夹爪模型生成
+│   ├── gripper_controller.py    # 物理夹爪适配器
+│   └── actuator_gripper.py      # 普通开合夹爪适配器
+├── output/                      # 轨迹与执行结果序列化
+├── tools/                       # catalog 等离线迁移工具
+├── config.py                    # 全局执行参数
+└── motion_limits.py             # URDF 运动限制读取
+```
+
+`execution.backends.mujoco.backend.MuJoCoExecutionBackend` 是 MuJoCo 的唯一实现入口。场景编译、资源解析、运行时状态和输出序列化分别位于对应子目录，旧的根目录实现已删除。
+
+执行模块接收已经完成规划和碰撞验证的时间参数化轨迹，负责加载后端、推进物理仿真、读取实际状态、
+处理查看器和写出执行结果。碰撞规划、逆解搜索、安全距离和路径生成属于 `planning` / `collision`，
+不在执行器中重新规划。`convergence` 只保留轨迹到位与超时的运行时判断；接触策略不属于默认执行流程。
+
+夹爪控制器属于具体仿真后端，不再单独设置 `control/` 模块。绑定型和普通开合型夹爪适配器都通过 MuJoCo 后端提供。
+
+夹爪原子动作的默认张开和闭合速度、抓取力、保持力和最大允许力位于根目录
+`config/global.json` 的 `gripper` 段。`GraspAction` 和 `ReleaseAction` 会读取这些默认值；
+请求中的同名 `strategy_params` 或 `constraints.maximum_force` 参数优先级更高。
 
 本目录将轨迹执行和物理仿真封装为插件。FK / Jacobian、Kinematics、SimPlatform FCL 和 Planning 继续使用现有实现；`_MoveExecutor` 通过注入接口调用它们。
 
-## 数据流与资源管理
+## 3. 数据流
 
 ```text
 commands.json：scene_id + scene_version + robot
     ↓ SceneResourceCoordinator.resolve()
-assets/catalog.json → 场景 JSON + URDF + Mesh
+requests/<request>/commands.<id>.json → 场景 JSON + URDF + Mesh
     ├→ URDF Kinematics → _MoveExecutor / 现有 Planning → SimPlatform FCL → q(t)
     └→ backend_resources["mujoco"] → MuJoCoExecutionBackend.load()
                                       ↓ 从同一 JSON / URDF 生成 MJCF
@@ -21,7 +54,7 @@ assets/catalog.json → 场景 JSON + URDF + Mesh
 - `SceneStateSynchronizer` 在步骤开始、步骤结束和执行采样帧处，将实际关节状态更新到 Kinematics、物体世界位姿更新到 FCL。执行后的仿真状态是权威状态。
 - 场景版本由资源维护者显式更新。报告中的指纹覆盖场景、机器人 URDF、直接引用的环境资产和后端配置；尚未递归覆盖 URDF 的所有 Mesh 依赖，不能作为完整资产缓存键。当前每次重新生成执行场景。
 
-## 主要接口
+## 4. 对外接口
 
 | 接口 | 输入 / 输出及用途 |
 | --- | --- |
@@ -45,26 +78,26 @@ assets/catalog.json → 场景 JSON + URDF + Mesh
 
 执行输入中的 `time_parameterized_waypoints` 为 `N × DOF` 关节角数组，`timestamps` 为从 0 开始的秒数数组；两者逐行对应。重复时间戳只有在对应位置一致时才会合并。执行前检查维数、有限值、时间顺序、关节限位及起点是否匹配当前状态。
 
-当前 demo 统一使用 `planning.time_parameterization.prepare_continuous_trajectory()`：平滑关节路径后为整段运动分配连续时间表，只在阶段起止处停稳。每关节速度基准由 URDF limit.velocity 读取，加速度优先读取 limit.acceleration；缺失时按约定采用速度上限数值作为加速度基准，并在报告中标记回退来源。两者分别乘 `velocity_scale` 和 `acceleration_scale`；速度还可以通过 `planning.time_parameterization.joint_velocity_multipliers` 按关节调整，最终限值为 `min(URDF 上限, URDF 上限 × velocity_scale × 关节倍率)`。例如 `[1,1,1,2,2,2]` 会让 J4–J6 在全局比例不变时加速到两倍，超出 URDF 上限则截断。生成的平滑路径在执行前重新校验碰撞。推拉共用同一连续轨迹实现和全局限值；夹爪开合独立控制。当前不约束 jerk，Ruckig 接口仍保留但不在 demo 执行链中使用。
+当前 demo 统一使用 `planning.trajectory.time_parameterization.prepare_continuous_trajectory()`：平滑关节路径后为整段运动分配连续时间表，只在阶段起止处停稳。每关节速度基准由 URDF limit.velocity 读取，加速度优先读取 limit.acceleration；缺失时按约定采用速度上限数值作为加速度基准，并在报告中标记回退来源。两者分别乘 `velocity_scale` 和 `acceleration_scale`；速度还可以通过 `planning.trajectory.time_parameterization.joint_velocity_multipliers` 按关节调整，最终限值为 `min(URDF 上限, URDF 上限 × velocity_scale × 关节倍率)`。例如 `[1,1,1,2,2,2]` 会让 J4–J6 在全局比例不变时加速到两倍，超出 URDF 上限则截断。生成的平滑路径在执行前重新校验碰撞。推拉共用同一连续轨迹实现和全局限值；夹爪开合独立控制。当前不约束 jerk，Ruckig 接口仍保留但不在 demo 执行链中使用。
 
 MuJoCo 使用位置执行器、偏置力补偿和 `mj_step`，步长 0.002 s。仅初始化时设置关节位置，运行中通过执行器跟踪轨迹。回调时间是仿真时间，计算耗时可能导致实际运行速度低于实时。
 
 完整路径精确缓存默认关闭，避免零命中时的场景签名开销。规划最终复核和平滑轨迹验证仍分别执行，默认碰撞采样步长为 0.02 rad；平滑轨迹按局部变化量采样。终点与安全间距不变，直线/圆弧几何检查保持原精度。更稀的离散采样可能漏过采样点间碰撞，配置及细采样对照方法见 [碰撞说明](../collision/README.md)。
 
-## 测试场景与指令
+## 5. 配置、输入与输出
 
 新增 ObjectLibraryServer 交互定位示例：`demo/skill_command/ols_grasp.commands.json` 配合 `--start-object-library`。命令为 `move 101 → move home`；demo 通过场景实例 ID 查询模型的 `grasp_properties` 交互位姿，换算夹持中心与控制 TCP，并尝试生成“到接近点 → 保持姿态直线到目标”两段请求，再通过原有 _MoveExecutor 接口执行。详细配置见 [服务接入说明](../services/README.md)。底层技能不查询服务，夹爪仍固定张开。
 
 项目里技能清单实际文件名为 `demo/SKILLS.md`。本次测试按其 `locate` / `move` 命令结构编写：
 
-- 场景：`assets/scenes/unified_arm_test.json`。
+- 场景：`requests/<request>/unified_arm_test.json`。
 - 基础布局回归任务：`tests/fixtures/unified_arm.commands.json`。
-- 资源目录：`assets/catalog.json`。
+- 资源目录：`requests/<request>/commands.<id>.json`。
 - 入口：`demo/run_demo.py`，使用新场景，不使用旧的 `config_002.commands.json`。
 
 历史场景版本 4 曾参考 `world_model/robotsim/scene_000.xml`，该旧场景已移除：机器人基座位于 `[0, 0, 0.5]`，桌子 URDF 原点位于 `[0.525, 0, 0]`，机械臂安装在独立圆柱底座上。底座半径 0.14 m，顶部比原 XML 低 2 mm，以满足碰撞裕量。机械臂携带固定张开的 Robotiq 2F85；不含相机附件、苹果或测试盒。
 
-机械臂与夹爪信息来自初始化时的最终场景：基础场景先应用 `demo/config/*.runtime.json`，再从唯一 `RobotModelRef` 和 `RobotAttachment` / `GripperModel` 读取 URDF 与安装关系。`execution/assembly.py` 在内存中拼接模型树，不生成组合 URDF；旧组合 URDF 和生成脚本已删除。catalog 只负责场景、runtime 配置和后端资源，不再选择机器人型号。
+机械臂与夹爪信息来自初始化时的最终场景：基础场景先应用 `demo/config/*.runtime.json`，再从唯一 `RobotModelRef` 和 `RobotAttachment` / `GripperModel` 读取 URDF 与安装关系。`execution/resources/assembly.py` 在内存中拼接模型树，不生成组合 URDF；旧组合 URDF 和生成脚本已删除。catalog 只负责场景、runtime 配置和后端资源，不再选择机器人型号。
 
 运动学和 FCL 使用原始六轴机械臂模型；MuJoCo 通过内存模型和夹爪适配器恢复活动关节，负责活动夹爪及被抓物体几何的补充碰撞检查。控制 TCP 仍为 `attachment_site`，抓取中心由安装关系和 `grasp_frame` 换算。物理模式支持真实开合与接触携物，绑定模式支持闭合确认后启用 weld。后端仍可输出 MJCF 缓存。
 
@@ -101,7 +134,7 @@ Windows 下这份 SimPlatform 发布包也包含 `mujoco.dll`。入口先加载�
 
 失败时停止后续步骤，保存报告，并以非零退出码结束。文件用于本地验证；尚未连接大脑 / 前端网络接口，也未转换为既有播放器的 `.traj` 格式。
 
-## 验证范围
+## 6. 验证与限制
 
 自动测试命令：
 
@@ -115,6 +148,12 @@ $env:SIM_PLATFORM_LIBRARY = "libraries\simplatform\bin\sim_platform_c.dll"
 本轮场景使用六轴 UR5e 固定基座机械臂和固定张开的夹爪。支持世界坐标下的单位缩放物体、箱体、圆柱及静态 URDF / OBJ / STL 环境资产。箱体 `size` 为完整三维尺寸，圆柱 `size` 为 `[半径, 半径, 完整高度]`。有铰链的环境 URDF、移动基座、可驱动夹爪和抓取附着关系需要后续适配。尚未实现暂停、恢复、取消和完整 TaskOrchestrator。
 
 运动测试走现有直接规划分支，未覆盖 RRT 绕障成功场景。执行期间按约 60 Hz 对实际关节及当前物体位姿做 FCL 检查，额外检查实际采样关节路径；这不是连续碰撞检测，也不预测运动障碍物。MuJoCo 与 FCL 读取相同几何源，但各自的 Mesh 接触算法可能不同（如 MuJoCo 的凸包处理），本测试不声称任意 Mesh 接触结果完全一致。
+
+
+
+
+
+
 
 
 

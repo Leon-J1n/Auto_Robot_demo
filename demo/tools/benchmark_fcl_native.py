@@ -21,11 +21,15 @@ def main():
     os.environ['SIM_PLATFORM_LIBRARY'] = str(args.library.resolve())
     # Matches the execution plugin's DLL loading order for the original bundle.
     import mujoco
-    from collision.simplatform_fcl import SimPlatformFCLCollisionChecker
+    from collision.backends.simplatform_fcl import SimPlatformFCLCollisionChecker
     from execution import SceneResourceCoordinator
     root = Path(__file__).resolve().parents[2]
-    resources = SceneResourceCoordinator(root / 'assets/catalog.json').resolve(
-        json.loads((root / 'demo/task_commands/commands.001.json').read_text(encoding='utf-8')))
+    task_path = root / 'requests/commands.001/commands.001.json'
+    task = json.loads(task_path.read_text(encoding='utf-8'))
+    resources = SceneResourceCoordinator(
+        scene_file=task_path.parent / task['scene_file'],
+        asset_root=root / 'services/object_library_server/data',
+    ).resolve(task)
     checker = SimPlatformFCLCollisionChecker(scene_file=resources.scene_file, scene_data=resources.scene,
                                             robot_urdf=resources.robot_urdf,
                                             initial_joints=resources.initial_joints)

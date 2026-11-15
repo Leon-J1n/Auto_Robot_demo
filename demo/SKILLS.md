@@ -61,7 +61,7 @@
 }
 ```
 
-完整统一场景示例见 `demo/task_commands/commands.001.json`。以下为对象目标的直线运动示例：
+完整统一场景示例见 `requests/commands.001/commands.001.json`。以下为对象目标的直线运动示例：
 
 ```json
 {
@@ -168,7 +168,7 @@
 }
 ```
 
-完整 `pick → put → move home` 示例见 `demo/task_commands/commands.001.json`，通过 `demo.run_demo` 运行。
+完整 `pick → put → move home` 示例见 `requests/commands.001/commands.001.json`，通过 `demo.run_demo` 运行。
 
 ### pour
 
@@ -206,9 +206,6 @@
   "skill_name": "grasp",
   "parameters": {
     "target": 101,
-    "grasp": {
-      "mode": "physical"
-    },
     "strategy_params": {
       "grasp_force": 20.0,
       "hold_force": 20.0,
@@ -220,15 +217,16 @@
 }
 ```
 
-独立 grasp 使用 `parameters.strategy_params`；pick 内嵌抓取使用 `parameters.grasp_request.strategy_params`。
+独立 grasp 使用 `parameters.strategy_params`；pick 内嵌抓取使用 `parameters.grasp_request.strategy_params`。grasp 和 release 不再接收 `link` 或 `grasp.mode` 参数。
 
 | 参数 | 默认值 | 含义 |
 | --- | --- | --- |
 | `grasp_force` | 20.0 | 闭合阶段力度参数 |
 | `hold_force` | 10.0 | 物理模式保持阶段左右指垫法向接触力之和的目标值，单位 N |
+| `open_speed` | 0.8 | 夹爪张开默认速度参数 |
 | `open_width` | 0.08 | 抓取前张开宽度，单位 m |
 | `close_width` | 0.0 | 闭合目标宽度，单位 m |
-| `close_speed` | 0.5 | 夹爪动作速度参数 |
+| `close_speed` | 0.8 | 夹爪闭合默认速度参数 |
 | `contact_threshold` | 2.0 | 确认抓取时每侧最低法向接触力，单位 N |
 | `confirmation_time` | 0.1 | 连续稳定确认时间，单位 s |
 
@@ -314,13 +312,13 @@
 
 ## 统一场景运行与报告
 
-`assets/scene.001.json` 将夹爪作为独立对象声明，使用 `MetadataRef` 引用夹爪资产，使用 `RobotAttachment` 指定父对象、父 link、子 link 和相对安装变换。运行时从两份原始 URDF 在内存中建立安装关系，不生成也不读取组合 URDF 文件。FCL 负责机械臂和静态场景的候选、接近路径和最终位姿检查；夹爪、活动机构和携带物体使用 MuJoCo 的实时几何距离检查。MuJoCo 负责物理积分、接触力和窗口播放，并输出后端 MJCF 缓存。
+`requests/commands.001/ur5_table_empty.json` 将夹爪作为独立对象声明，使用 `MetadataRef` 引用夹爪资产，使用 `RobotAttachment` 指定父对象、父 link、子 link 和相对安装变换。运行时从两份原始 URDF 在内存中建立安装关系，不生成也不读取组合 URDF 文件。FCL 负责机械臂和静态场景的候选、接近路径和最终位姿检查；夹爪、活动机构和携带物体使用 MuJoCo 的实时几何距离检查。MuJoCo 负责物理积分、接触力和窗口播放，并输出后端 MJCF 缓存。
 
-完整文件见 `demo/task_commands/commands.001.json`，当前顺序为 `pick → put → pick → put → move home`。命令按数组顺序执行，`command_id` 不决定顺序。
+完整文件见 `requests/commands.001/commands.001.json`，当前顺序为 `pick → put → pick → put → move home`。命令按数组顺序执行，`command_id` 不决定顺序。
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
-  --commands demo\task_commands\commands.001.json `
+  --commands requests\commands.001\commands.001.json `
   --start-object-library `
   --library libraries\simplatform\bin\sim_platform_c.dll `
   --viewer
@@ -342,20 +340,20 @@
 
 ## Mesh 碰撞预处理
 
-独立 OBJ/STL 资产自动经过 `collision/mesh_assets.py`：凸模型直接使用凸包，非凸模型由 CoACD 分解成多个凸块。FCL 与 MuJoCo 加载同一组凸块；MuJoCo 仍使用原始 mesh 显示外观。无需按对象名称编写篮筐、杯子等专用碰撞逻辑，也不生成组合 URDF。
+独立 OBJ/STL 资产自动经过 `collision/assets/mesh.py`：凸模型直接使用凸包，非凸模型由 CoACD 分解成多个凸块。FCL 与 MuJoCo 加载同一组凸块；MuJoCo 仍使用原始 mesh 显示外观。无需按对象名称编写篮筐、杯子等专用碰撞逻辑，也不生成组合 URDF。
 
 首次运行会输出 `Collision preprocessing`，可能需要数分钟。后续复用 `.cache/collision/` 缓存；源文件内容、缩放、算法版本或参数变化会生成新的缓存。缓存可以删除，之后会重新计算。原始资产不会被改写。分解失败或缓存校验失败会明确报错，不会静默退回填满空腔的整体凸包。
 
-依赖安装：`.\.venv\Scripts\python.exe -m pip install -r collision/requirements.txt`。默认采用按模型尺寸归一化的分解阈值 `0.05`，参数集中在 `collision/mesh_assets.py` 的 `SETTINGS` 中；需要米制阈值时可设置 `real_metric=True`。更小的阈值通常需要更多凸块和更长的首次处理时间。设置环境变量 `COACD_LOG_LEVEL=info` 可查看分解阶段日志。凸分解是近似，细缝或薄壁是否保留仍取决于源网格质量与分解精度，需要验证新容器的有效开口。
+依赖安装：`.\.venv\Scripts\python.exe -m pip install -r collision/requirements.txt`。默认采用按模型尺寸归一化的分解阈值 `0.05`，参数集中在 `collision/assets/mesh.py` 的 `SETTINGS` 中；需要米制阈值时可设置 `real_metric=True`。更小的阈值通常需要更多凸块和更长的首次处理时间。设置环境变量 `COACD_LOG_LEVEL=info` 可查看分解阶段日志。凸分解是近似，细缝或薄壁是否保留仍取决于源网格质量与分解精度，需要验证新容器的有效开口。
 
 已有 box/cylinder 等基础碰撞体及大部分 URDF 碰撞定义保持原样。Robotiq 左右 `spring_link` 的凹形 mesh 在运行时使用同一缓存流程拆成凸块，保留原始视觉网格、关节、惯量和碰撞局部变换；源 URDF 不改写，不生成组合 URDF。活动夹爪和活动机构链接由 MuJoCo 提供实时变换，并在 FCL 中使用同步代理几何参与规划和执行碰撞检查。其他 URDF mesh 不自动分解。独立网格可用 `Collider.collision_mesh`（相对于资产根目录的路径）指定碰撞源，外观仍取自 `AssetRef`。动态物体的配置总质量按凸块体积分配，惯量由这些凸块近似计算。
 
 
 ### 场景与运行配置分离
 
-`assets/scene.001.json` 使用与 `assets/scenes/` 一致的 schema 1 组件结构，仅保存场景身份、对象布局、资产引用、装配关系、显示颜色和 RobotDriver 初始关节角。`layout_reference` 和 `assembly_notes` 已删除。
+`requests/commands.001/ur5_table_empty.json` 使用与 `requests/<request>/` 一致的 schema 1 组件结构，仅保存场景身份、对象布局、资产引用、装配关系、显示颜色和 RobotDriver 初始关节角。`layout_reference` 和 `assembly_notes` 已删除。
 
-场景文件直接包含机器人、夹爪、碰撞器和物理组件。`assets/catalog.json` 只负责登记场景文件和后端资源，通用运行默认值由执行器自动补充。
+场景文件直接包含机器人、夹爪、碰撞器和物理组件。`requests/<request>/commands.<id>.json` 只负责登记场景文件和后端资源，通用运行默认值由执行器自动补充。
 
 资源加载器在内存中合成运行数据，并将同一份解析结果交给仿真与 FCL，不回写场景或生成组合 URDF。运行配置内容参与资源指纹计算。修改运动默认值、home 或物理覆盖参数时编辑 runtime 配置；修改位置和装配关系时编辑场景。旧 schema 2 测试夹具仍受支持。
 
@@ -460,6 +458,8 @@ contact 当前用于相对直线 push，要求正数 distance；pull 仍要求 g
 直线 contact push 从首次真实接触位置开始计算有效 distance，空行程不扣减请求行程。起步没有接触时允许先前进；规划从几何预测的接触位置延长同一连续路径，实际接触达到 `request.constraints.contact_threshold`（默认 0.1 N）时记录 TCP 起点并将有效进度归零。完成量和剩余距离依据实测接触起点验证，不把预测接触位置作为完成依据。反馈 `actual_delta` / `travel_distance` 是有效行程，`precontact_distance` 单独记录空行程，`total_travel_distance` 仅用于诊断实际机械臂总位移，`distance_reference` 为 first_contact。
 
 建立接触后，只要真实指垫接触仍存在，减速时力低于建立阈值不单独判为接触丢失；接触对消失仍按 contact_loss_timeout 停止。独立的小步搜索已取消，非允许碰撞、最大力与关节限位检查保留。未建立接触就结束前进时，有效行程为 0，返回 CONTACT_NOT_ESTABLISHED；已经产生运动时状态为 suspend。默认不自动将接触表面限定为把手横杆；显式 contact_geom 仍生效。
+
+
 
 
 

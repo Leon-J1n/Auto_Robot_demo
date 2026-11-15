@@ -27,7 +27,7 @@ URDF 加载入口：
 from libraries.eaik import load_urdf
 
 kin = load_urdf(
-    "assets/models/robots/30/ur5e_arm.urdf",
+    "services/object_library_server/data/robots/30/ur5e_arm.urdf",
     base_link="base",
     tip_link="attachment_site",
 )

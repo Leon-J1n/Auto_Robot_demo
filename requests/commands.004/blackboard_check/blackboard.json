@@ -1,0 +1,205 @@
+{
+  "revision": 3538,
+  "simulation_time": 47.16600000001168,
+  "targets": {
+    "9": {
+      "name": "Cabinet",
+      "model_id": 28
+    },
+    "7": {
+      "name": "Apple",
+      "model_id": 1
+    }
+  },
+  "objects": {
+    "WorkTable": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "RobotPedestal": {
+      "position": [
+        0.0,
+        -0.5499999999999999,
+        0.25
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "Apple": {
+      "position": [
+        0.2782296693866584,
+        -0.20490840437369617,
+        0.6346111215581853
+      ],
+      "quaternion_xyzw": [
+        0.028956656503734756,
+        -0.01881307791424209,
+        0.6325974169360488,
+        0.7737105972063167
+      ]
+    },
+    "SugarBox": {
+      "position": [
+        0.4799118250031905,
+        0.05494631398051696,
+        0.5974740988053964
+      ],
+      "quaternion_xyzw": [
+        -0.008116426861170175,
+        0.01684535412174652,
+        0.7071653471263637,
+        0.7068009121974669
+      ]
+    },
+    "Cabinet": {
+      "position": [
+        -0.3000000000000001,
+        0.1749999999999999,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.8660253028382761,
+        0.5000001748438417
+      ]
+    },
+    "Cabinet__root": {
+      "position": [
+        -0.3000000000000001,
+        0.1749999999999999,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.8660253028382761,
+        0.5000001748438417
+      ]
+    },
+    "Cabinet__cabinet0132": {
+      "position": [
+        -0.3000000000000001,
+        0.1749999999999999,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.2588188500895385,
+        0.9659258785426181
+      ]
+    },
+    "Cabinet__cabinet0132_door01": {
+      "position": [
+        -0.13193900468253783,
+        0.1537817346396106,
+        0.822811
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.8654982245643807,
+        0.500911991547322
+      ]
+    }
+  },
+  "mechanisms": {
+    "Cabinet__cabinet0132_door01": {
+      "joint_position": 1.5686899352737504,
+      "joint_type": 3
+    },
+    "Cabinet__cabinet0132": {
+      "joint_position": 1.5686899352737504,
+      "joint_type": 3
+    },
+    "Cabinet__root": {
+      "joint_position": 1.5686899352737504,
+      "joint_type": 3
+    }
+  },
+  "gripper": {
+    "known": true,
+    "initialized": true,
+    "width": 0.08175033980104535,
+    "force": 0.0,
+    "contact_detected": false,
+    "object_present": false,
+    "holding": false,
+    "mode": "physical",
+    "slip_detected": false,
+    "bilateral_contact": false,
+    "contact_lost": false,
+    "left_force_n": 0.0,
+    "right_force_n": 0.0,
+    "hold_force_target_n": null,
+    "filtered_hold_force_n": null,
+    "hold_force_torque_saturated": false,
+    "relative_position_error_m": 0.0,
+    "relative_orientation_error_rad": 0.0,
+    "confirmation": {
+      "left_force_n": 5.637715937828886,
+      "right_force_n": 5.669587205988906,
+      "stable_time_s": 0.1000000000000334,
+      "width_range_m": 6.354832062081817e-05,
+      "position_range_m": 7.533355987190518e-05,
+      "orientation_range_rad": 0.00010171155459685171,
+      "bilateral_contact": true,
+      "confirmed": true,
+      "reason": "stable_bilateral_grasp",
+      "mode": "physical"
+    },
+    "object_id": null
+  },
+  "model_cache": {
+    "entries": 4,
+    "hits": 4,
+    "misses": 4
+  },
+  "interaction_anchors": [
+    {
+      "target": "Cabinet",
+      "grasp_index": 0,
+      "body": "Cabinet__cabinet0132_door01",
+      "body_from_grasp": [
+        [
+          -2.0663179143061142e-19,
+          0.9999987317275395,
+          0.0015926529164867957,
+          -0.25193599999999994
+        ],
+        [
+          0.0007963267107331722,
+          -0.0015926524115073364,
+          0.9999984146597762,
+          -0.027594000000000063
+        ],
+        [
+          0.9999996829318344,
+          1.2682720583256444e-06,
+          -0.0007963257007739059,
+          0.007189000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ]
+}

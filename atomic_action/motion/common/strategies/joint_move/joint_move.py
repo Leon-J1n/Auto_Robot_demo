@@ -6,8 +6,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from planning.errors import PlanningError
-from planning.arm_posture import configuration_cost
+from planning.common.errors import PlanningError
+from planning.constraints.arm_posture import configuration_cost
 
 
 def _periodic_joint_delta(q, reference):
@@ -94,4 +94,5 @@ class JointMove:
             )
         return {"path_type": "joint", "joint_waypoints": np.vstack((start, goal)), "start": start, "goal": goal, "diagnostics": diagnostics,
                 **({"candidate_goals": candidate_goals} if candidate_goals is not None else {})}
+
 

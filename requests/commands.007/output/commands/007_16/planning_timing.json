@@ -1,0 +1,624 @@
+{
+  "command_id": "16",
+  "skill_name": "pick",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 0.0008211000822484493,
+    "candidate_selection": 0.016065799864009023,
+    "adapter_prepare_total": 0.01884149992838502
+  },
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "visual_estimate": {
+      "point_type": "vertical",
+      "pixel": {
+        "x": 320,
+        "y": 240
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "depth_m": 0.2157980054616928,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": -0.28140062594652654,
+        "y": -0.1622454238822926,
+        "z": 0.7588097219622383
+      },
+      "frame": "world",
+      "confidence": 0.88,
+      "camera_id": "wrist_camera",
+      "timestamp": 23.751999999997714,
+      "sequence": 1,
+      "visual_estimation_s": 19.095004400005564,
+      "grasp_type": "handle",
+      "grasp_estimation_method": "vertical_aabb",
+      "orientation_source": "target_local_aabb",
+      "axis_status": "fixed_horizontal",
+      "axis_source": "world_horizontal_aabb_tangent",
+      "long_axis_aligned": true,
+      "long_axis_world": [
+        0.8436612406753393,
+        0.5368758804250264,
+        -0.0
+      ],
+      "grasp_rotation_world": [
+        [
+          0.843661240675339,
+          0.0,
+          -0.5368758804250264
+        ],
+        [
+          0.5368758804250263,
+          0.0,
+          0.8436612406753394
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "surface_normal_world": [
+        0.5368758804250264,
+        -0.8436612406753394,
+        -0.0
+      ],
+      "aabb_estimate": {
+        "frame": "target_local",
+        "lower": [
+          -0.169210041,
+          -0.198080812,
+          -2.945e-06
+        ],
+        "upper": [
+          0.150933666,
+          0.198076262,
+          0.39623311
+        ],
+        "grasp_point_local": [
+          -0.13913170323465712,
+          0.008297692035362528,
+          0.22960338693507854
+        ],
+        "selected_face": "x_min",
+        "face_candidates": [
+          {
+            "face": "x_min",
+            "distance_m": 0.030078337765342883,
+            "normal_local": [
+              -1.0,
+              -0.0,
+              -0.0
+            ],
+            "normal_world": [
+              0.5368758804250264,
+              -0.8436612406753393,
+              0.0
+            ],
+            "closest_point_local": [
+              -0.169210041,
+              0.008297692035362528,
+              0.22960338693507854
+            ]
+          },
+          {
+            "face": "y_max",
+            "distance_m": 0.1897785699646375,
+            "normal_local": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "normal_world": [
+              -0.8436612406753393,
+              -0.5368758804250264,
+              0.0
+            ],
+            "closest_point_local": [
+              -0.13913170323465712,
+              0.198076262,
+              0.22960338693507854
+            ]
+          },
+          {
+            "face": "y_min",
+            "distance_m": 0.2063785040353625,
+            "normal_local": [
+              -0.0,
+              -1.0,
+              -0.0
+            ],
+            "normal_world": [
+              0.8436612406753393,
+              0.5368758804250264,
+              0.0
+            ],
+            "closest_point_local": [
+              -0.13913170323465712,
+              -0.198080812,
+              0.22960338693507854
+            ]
+          },
+          {
+            "face": "x_max",
+            "distance_m": 0.2900653692346571,
+            "normal_local": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "normal_world": [
+              -0.5368758804250264,
+              0.8436612406753393,
+              0.0
+            ],
+            "closest_point_local": [
+              0.150933666,
+              0.008297692035362528,
+              0.22960338693507854
+            ]
+          }
+        ]
+      },
+      "max_grasp_depth_m": 0.02,
+      "grasp_shallow_offset_m": 0.015,
+      "anchor_frame": "Drawer",
+      "depth_selected": true,
+      "grasp_depth_candidates_m": [
+        -0.015
+      ],
+      "depth_search_enabled": false,
+      "target_point_world": {
+        "x": -0.27334748774015116,
+        "y": -0.1749003424924227,
+        "z": 0.7588097219622383
+      },
+      "grasp_point_world": {
+        "x": -0.27334748774015116,
+        "y": -0.1749003424924227,
+        "z": 0.7588097219622383
+      },
+      "yaw_selected": true,
+      "grasp_depth_offset_m": -0.015,
+      "selected_yaw_offset_rad": 0.0,
+      "wrist_refinement": {
+        "camera_id": "wrist_camera",
+        "timestamp": 23.751999999997714,
+        "sequence": 1,
+        "coarse_surface_world": [
+          -0.28157899316957463,
+          -0.16235896968799118,
+          0.7585300078969281
+        ],
+        "refined_surface_world": [
+          -0.28140062594652654,
+          -0.1622454238822926,
+          0.7588097219622383
+        ],
+        "correction_world_m": [
+          0.0001783672230480926,
+          0.00011354580569858386,
+          0.00027971406531013265
+        ],
+        "correction_distance_m": 0.00035063866669543124,
+        "image_region": "full_frame",
+        "coarse_point_in_full_image": {
+          "in_front": true,
+          "optical_depth_m": 0.21579798664287328,
+          "pixel": {
+            "x": 319.4611148215864,
+            "y": 239.5927941011035
+          },
+          "in_frame": true,
+          "distance_from_principal_point_px": 0.10061213793504849
+        },
+        "status": "validated",
+        "timing_s": {
+          "capture": 0.0062200000975281,
+          "vlm": 6.858438399853185,
+          "validation": 1.7639224000740796
+        },
+        "elapsed_s": 8.628618099959567
+      },
+      "grasp_depth_attempts": [],
+      "grasp_depth_preflight": {
+        "success": true,
+        "reason": "static_geometry_valid",
+        "contacts": [],
+        "validation_mode": "static_open_geometry",
+        "contact_preflight": {
+          "distance_m": 0.04,
+          "rejected": [
+            {
+              "distance_m": 0.1,
+              "category": "prepoint_ik",
+              "reason": "eaik: No valid solution (FK target mismatch; FK target mismatch; joint limits); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.023529"
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.002542802831158042,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "shoulder_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "shoulder_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0025427588261663914,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0025427634827792645,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "WorkTable",
+                  "distance": 0.0,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "shoulder_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "shoulder_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "shoulder_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "shoulder_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_3_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            },
+            {
+              "distance_m": 0.07,
+              "category": "prepoint_collision",
+              "contacts": [
+                {
+                  "geom1": "forearm_link::collision_1",
+                  "geom2": "shoulder_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "shoulder_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision",
+                  "geom2": "wrist_2_link::collision_1",
+                  "distance": 0.0025428312364965677,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_1_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                },
+                {
+                  "geom1": "upper_arm_link::collision_1",
+                  "geom2": "wrist_2_link::collision",
+                  "distance": 0.0,
+                  "self_collision": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "contact",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.001074400031939149,
+        "context": 0.0001492002047598362,
+        "selection": 6.09993003308773e-06,
+        "path_generation": 0.22835149988532066,
+        "planning": 0.0007382999174296856,
+        "trajectory_preparation": 0.200812199851498,
+        "posture_scoring": 3.700144588947296e-06,
+        "pre_execution_total": 0.4311434000264853
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 3.3899908885359764e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 0.0001167000737041235,
+          "direct_path_collision_check": 0.0005146001931279898,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0015170001424849033,
+          "linear_path_validation_s": 0.00983810005709529,
+          "collision_validation_s": 0.1889645999763161,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 43,
+          "planner_waypoint_count": 22,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

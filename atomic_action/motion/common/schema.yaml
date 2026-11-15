@@ -108,6 +108,7 @@ input:
       planner_type:
         type: string
         default: auto
+        enum: [auto, direct, rrt, curobo]
         description: Backend planner identifier; interpreted by the implementation.
 
       max_attempts:

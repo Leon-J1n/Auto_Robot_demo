@@ -1,7 +1,0 @@
-# Texture supplies the base color; neutral Kd prevents duplicate tint.
-
-newmtl material_0
-# shader_type beckmann
-map_Kd baseball.png
-Ka 1 1 1
-Kd 1 1 1

@@ -108,8 +108,10 @@ def _handle_pose(backend, body):
 
 
 def prepare_contact_command(resources, backend, parameters, operation='pull'):
+    from execution.config import gripper_settings
+    force_defaults = gripper_settings()
     """Prepare handle approach with grasp or ungrasped pad contact."""
-    from demo.task_commands.converter import _deep_merge
+    from demo.interaction.command_converter import _deep_merge
 
     result = deepcopy(parameters)
     contact_mode = result.get('contact_mode','grasp')
@@ -140,7 +142,7 @@ def prepare_contact_command(resources, backend, parameters, operation='pull'):
     if contact_mode == 'contact' and gripper and getattr(gripper,'held_name',None):
         raise ValueError('Release the held object before using contact push')
     if relative and gripper and gripper.get_state().get('holding'):
-        result['request'] = _deep_merge({'constraints':{'maximum_force':60,'timeout':90}}, result['request'])
+        result['request'] = _deep_merge({'constraints':{'maximum_force': force_defaults['maximum_force'],'timeout':90}}, result['request'])
         return result
     pose_keys = ('contact',) if contact_mode == 'contact' else ('contact', 'contact_normal_local')
     auto_handle = any(key not in result for key in pose_keys)
@@ -154,12 +156,12 @@ def prepare_contact_command(resources, backend, parameters, operation='pull'):
                 'request': {'constraints': {'safety_distance': 0.003, 'timeout': 90}},
         })
         result['request'] = _deep_merge({
-            'constraints': {'maximum_force': 60,
+            'constraints': {'maximum_force': force_defaults['maximum_force'],
                             'timeout': 90, 'normal_alignment_tolerance': 3},
         }, result.get('request'))
         if contact_mode == 'grasp':
             result['grasp_request'] = _deep_merge({
-                'strategy_params': {'hold_force': 15, 'contact_threshold': 1},
+                'strategy_params': {'hold_force': force_defaults['hold_force'], 'contact_threshold': 1},
                 'constraints': {'timeout': 8},
             }, result.get('grasp_request'))
     return result
@@ -193,7 +195,7 @@ def motion_request(resources, backend, parameters):
         world = world @ np.linalg.inv(np.linalg.inv(wt) @ wg)
     elif pose['frame'] != 'control':
         raise ValueError('mechanism_pose.frame must be grasp or control')
-    from demo.task_commands.converter import _deep_merge
+    from demo.interaction.command_converter import _deep_merge
     q=Rotation.from_matrix(world[:3,:3]).as_quat()
     request=_deep_merge(resources.scene['move_defaults'],parameters.get('request',{}))
     request['target']={'type':'pose','frame':'world','position':dict(zip('xyz',world[:3,3])),
@@ -209,7 +211,7 @@ def apply_global_motion_timing(resources, request):
     """Use the same scene joint velocity limits as move, unless explicitly capped."""
     request = deepcopy(request)
     defaults = resources.scene['move_defaults']
-    from planning.time_parameterization import continuous_motion_limits
+    from planning.trajectory.time_parameterization import continuous_motion_limits
     count = len(resources.joint_names)
     velocity, acceleration = continuous_motion_limits(defaults, count)
     overrides = request.get('constraints', {})
@@ -280,5 +282,10 @@ def push_pull_request(resources, backend, parameters, operation):
         joint=int(backend.model.body_jntadr[body]);start=float(backend.data.qpos[backend.model.jnt_qposadr[joint]])
         request.setdefault('strategy_params',{})['arc_angle']=float(np.deg2rad(parameters['target_angle_deg'])-start)
     return apply_global_motion_timing(resources, request)
+
+
+
+
+
 
 

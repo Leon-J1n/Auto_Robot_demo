@@ -36,18 +36,20 @@ class GraspAction:
                                                    'error_message': 'No physical grasp is confirmed.'}}
 
         timeout = float(constraints.get('timeout', 30.0))
+        from execution.config import gripper_settings
+        speeds = gripper_settings(params)
         controller.open(float(params.get('open_width', DEFAULT_OPEN_WIDTH_M)),
-                        speed=float(params.get('close_speed', .5)), timeout=timeout)
+                        speed=float(speeds['open_speed']), timeout=timeout)
         result = controller.close(
             float(params.get('close_width', 0.0)),
-            speed=float(params.get('close_speed', .5)),
-            force=float(params.get('grasp_force', 20.0)),
+            speed=float(speeds['close_speed']),
+            force=float(speeds['grasp_force']),
             timeout=timeout,
-            maximum_force=float(constraints.get('maximum_force', 40.0)),
+            maximum_force=float(constraints.get('maximum_force', speeds['maximum_force'])),
         )
         holding = bool(result.get('contact_detected'))
         if holding and constraints.get('hold_on_success', True):
-            controller.hold(float(params.get('hold_force', 10.0)))
+            controller.hold(float(speeds['hold_force']))
         evidence = result.get('evidence', {})
         reason = evidence.get('reason')
         if reason == 'no_contact_force':

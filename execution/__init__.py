@@ -1,6 +1,10 @@
 """Execution plugins. Importing this package does not import a simulator."""
-from .registry import ExecutionBackendRegistry
+from .api.backend import ExecutionBackend, ExecutionBackendRegistry
 from .resources import SceneResourceCoordinator, SceneStateSynchronizer
-from .blackboard import TargetBlackboard
+from .runtime.state import TargetBlackboard
+from .runtime.executor import TrajectoryExecutor
 
-__all__ = ['ExecutionBackendRegistry', 'SceneResourceCoordinator', 'SceneStateSynchronizer', 'TargetBlackboard']
+__all__ = [
+    'ExecutionBackend', 'ExecutionBackendRegistry', 'SceneResourceCoordinator',
+    'SceneStateSynchronizer', 'TargetBlackboard', 'TrajectoryExecutor',
+]

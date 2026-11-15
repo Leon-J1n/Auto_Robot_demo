@@ -2,7 +2,7 @@
 import numpy as np
 
 from atomic_skill.pick import DemoInteractionPick
-from demo.task_commands.converter import _deep_merge
+from demo.interaction.command_converter import _deep_merge
 
 
 def validate_release_request(request):
@@ -55,5 +55,6 @@ class DemoInteractionPut(DemoInteractionPick):
         # The shared search subtracts direction * distance from the goal.
         return self._prepare_approach(base, resolved, goal, requested_path, state,
                                       np.array([0., 0., -1.]), skill='put')
+
 
 

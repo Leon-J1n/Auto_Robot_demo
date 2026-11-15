@@ -97,7 +97,7 @@ def world_grasp_candidates(metadata, world_from_object, control_from_grasp):
 
 class ObjectLibraryGraspResolver:
     def __init__(self, client, blackboard=None):
-        from execution.blackboard import TargetBlackboard
+        from execution.runtime.state import TargetBlackboard
         self.client = client
         self.blackboard = blackboard if blackboard is not None else TargetBlackboard()
 
@@ -129,7 +129,7 @@ class ObjectLibraryGraspResolver:
 
     @staticmethod
     def select(resolved, kin, checker, seed, *, safety_distance=.003, grasp_index=None, prefer_direct=False, candidate_validator=None):
-        from planning.arm_posture import configuration_cost, preference_for
+        from planning.constraints.arm_posture import configuration_cost, preference_for
         options, rejected = [], []
         candidates = resolved['candidates']
         if grasp_index is not None:
@@ -258,3 +258,5 @@ def apply_ols_friction(resources, client, blackboard=None):
     model_id = gripper.get('_ols_model_id')
     if model_id is not None:
         gripper['_ols_friction'] = read(int(model_id), gripper.get('_ols_asset_type', 'model'))
+
+

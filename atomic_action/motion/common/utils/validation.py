@@ -55,9 +55,10 @@ def validate_move_request(
     if not isinstance(normalized["planning"], Mapping):
         raise MoveValidationError("planning must be an object.")
     normalized["planning"] = dict(normalized["planning"])
-    from planning.collision_sampling import collision_sampling_settings
+    from planning.constraints.collision_sampling import collision_sampling_settings
     collision_sampling_settings(normalized)
     normalized["planning"].setdefault("mode", "auto")
+    normalized["planning"].setdefault("planner_type", "auto")
     normalized["planning"].setdefault("allow_replan", True)
     normalized["planning"].setdefault("planning_time", 10.0)
     normalized["planning"].setdefault("max_attempts", 3)
@@ -91,6 +92,7 @@ def validate_move_request(
     _enum(normalized["motion"], "phase", {"transit", "approach", "retreat", "contact"})
     _enum(normalized["motion"], "optimization_goal", {"balanced", "fastest", "shortest", "smoothest", "safest"})
     _enum(normalized["planning"], "mode", {"auto", "direct", "collision_free"})
+    _enum(normalized["planning"], "planner_type", {"auto", "direct", "rrt", "curobo"})
     for key in ("allow_replan",):
         if not isinstance(normalized["planning"][key], bool):
             raise MoveValidationError(f"planning.{key} must be boolean.")

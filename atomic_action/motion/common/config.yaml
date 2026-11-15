@@ -65,7 +65,7 @@ planning:
     default_planner: rrt_connect
     planning_time: 10.0
     max_attempts: 3
-    rrt_collision_resolution: 0.02
+    rrt_resolution_rad: 0.03
     optimize_path: true
     smooth_result: true
     allow_path_type_relaxation_only_for_soft_constraint: true

@@ -1,0 +1,31 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+# CUDA 12.8 wheels include Blackwell (sm_120) support required by RTX 50-series GPUs.
+torch==2.9.1+cu128
+--extra-index-url https://pypi.nvidia.com
+# The Windows CUDA 12 wheel is published as the unlocalised 1.18.0 release.
+# The +cu12 suffix is not a pip-resolvable version on the configured index.
+warp-lang==1.18.0
+numpy==2.2.6
+scipy==1.15.3
+trimesh==5.1.1
+yourdfpy==0.0.60
+PyYAML==6.0.3
+networkx==3.4.2
+matplotlib==3.10.9
+numpy-quaternion==2024.0.13
+setuptools_scm==10.3.4
+tqdm==4.70.1
+wheel==0.48.0
+importlib_resources==7.1.0
+viser==1.1.1
+cuda-core[cu12]==1.2.2
+cuda-bindings==12.9.10
+cuda-pathfinder==1.8.3
+nvidia-cuda-runtime-cu12==12.9.79
+nvidia-cuda-nvrtc-cu12==12.9.86
+nvidia-cuda-nvcc-cu12==12.9.86
+nvidia-nvfatbin-cu12==12.9.82
+nvidia-nvjitlink-cu12==12.9.86
+embreex==4.4.0.post1
+rtree==1.4.1
+manifold3d==3.5.4

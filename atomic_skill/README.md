@@ -111,8 +111,6 @@
 | 参数 | 类型 | 必填 / 默认 | 含义 |
 | --- | --- | --- | --- |
 | `target` | integer / string | 必填 | 要抓取的场景对象 ID |
-| `link` | string | 操作机构部件时指定 | 要抓取的活动 link |
-| `grasp.mode` | string | physical | 物理接触与摩擦抓取 |
 | `strategy_params` | object | 可选 | grasp_force、hold_force 等抓取参数；力单位 N |
 | `constraints` | object | 当前不开放 | 抓取验证、重试和超时等内部约束 |
 
@@ -124,9 +122,6 @@
   "skill_name":"grasp",
   "parameters":{
     "target":10,
-    "grasp":{
-      "mode":"physical"
-    },
     "strategy_params":{
       "grasp_force":20,
       "hold_force":15
@@ -140,7 +135,6 @@
 | 参数 | 类型 | 必填 / 默认 | 含义 |
 | --- | --- | --- | --- |
 | `target` | integer / string | 必填 | 要释放的场景对象 ID |
-| `link` | string | 释放机构部件时指定 | 对应的活动 link |
 | `strategy_params` | object | 可选 | open_width 等松爪参数；宽度单位 m |
 | `constraints` | object | 当前不开放 | 释放验证、重试和超时等内部约束 |
 

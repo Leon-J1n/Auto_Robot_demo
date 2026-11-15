@@ -11,9 +11,12 @@ class ReleaseAction:
         if runtime is None: raise RuntimeError('A robot runtime is required.')
         controller = getattr(runtime, 'gripper_controller', None)
         if controller is None:
-            from control import MujocoGripperController
+            from execution.backends.mujoco.actuator_gripper import MujocoGripperController
             controller = MujocoGripperController(runtime); runtime.gripper_controller = controller
         release = request.get('release', {}); params = request.get('strategy_params', {})
         if release.get('operation', 'release') != 'verify_only':
-            controller.open(float(params.get('open_width', .08)), speed=float(params.get('open_speed', .5)), timeout=float(request.get('constraints', {}).get('timeout', 30.0)))
+            from execution.config import gripper_settings
+            speeds = gripper_settings(params)
+            controller.open(float(params.get('open_width', .08)), speed=float(speeds['open_speed']), timeout=float(request.get('constraints', {}).get('timeout', 30.0)))
         return {'success': True, 'status': 'completed', 'selection': {'release_strategy': 'default_release'}, 'release_result': {'holding': False}, 'error': None}
+

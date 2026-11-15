@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from demo.error_messages import describe_error, error_category, error_from_exception
-from collision.simplatform_fcl import CollisionResult
+from collision.backends.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
 
@@ -243,6 +243,7 @@ def _write_command_planning_timing(output_dir, index, row):
         'skill_name': row.get('skill_name'),
         'success': row.get('success'),
         'target_resolution_timing_s': target_resolution_timing or {},
+        'vlm_request_s': row.get('vlm_request_s'),
         'wrist_observation': row.get('wrist_observation'),
         'pose_search_precheck': row.get('pose_search_precheck', []),
         'successful_distance_m': row.get('successful_distance_m'),
@@ -258,24 +259,51 @@ def _write_command_planning_timing(output_dir, index, row):
     return relative_path
 
 
+def _print_command_timing(row):
+    """Print the accumulated planning time for one command."""
+    phases = row.get('substeps')
+    candidates = phases if isinstance(phases, list) else [row]
+    planning_s = 0.0
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        timing = item.get('timing')
+        if not isinstance(timing, dict):
+            continue
+        value = timing.get('planning')
+        if isinstance(value, (int, float)):
+            planning_s += float(value)
+        attempt = timing.get('curobo_attempt')
+        if isinstance(attempt, (int, float)):
+            planning_s += float(attempt)
+        elif ((timing.get('failed_stage') == 'planning') or
+              (isinstance(item.get('error'), dict) and item['error'].get('failed_stage') == 'planning')) \
+                and isinstance(timing.get('total'), (int, float)):
+            planning_s += float(timing['total'])
+    parts = [f"timing|command={row.get('command_id', 'unknown')}",
+             f"planning={planning_s:.3f}s"]
+    print('|'.join(parts), flush=True)
+
+
 def _resolve_command_file(command_file):
     """Resolve a command path, including a bare commands.xxx.json filename."""
     command_path = Path(command_file).expanduser()
     if command_path.is_file():
         return command_path
     if not command_path.is_absolute() and command_path.parent == Path('.'):
-        organized = ROOT / 'demo' / 'task_commands' / command_path.stem / command_path.name
-        if organized.is_file():
-            return organized
+        for request_dir in sorted((ROOT / 'requests').glob(f'{command_path.stem}')):
+            organized = request_dir / command_path.name
+            if organized.is_file():
+                return organized
     return command_path
 
 
-def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='mujoco',
+def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         output_dir=None, viewer=False, collision_probe=False,
         object_library_url=None, start_object_library=False, show_collision_geometry=False):
     from libraries.eaik import load_urdf
     from collision import SimPlatformFCLCollisionChecker
-    from planning.time_parameterization import prepare_continuous_trajectory
+    from planning.trajectory.time_parameterization import prepare_continuous_trajectory
     from services.object_library import ObjectLibraryClient, LocalObjectLibraryService, ObjectLibraryError
     from atomic_skill.runner import TaskSkillExecutor
     from demo.interaction.object_library import ObjectLibraryGraspResolver, apply_ols_friction, scene_object_by_id, model_id_for
@@ -296,9 +324,19 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
     output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
     report = {'request_id': task.get('request_id'), 'success': False, 'steps': [],
               'collision_policy': 'planning_only'}
-    coordinator = SceneResourceCoordinator(catalog)
+    if scene_file is None:
+        scene_file = task.get('scene_file')
+    if scene_file:
+        scene_path = (Path(command_file).parent / scene_file).resolve()
+        coordinator = SceneResourceCoordinator(
+            scene_file=scene_path,
+            asset_root=ROOT / 'services' / 'object_library_server' / 'data',
+        )
+    else:
+        coordinator = SceneResourceCoordinator(catalog)
     backend = checker = None
-    from execution.blackboard import TargetBlackboard
+    curobo_action = None
+    from execution.runtime.state import TargetBlackboard
     blackboard = TargetBlackboard()
     sync = SceneStateSynchronizer(blackboard=blackboard)
     local_service = resolver = None
@@ -358,6 +396,12 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 model_id_for(scene_object_by_id(resources.scene, target))
                 object_commands.add(cid)
                 continue
+            if skill in {'grasp', 'release'}:
+                if 'link' in parameters or 'allow_contact' in parameters:
+                    raise ValueError(f'{skill} no longer accepts link or allow_contact')
+                grasp_options = parameters.get('grasp')
+                if isinstance(grasp_options, dict) and 'mode' in grasp_options:
+                    raise ValueError(f'{skill} no longer accepts grasp.mode')
             if skill in {'push', 'pull'} or parameters.get('link'):
                 if skill in {'pick', 'put'}:
                     raise ValueError('Mechanisms use move/grasp/push/pull/release, not pick/put retreat sequences')
@@ -474,7 +518,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             sync.sync(backend, kin, checker)
 
         def prepare_trajectory(trajectory, request, selection):
-            from demo.task_commands.converter import _deep_merge
+            from demo.interaction.command_converter import _deep_merge
             request = _deep_merge(resources.scene['move_defaults'], request)
             timed = prepare_continuous_trajectory(trajectory, request, collision_checker=checker,
                                                  timestep=float(backend.model.opt.timestep), kinematics=kin)
@@ -492,9 +536,51 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
         def execute_motion(request):
             # Select the concrete motion action from the request geometry.
             # Merge before action validation inserts its own missing defaults.
-            from demo.task_commands.converter import _deep_merge
+            from demo.interaction.command_converter import _deep_merge
             request = _deep_merge(resources.scene['move_defaults'], request)
             sync.sync(backend, kin, checker)
+            # Validation applies the same default later, but planner selection
+            # happens before action validation. Treat omitted values as auto so
+            # legacy requests also receive the CuRobo priority policy.
+            requested_planner = request.get('planning', {}).get('planner_type', 'auto')
+            planner_type = requested_planner
+            motion = request.get('motion', {})
+            # CuRobo has highest priority for every eligible joint move,
+            # including approach and retreat. Unsupported contact or geometric
+            # requests fall back to the existing planners below.
+            if (planner_type == 'auto'
+                    and motion.get('path_type', 'joint') in {'auto', 'joint'}
+                    and not request.get('target_body_name')):
+                planner_type = 'curobo'
+            if planner_type == 'curobo':
+                nonlocal curobo_action
+                if curobo_action is None:
+                    from planning.planners.curobo import CuroboPlanner
+                    from libraries.curobo.runtime_scene import runtime_snapshot
+                    robot_id = resources.robot_object.get('object_id_in_scene')
+                    curobo_action = CuroboPlanner(
+                        robot_runtime=backend,
+                        scene_provider=lambda: runtime_snapshot(backend),
+                        robot_object_id=robot_id,
+                        collision_checker=checker,
+                    )
+                curobo_result = curobo_action.execute(request)
+                if curobo_result.get('success') or requested_planner == 'curobo':
+                    return curobo_result
+                # Auto selection is a priority policy, not a hard dependency:
+                # if CuRobo cannot solve a scene, preserve the existing joint
+                # planner as the compatible fallback.
+                fallback_path = request.get('motion', {}).get('path_type', 'joint')
+                fallback_action = motion_actions.get(fallback_path, motion_actions['joint'])
+                fallback_result = fallback_action.execute(request)
+                if isinstance(fallback_result, dict):
+                    selection = fallback_result.setdefault('selection', {})
+                    selection['curobo_fallback'] = True
+                    selection['curobo_error'] = curobo_result.get('error')
+                    curobo_timing = curobo_result.get('timing', {})
+                    if isinstance(curobo_timing, dict) and isinstance(curobo_timing.get('total'), (int, float)):
+                        fallback_result.setdefault('timing', {})['curobo_attempt'] = float(curobo_timing['total'])
+                return fallback_result
             path_type = request.get("motion", {}).get("path_type", "joint")
             action = motion_actions.get(path_type, motion_actions["joint"])
             return action.execute(request)
@@ -556,7 +642,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                         result = orchestrator.execute(parameters)
                         row.update(result)
                         sync.sync(backend,kin,checker)
-                        from execution.grasp_verification import verify_command_grasp
+                        from execution.runtime.grasp_verification import verify_command_grasp
                         verify_command_grasp(backend, row)
                     elif command['skill_name'] in {'move_to', 'lift_up', 'put_down', 'shift_down', 'grasp', 'release', 'approach', 'retreat', 'pick', 'put', 'pour'}:
                         try:
@@ -594,6 +680,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                 print(step_message(command, success=bool(row.get('success')),
                                    error=display_error, stage=stage,
                                    target_name=active_target_name, status=display_status), flush=True)
+                _print_command_timing(row)
                 active_step_logged = True
                 if not row.get('success'):
                     report.update(final_state=backend.get_state(), frame_count=frame_index,
@@ -623,6 +710,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             print(step_message(active_command, success=False,
                                error=error,
                                stage=stage, target_name=active_target_name), flush=True)
+            _print_command_timing(row)
             active_step_logged = True
         elif active_command is None:
             initial_error = error_from_exception(exc, stage=stage)
@@ -634,6 +722,8 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
             exc, stage=stage, existing=row.get('error') if row else None))
     finally:
         try:
+            if curobo_action is not None:
+                curobo_action.close()
             if backend is not None and hasattr(backend, 'data'):
                 blackboard.observe(backend.get_state())
                 np.savez_compressed(output / 'final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
@@ -641,7 +731,7 @@ def run(command_file, *, catalog=ROOT / 'assets/catalog.json', backend_name='muj
                                     eq_data=backend.model.eq_data, time=float(backend.data.time))
             if backend is not None and 'resources' in locals() and (output / 'frames.jsonl').exists():
                 try:
-                    from execution.trajectory_export import write_traj_from_jsonl
+                    from execution.output.trajectory_export import write_traj_from_jsonl
                     trajectory_scene = resources.scene
                     # The runtime scene fuses the attached gripper into the
                     # robot for MuJoCo. WebEditor still has a separate
@@ -686,8 +776,9 @@ def main():
         sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--commands', type=Path,
-                        default=ROOT / 'demo/task_commands/commands.001/commands.001.json')
-    parser.add_argument('--catalog', type=Path, default=ROOT / 'assets/catalog.json')
+                        default=ROOT / 'requests/commands.001/commands.001.json')
+    parser.add_argument('--catalog', type=Path, default=None,
+                        help='Legacy scene catalog; new requests use scene_file in the task')
     parser.add_argument('--backend', default='mujoco')
     parser.add_argument('--library', type=Path, default=DEFAULT_SIMPLATFORM_LIBRARY,
                         help='SimPlatform native DLL (default: libraries/simplatform/bin/sim_platform_c.dll)')
@@ -703,7 +794,7 @@ def main():
     args.commands = _resolve_command_file(args.commands)
     if not args.commands.is_file():
         parser.error(f'commands file not found: {args.commands}')
-    if not args.catalog.is_file():
+    if args.catalog is not None and not args.catalog.is_file():
         parser.error(f'catalog file not found: {args.catalog}')
     library = args.library.expanduser().resolve()
     if not library.is_file():

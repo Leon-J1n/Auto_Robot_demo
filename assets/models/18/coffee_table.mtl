@@ -1,8 +1,0 @@
-# Appearance authority: OBJ/MTL. URDF pure colors match Kd.
-
-newmtl wood
-# Matches coffee_table.png, the asset's own colour chip; the exported Kd below
-# (0.831 0.655 0.424) is darker than the source pack's reference render.
-Ka 0.933333 0.800000 0.556863
-Kd 0.933333 0.800000 0.556863
-Ks 0.330000 0.330000 0.330000

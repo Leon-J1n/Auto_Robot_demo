@@ -8,14 +8,14 @@ from contextlib import contextmanager
 import pickle
 from time import perf_counter
 
-from collision.simplatform_fcl import SimPlatformFCLCollisionChecker, CollisionResult
+from collision.backends.simplatform_fcl import SimPlatformFCLCollisionChecker, CollisionResult
 from execution.resources import component
 
 
 class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
     def _path_validation_state(self):
         """Exact live scene/model/policy guard, never a rounded joint key."""
-        from planning.prepared_trajectory import planning_state_signature
+        from planning.trajectory.prepared import planning_state_signature
         b = self.backend
         c = b.gripper_controller
         policy = (
@@ -580,3 +580,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         while len(self._query_cache) > 2048:
             self._query_cache.popitem(last=False)
         return deepcopy(result)
+
+
+
+

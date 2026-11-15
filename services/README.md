@@ -19,7 +19,7 @@
 
 ## ID 与数据流
 
-测试场景为 `assets/scenes/ols_grasp_test.json`，在 `assets/catalog.json` 注册；保留原来的 move → home 测试场景。
+测试场景为 `requests/<request>/ols_grasp_test.json`，在 `requests/<request>/commands.<id>.json` 注册；保留原来的 move → home 测试场景。
 
 ```text
 commands: move.parameters.target = 101

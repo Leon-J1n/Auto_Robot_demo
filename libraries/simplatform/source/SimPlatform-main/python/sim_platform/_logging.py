@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import sys
 import logging
+from collections import deque
+from pathlib import Path
 from threading import Lock
 
 from bq.log import log as _bq_log
@@ -11,6 +13,8 @@ from bq.defs.log_level import log_level as _bq_level
 _LOG = None
 _SERVICE = "python_sdk"
 _LOCK = Lock()
+MAX_RECENT_LOGS = 30
+_RECENT_LOGS = deque(maxlen=MAX_RECENT_LOGS)
 _LEVELS = (_bq_level.verbose, _bq_level.debug, _bq_level.info,
            _bq_level.warning, _bq_level.error, _bq_level.fatal)
 _PYTHON_LEVELS = (5, logging.DEBUG, logging.INFO, logging.WARNING,
@@ -19,6 +23,7 @@ _PYTHON_LEVELS = (5, logging.DEBUG, logging.INFO, logging.WARNING,
 
 def _create_log(service: str):
     service = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in service)
+    Path("logs").mkdir(parents=True, exist_ok=True)
     config = "\n".join((
         "appenders_config.binary.type=compressed_file",
         "appenders_config.binary.levels=[all]",
@@ -50,8 +55,15 @@ def log(level: int, category: str, message: str) -> None:
     with _LOCK:
         logger = _LOG if _LOG is not None else _create_log(_SERVICE)
         globals()["_LOG"] = logger
+        _RECENT_LOGS.append((level, category, message))
         (_LOG.verbose, _LOG.debug, _LOG.info, _LOG.warning, _LOG.error, _LOG.fatal)[level](
             "{}: {}", category, message)
+
+
+def recent_logs() -> list[tuple[int, str, str]]:
+    """Return the most recent log records, oldest first, capped at 30 entries."""
+    with _LOCK:
+        return list(_RECENT_LOGS)
 
 
 def verbose(category: str, message: str) -> None:

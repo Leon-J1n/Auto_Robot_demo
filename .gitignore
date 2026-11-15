@@ -18,3 +18,9 @@ tests/generated_config_*.json
 config/vlm.json
 *.pyc
 __pycache__/
+collision/**/__pycache__/
+
+# Local extracted SDK/build and runtime output
+._simplatform_source/
+execution/output/
+libraries/simplatform_native/build_rebuild/

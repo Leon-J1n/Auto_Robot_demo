@@ -683,6 +683,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         if target.get('link'):
             self.blackboard.require_pose(anchor_frame)
         grasp = (self.blackboard.grasp_pose(name, 0) if point_type == 'grasp' else None)
+        vlm_request_s = None
         if grasp is None:
             if point_type == 'grasp':
                 grasp = self.blackboard.visual_grasp(name)
@@ -730,6 +731,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                     estimate = self.estimator.estimate_frame(frame,
                         point_type='vertical' if handle else point_type,
                         target=target.get('target_description', name.lower()))
+                vlm_request_s = estimate.get('vlm_request_s')
             except Exception as exc:
                 if point_type != 'place' or vertical_place:
                     raise
@@ -860,4 +862,6 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             'placement_height_search_pending': placement_pending,
             'depth_search_move_defaults': resources.scene.get('move_defaults', {}),
             'visual_estimate': evidence,
+            **({'vlm_request_s': float(vlm_request_s)}
+               if vlm_request_s is not None else {}),
         }

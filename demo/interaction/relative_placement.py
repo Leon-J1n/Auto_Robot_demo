@@ -6,7 +6,7 @@ from scipy.spatial.transform import Rotation
 
 from demo.interaction.object_library import GraspResolutionError, rigid_pose
 from demo.interaction.placement_fallback import MAX_CENTER_POINTS
-from demo.task_commands.converter import END_EFFECTOR_DIRECTIONS
+from demo.interaction.command_converter import END_EFFECTOR_DIRECTIONS
 from sensors.camera import CameraIntrinsics
 
 
@@ -127,3 +127,4 @@ def random_region_estimates(frame, region, rng):
             'placement_center_fallback': {'used': True, 'region': 'requested_relative_region',
                                           'max_points': MAX_CENTER_POINTS, 'sample_index': len(estimates)}})
     return estimates
+

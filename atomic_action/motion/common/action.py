@@ -16,8 +16,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from collision import SimPlatformFCLCollisionChecker
 from kinematics import IKError, KinematicsService
-from planning.prepared_trajectory import PreparedTrajectory, planning_state_signature
-from planning.arm_posture import (ArmPosturePreference, configuration_cost,
+from planning.trajectory.prepared import PreparedTrajectory, planning_state_signature
+from planning.constraints.arm_posture import (ArmPosturePreference, configuration_cost,
                                   joint_motion_balance_penalty, preference_for)
 from planning import CollisionFreePlanner, CollisionPlanningError, DirectPlanner, PlanningError
 from atomic_action.motion.common.selector import StrategySelectionError, StrategySelector
@@ -517,3 +517,7 @@ def run(request: Mapping[str, Any], *, scene_path: str | Path = DEFAULT_SCENE) -
     """Convenience entrypoint used by agents and simple scripts."""
     return _MoveExecutor(scene_path=scene_path).execute(request)
 # Backward-compatible aliases for callers still using the former Skill names.
+
+
+
+

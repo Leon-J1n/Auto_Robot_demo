@@ -12,6 +12,21 @@
   "trajectory": {
     "fps": 60,
     "pause_seconds": 1.0
+  },
+  "planning": {
+    "collision_validation": {
+      "resolution_rad": 0.04
+    },
+    "collision_free": {
+      "rrt_resolution_rad": 0.03
+    }
+  },
+  "gripper": {
+    "open_speed": 0.8,
+    "close_speed": 0.8,
+    "grasp_force": 20.0,
+    "hold_force": 10.0,
+    "maximum_force": 40.0
   }
 }
 ```
@@ -24,6 +39,12 @@
 - `pause_seconds`：每段第一帧与第二个原始采样帧之间额外插入的停顿；设为 `0` 关闭。
   仅影响导出回放，不增加仿真执行时间。停顿换算为最近的整数帧，半帧向上取整；
   单帧段不额外停顿。setup 段如果有多帧，也保留相同的停顿规则。
+- `planning.collision_validation.resolution_rad`：普通路径和最终轨迹复核的默认关节采样分辨率。
+- `planning.collision_free.rrt_resolution_rad`：RRT-Connect 扩展边的默认碰撞采样分辨率，单位 rad。
+- `gripper.open_speed` / `gripper.close_speed`：夹爪原子张开和闭合的默认速度；抓取或释放请求中的同名参数可以覆盖。
+- `gripper.grasp_force`：默认闭合抓取力，单位 N。
+- `gripper.hold_force`：默认保持夹持力，单位 N。
+- `gripper.maximum_force`：默认允许的最大闭合接触力，单位 N。
 
 速度、加速度比例限制的是运动上限，并不保证整个运动过程都达到上限。
 

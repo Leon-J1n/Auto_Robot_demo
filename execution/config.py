@@ -7,7 +7,13 @@ from pathlib import Path
 
 GLOBAL_CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'global.json'
 _KEYS = {'motion': {'velocity_scale', 'acceleration_scale'},
-         'trajectory': {'fps', 'pause_seconds'}}
+         'trajectory': {'fps', 'pause_seconds'},
+         'planning': {'collision_validation', 'collision_free'},
+         'gripper': {'open_speed', 'close_speed', 'grasp_force', 'hold_force', 'maximum_force'}}
+_PLANNING_KEYS = {
+    'collision_validation': {'resolution_rad'},
+    'collision_free': {'rrt_resolution_rad'},
+}
 
 
 def validate_config(config, *, partial=False):
@@ -19,6 +25,16 @@ def validate_config(config, *, partial=False):
         values = config.get(section)
         if not isinstance(values, dict) or set(values) - keys or (not partial and set(values) != keys):
             raise ValueError(f'Invalid {section} config keys; expected {sorted(keys)}')
+        if section == 'planning':
+            for key, nested in values.items():
+                expected = _PLANNING_KEYS[key]
+                if not isinstance(nested, dict) or set(nested) - expected or (not partial and set(nested) != expected):
+                    raise ValueError(f'Invalid planning.{key} config keys; expected {sorted(expected)}')
+                for nested_key, value in nested.items():
+                    if (isinstance(value, bool) or not isinstance(value, (float, int))
+                            or not math.isfinite(value) or value <= 0):
+                        raise ValueError(f'planning.{key}.{nested_key} must be finite and positive')
+            continue
         for key, value in values.items():
             if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value):
                 raise ValueError(f'{section}.{key} must be finite numeric data')
@@ -28,6 +44,8 @@ def validate_config(config, *, partial=False):
                 raise ValueError('trajectory.fps must be a positive integer')
             if key == 'pause_seconds' and value < 0:
                 raise ValueError('trajectory.pause_seconds must be nonnegative')
+            if section == 'gripper' and value <= 0:
+                raise ValueError(f'gripper.{key} must be positive')
     return deepcopy(config)
 
 
@@ -54,4 +72,23 @@ def motion_settings(constraints=None):
     if set(values) < _KEYS['motion']:
         values = {**load_global_config()['motion'], **values}
     validate_config({'motion': values}, partial=True)
+    return values
+
+
+def planning_settings(overrides=None):
+    """Return global planning defaults with optional nested overrides."""
+    values = deepcopy(load_global_config()['planning'])
+    for section, nested in (overrides or {}).items():
+        if section in values and isinstance(nested, dict):
+            values[section].update(nested)
+    validate_config({'planning': values}, partial=True)
+    return values
+
+
+def gripper_settings(overrides=None):
+    """Return global gripper defaults with optional request-level overrides."""
+    allowed = _KEYS['gripper']
+    values = {**load_global_config()['gripper'],
+              **{key: value for key, value in (overrides or {}).items() if key in allowed}}
+    validate_config({'gripper': values}, partial=True)
     return values

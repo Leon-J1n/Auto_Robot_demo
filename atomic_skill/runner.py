@@ -7,10 +7,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from demo.interaction.carrying_safety import payload_safety_distance, split_carrying_safety
-from demo.task_commands.converter import SkillCommandConverter, _deep_merge
+from demo.interaction.command_converter import SkillCommandConverter, _deep_merge
 from demo.interaction.object_library import scene_object_by_id
-from atomic_skill.grasp import execute_grasp
-from atomic_skill.release import execute_release
 from atomic_action.motion.common.interaction import DemoInteractionMove, execute_grasp_pose_move, planning_failed_without_motion, pose_request
 from atomic_skill.move_to import MoveToSkill
 from atomic_skill.approach import PoseSearchExecutor
@@ -75,7 +73,7 @@ class TaskSkillExecutor:
                                .get('constraints', {}).get('safety_distance', .003))
                 capture(margin)
             result = self._execute_command(command, index, state, row)
-        from execution.grasp_verification import verify_command_grasp
+        from execution.runtime.grasp_verification import verify_command_grasp
         return verify_command_grasp(self.backend, result)
 
     def _execute_command(self, command, index, state, row):
@@ -160,7 +158,7 @@ class TaskSkillExecutor:
                 valid_goals.append((float(np.linalg.norm(delta)), candidate_q))
             if not valid_goals:
                 raise ValueError('No collision-free IK solution exists for the relative move_to target')
-            from planning.arm_posture import configuration_cost
+            from planning.constraints.arm_posture import configuration_cost
             valid_goals.sort(key=lambda item: configuration_cost(kin, item[1], current_q, norm=2))
             selected_joint_goal = valid_goals[0][1]
             path_type = parameters.get('planning_method', 'joint')
@@ -324,9 +322,11 @@ class TaskSkillExecutor:
                 self.stage = 'grasp'
                 self.report['active_substep'] = 'grasp'
                 backend.set_status(f"{command['command_id']} | Closing and confirming grasp")
+                from execution.config import gripper_settings
+                gripper_defaults = gripper_settings(parameters)
                 grasp_request = {
                     'grasp': {'mode': 'physical'},
-                    'strategy_params': {'hold_force': parameters.get('hold_force', 10.0)},
+                    'strategy_params': {'hold_force': gripper_defaults['hold_force']},
                 }
                 carrying_distance = 0.0
                 previous_grasp_goal = getattr(backend, 'grasp_approach_goal', None)
@@ -529,7 +529,7 @@ class TaskSkillExecutor:
         return row
 
     def _execute_closure(self, command, row):
-        """Execute direct grasp/release commands after resolving scene names."""
+        """Execute direct grasp/release commands through the atomic actions."""
         skill = command['skill_name']
         parameters = command['parameters']
         self.stage = skill
@@ -537,10 +537,18 @@ class TaskSkillExecutor:
         self.backend.set_frame_callback(
             lambda frame_state: self.write_frame(command['command_id'], skill, frame_state))
         if skill == 'grasp':
-            result, carrying_distance = execute_grasp(
-                self.resources, parameters, self.grasper, self.backend, self.checker)
+            request = deepcopy(parameters)
+            request.pop('target', None)
+            request.pop('allow_contact', None)
+            request, carrying_distance = split_carrying_safety(request)
+            result = self.grasper.execute(request)
+            result['collision_policy'] = 'planning_only'
+            result['allowed_closure_contacts'] = []
         else:
-            result = execute_release(self.resources, parameters, self.releaser)
+            request = deepcopy(parameters)
+            request.pop('target', None)
+            request.pop('allow_contact', None)
+            result = self.releaser.execute(request)
         row.update(result)
         if result.get('success') and skill == 'release':
             # Let released dynamic objects settle in the live physics state
@@ -568,6 +576,9 @@ class TaskSkillExecutor:
         if not result.get('success'):
             self.stage = result.get('error', {}).get('failed_stage', skill)
         return row
+
+
+
 
 
 

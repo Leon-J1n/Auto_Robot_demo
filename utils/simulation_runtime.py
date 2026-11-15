@@ -268,7 +268,7 @@ class SceneRobotRuntime:
         tolerance = float(trajectory.get("execution_tolerance", 0.002))
         per_waypoint_steps = int(trajectory.get("steps_per_waypoint", 500))
         frames: list[dict[str, Any]] = []
-        from control.gripper_controller import MujocoGripperController
+        from execution.backends.mujoco.actuator_gripper import MujocoGripperController
         gripper_ids = [mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name)
                        for name in MujocoGripperController.driver_joint_names]
         gripper_addresses = [int(self.model.jnt_qposadr[j]) for j in gripper_ids if j >= 0]
@@ -324,3 +324,4 @@ def _resample_for_playback(waypoints: np.ndarray, duration: float, fps: float) -
     for joint_index in range(waypoints.shape[1]):
         result[:, joint_index] = np.interp(samples, cumulative, waypoints[:, joint_index])
     return result
+

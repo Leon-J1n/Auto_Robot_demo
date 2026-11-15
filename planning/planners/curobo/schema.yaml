@@ -1,0 +1,25 @@
+name: CuroboPlanner
+version: "1.0"
+description: Optional official cuRobo free-space planner, using the project's Move request and trajectory interfaces.
+input:
+  scene: {type: object, description: Complete current scene JSON; supplied by the runtime when omitted.}
+  target:
+    type: object
+    required: true
+    properties:
+      type: {type: string, enum: [pose, joint, named_state]}
+      frame: {type: string, enum: [base, world], default: base}
+      position: {type: object, description: "x/y/z in metres"}
+      orientation: {type: object, description: "Quaternion x/y/z/w, or roll/pitch/yaw in degrees, matching existing Move."}
+      joint_positions: {type: array, description: Values in scene RobotDriver.joint_sequence order.}
+  motion: {type: object, description: "path_type auto/joint only; linear/circular and orientation path constraints are rejected."}
+  planning: {type: object, description: "Explicit planner_type=curobo; max_attempts controls the official retry limit."}
+  constraints: {type: object, description: "Existing Move limits; collision checks remain enabled. Speed scales dilate time without changing path."}
+output:
+  success: {type: boolean}
+  status: {type: string, enum: [completed, failed, timeout]}
+  trajectory: {type: object, description: "joint_names, waypoints, time_parameterized_waypoints, timestamps, velocities, accelerations, duration, diagnostics"}
+  execution_result: {type: object, nullable: true}
+  planned_only: {type: boolean}
+  timing: {type: object}
+  error: {type: object, nullable: true}

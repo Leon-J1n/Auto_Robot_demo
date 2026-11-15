@@ -6,6 +6,7 @@ import base64
 import io
 import json
 import os
+from time import perf_counter
 from pathlib import Path
 from typing import Any
 
@@ -41,10 +42,12 @@ class VLMPointEstimator:
         target: str,
         instruction: str | None = None,
     ) -> dict[str, Any]:
+        request_times = []
         try:
             result = self.estimate(
                 frame.rgb, frame.depth, frame.intrinsics, frame.camera_pose,
                 point_type=point_type, target=target, instruction=instruction)
+            request_times.append(float(result.get('vlm_request_s', 0.0)))
         except InvalidPointDepth as exc:
             exc.details['details'].update(camera_id=frame.camera_id, sequence=frame.sequence)
             raise
@@ -59,11 +62,13 @@ class VLMPointEstimator:
                 result = self.estimate(
                     frame.rgb, frame.depth, frame.intrinsics, frame.camera_pose,
                     point_type=point_type, target=target, instruction=retry_instruction)
+                request_times.append(float(result.get('vlm_request_s', 0.0)))
             except ValueError as exc:
                 # A bad retry must not discard the first valid grasp point.
                 result.update(axis_status='invalid', axis_reason=f'{reason}；重试失败：{exc}')
             result.update(axis_retry_count=1, axis_initial_failure=reason)
-        result.update(camera_id=frame.camera_id, timestamp=frame.timestamp, sequence=frame.sequence)
+        result.update(camera_id=frame.camera_id, timestamp=frame.timestamp, sequence=frame.sequence,
+                      vlm_request_s=sum(request_times), vlm_request_count=len(request_times))
         return result
 
     def estimate(
@@ -110,6 +115,7 @@ class VLMPointEstimator:
         if instruction:
             prompt += f"补充要求：{instruction.strip()}\n"
         prompt += "请严格按照输出结构返回结果，只返回 JSON，不要 Markdown 或其他说明。"
+        request_started = perf_counter()
         try:
             response = self._get_client().responses.create(
                 model=self.model,
@@ -119,6 +125,7 @@ class VLMPointEstimator:
                 ]}],
             )
         except Exception as exc:
+            request_elapsed = perf_counter() - request_started
             exception_name = type(exc).__name__.lower()
             timed_out = isinstance(exc, TimeoutError) or 'timeout' in exception_name
             response_failed = any(marker in exception_name for marker in ('apistatus', 'ratelimit'))
@@ -130,6 +137,7 @@ class VLMPointEstimator:
                             'VLM_RESPONSE_FAILED' if response_failed else 'VLM_REQUEST_FAILED'),
                 error_message=str(exc) or type(exc).__name__,
                 failed_stage='vlm_request',
+                vlm_request_s=request_elapsed,
             )
             exc.details = payload
             raise
@@ -167,6 +175,7 @@ class VLMPointEstimator:
             "world_point": {"x": float(world_point[0]), "y": float(world_point[1]), "z": float(world_point[2])},
             "frame": "world",
             "confidence": point.get("confidence"),
+            "vlm_request_s": perf_counter() - request_started,
         }
         if point_type in {'grasp', 'handle'}:
             from .axis import estimate_axis

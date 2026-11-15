@@ -8,7 +8,8 @@ import numpy as np
 from kinematics import IKError
 
 from ..pose_utils import effective_orientation
-from planning.errors import PlanningError
+from planning.common.errors import PlanningError
+from planning.constraints.collision_sampling import collision_sampling_settings
 
 
 class LinearMove:
@@ -36,6 +37,7 @@ class LinearMove:
         step = float(request["strategy_params"].get("cartesian_step", 0.02))
         count = max(2, int(np.ceil(np.linalg.norm(goal_position - start_position) / step)) + 1)
         params = request["strategy_params"]
+        collision_resolution, _ = collision_sampling_settings(request)
         seed_value = params.get("ik_seed")
         seed = np.asarray(start_q if seed_value is None else seed_value, dtype=float)
         if seed.shape != (6,) or not np.all(np.isfinite(seed)):
@@ -69,7 +71,8 @@ class LinearMove:
             index = evaluated_count
             evaluated_count += 1
             _, candidate, rejection, colliding = self._evaluate_branch(
-                index, branch_seed, poses, start_q, request, method, cache=cache,
+                index, branch_seed, poses, start_q, request, method,
+                collision_resolution=collision_resolution, cache=cache,
             )
             if rejection is not None:
                 rejected.append(rejection)
@@ -97,7 +100,7 @@ class LinearMove:
             alternatives = []
             for physical_branch in physical_branches:
                 alternatives.extend(self.kinematics.equivalent_configurations(physical_branch, start_q, max_variants=8))
-            from planning.arm_posture import configuration_cost
+            from planning.constraints.arm_posture import configuration_cost
             alternatives.sort(key=lambda q: configuration_cost(self.kinematics, q, start_q, norm=2))
             alternatives = alternatives[:32]
             if not alternatives and not branch_seeds:
@@ -144,7 +147,8 @@ class LinearMove:
             }},
         }
 
-    def _evaluate_branch(self, branch_index, branch_seed, poses, start_q, request, method, *, cache=None):
+    def _evaluate_branch(self, branch_index, branch_seed, poses, start_q, request, method, *,
+                         collision_resolution, cache=None):
         """Evaluate one IK branch using thread-local MuJoCo workspaces."""
         kinematics, collision_checker = self.kinematics, self.collision_checker
         joints = [start_q]
@@ -190,7 +194,7 @@ class LinearMove:
                         collision = cache["collision"][key]
                     else:
                         collision = collision_checker.check_path(
-                            [previous_q, next_q], resolution=0.04,
+                            [previous_q, next_q], resolution=collision_resolution,
                             safety_distance=float(request["constraints"].get("safety_distance", 0.0)),
                         )
                         cache["collision"][key] = collision
@@ -203,7 +207,7 @@ class LinearMove:
         points = np.asarray(joints)
         deltas = np.diff(points, axis=0)
         score = float(np.sum(np.linalg.norm(deltas, axis=1)) + 2.0 * np.max(np.abs(deltas)))
-        from planning.arm_posture import preference_for
+        from planning.constraints.arm_posture import preference_for
         posture = preference_for(kinematics)
         if posture is not None:
             score += posture.path_penalty(points)
@@ -265,4 +269,5 @@ def _orientation_to_wxyz(orientation: Mapping[str, Any]) -> np.ndarray:
     if not np.all(np.isfinite(quaternion)) or np.linalg.norm(quaternion) < 1e-12:
         raise ValueError("Target orientation must define a finite nonzero quaternion.")
     return quaternion / np.linalg.norm(quaternion)
+
 

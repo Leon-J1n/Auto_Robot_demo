@@ -1,6 +1,6 @@
 # Target blackboard
 
-`execution.blackboard.TargetBlackboard` is shared by the demo's target resolver
+`execution.runtime.state.TargetBlackboard` is shared by the demo's target resolver
 and scene synchronizer. One run owns one board; a new run starts empty. Saved
 snapshots are diagnostic records, not automatically restored physical state.
 
@@ -64,3 +64,4 @@ Run tests with:
 ```powershell
 .\.venv\Scripts\python.exe -B -m unittest tests.test_target_blackboard tests.test_blackboard_command_coverage
 ```
+

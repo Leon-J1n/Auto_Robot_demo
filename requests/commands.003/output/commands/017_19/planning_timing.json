@@ -1,0 +1,1235 @@
+{
+  "command_id": "19",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 4.990105299977586,
+    "candidate_selection": 0.8378918000962585
+  },
+  "wrist_observation": {
+    "status": "camera_aligned",
+    "rejected": [],
+    "target_world": [
+      -0.019932651293247856,
+      -0.2836047152835113,
+      0.6154145720157227
+    ],
+    "translation_world_m": [
+      -0.044999957831847154,
+      4.437831348180868e-05,
+      3.250079455563437e-09
+    ],
+    "translation_distance_m": 0.04499997971447031,
+    "optical_depth_m": 0.23735121790262545,
+    "world_from_camera": [
+      [
+        0.000986185188588763,
+        -0.9999995137192647,
+        7.222399987233044e-08,
+        -0.019932634150793535
+      ],
+      [
+        0.9999995137192673,
+        0.0009861851885887825,
+        -7.122533698988417e-11,
+        -0.2836047153004167
+      ],
+      [
+        -9.50315739688176e-16,
+        7.222403495705337e-08,
+        0.999999999999996,
+        0.8527657899183472
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "pose_search_precheck": [
+    {
+      "distance_m": 0.1,
+      "elapsed_s": 0.0017325000371783972,
+      "status": "analytic_solution"
+    }
+  ],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "grasp_depth_attempts": [
+      {
+        "grasp_depth_offset_m": 0.03,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.03836951864410609,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.007582699880003929
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.03836951864410609,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.025,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.033369518710573476,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.007574399933218956
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.033369518710573476,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.02,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.02836951877704108,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.007334799971431494
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.02836951877704108,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.015,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.023369518843508685,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.007282700156792998
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.023369518843508685,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.01,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.018369518909976068,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.007212000200524926
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.018369518909976068,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.005,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.013369518976443673,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.0064662001095712185
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.013369518976443673,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "grasp_depth_offset_m": 0.0,
+        "success": false,
+        "gripper_pose_precheck": [
+          {
+            "status": "rejected",
+            "contacts": [
+              {
+                "geom1": "robotiq_2f85_right_pad",
+                "geom2": "table_floor",
+                "distance": -0.008369519042911056,
+                "self_collision": false
+              }
+            ],
+            "elapsed_s": 0.005888700019568205
+          }
+        ],
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "Gripper geometry collides at this grasp depth",
+          "rejected": [
+            {
+              "reason": "gripper_pose_collision",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.008369519042911056,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "grasp_floor_fallback": {
+      "used": true,
+      "success": true,
+      "candidates": [
+        {
+          "grasp_index": 0,
+          "world_from_object": [
+            [
+              0.007537197055332845,
+              -0.9999714330527527,
+              -0.0005689806444388151,
+              -0.008031487626822436
+            ],
+            [
+              0.9999713049830798,
+              0.0075376269489640935,
+              -0.000757225471689933,
+              -0.2853581249125054
+            ],
+            [
+              0.0007614926039087897,
+              -0.0005632569599341511,
+              0.9999995514352052,
+              0.6071428521192058
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_from_grasp": [
+            [
+              0.9999989045068342,
+              -0.0014801507693014524,
+              -1.1782687283605692e-05,
+              0.014006382990261607
+            ],
+            [
+              -0.001480148833626774,
+              -0.9999988913550146,
+              0.0001626289384338631,
+              -0.2856221538078226
+            ],
+            [
+              -1.2023389569121868e-05,
+              -0.00016261132014413262,
+              -0.999999986706498,
+              0.6269738859551981
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_from_control": [
+            [
+              -0.0014801539747191636,
+              -1.1854871578941186e-05,
+              0.9999989045012366,
+              0.014009394503984755
+            ],
+            [
+              -0.9999988913459128,
+              0.0001626558402038991,
+              -0.0014801520269810704,
+              -0.2856637542839371
+            ],
+            [
+              -0.0001626381150024301,
+              -0.9999999867012697,
+              -1.2095614124378228e-05,
+              0.8827738663199847
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "pose_source": "vlm_rgbd_grasp",
+          "grasp_depth_offset_m": -0.011369519042911058,
+          "yaw_offset_rad": 0.0,
+          "floor_fallback": {
+            "used": true,
+            "table_height_m": 0.6000000238418585,
+            "table_floor_z_m": 0.6170000238418585,
+            "table_floor_offset_m": 0.017,
+            "minimum_open_clearance_m": 0.003,
+            "minimum_table_clearance_m": 0.02,
+            "gripper_configuration": "preclosure_open",
+            "open_width_m": 0.08,
+            "vertical_shift_m": 0.011369519042911058,
+            "original_grasp_z_m": 0.615604366912287,
+            "adjusted_grasp_z_m": 0.6269738859551981,
+            "outside_search_range": true
+          }
+        }
+      ],
+      "selected": {
+        "used": true,
+        "table_height_m": 0.6000000238418585,
+        "table_floor_z_m": 0.6170000238418585,
+        "table_floor_offset_m": 0.017,
+        "minimum_open_clearance_m": 0.003,
+        "minimum_table_clearance_m": 0.02,
+        "gripper_configuration": "preclosure_open",
+        "open_width_m": 0.08,
+        "vertical_shift_m": 0.011369519042911058,
+        "original_grasp_z_m": 0.615604366912287,
+        "adjusted_grasp_z_m": 0.6269738859551981,
+        "outside_search_range": true
+      },
+      "rejected": []
+    },
+    "visual_estimate": {
+      "point_type": "grasp",
+      "pixel": {
+        "x": 316,
+        "y": 299
+      },
+      "normalized": {
+        "x": 0.5,
+        "y": 0.65
+      },
+      "depth_m": 0.23718923330307007,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": 0.014006382990261607,
+        "y": -0.2856221538078226,
+        "z": 0.615604366912287
+      },
+      "frame": "world",
+      "confidence": 0.85,
+      "is_elongated": true,
+      "axis_points": [
+        {
+          "normalized": {
+            "x": 0.4,
+            "y": 0.5
+          },
+          "pixel": {
+            "x": 315,
+            "y": 130
+          },
+          "depth_m": 0.9751266837120056,
+          "depth_sampling": {
+            "method": "pixel",
+            "valid_samples": 1
+          },
+          "world_point": {
+            "x": 0.010556056000033379,
+            "y": -0.2836322537555104,
+            "z": 0.6150836726449704
+          }
+        },
+        {
+          "normalized": {
+            "x": 0.8,
+            "y": 0.5
+          },
+          "pixel": {
+            "x": 340,
+            "y": 130
+          },
+          "depth_m": 0.9744527339935303,
+          "depth_sampling": {
+            "method": "pixel",
+            "valid_samples": 1
+          },
+          "world_point": {
+            "x": -0.04805546349923541,
+            "y": -0.28357445210284776,
+            "z": 0.6157782111979859
+          }
+        }
+      ],
+      "axis_status": "valid",
+      "axis_reason": null,
+      "long_axis_world": [
+        0.9999995137224296,
+        -0.0009861819834868554,
+        -0.0
+      ],
+      "axis_length_m": 0.05861154800074995,
+      "camera_id": "wrist_camera",
+      "timestamp": 31.839999999993232,
+      "sequence": 2,
+      "visual_estimation_s": 4.982790700159967,
+      "crop_origin_pixel": {
+        "x": 294,
+        "y": 155
+      },
+      "long_axis_aligned": true,
+      "orientation_source": "vlm_rgbd_axis",
+      "depth_selected": true,
+      "grasp_depth_candidates_m": [
+        0.03,
+        0.025,
+        0.02,
+        0.015,
+        0.01,
+        0.005,
+        0.0
+      ],
+      "depth_search_enabled": true,
+      "target_point_world": {
+        "x": 0.014006382990261607,
+        "y": -0.2856221538078226,
+        "z": 0.6269738859551981
+      },
+      "grasp_point_world": {
+        "x": 0.014006382990261607,
+        "y": -0.2856221538078226,
+        "z": 0.6269738859551981
+      },
+      "yaw_selected": true,
+      "grasp_depth_offset_m": -0.011369519042911058,
+      "selected_yaw_offset_rad": 0.0,
+      "grasp_rotation_world": [
+        [
+          0.9999989045068342,
+          -0.0014801507693014524,
+          -1.1782687283605692e-05
+        ],
+        [
+          -0.001480148833626774,
+          -0.9999988913550146,
+          0.0001626289384338631
+        ],
+        [
+          -1.2023389569121868e-05,
+          -0.00016261132014413262,
+          -0.999999986706498
+        ]
+      ],
+      "surface_normal_world": [
+        1.1782687283605692e-05,
+        -0.0001626289384338631,
+        0.999999986706498
+      ],
+      "wrist_refinement": {
+        "camera_id": "wrist_camera",
+        "timestamp": 31.839999999993232,
+        "sequence": 2,
+        "coarse_surface_world": [
+          -0.01993455647874392,
+          -0.2836336998685656,
+          0.6154156928972393
+        ],
+        "refined_surface_world": [
+          0.014006382990261607,
+          -0.2856221538078226,
+          0.615604366912287
+        ],
+        "correction_world_m": [
+          0.033940939469005525,
+          -0.001988453939256951,
+          0.00018867401504774062
+        ],
+        "correction_distance_m": 0.03399966057170568,
+        "image_region": "target_aabb_crop",
+        "coarse_point_in_full_image": {
+          "in_front": true,
+          "optical_depth_m": 0.23737826076423588,
+          "pixel": {
+            "x": 319.4403914191588,
+            "y": 239.5133171543745
+          },
+          "in_frame": true,
+          "distance_from_principal_point_px": 0.061078060795479276
+        },
+        "crop_origin_pixel": {
+          "x": 294,
+          "y": 155
+        },
+        "status": "validated",
+        "timing_s": {
+          "capture": 0.007150700083002448,
+          "vlm": 7.357301499927416,
+          "validation": 0.7670921001117676
+        },
+        "elapsed_s": 8.13162300013937
+      },
+      "grasp_depth_attempts": [
+        {
+          "grasp_depth_offset_m": 0.03,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.03836951864410609,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.007582699880003929
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.03836951864410609,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.025,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.033369518710573476,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.007574399933218956
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.033369518710573476,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.02,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.02836951877704108,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.007334799971431494
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.02836951877704108,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.015,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.023369518843508685,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.007282700156792998
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.023369518843508685,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.01,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.018369518909976068,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.007212000200524926
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.018369518909976068,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.005,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.013369518976443673,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.0064662001095712185
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.013369518976443673,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "grasp_depth_offset_m": 0.0,
+          "success": false,
+          "gripper_pose_precheck": [
+            {
+              "status": "rejected",
+              "contacts": [
+                {
+                  "geom1": "robotiq_2f85_right_pad",
+                  "geom2": "table_floor",
+                  "distance": -0.008369519042911056,
+                  "self_collision": false
+                }
+              ],
+              "elapsed_s": 0.005888700019568205
+            }
+          ],
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "Gripper geometry collides at this grasp depth",
+            "rejected": [
+              {
+                "reason": "gripper_pose_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "table_floor",
+                    "distance": -0.008369519042911056,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "grasp_depth_preflight": {
+        "success": true,
+        "reason": "static_geometry_valid",
+        "contacts": [],
+        "table_clearance": {
+          "success": true,
+          "table_height_m": 0.6000000238418585,
+          "gripper_lowest_z_m": 0.6200000238949407,
+          "clearance_m": 0.003000000053082208,
+          "lowest_link": "robotiq_2f85_right_pad",
+          "table_floor_z_m": 0.6170000238418585,
+          "table_floor_offset_m": 0.017,
+          "gripper_configuration": "preclosure_open",
+          "open_width_m": 0.08
+        },
+        "validation_mode": "static_open_geometry",
+        "contact_preflight": {
+          "distance_m": 0.1,
+          "rejected": []
+        }
+      },
+      "grasp_floor_fallback": {
+        "used": true,
+        "success": true,
+        "candidates": [
+          {
+            "grasp_index": 0,
+            "world_from_object": [
+              [
+                0.007537197055332845,
+                -0.9999714330527527,
+                -0.0005689806444388151,
+                -0.008031487626822436
+              ],
+              [
+                0.9999713049830798,
+                0.0075376269489640935,
+                -0.000757225471689933,
+                -0.2853581249125054
+              ],
+              [
+                0.0007614926039087897,
+                -0.0005632569599341511,
+                0.9999995514352052,
+                0.6071428521192058
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_from_grasp": [
+              [
+                0.9999989045068342,
+                -0.0014801507693014524,
+                -1.1782687283605692e-05,
+                0.014006382990261607
+              ],
+              [
+                -0.001480148833626774,
+                -0.9999988913550146,
+                0.0001626289384338631,
+                -0.2856221538078226
+              ],
+              [
+                -1.2023389569121868e-05,
+                -0.00016261132014413262,
+                -0.999999986706498,
+                0.6269738859551981
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_from_control": [
+              [
+                -0.0014801539747191636,
+                -1.1854871578941186e-05,
+                0.9999989045012366,
+                0.014009394503984755
+              ],
+              [
+                -0.9999988913459128,
+                0.0001626558402038991,
+                -0.0014801520269810704,
+                -0.2856637542839371
+              ],
+              [
+                -0.0001626381150024301,
+                -0.9999999867012697,
+                -1.2095614124378228e-05,
+                0.8827738663199847
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "pose_source": "vlm_rgbd_grasp",
+            "grasp_depth_offset_m": -0.011369519042911058,
+            "yaw_offset_rad": 0.0,
+            "floor_fallback": {
+              "used": true,
+              "table_height_m": 0.6000000238418585,
+              "table_floor_z_m": 0.6170000238418585,
+              "table_floor_offset_m": 0.017,
+              "minimum_open_clearance_m": 0.003,
+              "minimum_table_clearance_m": 0.02,
+              "gripper_configuration": "preclosure_open",
+              "open_width_m": 0.08,
+              "vertical_shift_m": 0.011369519042911058,
+              "original_grasp_z_m": 0.615604366912287,
+              "adjusted_grasp_z_m": 0.6269738859551981,
+              "outside_search_range": true
+            }
+          }
+        ],
+        "selected": {
+          "used": true,
+          "table_height_m": 0.6000000238418585,
+          "table_floor_z_m": 0.6170000238418585,
+          "table_floor_offset_m": 0.017,
+          "minimum_open_clearance_m": 0.003,
+          "minimum_table_clearance_m": 0.02,
+          "gripper_configuration": "preclosure_open",
+          "open_width_m": 0.08,
+          "vertical_shift_m": 0.011369519042911058,
+          "original_grasp_z_m": 0.615604366912287,
+          "adjusted_grasp_z_m": 0.6269738859551981,
+          "outside_search_range": true
+        },
+        "rejected": []
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0009616999886929989,
+        "context": 0.00010940013453364372,
+        "selection": 5.500158295035362e-06,
+        "path_generation": 0.007315200055018067,
+        "planning": 0.49062600010074675,
+        "trajectory_preparation": 0.11943299998529255,
+        "posture_scoring": 2.200016751885414e-06,
+        "pre_execution_total": 0.6184603001456708
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 9.34000127017498e-05,
+          "direct_path_collision_check": 0.0007610998582094908,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 4.137110433848434,
+          "total_joint_travel_rad": 3.5742961638399997,
+          "maximum_joint_travel_rad": 1.3003034308900074,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.562814270008435,
+          "joint_travel_by_joint_rad": [
+            0.2715106805730017,
+            0.11140549220247564,
+            1.263093964992462,
+            0.6279822917877466,
+            3.033943061225841e-07,
+            1.3003034308900074
+          ],
+          "normalized_joint_travel": [
+            0.08642446928168707,
+            0.035461443057579235,
+            0.8041343084465776,
+            0.19989282252732976,
+            9.657333492145999e-08,
+            0.4138991279557064
+          ],
+          "candidate_count": 8,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 4,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 3,
+          "budget_exhausted": false,
+          "post_solution_search_budget_s": 0.15,
+          "stopped_after_feasible_solution": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                -0.27147054895228934,
+                -2.205763357268961,
+                2.262932222158502,
+                -1.6279651986171881,
+                -1.5707962500372639,
+                1.3003119631910518
+              ],
+              "endpoint_check_s": 0.18057550000958145,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -3.2922615804830238,
+                1.9293749381129222,
+                -0.20790961597987564,
+                -1.5707963613383376,
+                -0.8202495798153789
+              ],
+              "endpoint_check_s": 0.02518999995663762,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -0.27147054895228934,
+                -0.11430292471994451,
+                -2.262932222158502,
+                0.8064388131507997,
+                -1.5707962500372639,
+                1.3003119631910518
+              ],
+              "endpoint_check_s": 0.0494907998945564,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -0.27147054895228934,
+                -1.6622911514049208,
+                1.9293749508894336,
+                1.3037125203776339,
+                -4.712389057142323,
+                -1.8412806903987415
+              ],
+              "endpoint_check_s": 0.007573599927127361,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -1.4793014984613855,
+                -1.9293749381129222,
+                1.8378801782243306,
+                -1.5707963613383376,
+                -0.8202495798153789
+              ],
+              "endpoint_check_s": 0.016158599872142076,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -0.27147054895228934,
+                0.15066894180841103,
+                -1.9293749508894336,
+                -2.9336829782364178,
+                -4.712389057142323,
+                -1.8412806903987415
+              ],
+              "endpoint_check_s": 0.04695930005982518,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -0.9358292978195277,
+                -2.262932237698338,
+                -1.513627376421905,
+                -4.712388945841249,
+                2.3213430737744143
+              ],
+              "endpoint_check_s": 0.008882900001481175,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -3.0272897424642213,
+                2.262932237698338,
+                -3.9480314071738873,
+                -4.712388945841249,
+                2.3213430737744143
+              ],
+              "endpoint_check_s": 0.030355399940162897,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -0.27147054895228934,
+                -2.205763357268961,
+                2.262932222158502,
+                -1.6279651986171881,
+                -1.5707962500372639,
+                1.3003119631910518
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.12430940009653568,
+              "fine_direct_plan_s": 0.0009208000265061855,
+              "direct_success": true,
+              "direct_elapsed_s": 0.12528849998489022
+            },
+            {
+              "goal": [
+                -0.27147054895228934,
+                -1.6622911514049208,
+                1.9293749508894336,
+                1.3037125203776339,
+                -4.712389057142323,
+                -1.8412806903987415
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 8.919691241575574
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -1.4793014984613855,
+                -1.9293749381129222,
+                1.8378801782243306,
+                -1.5707963613383376,
+                -0.8202495798153789
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.594463174726924
+            },
+            {
+              "goal": [
+                -2.392032091958721,
+                -0.9358292978195277,
+                -2.262932237698338,
+                -1.513627376421905,
+                -4.712388945841249,
+                2.3213430737744143
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 12.547587006617112
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0010118999052792788,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.11792680015787482,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 67,
+          "planner_waypoint_count": 34,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+<mujoco model="microwave">
+  <compiler angle="radian"/>
+
+  <asset>
+    <mesh name="body001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\body001.obj"/>
+    <mesh name="button001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button001.obj"/>
+    <mesh name="button002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button002.obj"/>
+    <mesh name="button003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button003.obj"/>
+    <mesh name="button004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button004.obj"/>
+    <mesh name="button005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button005.obj"/>
+    <mesh name="button006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\button006.obj"/>
+    <mesh name="disc001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\disc001.obj"/>
+    <mesh name="knob001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\knob001.obj"/>
+    <mesh name="door" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\door.obj"/>
+    <mesh name="door_clear" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\door_clear.obj"/>
+    <mesh name="graspable_handle" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\31\microwave_meshes\visuals\graspable_handle.obj"/>
+  </asset>
+
+  <worldbody>
+    <body name="model_frame">
+      <body name="base_link" quat="0.707107 0 0 -0.707107">
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="body001"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button001"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button002"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button003"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button004"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button005"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="button006"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="disc001"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="knob001"/>
+        <geom name="panel_1" size="0.0115463 0.000273224 0.007356" pos="0.214744 -0.147808 0.0547613" type="box"/>
+        <geom name="panel_2" size="0.0115951 0.000273224 0.00716073" pos="0.159805 -0.147582 0.0546636" type="box"/>
+        <geom name="panel_4" size="0.173887 0.160723 0.00260975" pos="-0.0706015 0.0217201 0.272315" type="box"/>
+        <geom name="panel_5" size="0.173888 0.160724 0.00195763" pos="-0.0706015 0.0217201 0.00197757" type="box"/>
+        <geom name="panel_6" size="0.0157353 0.160725 0.136281" pos="-0.228763 0.0217201 0.136301" type="box"/>
+        <geom name="panel_7" size="0.0731863 0.160303 0.137456" pos="0.171312 0.0221424 0.137475" type="box"/>
+        <geom name="panel_8" size="0.172757 0.00952215 0.137113" pos="-0.0717402 0.177363 0.137134" type="box"/>
+        <body name="door_link" pos="-0.229939 -0.143369 0.138086">
+          <inertial pos="0.18 0 0" quat="0.5 0.5 0.5 0.5" mass="1.2" diaginertia="0.024 0.016 0.009"/>
+          <joint name="door_joint" range="-1.5708 0" actuatorfrcrange="-20 20" damping="1" frictionloss="1"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="door"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="door_clear"/>
+          <geom pos="0.352807 -0.0321442 0.000705348" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.65 0.68 0.72 1" density="0" mesh="graspable_handle"/>
+          <geom size="0.185774 0.0026499 0.125207" pos="0.182979 -0.000150502 -0.000617815" type="box" rgba="0.65 0.68 0.72 1"/>
+          <geom size="0.0175628 0.0114613 0.0236725" pos="0.354074 -0.0184106 0.0952203" quat="0.943755 -0.330644 0 0" type="box" rgba="0.65 0.68 0.72 1"/>
+          <geom name="panel_3" size="0.0175628 0.0110825 0.0200185" pos="0.354074 -0.0216088 -0.0894629" quat="0.939506 0.342532 0 0" type="box" rgba="0.65 0.68 0.72 1"/>
+          <geom size="0.182712 0.00132746 0.121643" pos="0.185754 -0.00130245 0.000582926" type="box" rgba="0.65 0.68 0.72 1"/>
+          <geom size="0.149324 0.00203307 0.0958707" pos="0.181824 -0.000273675 -0.00183863" type="box" rgba="0.65 0.68 0.72 1"/>
+          <geom name="graspable_handle_bar_1" size="0.0238197 0.0172137 0.0665015" pos="0.352807 -0.0321442 0.000705348" type="box" rgba="0.65 0.68 0.72 1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

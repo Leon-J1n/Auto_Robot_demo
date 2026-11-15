@@ -6,7 +6,7 @@ from scipy.spatial.transform import Rotation
 
 from atomic_action.motion.common.interaction import planning_failed_without_motion
 from atomic_action.motion.common.interaction import pose_request
-from demo.task_commands.converter import _deep_merge
+from demo.interaction.command_converter import _deep_merge
 from planning import candidate_distances, candidate_pose, run_candidate_search, search_distances
 from atomic_skill.pose_precheck import ordered_distances
 
@@ -194,7 +194,7 @@ class ApproachSkill:
                 np.block([[rotation, position[:, None]],
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance)
             if align_camera:
-                from atomic_skill.wrist_observation import camera_aligned_pose
+                from demo.interaction.wrist_observation import camera_aligned_pose
                 transform, _ = camera_aligned_pose(transform, observation['control_from_camera'],
                                                     observation['target_world'])
             return transform
@@ -209,7 +209,7 @@ class ApproachSkill:
             )
             alignment = None
             if align_camera:
-                from atomic_skill.wrist_observation import camera_aligned_pose
+                from demo.interaction.wrist_observation import camera_aligned_pose
                 try:
                     candidate_transform, alignment = camera_aligned_pose(
                         candidate_transform, observation['control_from_camera'],
@@ -225,7 +225,7 @@ class ApproachSkill:
             moved = e._move(
                     f"{operation}_approach_{int(round(float(distance) * 1000))}mm",
                     spec={"mechanism_pose": candidate_pose}, contact=False,
-                    override={"motion": {"path_type": "joint", "path_constraint": "soft"},
+                    override={"motion": {"path_type": "joint", "path_constraint": "soft", "phase": "approach"},
                               "planning": {"mode": "collision_free", "allow_replan": True}})
             if alignment is not None:
                 e.phases[-1]['wrist_observation'] = alignment
@@ -263,11 +263,7 @@ class ApproachSkill:
         previous_error = deepcopy(failed.get('error'))
         moved = e._move(
             f'{operation}_move_to', position=position, rotation=rotation, contact=False,
-            override={'motion': {'path_type': 'joint', 'path_constraint': 'soft'},
+            override={'motion': {'path_type': 'joint', 'path_constraint': 'soft', 'phase': 'approach'},
                       'planning': {'mode': 'collision_free', 'allow_replan': True}})
         e.phases[-1].update(fallback_from='approach', approach_search_error=previous_error)
         return moved
-
-
-
-

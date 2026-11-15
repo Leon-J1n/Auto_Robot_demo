@@ -9,7 +9,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from ..pose_utils import effective_orientation
-from planning.errors import PlanningError
+from planning.common.errors import PlanningError
 
 
 class CircularMove:
@@ -110,4 +110,5 @@ def _angle_through_via(start: np.ndarray, via: np.ndarray, goal: np.ndarray, axi
     via_angle = _signed_angle(start, via, axis) % (2.0 * math.pi)
     goal_angle = _signed_angle(start, goal, axis) % (2.0 * math.pi)
     return goal_angle if via_angle <= goal_angle else goal_angle - 2.0 * math.pi
+
 

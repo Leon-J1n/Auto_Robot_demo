@@ -1,0 +1,1913 @@
+{
+  "revision": 3130,
+  "simulation_time": 36.32599999999843,
+  "targets": {
+    "1": {
+      "name": "WorkTable",
+      "model_id": 29
+    },
+    "2": {
+      "name": "ur5",
+      "model_id": null
+    },
+    "6": {
+      "name": "RobotPedestal",
+      "model_id": null
+    },
+    "7": {
+      "name": "Apple",
+      "model_id": 1
+    },
+    "8": {
+      "name": "Banana",
+      "model_id": 2
+    },
+    "9": {
+      "name": "Marker",
+      "model_id": 10
+    },
+    "10": {
+      "name": "Screwdriver",
+      "model_id": 13
+    },
+    "11": {
+      "name": "RubiksCube",
+      "model_id": 15
+    },
+    "12": {
+      "name": "Basket",
+      "model_id": 12
+    },
+    "13": {
+      "name": "Tray",
+      "model_id": 17
+    }
+  },
+  "objects": {
+    "WorkTable": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "RobotPedestal": {
+      "position": [
+        0.0,
+        -0.5499999999999999,
+        0.25
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "Apple": {
+      "position": [
+        -0.21430625417984234,
+        0.15755608552884975,
+        0.655011236911911
+      ],
+      "quaternion_xyzw": [
+        0.010541578945610095,
+        -0.04078865612733473,
+        0.7317284737759975,
+        0.6802930260631151
+      ]
+    },
+    "Banana": {
+      "position": [
+        0.4447112815317783,
+        -0.18663668930544977,
+        0.6149084138175741
+      ],
+      "quaternion_xyzw": [
+        0.009780993617391456,
+        -0.009131027955166515,
+        0.7102745213087551,
+        0.7037975993650141
+      ]
+    },
+    "Marker": {
+      "position": [
+        -0.008040477981501074,
+        -0.2854547926930583,
+        0.6071431596755987
+      ],
+      "quaternion_xyzw": [
+        9.040338502467295e-05,
+        -0.0004872366386054199,
+        0.7039122656440702,
+        0.7102867566719214
+      ]
+    },
+    "Screwdriver": {
+      "position": [
+        -0.17874383711241779,
+        -0.18441496308752206,
+        0.6144746520415021
+      ],
+      "quaternion_xyzw": [
+        -0.05701454054495665,
+        0.017621786870188286,
+        0.7416068806341569,
+        0.6681751637033697
+      ]
+    },
+    "RubiksCube": {
+      "position": [
+        0.2901840576365835,
+        0.17474124116688713,
+        0.6473363701397185
+      ],
+      "quaternion_xyzw": [
+        0.00205186161134614,
+        0.0008585290411105771,
+        0.7037155111562978,
+        0.7104783826055832
+      ]
+    },
+    "Basket": {
+      "position": [
+        -0.2,
+        0.15499999999999994,
+        0.600036
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    },
+    "Tray": {
+      "position": [
+        0.28,
+        0.16500000000000006,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    }
+  },
+  "mechanisms": {},
+  "gripper": {
+    "known": true,
+    "initialized": true,
+    "width": 0.08156527175935735,
+    "force": 0.0,
+    "contact_detected": false,
+    "object_present": false,
+    "holding": false,
+    "mode": "physical",
+    "slip_detected": false,
+    "bilateral_contact": false,
+    "contact_lost": false,
+    "left_force_n": 0.0,
+    "right_force_n": 0.0,
+    "hold_force_target_n": null,
+    "filtered_hold_force_n": null,
+    "hold_force_torque_saturated": false,
+    "relative_position_error_m": 0.0,
+    "relative_orientation_error_rad": 0.0,
+    "confirmation": {
+      "left_force_n": 8.092294647714134,
+      "right_force_n": 7.5733444905948915,
+      "measured_left_force_n": 8.092294647714134,
+      "measured_right_force_n": 7.5733444905948915,
+      "closure_completed": false,
+      "no_contact_time_s": 0.0,
+      "command_reached": false,
+      "driver_reached": false,
+      "width_reached": false,
+      "measured_width_m": 0.057773826579086744,
+      "requested_width_m": 0.0,
+      "no_contact_threshold_n": 0.1,
+      "stable_time_s": 0.09999999999994458,
+      "width_range_m": 6.377188388220073e-05,
+      "position_range_m": 7.080395300633016e-05,
+      "orientation_range_rad": 0.0005154500823838858,
+      "bilateral_contact": true,
+      "confirmed": true,
+      "reason": "stable_bilateral_grasp",
+      "mode": "physical"
+    },
+    "object_id": null
+  },
+  "model_cache": {
+    "entries": 8,
+    "hits": 6,
+    "misses": 8
+  },
+  "interaction_anchors": [
+    {
+      "target": "Apple",
+      "grasp_index": 0,
+      "body": "Apple",
+      "body_from_grasp": [
+        [
+          0.9978087495499804,
+          0.007402228287416213,
+          -0.0657488124446724,
+          -0.001386238619687924
+        ],
+        [
+          0.006032460028944078,
+          -0.9997611185068503,
+          -0.021007506942298554,
+          -0.0009767939624362454
+        ],
+        [
+          -0.06588860863231918,
+          0.020564847150234433,
+          -0.9976150451522794,
+          -0.0008430485640448238
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "target": "RubiksCube",
+      "grasp_index": 0,
+      "body": "RubiksCube",
+      "body_from_grasp": [
+        [
+          0.9999978945797412,
+          -0.0016597154185277367,
+          -0.0012067231723515317,
+          -0.0003407358400424054
+        ],
+        [
+          -0.0016650590432107746,
+          -0.9999887534885249,
+          -0.004440774127189488,
+          -0.0001406405732569116
+        ],
+        [
+          -0.0011993391796364307,
+          0.004442774042824453,
+          -0.9999894116161115,
+          -0.001346214081225372
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "visual_grasps": {
+    "Apple": {
+      "anchor_frame": "Apple",
+      "anchor_from_pose": [
+        [
+          0.9978087495499804,
+          0.007402228287416213,
+          -0.0657488124446724,
+          -0.001386238619687924
+        ],
+        [
+          0.006032460028944078,
+          -0.9997611185068503,
+          -0.021007506942298554,
+          -0.0009767939624362454
+        ],
+        [
+          -0.06588860863231918,
+          0.020564847150234433,
+          -0.9976150451522794,
+          -0.0008430485640448238
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "grasp",
+        "pixel": {
+          "x": 308,
+          "y": 236
+        },
+        "normalized": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "depth_m": 0.19488081336021423,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": 0.18153044964059278,
+          "y": -0.18864771671090624,
+          "z": 0.663658423182643
+        },
+        "frame": "world",
+        "confidence": 0.9,
+        "vlm_request_s": 4.437003599945456,
+        "is_elongated": false,
+        "axis_points": null,
+        "axis_status": "not_elongated",
+        "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "camera_id": "wrist_camera",
+        "timestamp": 2.957999999999896,
+        "sequence": 0,
+        "vlm_request_count": 1,
+        "visual_estimation_s": 4.454677199944854,
+        "crop_origin_pixel": {
+          "x": 220,
+          "y": 149
+        },
+        "long_axis_aligned": false,
+        "orientation_source": "fixed_downward",
+        "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "depth_selected": true,
+        "grasp_depth_candidates_m": [
+          0.03,
+          0.025,
+          0.02,
+          0.015,
+          0.01,
+          0.005,
+          0.0
+        ],
+        "depth_search_enabled": true,
+        "target_point_world": {
+          "x": 0.1815304963734124,
+          "y": -0.18864775485795543,
+          "z": 0.6336584231827036
+        },
+        "grasp_point_world": {
+          "x": 0.1815304963734124,
+          "y": -0.18864775485795543,
+          "z": 0.6336584231827036
+        },
+        "yaw_selected": true,
+        "grasp_depth_offset_m": 0.03,
+        "selected_yaw_offset_rad": 0.0,
+        "grasp_rotation_world": [
+          [
+            0.008197671915869304,
+            0.9999663985218371,
+            1.5577606537931407e-06
+          ],
+          [
+            0.999966398522258,
+            -0.00819767191389187,
+            -1.2715683049219255e-06
+          ],
+          [
+            -1.2587555675979688e-06,
+            1.5681322105093898e-06,
+            -0.9999999999979784
+          ]
+        ],
+        "surface_normal_world": [
+          -1.5577606537931407e-06,
+          1.2715683049219255e-06,
+          0.9999999999979784
+        ],
+        "wrist_refinement": {
+          "camera_id": "wrist_camera",
+          "timestamp": 2.957999999999896,
+          "sequence": 0,
+          "coarse_surface_world": [
+            0.17606778636811315,
+            -0.1868869546108751,
+            0.6627261988276469
+          ],
+          "refined_surface_world": [
+            0.18153044964059278,
+            -0.18864771671090624,
+            0.663658423182643
+          ],
+          "correction_world_m": [
+            0.005462663272479629,
+            -0.001760762100031149,
+            0.0009322243549960696
+          ],
+          "correction_distance_m": 0.005814638032539238,
+          "image_region": "target_aabb_crop",
+          "coarse_point_in_full_image": {
+            "in_front": true,
+            "optical_depth_m": 0.1958134361317937,
+            "pixel": {
+              "x": 319.6515626029936,
+              "y": 239.7538117517649
+            },
+            "in_frame": true,
+            "distance_from_principal_point_px": 0.29562075021920153
+          },
+          "crop_origin_pixel": {
+            "x": 220,
+            "y": 149
+          },
+          "status": "validated",
+          "timing_s": {
+            "capture": 0.006188699975609779,
+            "vlm": 4.44165170006454,
+            "validation": 0.8290699999779463
+          },
+          "elapsed_s": 5.276973699918017
+        },
+        "grasp_depth_attempts": [
+          {
+            "grasp_depth_offset_m": 0.03,
+            "success": true,
+            "gripper_pose_precheck": [
+              {
+                "status": "clear",
+                "elapsed_s": 0.007519699865952134
+              }
+            ],
+            "rejected": []
+          }
+        ],
+        "grasp_depth_preflight": {
+          "success": true,
+          "reason": "static_geometry_valid",
+          "contacts": [],
+          "table_clearance": {
+            "success": true,
+            "table_height_m": 0.6000000238418585,
+            "gripper_lowest_z_m": 0.6266925504702251,
+            "clearance_m": 0.009692526628366616,
+            "lowest_link": "robotiq_2f85_left_pad",
+            "table_floor_z_m": 0.6170000238418585,
+            "table_floor_offset_m": 0.017,
+            "gripper_configuration": "preclosure_open",
+            "open_width_m": 0.08
+          },
+          "validation_mode": "static_open_geometry",
+          "contact_preflight": {
+            "distance_m": 0.1,
+            "rejected": []
+          }
+        }
+      }
+    },
+    "RubiksCube": {
+      "anchor_frame": "RubiksCube",
+      "anchor_from_pose": [
+        [
+          0.9999978945797412,
+          -0.0016597154185277367,
+          -0.0012067231723515317,
+          -0.0003407358400424054
+        ],
+        [
+          -0.0016650590432107746,
+          -0.9999887534885249,
+          -0.004440774127189488,
+          -0.0001406405732569116
+        ],
+        [
+          -0.0011993391796364307,
+          0.004442774042824453,
+          -0.9999894116161115,
+          -0.001346214081225372
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "grasp",
+        "pixel": {
+          "x": 309,
+          "y": 238
+        },
+        "normalized": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "depth_m": 0.19563427567481995,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": -0.4797666778856378,
+          "y": -0.1853887075469331,
+          "z": 0.6554193996362533
+        },
+        "frame": "world",
+        "confidence": 0.9,
+        "vlm_request_s": 5.699079399928451,
+        "is_elongated": false,
+        "axis_points": null,
+        "axis_status": "not_elongated",
+        "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "camera_id": "wrist_camera",
+        "timestamp": 15.138000000001725,
+        "sequence": 1,
+        "vlm_request_count": 1,
+        "visual_estimation_s": 3.712527299998328,
+        "crop_origin_pixel": {
+          "x": 242,
+          "y": 172
+        },
+        "long_axis_aligned": false,
+        "orientation_source": "fixed_downward",
+        "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "depth_selected": true,
+        "grasp_depth_candidates_m": [
+          0.03,
+          0.025,
+          0.02,
+          0.015,
+          0.01,
+          0.005,
+          0.0
+        ],
+        "depth_search_enabled": true,
+        "target_point_world": {
+          "x": -0.4797666778851012,
+          "y": -0.18538870754667325,
+          "z": 0.6254193996362533
+        },
+        "grasp_point_world": {
+          "x": -0.4797666778851012,
+          "y": -0.18538870754667325,
+          "z": 0.6254193996362533
+        },
+        "yaw_selected": true,
+        "grasp_depth_offset_m": 0.03,
+        "selected_yaw_offset_rad": 0.0,
+        "grasp_rotation_world": [
+          [
+            -0.00017191729928952158,
+            0.9999999852222211,
+            1.7884833977935787e-11
+          ],
+          [
+            0.9999999852222212,
+            0.0001719172992895612,
+            8.661361868398705e-12
+          ],
+          [
+            8.65828765946563e-12,
+            1.7886324253051746e-11,
+            -1.0000000000000002
+          ]
+        ],
+        "surface_normal_world": [
+          -1.7884833977935787e-11,
+          -8.661361868398705e-12,
+          1.0000000000000002
+        ],
+        "wrist_refinement": {
+          "camera_id": "wrist_camera",
+          "timestamp": 15.138000000001725,
+          "sequence": 1,
+          "coarse_surface_world": [
+            -0.48474985219167466,
+            -0.18465826282152586,
+            0.6552659517590821
+          ],
+          "refined_surface_world": [
+            -0.4797666778856378,
+            -0.1853887075469331,
+            0.6554193996362533
+          ],
+          "correction_world_m": [
+            0.004983174306036842,
+            -0.000730444725407231,
+            0.0001534478771711978
+          ],
+          "correction_distance_m": 0.0050387619424050335,
+          "image_region": "target_aabb_crop",
+          "coarse_point_in_full_image": {
+            "in_front": true,
+            "optical_depth_m": 0.1957870693796952,
+            "pixel": {
+              "x": 319.5882117807536,
+              "y": 239.55358611980293
+            },
+            "in_frame": true,
+            "distance_from_principal_point_px": 0.10321235633033218
+          },
+          "crop_origin_pixel": {
+            "x": 242,
+            "y": 172
+          },
+          "status": "validated",
+          "timing_s": {
+            "capture": 0.005753499921411276,
+            "vlm": 5.701694500166923,
+            "validation": 0.7696827000472695
+          },
+          "elapsed_s": 6.4771779999136925
+        },
+        "grasp_depth_attempts": [
+          {
+            "grasp_depth_offset_m": 0.03,
+            "success": true,
+            "gripper_pose_precheck": [
+              {
+                "status": "clear",
+                "elapsed_s": 0.007782799890264869
+              }
+            ],
+            "rejected": []
+          }
+        ],
+        "grasp_depth_preflight": {
+          "success": true,
+          "reason": "static_geometry_valid",
+          "contacts": [],
+          "table_clearance": {
+            "success": true,
+            "table_height_m": 0.6000000238418585,
+            "gripper_lowest_z_m": 0.6184536174575743,
+            "clearance_m": 0.0014535936157158424,
+            "lowest_link": "robotiq_2f85_right_pad",
+            "table_floor_z_m": 0.6170000238418585,
+            "table_floor_offset_m": 0.017,
+            "gripper_configuration": "preclosure_open",
+            "open_width_m": 0.08
+          },
+          "validation_mode": "static_open_geometry",
+          "contact_preflight": {
+            "distance_m": 0.1,
+            "rejected": []
+          }
+        }
+      }
+    }
+  },
+  "visual_places": {
+    "Basket": {
+      "anchor_frame": "Basket",
+      "anchor_from_pose": [
+        [
+          0.9999999999999998,
+          3.330669073875468e-16,
+          0.0,
+          0.0009847028773809774
+        ],
+        [
+          3.330669073875468e-16,
+          -0.9999999999999998,
+          0.0,
+          0.013901908271342495
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          0.18747099999999994
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "place",
+        "pixel": {
+          "x": 404,
+          "y": 309
+        },
+        "world_point": {
+          "x": -0.2139019082713425,
+          "y": 0.15598470287738098,
+          "z": 0.817507
+        },
+        "depth_m": 1.052276372909546,
+        "frame": "world",
+        "confidence": null,
+        "timestamp": 6.1159999999995485,
+        "sequence": 1,
+        "placement_center_fallback": {
+          "used": true,
+          "radius_fraction_xy": 0.2,
+          "max_points": 3,
+          "sample_index": 0,
+          "trigger": "vlm_point_infeasible",
+          "attempts": [
+            {
+              "world_point": {
+                "x": -0.2139019082713425,
+                "y": 0.15598470287738098,
+                "z": 0.817507
+              },
+              "height_attempts": [
+                {
+                  "placement_height_offset_m": -0.03,
+                  "success": true,
+                  "evaluated": true,
+                  "elapsed_s": 0.27167239994741976,
+                  "rejected": []
+                },
+                {
+                  "placement_height_offset_m": -0.02,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": -0.01,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.0,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.01,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.02,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.03,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.04,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                },
+                {
+                  "placement_height_offset_m": 0.05,
+                  "success": true,
+                  "evaluated": false,
+                  "inferred_by_monotonicity": true,
+                  "inference": "binary search inferred feasible above the selected height"
+                }
+              ],
+              "success": true,
+              "elapsed_s": 0.27203399990685284
+            }
+          ],
+          "primary_height_attempts": [
+            {
+              "placement_height_offset_m": -0.03,
+              "success": false,
+              "evaluated": true,
+              "elapsed_s": 1.3872735002078116,
+              "error": {
+                "error_code": "TARGET_POSE_UNREACHABLE",
+                "failed_stage": "target_resolution",
+                "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.007471'}]",
+                "rejected": [
+                  {
+                    "grasp_index": 0,
+                    "reason": "ik_failed",
+                    "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.007471"
+                  }
+                ]
+              }
+            },
+            {
+              "placement_height_offset_m": -0.02,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": -0.01,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.0,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.01,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.02,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.03,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.04,
+              "success": false,
+              "evaluated": false,
+              "inferred_by_monotonicity": true,
+              "inference": "all higher tested heights were infeasible"
+            },
+            {
+              "placement_height_offset_m": 0.05,
+              "success": false,
+              "evaluated": true,
+              "elapsed_s": 1.357944600051269,
+              "error": {
+                "error_code": "TARGET_POSE_UNREACHABLE",
+                "failed_stage": "target_resolution",
+                "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.046497'}]",
+                "rejected": [
+                  {
+                    "grasp_index": 0,
+                    "reason": "ik_failed",
+                    "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.046497"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "crop_origin_pixel": {
+          "x": 340,
+          "y": 251
+        },
+        "rgbd_world_point": {
+          "x": -0.2139019082713425,
+          "y": 0.15598470287738098,
+          "z": 0.6142603578885197
+        },
+        "placement_aabb_top_world": {
+          "x": -0.2139019082713425,
+          "y": 0.15598470287738098,
+          "z": 0.817507
+        },
+        "held_object": "Apple",
+        "placement_cycle_id": "6",
+        "placement_height_selected": true,
+        "placement_height_candidates_m": [
+          -0.03,
+          -0.02,
+          -0.01,
+          0.0,
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05
+        ],
+        "placement_request": {
+          "relation": "at",
+          "distance_m": 0.0
+        },
+        "placement_height_offset_m": -0.03,
+        "placement_height_attempts": [
+          {
+            "placement_height_offset_m": -0.03,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.27167239994741976,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": -0.02,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": -0.01,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.0,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.01,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.04,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.05,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          }
+        ],
+        "target_point_world": {
+          "x": -0.2139019082713425,
+          "y": 0.15598470287738095,
+          "z": 0.787507
+        }
+      }
+    },
+    "Tray": {
+      "anchor_frame": "Tray",
+      "anchor_from_pose": [
+        [
+          0.9999999999999998,
+          3.330669073875468e-16,
+          0.0,
+          0.011656361440828739
+        ],
+        [
+          3.330669073875468e-16,
+          -0.9999999999999998,
+          0.0,
+          -0.010404901324414573
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          0.06499999999999995
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "place",
+        "pixel": {
+          "x": 205,
+          "y": 317
+        },
+        "normalized": {
+          "x": 0.52,
+          "y": 0.5
+        },
+        "depth_m": 1.0543148517608643,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": 0.2904049013244146,
+          "y": 0.1766563614408288,
+          "z": 0.6749999999999999
+        },
+        "frame": "world",
+        "confidence": 0.95,
+        "vlm_request_s": 3.5688484001439065,
+        "camera_id": "global_camera",
+        "timestamp": 18.154000000000817,
+        "sequence": 3,
+        "vlm_request_count": 1,
+        "visual_estimation_s": 3.5721476001199335,
+        "crop_origin_pixel": {
+          "x": 96,
+          "y": 245
+        },
+        "placement_request": {
+          "relation": "at",
+          "distance_m": 0.0
+        },
+        "rgbd_world_point": {
+          "x": 0.2904049013244146,
+          "y": 0.1766563614408288,
+          "z": 0.6158354129909069
+        },
+        "placement_aabb_top_world": {
+          "x": 0.2904049013244146,
+          "y": 0.1766563614408288,
+          "z": 0.6749999999999999
+        },
+        "held_object": "RubiksCube",
+        "placement_height_selected": true,
+        "placement_height_candidates_m": [
+          -0.03,
+          -0.02,
+          -0.01,
+          0.0,
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05
+        ],
+        "target_point_world": {
+          "x": 0.2904049013244146,
+          "y": 0.1766563614408288,
+          "z": 0.6649999999999999
+        },
+        "placement_cycle_id": "14",
+        "placement_height_offset_m": -0.01,
+        "placement_height_attempts": [
+          {
+            "placement_height_offset_m": -0.03,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 0.10878530004993081,
+            "error": {
+              "error_code": "TARGET_POSE_COLLISION",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.014193977480296827, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011619256528837987, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009834692375368664, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0016403846691041754, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0018533878331975654, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013667041475096746, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013317836602195892, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.006069618915195977, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.00986470060932807, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.00991756252441003, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.01210569696153989, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011894588739129058, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.037162187886016815, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.012263331066891488, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02802011473625812, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.02605431737679077, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.015940243809637874, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.000724463793071651, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0048578591803795975, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.004811658460310285, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0040999457911075786, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.00061567905929407, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.001978396579155959, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.01419397748029694, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011619256528838096, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009834692375368773, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0016403846691040642, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0018533878331974543, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013667041475096746, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013317836602196004, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.00606961891519609, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.00986470060932818, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009917562524410142, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.01210569696154, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011894588739129165, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.014193977849693897, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011619256895220689, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.00983469272848964, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0016403842924068357, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.001853387451523207, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013667041849598063, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013317836981536008, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.006069619271154241, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009864700951793015, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009917562874033583, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.012105697318455275, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.01189458910160244, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.014193977849693673, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011619256895220467, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009834692728489415, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0016403842924070577, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.001853387451523429, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013667041849597843, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.013317836981535786, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.006069619271154018, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009864700951792793, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.009917562874033363, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.012105697318455053, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.011894589101602219, 'self_collision': False})}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.014193977480296827,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011619256528837987,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009834692375368664,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0016403846691041754,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0018533878331975654,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013667041475096746,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013317836602195892,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.006069618915195977,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.00986470060932807,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.00991756252441003,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.01210569696153989,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011894588739129058,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.037162187886016815,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.012263331066891488,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02802011473625812,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02605431737679077,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.015940243809637874,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": 0.000724463793071651,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0048578591803795975,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.004811658460310285,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0040999457911075786,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": 0.00061567905929407,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.001978396579155959,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.01419397748029694,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011619256528838096,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009834692375368773,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0016403846691040642,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0018533878331974543,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013667041475096746,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013317836602196004,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.00606961891519609,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.00986470060932818,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009917562524410142,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.01210569696154,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011894588739129165,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.014193977849693897,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011619256895220689,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.00983469272848964,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0016403842924068357,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.001853387451523207,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013667041849598063,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013317836981536008,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.006069619271154241,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009864700951793015,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009917562874033583,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.012105697318455275,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.01189458910160244,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.014193977849693673,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011619256895220467,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009834692728489415,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0016403842924070577,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.001853387451523429,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013667041849597843,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.013317836981535786,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.006069619271154018,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009864700951792793,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.009917562874033363,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.012105697318455053,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.011894589101602219,
+                      "self_collision": false
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": -0.02,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 0.001930000027641654,
+            "error": {
+              "error_code": "TARGET_POSE_COLLISION",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.004193977480297039, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0016192565288381984, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00016530762463112504, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.003667041475096959, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0033178366021962163, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0001352993906716058, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 8.243747558975502e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0021056969615401017, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0018945887391292682, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.03223130272333879, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.010200185585997367, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.024524989724533947, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.022866668040264878, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.01363175904768255, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0028685785598994264, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0027742620318522006, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.0018152001954499736, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.002681463009204096, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': 0.00020402224201033605, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.004193977480297149, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0016192565288383094, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00016530762463101402, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.003667041475096959, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0033178366021962163, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00013529939067160576, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 8.2437475589644e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.002105696961540213, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0018945887391293792, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.004193977849693663, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0016192568952204565, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00016530727151059223, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0036670418495978333, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0033178369815357765, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00013529904820721583, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 8.243712596664678e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.002105697318455044, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.001894589101602209, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.004193977849693663, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0016192568952204565, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.00016530727151059223, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0036670418495978333, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.0033178369815357765, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 0.0001352990482072158, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': 8.243712596664675e-05, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.002105697318455044, 'self_collision': False}, {'geom1': 'RubiksCube', 'geom2': 'Tray', 'distance': -0.001894589101602209, 'self_collision': False})}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.004193977480297039,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0016192565288381984,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00016530762463112504,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.003667041475096959,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0033178366021962163,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0001352993906716058,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 8.243747558975502e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0021056969615401017,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0018945887391292682,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.03223130272333879,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.010200185585997367,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.024524989724533947,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.022866668040264878,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.01363175904768255,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0028685785598994264,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0027742620318522006,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0018152001954499736,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": 0.002681463009204096,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": 0.00020402224201033605,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.004193977480297149,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0016192565288383094,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00016530762463101402,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.003667041475096959,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0033178366021962163,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00013529939067160576,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 8.2437475589644e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.002105696961540213,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0018945887391293792,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.004193977849693663,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0016192568952204565,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00016530727151059223,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0036670418495978333,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0033178369815357765,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00013529904820721583,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 8.243712596664678e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.002105697318455044,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.001894589101602209,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision_1",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.004193977849693663,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0016192568952204565,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.00016530727151059223,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0036670418495978333,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.0033178369815357765,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 0.0001352990482072158,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": 8.243712596664675e-05,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.002105697318455044,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "RubiksCube",
+                      "geom2": "Tray",
+                      "distance": -0.001894589101602209,
+                      "self_collision": false
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": -0.01,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.02535579982213676,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": 0.0,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.01,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.02288329997099936,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.04,
+            "success": true,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "binary search inferred feasible above the selected height"
+          },
+          {
+            "placement_height_offset_m": 0.05,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.02556990017183125,
+            "rejected": []
+          }
+        ],
+        "placement_revalidation": {
+          "trigger": "cached_place_pose_infeasible",
+          "previous_height_offset_m": -0.02,
+          "previous_error_code": "TARGET_POSE_COLLISION"
+        }
+      }
+    }
+  }
+}

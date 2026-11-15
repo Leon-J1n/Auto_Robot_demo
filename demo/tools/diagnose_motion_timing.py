@@ -17,8 +17,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     os.environ['SIM_PLATFORM_LIBRARY'] = str(Path(args.library).resolve())
-    from control.continuous_trajectory import ContinuousJointPath
-    from control.pull_push_controller import MujocoPullPushController
+    from planning.trajectory.path import ContinuousJointPath
     from demo.run_demo import run
     import mujoco
 
@@ -74,8 +73,7 @@ def main():
     started = time.perf_counter()
     with ExitStack() as stack:
         stack.enter_context(patch.object(ContinuousJointPath, 'samples', samples))
-        for owner, name in [(MujocoPullPushController,'_collision'), (MujocoPullPushController,'_contacts'),
-                            (mujoco,'mj_step'), (mujoco,'mj_forward')]:
+        for owner, name in [(mujoco, 'mj_step'), (mujoco, 'mj_forward')]:
             stack.enter_context(patch.object(owner,name,measured(name,getattr(owner,name))))
         report = run(args.commands, output_dir=args.output)
     summary = {'wall_s':time.perf_counter()-started, 'simulation_s':report.get('final_state',{}).get('simulation_time'),
@@ -88,4 +86,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
 

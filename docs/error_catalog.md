@@ -8,14 +8,11 @@
 
 | 错误码 | 扫描结果 | 代表位置 |
 | --- | --- | --- |
-| `ACTUATOR_TRACKING_FAILED` | 代码中使用 | [control/pull_push_controller.py:443](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:443) |
 | `CAMERA_MODEL_UNAVAILABLE` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:16](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:16) |
 | `CAMERA_NOT_MOVABLE` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:17](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:17) |
 | `CLEARANCE_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:34](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:34) |
-| `COLLISION_DETECTED` | 代码中使用 | [planning/direct_planner.py:48](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:48) |
+| `COLLISION_DETECTED` | 代码中使用 | [planning/planners/direct_planner.py:48](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:48) |
 | `COMMAND_EXECUTION_FAILED` | 代码中使用 | [atomic_skill/pull.py:271](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:271) |
-| `CONTACT_LOST` | 代码中使用 | [control/pull_push_controller.py:899](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:899) |
-| `CONTACT_NOT_ESTABLISHED` | 代码中使用 | [control/pull_push_controller.py:567](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:567) |
 | `CONTACT_PATH_COLLISION` | 代码中使用 | [atomic_skill/pick.py:23](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:23) |
 | `CONTACT_PATH_PLANNING_FAILED` | 代码中使用 | [atomic_skill/pick.py:24](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:24) |
 | `CONTACT_PATH_UNREACHABLE` | 代码中使用 | [atomic_skill/pick.py:22](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:22) |
@@ -28,12 +25,11 @@
 | `EXECUTION_FAILED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:25](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:25) |
 | `EXECUTION_TIMEOUT` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:26](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:26) |
 | `FIELD_OF_VIEW_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:24](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:24) |
-| `FORCE_LIMIT` | 代码中使用 | [control/pull_push_controller.py:879](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:879) |
 | `FRAME_TRANSFORM_FAILED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:13) |
 | `GOAL_TOLERANCE_EXCEEDED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:27) |
 | `GRASP_CLOSURE_COLLISION` | 代码中使用 | [demo/interaction/closure_validation.py:49](C:/Users/21474/Desktop/robot-agent/demo/interaction/closure_validation.py:49) |
 | `GRASP_CLOSURE_INFEASIBLE` | 代码中使用 | [demo/interaction/object_library.py:193](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:193) |
-| `GRASP_FAILED` | 代码中使用 | [execution/convergence.py:33](C:/Users/21474/Desktop/robot-agent/execution/convergence.py:33) |
+| `GRASP_FAILED` | 代码中使用 | [execution/runtime/convergence.py:33](C:/Users/21474/Desktop/robot-agent/execution/runtime/convergence.py:33) |
 | `GRASP_NOT_CONFIRMED` | 代码中使用 | [atomic_action/manipulation/grasp/action.py:52](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/grasp/action.py:52) |
 | `GRASP_OPENING_COLLISION` | 代码中使用 | [demo/interaction/closure_validation.py:49](C:/Users/21474/Desktop/robot-agent/demo/interaction/closure_validation.py:49) |
 | `GRASP_POSE_PREDICTION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:30) |
@@ -46,7 +42,6 @@
 | `INVALID_OFFSET` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:22](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:22) |
 | `INVALID_REQUEST` | 代码中使用 | [atomic_skill/pull.py:481](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:481) |
 | `INVALID_RETREAT_REQUEST` | 代码中使用 | [atomic_skill/retreat.py:107](C:/Users/21474/Desktop/robot-agent/atomic_skill/retreat.py:107) |
-| `JOINT_LIMIT` | 代码中使用 | [control/pull_push_controller.py:619](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:619) |
 | `JOINT_LIMIT_VIOLATION` | 代码中使用 | [atomic_action/motion/common/strategies/joint_move/joint_move.py:91](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/joint_move/joint_move.py:91) |
 | `LOCALIZATION_TIMEOUT` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:37](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:37) |
 | `LOOK_AT_GENERATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:23) |
@@ -58,9 +53,9 @@
 | `OBSERVATION_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:14](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:14) |
 | `OCCLUSION_EVIDENCE_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:19](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:19) |
 | `ORIENTATION_ESTIMATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:28) |
-| `PATH_CONSTRAINT_INFEASIBLE` | 代码中使用 | [planning/collision_free_planner.py:45](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:45) |
-| `PATH_NOT_FOUND` | 代码中使用 | [planning/collision_free_planner.py:187](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:187) |
-| `PLANNING_FAILED` | 代码中使用 | [planning/collision_free_planner.py:67](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:67) |
+| `PATH_CONSTRAINT_INFEASIBLE` | 代码中使用 | [planning/planners/collision_free_planner.py:45](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:45) |
+| `PATH_NOT_FOUND` | 代码中使用 | [planning/planners/collision_free_planner.py:187](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:187) |
+| `PLANNING_FAILED` | 代码中使用 | [planning/planners/collision_free_planner.py:67](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:67) |
 | `POSE_ESTIMATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:29](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:29) |
 | `POSE_VALIDATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:36](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:36) |
 | `POSE_VERIFICATION_FAILED` | 代码中使用 | [atomic_action/motion/common/interaction.py:62](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/interaction.py:62) |
@@ -71,11 +66,8 @@
 | `PREPOINT_COLLISION` | 代码中使用 | [atomic_skill/pick.py:21](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:21) |
 | `PREPOINT_UNREACHABLE` | 代码中使用 | [atomic_skill/pick.py:20](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:20) |
 | `PROJECTION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:27) |
-| `PUSH_PULL_EXECUTION_ERROR` | 代码中使用 | [control/pull_push_controller.py:20](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:20) |
-| `PUSH_PULL_TIMEOUT` | 代码中使用 | [control/pull_push_controller.py:808](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:808) |
 | `REFERENCE_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:19](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:19) |
 | `REGISTRATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:23) |
-| `ROBOT_JOINT_LIMIT` | 代码中使用 | [control/pull_push_controller.py:778](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:778) |
 | `SCENE_CHANGED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:28) |
 | `SEARCH_EXHAUSTED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:32](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:32) |
 | `SEARCH_NOT_REQUIRED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:13) |
@@ -88,14 +80,12 @@
 | `STOPPED_BY_SAFETY` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:29](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:29) |
 | `TARGET_DESCRIPTION_AMBIGUOUS` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:14](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:14) |
 | `TARGET_NOT_FOUND` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:13) |
-| `TARGET_NOT_REACHED` | 代码中使用 | [control/pull_push_controller.py:458](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:458) |
 | `TARGET_POSE_COLLISION` | 代码中使用 | [demo/interaction/object_library.py:174](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:174) |
 | `TARGET_POSE_UNREACHABLE` | 代码中使用 | [demo/interaction/object_library.py:173](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:173) |
 | `TARGET_PRIOR_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:18](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:18) |
 | `TARGET_RESOLUTION_FAILED` | 代码中使用 | [atomic_skill/runner.py:183](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:183) |
 | `TARGET_UNREACHABLE` | 代码中使用 | [atomic_action/motion/common/strategies/joint_move/joint_move.py:63](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/joint_move/joint_move.py:63) |
-| `TRAJECTORY_INVALID` | 代码中使用 | [planning/time_parameterization.py:114](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:114) |
-| `TRAVEL_LIMIT` | 代码中使用 | [control/pull_push_controller.py:610](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:610) |
+| `TRAJECTORY_INVALID` | 代码中使用 | [planning/trajectory/time_parameterization.py:114](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:114) |
 | `UNKNOWN_STRATEGY` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:11](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:11) |
 | `VIEWPOINT_GENERATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:22](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:22) |
 
@@ -282,39 +272,39 @@
 | [atomic_skill/runner.py:339](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:339) | f"Grasp failed: {grasp_result['error']}" |
 | [atomic_skill/runner.py:361](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:361) | f"Release failed: {release_result['error']}" |
 | [atomic_skill/runner.py:412](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:412) | f"{command['skill_name']} requires an object-library resolver" |
-| [planning/collision_free_planner.py:45](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:45) | A hard Cartesian path cannot be relaxed for collision avoidance. |
-| [planning/collision_free_planner.py:54](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:54) | Start state is in collision. |
-| [planning/collision_free_planner.py:60](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:60) | Goal state is in collision. |
-| [planning/collision_free_planner.py:185](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:185) | No collision-free path exists with the end-effector orientation fixed. |
-| [planning/collision_free_planner.py:67](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:67) | Fixed-orientation collision planning requires a kinematics service. |
-| [planning/collision_free_planner.py:80](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:80) | RRT-Connect could not find a collision-free path within the planning budget. |
-| [planning/collision_free_planner.py:109](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:109) | Final collision-free path failed collision validation. |
-| [planning/collision_free_planner.py:201](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:201) | Fixed-orientation path could not be reconstructed. |
-| [planning/collision_free_planner.py:217](C:/Users/21474/Desktop/robot-agent/planning/collision_free_planner.py:217) | Fixed-orientation path failed final collision validation. |
-| [planning/direct_planner.py:32](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:32) | Path strategy returned an invalid joint path. |
-| [planning/direct_planner.py:34](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:34) | Path contains non-finite joint values. |
-| [planning/direct_planner.py:36](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:36) | Path violates joint limits. |
-| [planning/direct_planner.py:47](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:47) | Goal state is in collision. |
-| [planning/direct_planner.py:62](C:/Users/21474/Desktop/robot-agent/planning/direct_planner.py:62) | Direct path collides with the robot or environment. |
-| [planning/interaction_planners.py:23](C:/Users/21474/Desktop/robot-agent/planning/interaction_planners.py:23) | search must be an object |
-| [planning/interaction_planners.py:28](C:/Users/21474/Desktop/robot-agent/planning/interaction_planners.py:28) | f"{label} search values must be finite" |
-| [planning/interaction_planners.py:30](C:/Users/21474/Desktop/robot-agent/planning/interaction_planners.py:30) | f"{label} search requires 0 <= min_distance <= max_distance and step > 0" |
-| [planning/motion_limits.py:13](C:/Users/21474/Desktop/robot-agent/planning/motion_limits.py:13) | f'URDF joint {name} has no velocity limit' |
-| [planning/motion_limits.py:18](C:/Users/21474/Desktop/robot-agent/planning/motion_limits.py:18) | f'URDF joint {name} requires positive finite velocity/acceleration limits' |
-| [planning/time_parameterization.py:12](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:12) | f'{key} must be resolved from the robot URDF before continuous timing' |
-| [planning/time_parameterization.py:16](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:16) | f'{key} and {scale_key} must be finite positive joint limits and scale' |
-| [planning/time_parameterization.py:48](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:48) | waypoints must be finite NxDOF, N >= 2 |
-| [planning/time_parameterization.py:178](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:178) | waypoints must be finite with shape (N, DOF), N >= 2 |
-| [planning/time_parameterization.py:185](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:185) | velocity_scale and per-joint max_velocity must be finite and positive |
-| [planning/time_parameterization.py:236](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:236) | Ruckig joint limits and scales must be finite and positive |
-| [planning/time_parameterization.py:21](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:21) | f'{multiplier_key} must contain one finite positive multiplier per joint' |
-| [planning/time_parameterization.py:135](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:135) | Smoothed trajectory exceeds circular path tolerance |
-| [planning/time_parameterization.py:160](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:160) | Locally timed references exceed joint limits |
-| [planning/time_parameterization.py:200](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:200) | Interpolated trajectory failed collision validation |
-| [planning/time_parameterization.py:252](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:252) | Time-parameterized trajectory failed collision validation |
-| [planning/time_parameterization.py:87](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:87) | Smoothed trajectory exceeds linear path tolerance |
-| [planning/time_parameterization.py:117](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:117) | Continuous trajectory failed collision validation |
-| [planning/time_parameterization.py:114](C:/Users/21474/Desktop/robot-agent/planning/time_parameterization.py:114) | Continuous trajectory failed collision validation |
+| [planning/planners/collision_free_planner.py:45](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:45) | A hard Cartesian path cannot be relaxed for collision avoidance. |
+| [planning/planners/collision_free_planner.py:54](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:54) | Start state is in collision. |
+| [planning/planners/collision_free_planner.py:60](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:60) | Goal state is in collision. |
+| [planning/planners/collision_free_planner.py:185](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:185) | No collision-free path exists with the end-effector orientation fixed. |
+| [planning/planners/collision_free_planner.py:67](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:67) | Fixed-orientation collision planning requires a kinematics service. |
+| [planning/planners/collision_free_planner.py:80](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:80) | RRT-Connect could not find a collision-free path within the planning budget. |
+| [planning/planners/collision_free_planner.py:109](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:109) | Final collision-free path failed collision validation. |
+| [planning/planners/collision_free_planner.py:201](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:201) | Fixed-orientation path could not be reconstructed. |
+| [planning/planners/collision_free_planner.py:217](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:217) | Fixed-orientation path failed final collision validation. |
+| [planning/planners/direct_planner.py:32](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:32) | Path strategy returned an invalid joint path. |
+| [planning/planners/direct_planner.py:34](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:34) | Path contains non-finite joint values. |
+| [planning/planners/direct_planner.py:36](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:36) | Path violates joint limits. |
+| [planning/planners/direct_planner.py:47](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:47) | Goal state is in collision. |
+| [planning/planners/direct_planner.py:62](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:62) | Direct path collides with the robot or environment. |
+| [planning/planners/interaction_planners.py:23](C:/Users/21474/Desktop/robot-agent/planning/planners/interaction_planners.py:23) | search must be an object |
+| [planning/planners/interaction_planners.py:28](C:/Users/21474/Desktop/robot-agent/planning/planners/interaction_planners.py:28) | f"{label} search values must be finite" |
+| [planning/planners/interaction_planners.py:30](C:/Users/21474/Desktop/robot-agent/planning/planners/interaction_planners.py:30) | f"{label} search requires 0 <= min_distance <= max_distance and step > 0" |
+| [planning/constraints/motion_limits.py:13](C:/Users/21474/Desktop/robot-agent/planning/constraints/motion_limits.py:13) | f'URDF joint {name} has no velocity limit' |
+| [planning/constraints/motion_limits.py:18](C:/Users/21474/Desktop/robot-agent/planning/constraints/motion_limits.py:18) | f'URDF joint {name} requires positive finite velocity/acceleration limits' |
+| [planning/trajectory/time_parameterization.py:12](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:12) | f'{key} must be resolved from the robot URDF before continuous timing' |
+| [planning/trajectory/time_parameterization.py:16](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:16) | f'{key} and {scale_key} must be finite positive joint limits and scale' |
+| [planning/trajectory/time_parameterization.py:48](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:48) | waypoints must be finite NxDOF, N >= 2 |
+| [planning/trajectory/time_parameterization.py:178](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:178) | waypoints must be finite with shape (N, DOF), N >= 2 |
+| [planning/trajectory/time_parameterization.py:185](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:185) | velocity_scale and per-joint max_velocity must be finite and positive |
+| [planning/trajectory/time_parameterization.py:236](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:236) | Ruckig joint limits and scales must be finite and positive |
+| [planning/trajectory/time_parameterization.py:21](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:21) | f'{multiplier_key} must contain one finite positive multiplier per joint' |
+| [planning/trajectory/time_parameterization.py:135](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:135) | Smoothed trajectory exceeds circular path tolerance |
+| [planning/trajectory/time_parameterization.py:160](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:160) | Locally timed references exceed joint limits |
+| [planning/trajectory/time_parameterization.py:200](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:200) | Interpolated trajectory failed collision validation |
+| [planning/trajectory/time_parameterization.py:252](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:252) | Time-parameterized trajectory failed collision validation |
+| [planning/trajectory/time_parameterization.py:87](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:87) | Smoothed trajectory exceeds linear path tolerance |
+| [planning/trajectory/time_parameterization.py:117](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:117) | Continuous trajectory failed collision validation |
+| [planning/trajectory/time_parameterization.py:114](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:114) | Continuous trajectory failed collision validation |
 | [kinematics/__init__.py:15](C:/Users/21474/Desktop/robot-agent/kinematics/__init__.py:15) | name |
 | [kinematics/contracts.py:59](C:/Users/21474/Desktop/robot-agent/kinematics/contracts.py:59) | Result contains no IK solutions |
 | [kinematics/geometry.py:33](C:/Users/21474/Desktop/robot-agent/kinematics/geometry.py:33) | Only world/base poses are supported |
@@ -483,57 +473,51 @@
 | [demo/scene/assembler.py:146](C:/Users/21474/Desktop/robot-agent/demo/scene/assembler.py:146) | f"OLS returned invalid {asset_type} metadata for {object_id}" |
 | [demo/scene/assembler.py:375](C:/Users/21474/Desktop/robot-agent/demo/scene/assembler.py:375) | Robot arm must reference an OLS robot asset |
 | [demo/scene/assembler.py:165](C:/Users/21474/Desktop/robot-agent/demo/scene/assembler.py:165) | f"Invalid OLS file manifest: {manifest_path}" |
-| [demo/task_commands/converter.py:166](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:166) | f"command {index} uses unsupported skill {skill_name!r}" |
-| [demo/task_commands/converter.py:556](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:556) | configuration overrides must be objects |
-| [demo/task_commands/converter.py:616](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:616) | reference_pose quaternion must not be zero |
-| [demo/task_commands/converter.py:67](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:67) | interaction registry must contain an objects mapping |
-| [demo/task_commands/converter.py:69](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:69) | interaction registry must contain a scene path |
-| [demo/task_commands/converter.py:92](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:92) | command document must contain a commands list |
-| [demo/task_commands/converter.py:127](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:127) | f"command {index} must be an object" |
-| [demo/task_commands/converter.py:136](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:136) | f"command {index} has no valid skill_name" |
-| [demo/task_commands/converter.py:138](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:138) | f"command {index} parameters must be an object" |
-| [demo/task_commands/converter.py:178](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:178) | f"{skill_name} distance must be positive and finite" |
-| [demo/task_commands/converter.py:180](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:180) | f"{skill_name} requires a current end-effector pose" |
-| [demo/task_commands/converter.py:207](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:207) | f"move command {index} has no valid target" |
-| [demo/task_commands/converter.py:212](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:212) | pick requires an interaction object target |
-| [demo/task_commands/converter.py:245](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:245) | f"move command {index} has unsupported path type {path_type!r}" |
-| [demo/task_commands/converter.py:324](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:324) | pick requires a validated interaction pre-point and contact path |
-| [demo/task_commands/converter.py:394](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:394) | f"{skill_name} command {index} has no valid target" |
-| [demo/task_commands/converter.py:399](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:399) | f"target {target_id!r} does not define action_requests.{skill_name}" |
-| [demo/task_commands/converter.py:415](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:415) | f"target {target_id!r} has no spatial configuration" |
-| [demo/task_commands/converter.py:431](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:431) | f"target {target_id!r} has an invalid reference_pose" |
-| [demo/task_commands/converter.py:442](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:442) | f"target {target_id!r} has no anchor {anchor_key!r}" |
-| [demo/task_commands/converter.py:448](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:448) | f"target {target_id!r} has no valid local direction for relation {relation!r}" |
-| [demo/task_commands/converter.py:464](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:464) | f"target {target_id!r} has no tool orientation" |
-| [demo/task_commands/converter.py:484](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:484) | f"move command {index} targets the end effector before any pose target is known" |
-| [demo/task_commands/converter.py:498](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:498) | f"move command {index} has unknown relation {relation!r}" |
-| [demo/task_commands/converter.py:509](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:509) | f"move command {index} has invalid distance_m" |
-| [demo/task_commands/converter.py:513](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:513) | f"move command {index} relative target has no xyz position" |
-| [demo/task_commands/converter.py:521](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:521) | f"command {index} target {target_id!r} is not defined in the interaction registry" |
-| [demo/task_commands/converter.py:526](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:526) | f"command {index} target {target_id!r} is ambiguous in the interaction registry" |
-| [demo/task_commands/converter.py:98](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:98) | f"command {index} must be an object" |
-| [demo/task_commands/converter.py:143](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:143) | put requires a scene object destination in demo.run_demo |
-| [demo/task_commands/converter.py:146](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:146) | put requires an interaction object destination |
-| [demo/task_commands/converter.py:156](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:156) | f"{skill_name} command {index} has no valid target" |
-| [demo/task_commands/converter.py:158](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:158) | f"{skill_name} uses target; target_pose is resolved by the executor" |
-| [demo/task_commands/converter.py:176](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:176) | f"{skill_name} requires a numeric distance" |
-| [demo/task_commands/converter.py:505](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:505) | f"move command {index} has invalid distance_m" |
-| [demo/task_commands/converter.py:218](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:218) | f"named target {target_id!r} does not expose a pose for relative motion" |
-| [demo/task_commands/converter.py:375](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:375) | approach collision checker returned an invalid batch result |
-| [demo/task_commands/converter.py:230](C:/Users/21474/Desktop/robot-agent/demo/task_commands/converter.py:230) | Object-ID interaction motion does not support relation/distance_m/anchor offsets |
+| [requests/converter.py:166](C:/Users/21474/Desktop/robot-agent/requests/converter.py:166) | f"command {index} uses unsupported skill {skill_name!r}" |
+| [requests/converter.py:556](C:/Users/21474/Desktop/robot-agent/requests/converter.py:556) | configuration overrides must be objects |
+| [requests/converter.py:616](C:/Users/21474/Desktop/robot-agent/requests/converter.py:616) | reference_pose quaternion must not be zero |
+| [requests/converter.py:67](C:/Users/21474/Desktop/robot-agent/requests/converter.py:67) | interaction registry must contain an objects mapping |
+| [requests/converter.py:69](C:/Users/21474/Desktop/robot-agent/requests/converter.py:69) | interaction registry must contain a scene path |
+| [requests/converter.py:92](C:/Users/21474/Desktop/robot-agent/requests/converter.py:92) | command document must contain a commands list |
+| [requests/converter.py:127](C:/Users/21474/Desktop/robot-agent/requests/converter.py:127) | f"command {index} must be an object" |
+| [requests/converter.py:136](C:/Users/21474/Desktop/robot-agent/requests/converter.py:136) | f"command {index} has no valid skill_name" |
+| [requests/converter.py:138](C:/Users/21474/Desktop/robot-agent/requests/converter.py:138) | f"command {index} parameters must be an object" |
+| [requests/converter.py:178](C:/Users/21474/Desktop/robot-agent/requests/converter.py:178) | f"{skill_name} distance must be positive and finite" |
+| [requests/converter.py:180](C:/Users/21474/Desktop/robot-agent/requests/converter.py:180) | f"{skill_name} requires a current end-effector pose" |
+| [requests/converter.py:207](C:/Users/21474/Desktop/robot-agent/requests/converter.py:207) | f"move command {index} has no valid target" |
+| [requests/converter.py:212](C:/Users/21474/Desktop/robot-agent/requests/converter.py:212) | pick requires an interaction object target |
+| [requests/converter.py:245](C:/Users/21474/Desktop/robot-agent/requests/converter.py:245) | f"move command {index} has unsupported path type {path_type!r}" |
+| [requests/converter.py:324](C:/Users/21474/Desktop/robot-agent/requests/converter.py:324) | pick requires a validated interaction pre-point and contact path |
+| [requests/converter.py:394](C:/Users/21474/Desktop/robot-agent/requests/converter.py:394) | f"{skill_name} command {index} has no valid target" |
+| [requests/converter.py:399](C:/Users/21474/Desktop/robot-agent/requests/converter.py:399) | f"target {target_id!r} does not define action_requests.{skill_name}" |
+| [requests/converter.py:415](C:/Users/21474/Desktop/robot-agent/requests/converter.py:415) | f"target {target_id!r} has no spatial configuration" |
+| [requests/converter.py:431](C:/Users/21474/Desktop/robot-agent/requests/converter.py:431) | f"target {target_id!r} has an invalid reference_pose" |
+| [requests/converter.py:442](C:/Users/21474/Desktop/robot-agent/requests/converter.py:442) | f"target {target_id!r} has no anchor {anchor_key!r}" |
+| [requests/converter.py:448](C:/Users/21474/Desktop/robot-agent/requests/converter.py:448) | f"target {target_id!r} has no valid local direction for relation {relation!r}" |
+| [requests/converter.py:464](C:/Users/21474/Desktop/robot-agent/requests/converter.py:464) | f"target {target_id!r} has no tool orientation" |
+| [requests/converter.py:484](C:/Users/21474/Desktop/robot-agent/requests/converter.py:484) | f"move command {index} targets the end effector before any pose target is known" |
+| [requests/converter.py:498](C:/Users/21474/Desktop/robot-agent/requests/converter.py:498) | f"move command {index} has unknown relation {relation!r}" |
+| [requests/converter.py:509](C:/Users/21474/Desktop/robot-agent/requests/converter.py:509) | f"move command {index} has invalid distance_m" |
+| [requests/converter.py:513](C:/Users/21474/Desktop/robot-agent/requests/converter.py:513) | f"move command {index} relative target has no xyz position" |
+| [requests/converter.py:521](C:/Users/21474/Desktop/robot-agent/requests/converter.py:521) | f"command {index} target {target_id!r} is not defined in the interaction registry" |
+| [requests/converter.py:526](C:/Users/21474/Desktop/robot-agent/requests/converter.py:526) | f"command {index} target {target_id!r} is ambiguous in the interaction registry" |
+| [requests/converter.py:98](C:/Users/21474/Desktop/robot-agent/requests/converter.py:98) | f"command {index} must be an object" |
+| [requests/converter.py:143](C:/Users/21474/Desktop/robot-agent/requests/converter.py:143) | put requires a scene object destination in demo.run_demo |
+| [requests/converter.py:146](C:/Users/21474/Desktop/robot-agent/requests/converter.py:146) | put requires an interaction object destination |
+| [requests/converter.py:156](C:/Users/21474/Desktop/robot-agent/requests/converter.py:156) | f"{skill_name} command {index} has no valid target" |
+| [requests/converter.py:158](C:/Users/21474/Desktop/robot-agent/requests/converter.py:158) | f"{skill_name} uses target; target_pose is resolved by the executor" |
+| [requests/converter.py:176](C:/Users/21474/Desktop/robot-agent/requests/converter.py:176) | f"{skill_name} requires a numeric distance" |
+| [requests/converter.py:505](C:/Users/21474/Desktop/robot-agent/requests/converter.py:505) | f"move command {index} has invalid distance_m" |
+| [requests/converter.py:218](C:/Users/21474/Desktop/robot-agent/requests/converter.py:218) | f"named target {target_id!r} does not expose a pose for relative motion" |
+| [requests/converter.py:375](C:/Users/21474/Desktop/robot-agent/requests/converter.py:375) | approach collision checker returned an invalid batch result |
+| [requests/converter.py:230](C:/Users/21474/Desktop/robot-agent/requests/converter.py:230) | Object-ID interaction motion does not support relation/distance_m/anchor offsets |
 | [demo/tools/benchmark_fcl_native.py:52](C:/Users/21474/Desktop/robot-agent/demo/tools/benchmark_fcl_native.py:52) | f'Native filtering changed collision result at sample {index}: {results}' |
-| [execution/assembly.py:28](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:28) | Attachment must connect an existing parent link to the child URDF root |
-| [execution/assembly.py:30](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:30) | Attachment link names must be unique |
-| [execution/assembly.py:35](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:35) | Attachment requires a finite parent-link pose and unit quaternion |
-| [execution/assembly.py:15](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:15) | filename |
-| [execution/assembly.py:41](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:41) | 'Duplicate attachment element name: ' + e.get('name') |
-| [execution/assembly.py:45](C:/Users/21474/Desktop/robot-agent/execution/assembly.py:45) | Nonzero mimic offsets are unsupported |
-| [execution/backends/mujoco/assembly.py:28](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:28) | Attachment must connect an existing parent link to the child URDF root |
-| [execution/backends/mujoco/assembly.py:30](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:30) | Attachment link names must be unique |
-| [execution/backends/mujoco/assembly.py:35](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:35) | Attachment requires a finite parent-link pose and unit quaternion |
-| [execution/backends/mujoco/assembly.py:15](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:15) | filename |
-| [execution/backends/mujoco/assembly.py:41](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:41) | 'Duplicate attachment element name: ' + e.get('name') |
-| [execution/backends/mujoco/assembly.py:45](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/assembly.py:45) | Nonzero mimic offsets are unsupported |
+| [execution/resources/assembly.py:28](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:28) | Attachment must connect an existing parent link to the child URDF root |
+| [execution/resources/assembly.py:30](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:30) | Attachment link names must be unique |
+| [execution/resources/assembly.py:35](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:35) | Attachment requires a finite parent-link pose and unit quaternion |
+| [execution/resources/assembly.py:15](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:15) | filename |
+| [execution/resources/assembly.py:41](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:41) | 'Duplicate attachment element name: ' + e.get('name') |
+| [execution/resources/assembly.py:45](C:/Users/21474/Desktop/robot-agent/execution/resources/assembly.py:45) | Nonzero mimic offsets are unsupported |
 | [execution/backends/mujoco/backend.py:140](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:140) | MuJoCo plugin expects format=generate_from_scene |
 | [execution/backends/mujoco/backend.py:167](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:167) | Floating robot bases are not supported |
 | [execution/backends/mujoco/backend.py:298](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:298) | trajectory.fps cannot exceed the physics step frequency |
@@ -553,91 +537,88 @@
 | [execution/backends/mujoco/backend.py:209](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:209) | Configured grasp frame link is absent from MJCF |
 | [execution/backends/mujoco/backend.py:231](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:231) | f'Non-uniform cylinder scale is unsupported: {name}' |
 | [execution/backends/mujoco/backend.py:257](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:257) | f'Unsupported geometry: {name}' |
-| [execution/blackboard.py:93](C:/Users/21474/Desktop/robot-agent/execution/blackboard.py:93) | f'Target has no measured world pose: {name}' |
+| [execution/runtime/state.py:93](C:/Users/21474/Desktop/robot-agent/execution/runtime/state.py:93) | f'Target has no measured world pose: {name}' |
 | [execution/config.py:15](C:/Users/21474/Desktop/robot-agent/execution/config.py:15) | Config requires motion and trajectory objects |
 | [execution/config.py:21](C:/Users/21474/Desktop/robot-agent/execution/config.py:21) | f'Invalid {section} config keys; expected {sorted(keys)}' |
 | [execution/config.py:24](C:/Users/21474/Desktop/robot-agent/execution/config.py:24) | f'{section}.{key} must be finite numeric data' |
 | [execution/config.py:26](C:/Users/21474/Desktop/robot-agent/execution/config.py:26) | f'motion.{key} must be between 0.01 and 1.0' |
 | [execution/config.py:28](C:/Users/21474/Desktop/robot-agent/execution/config.py:28) | trajectory.fps must be a positive integer |
 | [execution/config.py:30](C:/Users/21474/Desktop/robot-agent/execution/config.py:30) | trajectory.pause_seconds must be nonnegative |
-| [execution/convergence.py:10](C:/Users/21474/Desktop/robot-agent/execution/convergence.py:10) | Contact monitor interval must be positive |
-| [execution/motion_limits.py:13](C:/Users/21474/Desktop/robot-agent/execution/motion_limits.py:13) | f'URDF joint {name} has no velocity limit' |
-| [execution/motion_limits.py:18](C:/Users/21474/Desktop/robot-agent/execution/motion_limits.py:18) | f'URDF joint {name} requires positive finite velocity/acceleration limits' |
-| [execution/mujoco.py:140](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:140) | MuJoCo plugin expects format=generate_from_scene |
-| [execution/mujoco.py:165](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:165) | Floating robot bases are not supported |
-| [execution/mujoco.py:298](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:298) | trajectory.fps cannot exceed the physics step frequency |
-| [execution/mujoco.py:312](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:312) | f'Missing MuJoCo resource: {name}' |
-| [execution/mujoco.py:448](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:448) | Viewer closed during execution |
-| [execution/mujoco.py:480](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:480) | Explicit pose edits only support static objects |
-| [execution/mujoco.py:492](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:492) | Trajectory requires finite NxDOF joints and nondecreasing timestamps from zero |
-| [execution/mujoco.py:497](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:497) | Different joint positions share a trajectory timestamp |
-| [execution/mujoco.py:501](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:501) | Trajectory requires a positive duration |
-| [execution/mujoco.py:503](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:503) | Execution timeout must be finite and positive |
-| [execution/mujoco.py:505](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:505) | Trajectory exceeds joint limits |
-| [execution/mujoco.py:507](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:507) | Trajectory start differs from execution state |
-| [execution/mujoco.py:170](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:170) | Dynamic environment URDF requires an articulated-object adapter |
-| [execution/mujoco.py:181](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:181) | Only static environment URDFs are supported |
-| [execution/mujoco.py:199](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:199) | URDF TCP link missing from imported MJCF |
-| [execution/mujoco.py:595](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:595) | reason |
-| [execution/mujoco.py:207](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:207) | Configured grasp frame link is absent from MJCF |
-| [execution/mujoco.py:253](C:/Users/21474/Desktop/robot-agent/execution/mujoco.py:253) | f'Unsupported geometry: {name}' |
-| [execution/registry.py:27](C:/Users/21474/Desktop/robot-agent/execution/registry.py:27) | f'Execution backend already registered: {name}' |
-| [execution/registry.py:35](C:/Users/21474/Desktop/robot-agent/execution/registry.py:35) | f'Unknown execution backend: {name}' |
-| [execution/resources.py:66](C:/Users/21474/Desktop/robot-agent/execution/resources.py:66) | Runtime configuration scene identity mismatch |
-| [execution/resources.py:70](C:/Users/21474/Desktop/robot-agent/execution/resources.py:70) | Unsupported runtime scene settings |
-| [execution/resources.py:108](C:/Users/21474/Desktop/robot-agent/execution/resources.py:108) | Transform requires finite position and unit xyzw quaternion |
-| [execution/resources.py:111](C:/Users/21474/Desktop/robot-agent/execution/resources.py:111) | Transform requires finite position and unit xyzw quaternion |
-| [execution/resources.py:115](C:/Users/21474/Desktop/robot-agent/execution/resources.py:115) | This scene compiler currently requires world-parented objects with unit scale |
-| [execution/resources.py:76](C:/Users/21474/Desktop/robot-agent/execution/resources.py:76) | f'Runtime configuration references unknown object: {ident}' |
-| [execution/resources.py:92](C:/Users/21474/Desktop/robot-agent/execution/resources.py:92) | Only camera/light objects may be excluded from the control scene |
-| [execution/resources.py:138](C:/Users/21474/Desktop/robot-agent/execution/resources.py:138) | f'Missing scene asset: {path}' |
-| [execution/resources.py:149](C:/Users/21474/Desktop/robot-agent/execution/resources.py:149) | Task requires schema_version=2.0 and request_id |
-| [execution/resources.py:162](C:/Users/21474/Desktop/robot-agent/execution/resources.py:162) | Unknown scene_id or scene_version mismatch |
-| [execution/resources.py:166](C:/Users/21474/Desktop/robot-agent/execution/resources.py:166) | Supported scene_schema_version values are 1 and 2 |
-| [execution/resources.py:168](C:/Users/21474/Desktop/robot-agent/execution/resources.py:168) | Scene identity disagrees with catalog/task |
-| [execution/resources.py:206](C:/Users/21474/Desktop/robot-agent/execution/resources.py:206) | Exactly one robot is supported by this runner |
-| [execution/resources.py:209](C:/Users/21474/Desktop/robot-agent/execution/resources.py:209) | Scene RobotModelRef must define urdf |
-| [execution/resources.py:213](C:/Users/21474/Desktop/robot-agent/execution/resources.py:213) | f'Missing robot URDF: {urdf}' |
-| [execution/resources.py:217](C:/Users/21474/Desktop/robot-agent/execution/resources.py:217) | Duplicate scene object ID/name |
-| [execution/resources.py:242](C:/Users/21474/Desktop/robot-agent/execution/resources.py:242) | Scene robot base_link must be the URDF root |
-| [execution/resources.py:244](C:/Users/21474/Desktop/robot-agent/execution/resources.py:244) | f'No resources for execution backend {backend}' |
-| [execution/resources.py:251](C:/Users/21474/Desktop/robot-agent/execution/resources.py:251) | RobotDriver joint_sequence must match URDF revolute joints |
-| [execution/resources.py:254](C:/Users/21474/Desktop/robot-agent/execution/resources.py:254) | Scene RobotDriver must define initial_joint_positions_rad |
-| [execution/resources.py:257](C:/Users/21474/Desktop/robot-agent/execution/resources.py:257) | Invalid initial_joints |
-| [execution/resources.py:302](C:/Users/21474/Desktop/robot-agent/execution/resources.py:302) | Collision resource mismatch |
-| [execution/resources.py:305](C:/Users/21474/Desktop/robot-agent/execution/resources.py:305) | Initial joint state mismatch |
-| [execution/resources.py:307](C:/Users/21474/Desktop/robot-agent/execution/resources.py:307) | Joint order mismatch |
-| [execution/resources.py:309](C:/Users/21474/Desktop/robot-agent/execution/resources.py:309) | Robot base pose mismatch |
-| [execution/resources.py:314](C:/Users/21474/Desktop/robot-agent/execution/resources.py:314) | f'URDF/TCP mismatch: {pos_error}, {rot_error}' |
-| [execution/resources.py:376](C:/Users/21474/Desktop/robot-agent/execution/resources.py:376) | Moving robot bases are not supported in this release |
-| [execution/resources.py:81](C:/Users/21474/Desktop/robot-agent/execution/resources.py:81) | f'Unsupported or duplicate runtime component: {kind}' |
-| [execution/resources.py:231](C:/Users/21474/Desktop/robot-agent/execution/resources.py:231) | Only fixed attachments to the scene robot are supported |
-| [execution/resources.py:233](C:/Users/21474/Desktop/robot-agent/execution/resources.py:233) | Attachment Transform.parent disagrees with RobotAttachment |
-| [execution/resources.py:235](C:/Users/21474/Desktop/robot-agent/execution/resources.py:235) | Only one gripper attachment is supported |
-| [execution/resources.py:267](C:/Users/21474/Desktop/robot-agent/execution/resources.py:267) | Object names require ASCII letters, numbers, underscore or hyphen |
-| [execution/resources.py:269](C:/Users/21474/Desktop/robot-agent/execution/resources.py:269) | Duplicate scene object ID/name |
-| [execution/resources.py:273](C:/Users/21474/Desktop/robot-agent/execution/resources.py:273) | Articulated end effectors require a separate execution adapter |
-| [execution/resources.py:277](C:/Users/21474/Desktop/robot-agent/execution/resources.py:277) | Disabled colliders are not supported by this test pipeline |
-| [execution/resources.py:330](C:/Users/21474/Desktop/robot-agent/execution/resources.py:330) | f'Object mismatch: {name}' |
-| [execution/resources.py:280](C:/Users/21474/Desktop/robot-agent/execution/resources.py:280) | Specify either primitive geometry or AssetRef, not both |
-| [execution/resources.py:283](C:/Users/21474/Desktop/robot-agent/execution/resources.py:283) | Primitive size must contain three positive dimensions |
-| [execution/resources.py:285](C:/Users/21474/Desktop/robot-agent/execution/resources.py:285) | Cylinder size is [radius, radius, full_height] |
-| [execution/resources.py:287](C:/Users/21474/Desktop/robot-agent/execution/resources.py:287) | Environment requires a box collider or AssetRef |
-| [execution/resources.py:291](C:/Users/21474/Desktop/robot-agent/execution/resources.py:291) | asset_path |
-| [execution/resources.py:293](C:/Users/21474/Desktop/robot-agent/execution/resources.py:293) | Supported environment assets: URDF, OBJ, STL |
-| [execution/resources.py:323](C:/Users/21474/Desktop/robot-agent/execution/resources.py:323) | f'Articulated base pose mismatch: {name}' |
-| [execution/resources.py:337](C:/Users/21474/Desktop/robot-agent/execution/resources.py:337) | f'FCL primitive dimensions mismatch: {name}' |
-| [execution/resources.py:229](C:/Users/21474/Desktop/robot-agent/execution/resources.py:229) | Gripper MetadataRef path must contain an integer OLS model ID |
-| [execution/scene_catalog.py:19](C:/Users/21474/Desktop/robot-agent/execution/scene_catalog.py:19) | f"Scene document must be an object: {path}" |
-| [execution/scene_catalog.py:23](C:/Users/21474/Desktop/robot-agent/execution/scene_catalog.py:23) | f"Scene must define scene_id and integer scene_version: {path}" |
-| [execution/trajectory_export.py:319](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:319) | _main() |
-| [execution/trajectory_export.py:133](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:133) | TRAJ segment_count exceeds the uint16 format limit |
-| [execution/trajectory_export.py:157](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:157) | TRAJ export requires exactly one robot object |
-| [execution/trajectory_export.py:241](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:241) | file is shorter than the 32-byte TRAJ header |
-| [execution/trajectory_export.py:298](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:298) | "TRAJ validation failed: " + "; ".join(errors) |
-| [execution/trajectory_export.py:38](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:38) | TRAJ supports at most six driven joints per object |
-| [execution/trajectory_export.py:112](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:112) | TRAJ frames require unique nonnegative frame_index values |
-| [execution/trajectory_export.py:120](C:/Users/21474/Desktop/robot-agent/execution/trajectory_export.py:120) | f'Command {command!r} has non-contiguous execution frames' |
+| [execution/runtime/convergence.py:10](C:/Users/21474/Desktop/robot-agent/execution/runtime/convergence.py:10) | Contact monitor interval must be positive |
+| [planning/constraints/motion_limits.py:13](C:/Users/21474/Desktop/robot-agent/planning/constraints/motion_limits.py:13) | f'URDF joint {name} has no velocity limit' |
+| [planning/constraints/motion_limits.py:18](C:/Users/21474/Desktop/robot-agent/planning/constraints/motion_limits.py:18) | f'URDF joint {name} requires positive finite velocity/acceleration limits' |
+| [execution/backends/mujoco/backend.py:165](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:165) | Floating robot bases are not supported |
+| [execution/backends/mujoco/backend.py:448](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:448) | Viewer closed during execution |
+| [execution/backends/mujoco/backend.py:480](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:480) | Explicit pose edits only support static objects |
+| [execution/backends/mujoco/backend.py:492](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:492) | Trajectory requires finite NxDOF joints and nondecreasing timestamps from zero |
+| [execution/backends/mujoco/backend.py:497](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:497) | Different joint positions share a trajectory timestamp |
+| [execution/backends/mujoco/backend.py:501](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:501) | Trajectory requires a positive duration |
+| [execution/backends/mujoco/backend.py:503](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:503) | Execution timeout must be finite and positive |
+| [execution/backends/mujoco/backend.py:505](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:505) | Trajectory exceeds joint limits |
+| [execution/backends/mujoco/backend.py:507](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:507) | Trajectory start differs from execution state |
+| [execution/backends/mujoco/backend.py:170](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:170) | Dynamic environment URDF requires an articulated-object adapter |
+| [execution/backends/mujoco/backend.py:181](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:181) | Only static environment URDFs are supported |
+| [execution/backends/mujoco/backend.py:199](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:199) | URDF TCP link missing from imported MJCF |
+| [execution/backends/mujoco/backend.py:595](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:595) | reason |
+| [execution/backends/mujoco/backend.py:207](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:207) | Configured grasp frame link is absent from MJCF |
+| [execution/backends/mujoco/backend.py:253](C:/Users/21474/Desktop/robot-agent/execution/backends/mujoco/backend.py:253) | f'Unsupported geometry: {name}' |
+| [execution/api/backend.py:27](C:/Users/21474/Desktop/robot-agent/execution/api/backend.py:27) | f'Execution backend already registered: {name}' |
+| [execution/api/backend.py:35](C:/Users/21474/Desktop/robot-agent/execution/api/backend.py:35) | f'Unknown execution backend: {name}' |
+| [execution/resources/resolver.py:66](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:66) | Runtime configuration scene identity mismatch |
+| [execution/resources/resolver.py:70](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:70) | Unsupported runtime scene settings |
+| [execution/resources/resolver.py:108](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:108) | Transform requires finite position and unit xyzw quaternion |
+| [execution/resources/resolver.py:111](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:111) | Transform requires finite position and unit xyzw quaternion |
+| [execution/resources/resolver.py:115](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:115) | This scene compiler currently requires world-parented objects with unit scale |
+| [execution/resources/resolver.py:76](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:76) | f'Runtime configuration references unknown object: {ident}' |
+| [execution/resources/resolver.py:92](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:92) | Only camera/light objects may be excluded from the control scene |
+| [execution/resources/resolver.py:138](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:138) | f'Missing scene asset: {path}' |
+| [execution/resources/resolver.py:149](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:149) | Task requires schema_version=2.0 and request_id |
+| [execution/resources/resolver.py:162](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:162) | Unknown scene_id or scene_version mismatch |
+| [execution/resources/resolver.py:166](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:166) | Supported scene_schema_version values are 1 and 2 |
+| [execution/resources/resolver.py:168](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:168) | Scene identity disagrees with catalog/task |
+| [execution/resources/resolver.py:206](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:206) | Exactly one robot is supported by this runner |
+| [execution/resources/resolver.py:209](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:209) | Scene RobotModelRef must define urdf |
+| [execution/resources/resolver.py:213](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:213) | f'Missing robot URDF: {urdf}' |
+| [execution/resources/resolver.py:217](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:217) | Duplicate scene object ID/name |
+| [execution/resources/resolver.py:242](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:242) | Scene robot base_link must be the URDF root |
+| [execution/resources/resolver.py:244](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:244) | f'No resources for execution backend {backend}' |
+| [execution/resources/resolver.py:251](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:251) | RobotDriver joint_sequence must match URDF revolute joints |
+| [execution/resources/resolver.py:254](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:254) | Scene RobotDriver must define initial_joint_positions_rad |
+| [execution/resources/resolver.py:257](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:257) | Invalid initial_joints |
+| [execution/resources/resolver.py:302](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:302) | Collision resource mismatch |
+| [execution/resources/resolver.py:305](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:305) | Initial joint state mismatch |
+| [execution/resources/resolver.py:307](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:307) | Joint order mismatch |
+| [execution/resources/resolver.py:309](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:309) | Robot base pose mismatch |
+| [execution/resources/resolver.py:314](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:314) | f'URDF/TCP mismatch: {pos_error}, {rot_error}' |
+| [execution/resources/resolver.py:376](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:376) | Moving robot bases are not supported in this release |
+| [execution/resources/resolver.py:81](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:81) | f'Unsupported or duplicate runtime component: {kind}' |
+| [execution/resources/resolver.py:231](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:231) | Only fixed attachments to the scene robot are supported |
+| [execution/resources/resolver.py:233](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:233) | Attachment Transform.parent disagrees with RobotAttachment |
+| [execution/resources/resolver.py:235](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:235) | Only one gripper attachment is supported |
+| [execution/resources/resolver.py:267](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:267) | Object names require ASCII letters, numbers, underscore or hyphen |
+| [execution/resources/resolver.py:269](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:269) | Duplicate scene object ID/name |
+| [execution/resources/resolver.py:273](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:273) | Articulated end effectors require a separate execution adapter |
+| [execution/resources/resolver.py:277](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:277) | Disabled colliders are not supported by this test pipeline |
+| [execution/resources/resolver.py:330](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:330) | f'Object mismatch: {name}' |
+| [execution/resources/resolver.py:280](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:280) | Specify either primitive geometry or AssetRef, not both |
+| [execution/resources/resolver.py:283](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:283) | Primitive size must contain three positive dimensions |
+| [execution/resources/resolver.py:285](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:285) | Cylinder size is [radius, radius, full_height] |
+| [execution/resources/resolver.py:287](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:287) | Environment requires a box collider or AssetRef |
+| [execution/resources/resolver.py:291](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:291) | asset_path |
+| [execution/resources/resolver.py:293](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:293) | Supported environment assets: URDF, OBJ, STL |
+| [execution/resources/resolver.py:323](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:323) | f'Articulated base pose mismatch: {name}' |
+| [execution/resources/resolver.py:337](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:337) | f'FCL primitive dimensions mismatch: {name}' |
+| [execution/resources/resolver.py:229](C:/Users/21474/Desktop/robot-agent/execution/resources/resolver.py:229) | Gripper MetadataRef path must contain an integer OLS model ID |
+| [execution/tools/catalog_migration.py:19](C:/Users/21474/Desktop/robot-agent/execution/tools/catalog_migration.py:19) | f"Scene document must be an object: {path}" |
+| [execution/tools/catalog_migration.py:23](C:/Users/21474/Desktop/robot-agent/execution/tools/catalog_migration.py:23) | f"Scene must define scene_id and integer scene_version: {path}" |
+| [execution/output/trajectory_export.py:319](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:319) | _main() |
+| [execution/output/trajectory_export.py:133](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:133) | TRAJ segment_count exceeds the uint16 format limit |
+| [execution/output/trajectory_export.py:157](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:157) | TRAJ export requires exactly one robot object |
+| [execution/output/trajectory_export.py:241](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:241) | file is shorter than the 32-byte TRAJ header |
+| [execution/output/trajectory_export.py:298](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:298) | "TRAJ validation failed: " + "; ".join(errors) |
+| [execution/output/trajectory_export.py:38](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:38) | TRAJ supports at most six driven joints per object |
+| [execution/output/trajectory_export.py:112](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:112) | TRAJ frames require unique nonnegative frame_index values |
+| [execution/output/trajectory_export.py:120](C:/Users/21474/Desktop/robot-agent/execution/output/trajectory_export.py:120) | f'Command {command!r} has non-contiguous execution frames' |
 | [sensors/camera/manager.py:14](C:/Users/21474/Desktop/robot-agent/sensors/camera/manager.py:14) | At least one camera is required. |
 | [sensors/camera/manager.py:22](C:/Users/21474/Desktop/robot-agent/sensors/camera/manager.py:22) | f"Unknown camera '{camera_id}'. Available cameras: {available}" |
 | [sensors/camera_mujoco/camera.py:42](C:/Users/21474/Desktop/robot-agent/sensors/camera_mujoco/camera.py:42) | Camera width and height must be positive. |
@@ -653,70 +634,6 @@
 | [sensors/camera_mujoco/scene.py:91](C:/Users/21474/Desktop/robot-agent/sensors/camera_mujoco/scene.py:91) | f"Invalid camera quaternion for {camera_name}." |
 | [sensors/camera_mujoco/scene.py:85](C:/Users/21474/Desktop/robot-agent/sensors/camera_mujoco/scene.py:85) | f"Unsupported camera parent object: {parent_object}" |
 | [sensors/camera_mujoco/scene.py:88](C:/Users/21474/Desktop/robot-agent/sensors/camera_mujoco/scene.py:88) | Wrist camera parent body robotiq_2f85_mount is absent from MJCF. |
-| [control/binding_gripper.py:36](C:/Users/21474/Desktop/robot-agent/control/binding_gripper.py:36) | f'Physical grasp requires the articulated gripper backend: missing {name}' |
-| [control/binding_gripper.py:95](C:/Users/21474/Desktop/robot-agent/control/binding_gripper.py:95) | Gripper opening timed out |
-| [control/binding_gripper.py:104](C:/Users/21474/Desktop/robot-agent/control/binding_gripper.py:104) | Release the held object before acquiring another grasp |
-| [control/binding_gripper.py:172](C:/Users/21474/Desktop/robot-agent/control/binding_gripper.py:172) | Physical hold force must be in (0, 40] N |
-| [control/continuous_trajectory.py:19](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:19) | path and fractions must contain at least two matching samples |
-| [control/continuous_trajectory.py:21](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:21) | path and fractions must be finite |
-| [control/continuous_trajectory.py:23](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:23) | fractions must be strictly increasing and end above zero |
-| [control/continuous_trajectory.py:66](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:66) | Local timing requires finite positive joint limits and timestep |
-| [control/continuous_trajectory.py:113](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:113) | Joint velocity limits must be finite and positive |
-| [control/continuous_trajectory.py:162](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:162) | corner_slowdown must be finite and nonnegative |
-| [control/continuous_trajectory.py:37](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:37) | f"Unsupported path interpolator: {interpolator}" |
-| [control/continuous_trajectory.py:117](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:117) | Joint acceleration limits must be finite and positive |
-| [control/continuous_trajectory.py:148](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:148) | Joint jerk limits must be finite and positive |
-| [control/continuous_trajectory.py:154](C:/Users/21474/Desktop/robot-agent/control/continuous_trajectory.py:154) | Task speed limit must be finite and positive |
-| [control/gripper_controller.py:45](C:/Users/21474/Desktop/robot-agent/control/gripper_controller.py:45) | f"MuJoCo gripper object not found: {name}" |
-| [control/gripper_controller.py:130](C:/Users/21474/Desktop/robot-agent/control/gripper_controller.py:130) | Gripper motion timed out. |
-| [control/press_controller.py:57](C:/Users/21474/Desktop/robot-agent/control/press_controller.py:57) | Calibrated force feedback is unavailable. |
-| [control/press_controller.py:105](C:/Users/21474/Desktop/robot-agent/control/press_controller.py:105) | Press execution timed out. |
-| [control/press_controller.py:127](C:/Users/21474/Desktop/robot-agent/control/press_controller.py:127) | Unexpected local collision during press. |
-| [control/press_controller.py:130](C:/Users/21474/Desktop/robot-agent/control/press_controller.py:130) | Maximum press force exceeded. |
-| [control/press_controller.py:111](C:/Users/21474/Desktop/robot-agent/control/press_controller.py:111) | f"Local press IK failed at travel {travel:.6f} m: {exc}" |
-| [control/pull_push_controller.py:44](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:44) | Target must identify one movable body, not the cabinet root. |
-| [control/pull_push_controller.py:136](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:136) | f'Forbidden contact: {body_a} ({geom_a}) ↔ {body_b} ({geom_b}); distance={distance:.6g}' |
-| [control/pull_push_controller.py:174](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:174) | FCL detected a forbidden robot/environment collision. |
-| [control/pull_push_controller.py:222](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:222) | Unsupported end-effector path type. |
-| [control/pull_push_controller.py:307](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:307) | Unsupported end-effector path type. |
-| [control/pull_push_controller.py:312](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:312) | Robot is not at the prepared interaction configuration. |
-| [control/pull_push_controller.py:320](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:320) | Target state changed after the path was prepared. |
-| [control/pull_push_controller.py:357](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:357) | Establish measured pad contact before Push/Pull. |
-| [control/pull_push_controller.py:359](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:359) | Initial contact exceeds maximum_force. |
-| [control/pull_push_controller.py:530](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:530) | Unsupported end-effector path type. |
-| [control/pull_push_controller.py:567](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:567) | Establish measured pad contact before Push/Pull. |
-| [control/pull_push_controller.py:576](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:576) | Initial contact exceeds maximum_force. |
-| [control/pull_push_controller.py:590](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:590) | Tool Z axis is not aligned with contact normal. |
-| [control/pull_push_controller.py:609](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:609) | Configured travel limit reached. |
-| [control/pull_push_controller.py:634](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:634) | Requested motion pulls away from the surface; non-grasped contact can only push. |
-| [control/pull_push_controller.py:799](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:799) | No complete path. |
-| [control/pull_push_controller.py:367](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:367) | contact_point is not at the measured pad contact. |
-| [control/pull_push_controller.py:443](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:443) | Arm did not reach the planned endpoint. |
-| [control/pull_push_controller.py:456](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:456) | Requested forward stroke ended without measured pad contact. |
-| [control/pull_push_controller.py:458](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:458) | Actual target motion did not reach the requested endpoint. |
-| [control/pull_push_controller.py:548](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:548) | contact_geom must belong to the target link. |
-| [control/pull_push_controller.py:555](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:555) | Invalid prepared interaction joint state. |
-| [control/pull_push_controller.py:618](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:618) | Mechanism joint limit reached. |
-| [control/pull_push_controller.py:629](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:629) | contact_point is not at the measured pad contact. |
-| [control/pull_push_controller.py:808](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:808) | Trajectory validation timeout. |
-| [control/pull_push_controller.py:917](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:917) | Arm did not reach the planned endpoint. |
-| [control/pull_push_controller.py:930](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:930) | Requested forward stroke ended without measured pad contact. |
-| [control/pull_push_controller.py:933](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:933) | Actual target motion did not reach the requested endpoint. |
-| [control/pull_push_controller.py:408](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:408) | Measured contact force exceeded maximum_force. |
-| [control/pull_push_controller.py:441](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:441) | Execution timed out. |
-| [control/pull_push_controller.py:692](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:692) | Smoothed path exceeds Cartesian path tolerance. |
-| [control/pull_push_controller.py:717](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:717) | Planning timeout. |
-| [control/pull_push_controller.py:766](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:766) | No collision-free IK branch at path sample. |
-| [control/pull_push_controller.py:769](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:769) | IK returned no finite joint solution |
-| [control/pull_push_controller.py:777](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:777) | IK reaches arm joint limits |
-| [control/pull_push_controller.py:783](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:783) | No continuous IK continuation |
-| [control/pull_push_controller.py:879](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:879) | Measured contact force exceeded maximum_force. |
-| [control/pull_push_controller.py:915](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:915) | Execution timed out. |
-| [control/pull_push_controller.py:396](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:396) | Physics became unstable. |
-| [control/pull_push_controller.py:425](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:425) | Measured target contact lost. |
-| [control/pull_push_controller.py:762](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:762) | No continuous IK branch at path sample. |
-| [control/pull_push_controller.py:867](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:867) | Physics became unstable. |
-| [control/pull_push_controller.py:899](C:/Users/21474/Desktop/robot-agent/control/pull_push_controller.py:899) | Measured target contact lost. |
 | [services/object_library.py:18](C:/Users/21474/Desktop/robot-agent/services/object_library.py:18) | Object library URL must be an HTTP(S) base URL |
 | [services/object_library.py:20](C:/Users/21474/Desktop/robot-agent/services/object_library.py:20) | Object library uid must be a nonnegative integer |
 | [services/object_library.py:26](C:/Users/21474/Desktop/robot-agent/services/object_library.py:26) | f'{asset_type.title()} ID must be a nonnegative integer' |
@@ -724,3 +641,6 @@
 | [services/object_library.py:32](C:/Users/21474/Desktop/robot-agent/services/object_library.py:32) | Model metadata exceeds 2 MiB |
 | [services/object_library.py:35](C:/Users/21474/Desktop/robot-agent/services/object_library.py:35) | f'OLS {asset_type} {asset_id}: HTTP {exc.code}' |
 | [services/object_library.py:37](C:/Users/21474/Desktop/robot-agent/services/object_library.py:37) | f'OLS {asset_type} {asset_id} query failed: {exc}' |
+
+
+

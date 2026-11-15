@@ -1,0 +1,338 @@
+{
+  "revision": 1084,
+  "simulation_time": 9.847999999999958,
+  "targets": {
+    "1": {
+      "name": "WorkTable",
+      "model_id": 29
+    },
+    "2": {
+      "name": "ur5",
+      "model_id": null
+    },
+    "6": {
+      "name": "RobotPedestal",
+      "model_id": null
+    },
+    "7": {
+      "name": "Apple",
+      "model_id": 1
+    }
+  },
+  "objects": {
+    "WorkTable": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "RobotPedestal": {
+      "position": [
+        0.0,
+        -0.5499999999999999,
+        0.25
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "Apple": {
+      "position": [
+        -0.13412847450281715,
+        -0.36812252035184384,
+        1.2111672409582137
+      ],
+      "quaternion_xyzw": [
+        0.22823581283376557,
+        -0.18954857419978102,
+        0.6741399786957376,
+        0.6763985813727361
+      ]
+    }
+  },
+  "mechanisms": {},
+  "gripper": {
+    "known": true,
+    "initialized": true,
+    "width": 0.0743474156033677,
+    "force": 10.138256436484166,
+    "contact_detected": true,
+    "object_present": true,
+    "holding": true,
+    "mode": "physical",
+    "slip_detected": false,
+    "bilateral_contact": true,
+    "contact_lost": false,
+    "left_force_n": 5.0726411441462105,
+    "right_force_n": 5.065615292337955,
+    "hold_force_target_n": 10.0,
+    "filtered_hold_force_n": 10.1291472756112,
+    "hold_force_torque_saturated": false,
+    "relative_position_error_m": 0.0046812899801064786,
+    "relative_orientation_error_rad": 0.016287357243123756,
+    "confirmation": {
+      "left_force_n": 6.934972669995698,
+      "right_force_n": 6.899262000190486,
+      "measured_left_force_n": 6.934972669995698,
+      "measured_right_force_n": 6.899262000190486,
+      "closure_completed": false,
+      "no_contact_time_s": 0.0,
+      "command_reached": false,
+      "driver_reached": false,
+      "width_reached": false,
+      "measured_width_m": 0.0742720588271156,
+      "requested_width_m": 0.0,
+      "no_contact_threshold_n": 0.1,
+      "stable_time_s": 0.09999999999998899,
+      "width_range_m": 0.00017584437774548212,
+      "position_range_m": 0.00014364006992770946,
+      "orientation_range_rad": 0.0002732897390278803,
+      "bilateral_contact": true,
+      "confirmed": true,
+      "reason": "stable_bilateral_grasp",
+      "mode": "physical"
+    },
+    "object_id": "Apple"
+  },
+  "model_cache": {
+    "entries": 2,
+    "hits": 2,
+    "misses": 2
+  },
+  "interaction_anchors": [
+    {
+      "target": "Apple",
+      "grasp_index": 0,
+      "body": "Apple",
+      "body_from_grasp": [
+        [
+          0.9978087495499802,
+          0.007402228287415035,
+          -0.06574881244467162,
+          0.0024942930298297653
+        ],
+        [
+          0.00603246002894294,
+          -0.9997611185068506,
+          -0.021007506942297718,
+          -0.0007739968387511127
+        ],
+        [
+          -0.06588860863231828,
+          0.020564847150233666,
+          -0.9976150451522797,
+          -0.002719615322153146
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "visual_grasps": {
+    "Apple": {
+      "anchor_frame": "Apple",
+      "anchor_from_pose": [
+        [
+          0.9978087495499802,
+          0.007402228287415035,
+          -0.06574881244467162,
+          0.0024942930298297653
+        ],
+        [
+          0.00603246002894294,
+          -0.9997611185068506,
+          -0.021007506942297718,
+          -0.0007739968387511127
+        ],
+        [
+          -0.06588860863231828,
+          0.020564847150233666,
+          -0.9976150451522797,
+          -0.002719615322153146
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "grasp",
+        "pixel": {
+          "x": 319,
+          "y": 242
+        },
+        "normalized": {
+          "x": 0.5,
+          "y": 0.55
+        },
+        "depth_m": 0.1953691691160202,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": 0.0012270884230557817,
+          "y": -0.00452755106121123,
+          "z": 0.6620457272027236
+        },
+        "frame": "world",
+        "confidence": 0.9,
+        "is_elongated": false,
+        "axis_points": null,
+        "axis_status": "not_elongated",
+        "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "camera_id": "wrist_camera",
+        "timestamp": 5.589999999999606,
+        "sequence": 0,
+        "visual_estimation_s": 8.895486599998549,
+        "crop_origin_pixel": {
+          "x": 231,
+          "y": 146
+        },
+        "long_axis_aligned": false,
+        "orientation_source": "fixed_downward",
+        "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "depth_selected": true,
+        "grasp_depth_candidates_m": [
+          0.03,
+          0.025,
+          0.02,
+          0.015,
+          0.01,
+          0.005,
+          0.0
+        ],
+        "depth_search_enabled": true,
+        "target_point_world": {
+          "x": 0.0012271347154048284,
+          "y": -0.004527589703942578,
+          "z": 0.6320457272027842
+        },
+        "grasp_point_world": {
+          "x": 0.0012271347154048284,
+          "y": -0.004527589703942578,
+          "z": 0.6320457272027842
+        },
+        "yaw_selected": true,
+        "grasp_depth_offset_m": 0.03,
+        "selected_yaw_offset_rad": 0.0,
+        "grasp_rotation_world": [
+          [
+            0.019216295069384853,
+            0.9998153499528927,
+            1.5430783015010973e-06
+          ],
+          [
+            0.9998153499532915,
+            -0.019216295067404528,
+            -1.288091045243299e-06
+          ],
+          [
+            -1.2582009511905505e-06,
+            1.5675457096257455e-06,
+            -0.9999999999979798
+          ]
+        ],
+        "surface_normal_world": [
+          -1.5430783015010973e-06,
+          1.288091045243299e-06,
+          0.9999999999979798
+        ],
+        "wrist_refinement": {
+          "camera_id": "wrist_camera",
+          "timestamp": 5.589999999999606,
+          "sequence": 0,
+          "coarse_surface_world": [
+            0.0009365293596054363,
+            -0.005716631664575244,
+            0.6615912404386326
+          ],
+          "refined_surface_world": [
+            0.0012270884230557817,
+            -0.00452755106121123,
+            0.6620457272027236
+          ],
+          "correction_world_m": [
+            0.00029055906345034537,
+            0.0011890806033640136,
+            0.00045448676409098887
+          ],
+          "correction_distance_m": 0.0013057164582647976,
+          "image_region": "target_aabb_crop",
+          "coarse_point_in_full_image": {
+            "in_front": true,
+            "optical_depth_m": 0.19582345150984024,
+            "pixel": {
+              "x": 319.5810635936598,
+              "y": 239.4611357726315
+            },
+            "in_frame": true,
+            "distance_from_principal_point_px": 0.08989846709477149
+          },
+          "crop_origin_pixel": {
+            "x": 231,
+            "y": 146
+          },
+          "status": "validated",
+          "timing_s": {
+            "capture": 0.006256300024688244,
+            "vlm": 3.56225369987078,
+            "validation": 0.12799639999866486
+          },
+          "elapsed_s": 3.696682999841869
+        },
+        "grasp_depth_attempts": [
+          {
+            "grasp_depth_offset_m": 0.03,
+            "success": true,
+            "gripper_pose_precheck": [
+              {
+                "status": "clear",
+                "elapsed_s": 0.0050020001363009214
+              }
+            ],
+            "rejected": []
+          }
+        ],
+        "grasp_depth_preflight": {
+          "success": true,
+          "reason": "static_geometry_valid",
+          "contacts": [],
+          "table_clearance": {
+            "success": true,
+            "table_height_m": 0.6000000238418585,
+            "gripper_lowest_z_m": 0.6250798545662177,
+            "clearance_m": 0.00807983072435925,
+            "lowest_link": "robotiq_2f85_left_pad",
+            "table_floor_z_m": 0.6170000238418585,
+            "table_floor_offset_m": 0.017,
+            "gripper_configuration": "preclosure_open",
+            "open_width_m": 0.08
+          },
+          "validation_mode": "static_open_geometry",
+          "contact_preflight": {
+            "distance_m": 0.1,
+            "rejected": []
+          }
+        }
+      }
+    }
+  },
+  "visual_places": {}
+}

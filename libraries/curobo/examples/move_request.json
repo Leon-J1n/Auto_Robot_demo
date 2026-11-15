@@ -1,0 +1,30 @@
+{
+  "target": {
+    "type": "pose",
+    "frame": "base",
+    "position": {
+      "x": 0.08267654486244058,
+      "y": 0.14801710366428153,
+      "z": 0.8428094434288469
+    },
+    "orientation": {
+      "representation": "quaternion",
+      "w": -0.19621127880360203,
+      "x": 0.732270583138882,
+      "y": -0.6299146932035998,
+      "z": 0.1687850894656034
+    }
+  },
+  "motion": {
+    "path_type": "joint"
+  },
+  "planning": {
+    "planner_type": "curobo",
+    "max_attempts": 5
+  },
+  "constraints": {
+    "safety_distance": 0.0,
+    "velocity_scale": 1.0,
+    "acceleration_scale": 1.0
+  }
+}

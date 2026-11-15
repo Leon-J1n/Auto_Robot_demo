@@ -1,0 +1,1964 @@
+{
+  "command_id": "15",
+  "skill_name": "approach",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 45.10287160007283,
+    "candidate_selection": 0.6213746999856085
+  },
+  "wrist_observation": null,
+  "pose_search_precheck": [
+    {
+      "distance_m": 0.1,
+      "elapsed_s": 0.0012601998168975115,
+      "status": "analytic_solution"
+    }
+  ],
+  "successful_distance_m": 0.1,
+  "target_resolution_diagnostics": {
+    "placement_height_attempts": [
+      {
+        "placement_height_offset_m": -0.03,
+        "success": false,
+        "evaluated": true,
+        "elapsed_s": 0.35643759998492897,
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491791, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559401, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169552, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664459946, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086941, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098935968822563, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030147117, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984321, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185131, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034605, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491744, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559297, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169637, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664460019, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086929, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989359688226958, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030146301, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984207, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185242, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034468, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016512825682070977, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016312250262632466, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.001509637555997713, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091933, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069296, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113817, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.00717551788379986, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.020611102404019675, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098936138685231, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266134780104781, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105084, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626555, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'forearm_link', 'distance': 0.001834939807370991, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091931, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069287, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113822, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517883799874, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110240401966, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989361386852527, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.000726613478010471, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105065, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626535, 'self_collision': False})}]",
+          "rejected": [
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.013071685519491791,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.004215751473559401,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014276734653169552,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007175517664459946,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.02061110264086941,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.001098935968822563,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0007266135030147117,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.009098213493984321,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014447362076185131,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007255055220034605,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.013071685519491744,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.004215751473559297,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014276734653169637,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007175517664460019,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.02061110264086929,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0010989359688226958,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0007266135030146301,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.009098213493984207,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014447362076185242,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007255055220034468,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Screwdriver",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0016512825682070977,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Screwdriver",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.0016312250262632466,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Screwdriver",
+                  "geom2": "upper_arm_link",
+                  "distance": 0.001509637555997713,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.013071685569091933,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.004215751380069296,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014276734874113817,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.00717551788379986,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.020611102404019675,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.001098936138685231,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0007266134780104781,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.009098213263105084,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.01444736231610666,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007255054986626555,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Screwdriver",
+                  "geom2": "forearm_link",
+                  "distance": 0.001834939807370991,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.013071685569091931,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.004215751380069287,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.014276734874113822,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007175517883799874,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.02061110240401966,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0010989361386852527,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.000726613478010471,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.009098213263105065,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.01444736231610666,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.007255054986626535,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "placement_height_offset_m": -0.02,
+        "success": false,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred infeasible below the selected height"
+      },
+      {
+        "placement_height_offset_m": -0.01,
+        "success": false,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred infeasible below the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.0,
+        "success": false,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred infeasible below the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.01,
+        "success": false,
+        "evaluated": true,
+        "elapsed_s": 0.11751869996078312,
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385385, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096585539156, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558263382, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221468130421, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385503, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02273609658553926, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558264484, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972214681305314, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753289, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823899814, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002609825995593152, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972217080515034, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753206, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823900164, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098259955934892, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221708051837, 'self_collision': False})}]",
+          "rejected": [
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.008417240458385385,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.022736096585539156,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0026098257558263382,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.002697221468130421,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.008417240458385503,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.02273609658553926,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0026098257558264484,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0026972214681305314,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.008417240504753289,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.022736096823899814,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.002609825995593152,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0026972217080515034,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.008417240504753206,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.022736096823900164,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0026098259955934892,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.002697221708051837,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "placement_height_offset_m": 0.02,
+        "success": false,
+        "evaluated": false,
+        "inferred_by_monotonicity": true,
+        "inference": "binary search inferred infeasible below the selected height"
+      },
+      {
+        "placement_height_offset_m": 0.03,
+        "success": false,
+        "evaluated": true,
+        "elapsed_s": 0.11221219995059073,
+        "error": {
+          "error_code": "TARGET_POSE_COLLISION",
+          "failed_stage": "target_resolution",
+          "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452309, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643363, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452844, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643467, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709944139, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015989922540365, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709942888, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002801598992254136, 'self_collision': False})}]",
+          "rejected": [
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0013810597689452309,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0028015987527643363,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0013810597689452844,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0028015987527643467,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0013810595709944139,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.0028015989922540365,
+                  "self_collision": false
+                }
+              ]
+            },
+            {
+              "grasp_index": 0,
+              "reason": "goal_collision",
+              "contacts": [
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": 0.0013810595709942888,
+                  "self_collision": false
+                },
+                {
+                  "geom1": "Banana",
+                  "geom2": "Basket",
+                  "distance": -0.002801598992254136,
+                  "self_collision": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "placement_height_offset_m": 0.04,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.022135799983516335,
+        "rejected": []
+      },
+      {
+        "placement_height_offset_m": 0.05,
+        "success": true,
+        "evaluated": true,
+        "elapsed_s": 0.013016999932006001,
+        "rejected": []
+      }
+    ],
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 386,
+        "y": 299
+      },
+      "world_point": {
+        "x": -0.1671875552500418,
+        "y": 0.1287949097202647,
+        "z": 0.817507
+      },
+      "depth_m": 1.045091152191162,
+      "frame": "world",
+      "confidence": null,
+      "timestamp": 20.45999999999954,
+      "sequence": 3,
+      "placement_center_fallback": {
+        "used": true,
+        "radius_fraction_xy": 0.2,
+        "max_points": 3,
+        "sample_index": 0,
+        "trigger": "vlm_error",
+        "vlm_error_type": "APITimeoutError",
+        "attempts": [
+          {
+            "world_point": {
+              "x": -0.1671875552500418,
+              "y": 0.1287949097202647,
+              "z": 0.817507
+            },
+            "height_attempts": [
+              {
+                "placement_height_offset_m": -0.03,
+                "success": false,
+                "evaluated": true,
+                "elapsed_s": 0.35643759998492897,
+                "error": {
+                  "error_code": "TARGET_POSE_COLLISION",
+                  "failed_stage": "target_resolution",
+                  "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491791, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559401, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169552, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664459946, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086941, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098935968822563, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030147117, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984321, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185131, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034605, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491744, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559297, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169637, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664460019, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086929, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989359688226958, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030146301, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984207, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185242, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034468, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016512825682070977, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016312250262632466, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.001509637555997713, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091933, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069296, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113817, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.00717551788379986, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.020611102404019675, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098936138685231, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266134780104781, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105084, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626555, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'forearm_link', 'distance': 0.001834939807370991, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091931, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069287, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113822, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517883799874, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110240401966, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989361386852527, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.000726613478010471, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105065, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626535, 'self_collision': False})}]",
+                  "rejected": [
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.013071685519491791,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.004215751473559401,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014276734653169552,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007175517664459946,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.02061110264086941,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.001098935968822563,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0007266135030147117,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.009098213493984321,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014447362076185131,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007255055220034605,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.013071685519491744,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.004215751473559297,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014276734653169637,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007175517664460019,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.02061110264086929,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0010989359688226958,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0007266135030146301,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.009098213493984207,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014447362076185242,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007255055220034468,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Screwdriver",
+                          "geom2": "upper_arm_link",
+                          "distance": 0.0016512825682070977,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Screwdriver",
+                          "geom2": "upper_arm_link",
+                          "distance": 0.0016312250262632466,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Screwdriver",
+                          "geom2": "upper_arm_link",
+                          "distance": 0.001509637555997713,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.013071685569091933,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.004215751380069296,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014276734874113817,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.00717551788379986,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.020611102404019675,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.001098936138685231,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0007266134780104781,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.009098213263105084,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.01444736231610666,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007255054986626555,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Screwdriver",
+                          "geom2": "forearm_link",
+                          "distance": 0.001834939807370991,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.013071685569091931,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.004215751380069287,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.014276734874113822,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007175517883799874,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.02061110240401966,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0010989361386852527,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.000726613478010471,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.009098213263105065,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.01444736231610666,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.007255054986626535,
+                          "self_collision": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "placement_height_offset_m": -0.02,
+                "success": false,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred infeasible below the selected height"
+              },
+              {
+                "placement_height_offset_m": -0.01,
+                "success": false,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred infeasible below the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.0,
+                "success": false,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred infeasible below the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.01,
+                "success": false,
+                "evaluated": true,
+                "elapsed_s": 0.11751869996078312,
+                "error": {
+                  "error_code": "TARGET_POSE_COLLISION",
+                  "failed_stage": "target_resolution",
+                  "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385385, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096585539156, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558263382, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221468130421, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385503, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02273609658553926, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558264484, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972214681305314, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753289, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823899814, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002609825995593152, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972217080515034, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753206, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823900164, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098259955934892, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221708051837, 'self_collision': False})}]",
+                  "rejected": [
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.008417240458385385,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.022736096585539156,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0026098257558263382,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.002697221468130421,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.008417240458385503,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.02273609658553926,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0026098257558264484,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0026972214681305314,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.008417240504753289,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.022736096823899814,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.002609825995593152,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0026972217080515034,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.008417240504753206,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.022736096823900164,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0026098259955934892,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.002697221708051837,
+                          "self_collision": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "placement_height_offset_m": 0.02,
+                "success": false,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred infeasible below the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.03,
+                "success": false,
+                "evaluated": true,
+                "elapsed_s": 0.11221219995059073,
+                "error": {
+                  "error_code": "TARGET_POSE_COLLISION",
+                  "failed_stage": "target_resolution",
+                  "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452309, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643363, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452844, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643467, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709944139, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015989922540365, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709942888, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002801598992254136, 'self_collision': False})}]",
+                  "rejected": [
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0013810597689452309,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0028015987527643363,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0013810597689452844,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0028015987527643467,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0013810595709944139,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.0028015989922540365,
+                          "self_collision": false
+                        }
+                      ]
+                    },
+                    {
+                      "grasp_index": 0,
+                      "reason": "goal_collision",
+                      "contacts": [
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": 0.0013810595709942888,
+                          "self_collision": false
+                        },
+                        {
+                          "geom1": "Banana",
+                          "geom2": "Basket",
+                          "distance": -0.002801598992254136,
+                          "self_collision": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "placement_height_offset_m": 0.04,
+                "success": true,
+                "evaluated": true,
+                "elapsed_s": 0.022135799983516335,
+                "rejected": []
+              },
+              {
+                "placement_height_offset_m": 0.05,
+                "success": true,
+                "evaluated": true,
+                "elapsed_s": 0.013016999932006001,
+                "rejected": []
+              }
+            ],
+            "success": true
+          }
+        ]
+      },
+      "crop_origin_pixel": {
+        "x": 340,
+        "y": 251
+      },
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "rgbd_world_point": {
+        "x": -0.1671875552500418,
+        "y": 0.1287949097202647,
+        "z": 0.6167621157824956
+      },
+      "placement_aabb_top_world": {
+        "x": -0.1671875552500418,
+        "y": 0.1287949097202647,
+        "z": 0.817507
+      },
+      "held_object": "Banana",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05
+      ],
+      "target_point_world": {
+        "x": -0.1671875552500418,
+        "y": 0.1287949097202647,
+        "z": 0.857507
+      },
+      "placement_cycle_id": "16",
+      "placement_height_offset_m": 0.04,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.35643759998492897,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491791, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559401, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169552, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664459946, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086941, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098935968822563, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030147117, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984321, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185131, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034605, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685519491744, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751473559297, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734653169637, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517664460019, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110264086929, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989359688226958, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266135030146301, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213493984207, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014447362076185242, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255055220034468, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016512825682070977, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.0016312250262632466, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': 0.001509637555997713, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091933, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069296, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113817, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.00717551788379986, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.020611102404019675, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.001098936138685231, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0007266134780104781, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105084, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626555, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'forearm_link', 'distance': 0.001834939807370991, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.013071685569091931, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.004215751380069287, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.014276734874113822, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007175517883799874, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02061110240401966, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0010989361386852527, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.000726613478010471, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.009098213263105065, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.01444736231610666, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.007255054986626535, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.013071685519491791,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.004215751473559401,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014276734653169552,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007175517664459946,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.02061110264086941,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.001098935968822563,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0007266135030147117,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.009098213493984321,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014447362076185131,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007255055220034605,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.013071685519491744,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.004215751473559297,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014276734653169637,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007175517664460019,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.02061110264086929,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0010989359688226958,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0007266135030146301,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.009098213493984207,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014447362076185242,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007255055220034468,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0016512825682070977,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.0016312250262632466,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "upper_arm_link",
+                    "distance": 0.001509637555997713,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.013071685569091933,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.004215751380069296,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014276734874113817,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.00717551788379986,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.020611102404019675,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.001098936138685231,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0007266134780104781,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.009098213263105084,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.01444736231610666,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007255054986626555,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "forearm_link",
+                    "distance": 0.001834939807370991,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.013071685569091931,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.004215751380069287,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.014276734874113822,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007175517883799874,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.02061110240401966,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0010989361386852527,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.000726613478010471,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.009098213263105065,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.01444736231610666,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.007255054986626535,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": false,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred infeasible below the selected height"
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": false,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred infeasible below the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": false,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred infeasible below the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.11751869996078312,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385385, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096585539156, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558263382, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221468130421, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240458385503, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.02273609658553926, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098257558264484, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972214681305314, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753289, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823899814, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002609825995593152, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026972217080515034, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.008417240504753206, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.022736096823900164, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0026098259955934892, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002697221708051837, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.008417240458385385,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.022736096585539156,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0026098257558263382,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.002697221468130421,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.008417240458385503,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.02273609658553926,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0026098257558264484,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0026972214681305314,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.008417240504753289,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.022736096823899814,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.002609825995593152,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0026972217080515034,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.008417240504753206,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.022736096823900164,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0026098259955934892,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.002697221708051837,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": false,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred infeasible below the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.11221219995059073,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452309, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643363, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810597689452844, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015987527643467, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709944139, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.0028015989922540365, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Banana', 'geom2': 'Basket', 'distance': 0.0013810595709942888, 'self_collision': False}, {'geom1': 'Banana', 'geom2': 'Basket', 'distance': -0.002801598992254136, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0013810597689452309,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0028015987527643363,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0013810597689452844,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0028015987527643467,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0013810595709944139,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.0028015989922540365,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": 0.0013810595709942888,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Banana",
+                    "geom2": "Basket",
+                    "distance": -0.002801598992254136,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": 0.04,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.022135799983516335,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.05,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.013016999932006001,
+          "rejected": []
+        }
+      ]
+    }
+  },
+  "motions": [
+    {
+      "phase": "approach_approach_100mm",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0010500000789761543,
+        "context": 0.0001183999702334404,
+        "selection": 5.600042641162872e-06,
+        "path_generation": 0.0033917000982910395,
+        "planning": 0.6167255998589098,
+        "trajectory_preparation": 0.513352100038901,
+        "posture_scoring": 2.600019797682762e-06,
+        "pre_execution_total": 1.1346542998217046
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 8.950009942054749e-05,
+          "direct_path_collision_check": 0.01804140000604093,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 4.3921432027641085,
+          "total_joint_travel_rad": 3.919691828948082,
+          "maximum_joint_travel_rad": 1.1937348747541259,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.4724513738160269,
+          "joint_travel_by_joint_rad": [
+            1.1937348747541259,
+            0.3916035680979394,
+            1.1361627915352572,
+            0.7493384798808269,
+            0.0009487587472820636,
+            0.4479033559326501
+          ],
+          "normalized_joint_travel": [
+            0.3799773283170255,
+            0.12465119409024376,
+            0.7233250304219367,
+            0.23852166809560968,
+            0.0003019990633044882,
+            0.1425719597633209
+          ],
+          "candidate_count": 4,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 0,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 3,
+          "budget_exhausted": false,
+          "post_solution_search_budget_s": 0.15,
+          "stopped_after_feasible_solution": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                0.04861996976665081,
+                -0.9255537757381224,
+                0.3579281203255542,
+                -1.0031706009561026,
+                -1.570796296521516,
+                0.048619972971754286
+              ],
+              "endpoint_check_s": 0.017646600026637316,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.04861996976665081,
+                -0.582239062640209,
+                -0.3579281203255542,
+                -0.6306290734029074,
+                -1.570796296521516,
+                0.048619972971754286
+              ],
+              "endpoint_check_s": 0.015420699957758188,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.707225016056907,
+                -2.5593536003620136,
+                0.35792813597294476,
+                -2.510963570646595,
+                1.570796381496057,
+                0.43436764073798917
+              ],
+              "endpoint_check_s": 0.016481499886140227,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -2.707225016056907,
+                -2.2160388722693822,
+                -0.35792813597294476,
+                -2.138422026793337,
+                1.570796381496057,
+                0.43436764073798917
+              ],
+              "endpoint_check_s": 0.018147099995985627,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                0.04861996976665081,
+                -0.9255537757381224,
+                0.3579281203255542,
+                -1.0031706009561026,
+                -1.570796296521516,
+                0.048619972971754286
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 0.5306488000787795,
+              "fine_direct_plan_s": 0.018215799937024713,
+              "direct_success": true,
+              "direct_elapsed_s": 0.5489260000176728
+            },
+            {
+              "goal": [
+                0.04861996976665081,
+                -0.582239062640209,
+                -0.3579281203255542,
+                -0.6306290734029074,
+                -1.570796296521516,
+                0.048619972971754286
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 5.351404310250298
+            },
+            {
+              "goal": [
+                -2.707225016056907,
+                -2.5593536003620136,
+                0.35792813597294476,
+                -2.510963570646595,
+                1.570796381496057,
+                0.43436764073798917
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 7.901723240729622
+            },
+            {
+              "goal": [
+                -2.707225016056907,
+                -2.2160388722693822,
+                -0.35792813597294476,
+                -2.138422026793337,
+                1.570796381496057,
+                0.43436764073798917
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 7.9017232407296225
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0010850999969989061,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.5116991000249982,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 61,
+          "planner_waypoint_count": 31,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,802 @@
+{
+  "command_id": "34",
+  "skill_name": "put",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 0.0012264000251889229,
+    "candidate_selection": 0.04335769987665117,
+    "adapter_prepare_total": 0.04644219996407628
+  },
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 242,
+        "y": 317
+      },
+      "normalized": {
+        "x": 0.7,
+        "y": 0.5
+      },
+      "depth_m": 1.0543149709701538,
+      "depth_sampling": {
+        "method": "pixel",
+        "valid_samples": 1
+      },
+      "world_point": {
+        "x": 0.19656229168029582,
+        "y": 0.1766564040286167,
+        "z": 0.6749999999999999
+      },
+      "frame": "world",
+      "confidence": 0.9,
+      "camera_id": "global_camera",
+      "timestamp": 53.91000000001992,
+      "sequence": 7,
+      "visual_estimation_s": 11.001589300110936,
+      "crop_origin_pixel": {
+        "x": 96,
+        "y": 245
+      },
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "rgbd_world_point": {
+        "x": 0.19656229168029582,
+        "y": 0.1766564040286167,
+        "z": 0.6158352994520082
+      },
+      "placement_aabb_top_world": {
+        "x": 0.19656229168029582,
+        "y": 0.1766564040286167,
+        "z": 0.6749999999999999
+      },
+      "held_object": "Screwdriver",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05
+      ],
+      "target_point_world": {
+        "x": 0.19656229168029582,
+        "y": 0.1766564040286167,
+        "z": 0.6849999999999999
+      },
+      "placement_cycle_id": "34",
+      "placement_height_offset_m": 0.01,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.3182368001434952,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0003667560609362614, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0003667568590249749, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0003647613910862824, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.000364760592997569, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.023103264550760047, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.003294564100446568, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.001962022451183721, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0017556788169907024, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0037124101798961156, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.002231688308490683, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.00036675606093615037, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0003667568590248638, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0003647613910861714, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.00036476059299745805, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.023103264550759974, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.003294564100446457, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0019620224511836095, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0017556788169907024, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0037124101798960045, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0022316883084905724, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.00036675640939485654, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.00036675721605582395, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0003647617409640756, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.00036476093430299716, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.023103264533181848, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.003294564478806356, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.001962022760222071, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0017556791247004488, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.003712410517460869, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0022316886281500926, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.0003667564093950786, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Tray', 'distance': -0.000366757216056046, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.0003647617409640756, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Tray', 'distance': -0.00036476093430299716, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.02310326453318179, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0032945644788065775, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0019620227602222926, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0017556791247006706, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.0037124105174610915, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.002231688628150315, 'self_collision': False})}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003667560609362614,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003667568590249749,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003647613910862824,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.000364760592997569,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.023103264550760047,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.003294564100446568,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.001962022451183721,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0017556788169907024,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0037124101798961156,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.002231688308490683,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036675606093615037,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003667568590248638,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003647613910861714,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036476059299745805,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.023103264550759974,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.003294564100446457,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0019620224511836095,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0017556788169907024,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0037124101798960045,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0022316883084905724,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036675640939485654,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036675721605582395,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003647617409640756,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036476093430299716,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.023103264533181848,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.003294564478806356,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.001962022760222071,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0017556791247004488,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.003712410517460869,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0022316886281500926,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003667564093950786,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_right_pad",
+                    "geom2": "Tray",
+                    "distance": -0.000366757216056046,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.0003647617409640756,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "robotiq_2f85_left_pad",
+                    "geom2": "Tray",
+                    "distance": -0.00036476093430299716,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.02310326453318179,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0032945644788065775,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0019620227602222926,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0017556791247006706,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.0037124105174610915,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.002231688628150315,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": false,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred infeasible below the selected height"
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.10305160004645586,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.009560072223854724, 'self_collision': False},)}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.009560072223854502, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.009560072674631796, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': -0.009560072674631697, 'self_collision': False},)}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.009560072223854724,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.009560072223854502,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.009560072674631796,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": -0.009560072674631697,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": false,
+          "evaluated": true,
+          "elapsed_s": 0.09871200006455183,
+          "error": {
+            "error_code": "TARGET_POSE_COLLISION",
+            "failed_stage": "target_resolution",
+            "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': 0.00043152357130948833, 'self_collision': False},)}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': 0.00043152357130984335, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision_1', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': 0.0004315231206959622, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'Screwdriver', 'geom2': 'Tray', 'distance': 0.0004315231206961791, 'self_collision': False},)}]",
+            "rejected": [
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": 0.00043152357130948833,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": 0.00043152357130984335,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "forearm_link::collision",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "forearm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "upper_arm_link::collision_1",
+                    "geom2": "WorkTable",
+                    "distance": 0.0,
+                    "self_collision": false
+                  },
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": 0.0004315231206959622,
+                    "self_collision": false
+                  }
+                ]
+              },
+              {
+                "grasp_index": 0,
+                "reason": "goal_collision",
+                "contacts": [
+                  {
+                    "geom1": "Screwdriver",
+                    "geom2": "Tray",
+                    "distance": 0.0004315231206961791,
+                    "self_collision": false
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.016843599965795875,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.04,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.05,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.016559999901801348,
+          "rejected": []
+        }
+      ]
+    }
+  },
+  "motions": [
+    {
+      "phase": "contact",
+      "planner": null,
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.001004599966108799,
+        "context": 0.00011350004933774471,
+        "selection": 5.899928510189056e-06,
+        "path_generation": 0.27190080005675554,
+        "planning": 0.02623479999601841
+      },
+      "planner_diagnostics": {}
+    },
+    {
+      "phase": "contact",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0009960997849702835,
+        "context": 0.00012950017116963863,
+        "selection": 6.6999346017837524e-06,
+        "path_generation": 0.003487600013613701,
+        "planning": 1.371080899843946,
+        "trajectory_preparation": 1.2759477999061346,
+        "posture_scoring": 3.200024366378784e-06,
+        "pre_execution_total": 2.6516603999771178
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.0,
+          "endpoint_collision_prechecked": true,
+          "path_densification": 0.00011889985762536526,
+          "direct_path_collision_check": 0.01633640006184578,
+          "collision_resolution_rad": 0.04
+        },
+        "configuration_selection": {
+          "objective": "joint_travel_plus_motion_balance",
+          "selection_cost_rad": 4.823394810673051,
+          "total_joint_travel_rad": 3.8913966679866903,
+          "maximum_joint_travel_rad": 1.9456109832184727,
+          "arm_posture_penalty_rad": 0.0,
+          "joint_motion_balance_penalty_rad": 0.9319981426863608,
+          "joint_travel_by_joint_rad": [
+            1.531953989852841e-05,
+            0.806297437685051,
+            1.9456109832184727,
+            1.1394006463466784,
+            2.4204650050929644e-06,
+            6.986073158449235e-05
+          ],
+          "normalized_joint_travel": [
+            4.876357359407693e-06,
+            0.2566522539299467,
+            1.2386509522320373,
+            0.3626822191742342,
+            7.704573648395048e-07,
+            2.2237344910624175e-05
+          ],
+          "candidate_count": 4,
+          "direct_candidates_evaluated": 1,
+          "endpoint_rejected_count": 2,
+          "untested_direct_count": 0,
+          "bypass_attempts": 0,
+          "contact_candidates_validated": 0,
+          "contact_candidates_rejected": 0,
+          "candidates_pruned_by_lower_bound": 1,
+          "budget_exhausted": false,
+          "post_solution_search_budget_s": 0.15,
+          "stopped_after_feasible_solution": false,
+          "candidate_timings": [
+            {
+              "goal": [
+                -0.4431424424168533,
+                0.1124718219645593,
+                -1.0922192127185746,
+                -0.5910488597141368,
+                -1.57079633355641,
+                -0.4431424392117485
+              ],
+              "endpoint_check_s": 5.7300087064504623e-05,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -0.4431424424168533,
+                -0.9306599436054219,
+                1.0922192127185746,
+                -1.7323555195813047,
+                -1.57079633355641,
+                -0.4431424392117485
+              ],
+              "endpoint_check_s": 0.015818400075659156,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -3.226810265957882,
+                -2.210932710500937,
+                -1.0922192131871449,
+                -1.4092371313493965,
+                -4.712388959834339,
+                -0.08521760916298514
+              ],
+              "endpoint_check_s": 0.027696900069713593,
+              "endpoint_collision": false,
+              "status": "pending"
+            },
+            {
+              "goal": [
+                -3.226810265957882,
+                -3.2540644765135864,
+                1.0922192131871449,
+                -2.5505437917110365,
+                -4.712388959834339,
+                -0.08521760916298514
+              ],
+              "endpoint_check_s": 0.025849999859929085,
+              "endpoint_collision": true,
+              "status": "endpoint_collision"
+            },
+            {
+              "goal": [
+                -0.4431424424168533,
+                -0.9306599436054219,
+                1.0922192127185746,
+                -1.7323555195813047,
+                -1.57079633355641,
+                -0.4431424392117485
+              ],
+              "status": "direct_pending",
+              "coarse_path_check_s": 1.2849394001532346,
+              "fine_direct_plan_s": 0.016545700142160058,
+              "direct_success": true,
+              "direct_elapsed_s": 1.301553800003603
+            },
+            {
+              "goal": [
+                -3.226810265957882,
+                -2.210932710500937,
+                -1.0922192131871449,
+                -1.4092371313493965,
+                -4.712388959834339,
+                -0.08521760916298514
+              ],
+              "status": "pruned_by_lower_bound",
+              "lower_bound_cost": 9.424917305976987
+            }
+          ]
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0013905998785048723,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 1.2739927000366151,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 99,
+          "planner_waypoint_count": 50,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}
