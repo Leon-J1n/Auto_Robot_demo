@@ -13,6 +13,8 @@ from demo.error_messages import describe_error, error_category, error_from_excep
 from collision.backends.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
+from demo.output_layout import prepare_output, command_view, summary_view, write_metrics, output_lock, write_command_result
+from atomic_action.perception.vlm_estimate.timing import command_timing_scope, start_command, stamp_command
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SIMPLATFORM_LIBRARY = ROOT / 'libraries' / 'simplatform' / 'bin' / 'sim_platform_c.dll'
@@ -88,22 +90,20 @@ def _write_json(path, value):
 
 
 def _write_command_report(output_dir, index, row):
-    """Persist one command result to a process-unique file.
-
-    Command reports are intentionally never written to the shared aggregate
-    report while a task is running. This prevents concurrent demo processes
-    from racing on ``report.json`` (especially on Windows, where os.replace
-    fails if another process has the destination open).
-    """
+    """Persist one command per JSONL line, with separately stored trajectory arrays."""
     output = Path(output_dir) / 'commands'
     output.mkdir(parents=True, exist_ok=True)
+    stamp_command(row)
     command_id = re.sub(r'[^A-Za-z0-9_.-]+', '_', str(row.get('command_id', index)))
-    target = output / f'{int(index):03d}_{command_id}.{os.getpid()}.json'
-    _write_json(target, row)
+    stem = f'step_{int(index):03d}_command_{command_id}'
+    target = output / 'results.jsonl'
+    row['step_index'] = int(index)
+    write_command_result(target, command_view(row, output_dir, stem, _write_json), serializable)
     return target
 
 
 SUCCESS_ACTIONS = {
+    'approach': '已接近目标', 'retreat': '已远离目标',
     'move_to': '已移动到目标', 'lift_up': '已竖直抬升',
     'put_down': '已竖直下降', 'shift_down': '已竖直下降',
     'pick': '已抓取目标', 'put': '已放置到目标',
@@ -190,6 +190,12 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
     """Concise Chinese outcome for the two-line command progress display."""
     target = target_name if target_name is not None else command['parameters'].get('target')
     if success and status != 'suspend':
+        if command['skill_name'] in {'move_to', 'put', 'approach'}:
+            relation = command['parameters'].get('relation', 'at')
+            direction = {'front': '前方', 'behind': '后方', 'left': '左侧',
+                         'right': '右侧', 'above': '上方', 'below': '下方'}.get(relation)
+            if direction:
+                target = f'{target} {direction}'
         return f"success: {SUCCESS_ACTIONS.get(command['skill_name'], '已完成目标')} {target}"
     error = error if isinstance(error, dict) else {}
     description = ERROR_DESCRIPTIONS.get(error.get('error_code'))
@@ -214,6 +220,7 @@ def _default_output_dir(command_file):
 
 def _write_command_planning_timing(output_dir, index, row):
     """Write compact planning-stage timings for one command and its motion phases."""
+    stamp_command(row)
     phases = row.get('substeps')
     candidates = phases if isinstance(phases, list) else [row]
     motions = []
@@ -231,7 +238,7 @@ def _write_command_planning_timing(output_dir, index, row):
         }
         planner_details = {
             key: diagnostics[key] for key in
-            ('algorithm', 'planning_stages_s', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
+            ('algorithm', 'planning_stages_s', 'planning_proxy_cache', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
              'configuration_selection')
             if key in diagnostics
         }
@@ -262,50 +269,71 @@ def _write_command_planning_timing(output_dir, index, row):
             'planner_diagnostics': planner_details,
         })
     command_id = str(row.get('command_id', 'command'))
-    safe_id = re.sub(r'[^A-Za-z0-9_.-]+', '_', command_id).strip('._') or 'command'
-    relative_path = (Path('commands') / f'{index:03d}_{safe_id}' /
-                     f'planning_timing.{os.getpid()}.json')
+    relative_path = Path('metrics') / 'planning.jsonl'
     target = Path(output_dir) / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     target_resolution_timing = row.get('target_resolution_timing_s')
     target_resolution = row.get('target_resolution')
     if not isinstance(target_resolution_timing, dict) and isinstance(target_resolution, dict):
         target_resolution_timing = target_resolution.get('resolution_timing_s')
-    target.write_text(json.dumps({
+    entry = {
         'command_id': command_id,
         'skill_name': row.get('skill_name'),
         'success': row.get('success'),
+        'planning_preparation_s': _command_planning_time(row),
+        'target_preparation_s': row.get('target_preparation_s', 0.),
         'target_resolution_timing_s': target_resolution_timing or {},
-        'vlm_request_s': row.get('vlm_request_s'),
-        'wrist_observation': row.get('wrist_observation'),
-        'pose_search_precheck': row.get('pose_search_precheck', []),
+        'vlm_request_s': _command_vlm_request_time(row),
+        'vlm_request_count': row.get('vlm_request_count', 0),
+        'vlm_failed_request_count': row.get('vlm_failed_request_count', 0),
+        'pose_search_precheck_count': len(row.get('pose_search_precheck', [])),
         'successful_distance_m': row.get('successful_distance_m'),
-        'target_resolution_diagnostics': {
-            key: target_resolution[key] for key in
-            ('resolution_timing_s', 'placement_height_attempts', 'grasp_depth_attempts',
-             'grasp_floor_fallback', 'visual_estimate')
-            if isinstance(target_resolution, dict) and key in target_resolution
-        },
         'motions': motions,
-    }, indent=2, default=str), encoding='utf-8')
+    }
+    for motion in motions:
+        details = motion['planner_diagnostics']
+        selection = details.get('configuration_selection')
+        if isinstance(selection, dict):
+            details['configuration_selection'] = {key: value for key, value in selection.items()
+                                                  if key != 'candidate_timings'}
+        if isinstance(details.get('ik_branch_selection'), dict):
+            details['ik_branch_selection'].pop('rejected', None)
+    write_metrics(target, entry, serializable)
     row['planning_timing_file'] = relative_path.as_posix()
     return relative_path
 
 
-def _print_command_timing(row):
-    """Print the accumulated planning time for one command."""
+def _command_vlm_request_time(row):
+    """Read request-entry measurements, never infer time from perception results."""
+    stamp_command(row)
+    value = row.get('vlm_request_s')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and np.isfinite(value) and value >= 0:
+        return float(value)
+    return None
+
+
+def _command_planning_time(row):
+    """Sum disjoint preparation intervals; inclusive subtotals take precedence."""
     phases = row.get('substeps')
     candidates = phases if isinstance(phases, list) else [row]
-    planning_s = 0.0
+    planning_s = float(row.get('target_preparation_s', 0.))
+    planning_s += sum(float(item.get('elapsed_s', 0.)) for item in row.get('pose_search_precheck', []))
     for item in candidates:
         if not isinstance(item, dict):
             continue
         timing = item.get('timing')
         if not isinstance(timing, dict):
             continue
-        value = timing.get('planning')
+        value = timing.get('pre_execution_total')
         if isinstance(value, (int, float)):
             planning_s += float(value)
+            continue
+        fields = ('validation', 'context', 'selection', 'path_generation',
+                  'planning', 'trajectory_preparation', 'posture_scoring')
+        measured = [float(timing[key]) for key in fields if isinstance(timing.get(key), (int, float))]
+        if measured:
+            planning_s += sum(measured)
+            continue
         attempt = timing.get('curobo_attempt')
         if isinstance(attempt, (int, float)):
             planning_s += float(attempt)
@@ -313,8 +341,18 @@ def _print_command_timing(row):
               (isinstance(item.get('error'), dict) and item['error'].get('failed_stage') == 'planning')) \
                 and isinstance(timing.get('total'), (int, float)):
             planning_s += float(timing['total'])
+    return planning_s
+
+
+def _print_command_timing(row):
+    """Print all motion preparation, excluding VLM calls and execution."""
+    planning_s = _command_planning_time(row)
+    row['planning_preparation_s'] = planning_s
     parts = [f"timing|command={row.get('command_id', 'unknown')}",
              f"planning={planning_s:.3f}s"]
+    vlm_request_s = _command_vlm_request_time(row)
+    if vlm_request_s is not None:
+        parts.append(f'vlm_request={vlm_request_s:.3f}s')
     print('|'.join(parts), flush=True)
 
 
@@ -334,6 +372,17 @@ def _resolve_command_file(command_file):
 def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         output_dir=None, viewer=False, collision_probe=False,
         object_library_url=None, start_object_library=False, show_collision_geometry=False):
+    output = output_dir if output_dir is not None else _default_output_dir(command_file)
+    with output_lock(output), command_timing_scope():
+        return _run(command_file, catalog=catalog, scene_file=scene_file, backend_name=backend_name,
+                    output_dir=output, viewer=viewer, collision_probe=collision_probe,
+                    object_library_url=object_library_url, start_object_library=start_object_library,
+                    show_collision_geometry=show_collision_geometry)
+
+
+def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
+         output_dir=None, viewer=False, collision_probe=False,
+         object_library_url=None, start_object_library=False, show_collision_geometry=False):
     from libraries.eaik import load_urdf
     from collision import SimPlatformFCLCollisionChecker
     from planning.trajectory.time_parameterization import prepare_continuous_trajectory
@@ -354,7 +403,9 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
     visual_place_parameters = infer_command_place_parameters(commands)
     if output_dir is None:
         output_dir = _default_output_dir(command_file)
-    output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
+    source_scene = scene_file or task.get('scene_file')
+    output = prepare_output(output_dir, protected=(command_file, catalog,
+        (Path(command_file).parent / source_scene) if source_scene else None))
     report = {'request_id': task.get('request_id'), 'success': False, 'steps': [],
               'collision_policy': 'planning_only'}
     if scene_file is None:
@@ -498,7 +549,7 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         if visual_estimates:
             if backend_name != 'mujoco':
                 raise ValueError('Visual estimates require the MuJoCo backend')
-            backend.load(resources, output / backend_name, camera_scene_json=resources.scene_file)
+            backend.load(resources, output / 'runtime' / backend_name, camera_scene_json=resources.scene_file)
             from demo.interaction.vlm_grasp import VLMGraspResolver
             resolver = VLMGraspResolver(
                 resolver.client, blackboard, backend,
@@ -508,14 +559,21 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                 command_place_parameters=visual_place_parameters,
             )
         else:
-            backend.load(resources, output / backend_name)
+            backend.load(resources, output / 'runtime' / backend_name)
         report['consistency'] = coordinator.validate_consistency(resources, kin, checker, backend)
         if isinstance(checker, GraspCollisionChecker):
             checker.bind_backend(backend)
             backend.gripper_controller = backend.create_gripper_controller()
+            proxy_config = resources.scene.get('planning_collision_proxy', {})
+            if not isinstance(proxy_config, dict) or not isinstance(proxy_config.get('enabled', False), bool):
+                raise ValueError('planning_collision_proxy requires an enabled boolean')
+            if proxy_config.get('enabled'):
+                checker.enable_planning_proxy({k:v for k,v in proxy_config.items() if k != 'enabled'})
             start_check = checker.check(resources.initial_joints, safety_distance=0.003)
             if start_check.in_collision:
                 raise ValueError(f'Initial assembled robot collides: {start_check.contacts}')
+            if getattr(checker, 'planning_proxy', None) is not None:
+                report['planning_collision_proxy'] = checker.planning_proxy.snapshot['planning_proxy']
         if demo_fallback_ignore_collisions:
             checker = DemoCollisionOverrideChecker(checker)
         if viewer or show_collision_geometry:
@@ -602,10 +660,11 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             resources=resources, backend=backend, kinematics=kin, checker=checker,
             synchronizer=sync, resolver=resolver, execute_motion=execute_motion,
             report=report, write_frame=write_task_frame)
-        with (output / 'frames.jsonl').open('w', encoding='utf-8') as frames:
+        with (output / 'trajectories/frames.jsonl').open('w', encoding='utf-8') as frames:
             for frame_state in startup_frames:
                 write_task_frame('setup', 'initial_state', frame_state)
             for index, command in enumerate(commands, 1):
+                start_command(command['command_id'])
                 active_command = command
                 active_step_logged = False
                 row = None
@@ -734,11 +793,20 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             if curobo_action is not None:
                 curobo_action.close()
             if backend is not None and hasattr(backend, 'data'):
-                blackboard.observe(backend.get_state())
-                np.savez_compressed(output / 'final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
+                final_state = backend.get_state()
+                report['final_state'] = final_state
+                blackboard.observe(final_state)
+                np.savez_compressed(output / 'snapshots/final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
                                     ctrl=backend.data.ctrl, eq_active=backend.data.eq_active,
                                     eq_data=backend.model.eq_data, time=float(backend.data.time))
-            if backend is not None and 'resources' in locals() and (output / 'frames.jsonl').exists():
+                try:
+                    from demo.final_scene import final_scene
+                    authored_scene = json.loads(Path(resources.scene_file).read_text(encoding='utf-8'))
+                    _write_json(output / 'snapshots/final_scene.json', final_scene(authored_scene, backend, final_state))
+                    report['final_scene_file'] = 'snapshots/final_scene.json'
+                except Exception as exc:
+                    report['final_scene_export_error'] = str(exc)
+            if backend is not None and 'resources' in locals() and (output / 'trajectories/frames.jsonl').exists():
                 try:
                     from execution.output.trajectory_export import write_traj_from_jsonl
                     trajectory_scene = resources.scene
@@ -756,19 +824,18 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                         trajectory_scene = dict(trajectory_scene)
                         trajectory_scene['objects'] = [*trajectory_scene.get('objects', ()), *attachments]
                     traj_path = write_traj_from_jsonl(
-                        output / 'trajectory.traj', trajectory_scene, output / 'frames.jsonl',
+                        output / 'trajectories/execution.traj', trajectory_scene, output / 'trajectories/frames.jsonl',
                         initial_joints=resources.initial_joints)
                     report['trajectory_file'] = str(traj_path)
                 except Exception as exc:
                     report['trajectory_export_error'] = str(exc)
-            blackboard_path = output / 'blackboard.json'
+            blackboard_path = output / 'snapshots/blackboard.json'
             blackboard_path.write_text(json.dumps(blackboard.snapshot(), indent=2, default=serializable), encoding='utf-8')
             report['blackboard_file'] = str(blackboard_path)
             report['allowed_carrying_contacts'] = list(getattr(checker, 'carrying_contact_log', {}).values())
-            # Do not overwrite the shared report.json: multiple demo runs may
-            # use the same output directory. The final aggregate is unique to
-            # this process and each command has already been persisted above.
-            _write_json(output / f'report.{os.getpid()}.json', report)
+            if 'final_state' in report:
+                _write_json(output / 'snapshots/state.json', report['final_state'])
+            _write_json(output / 'summary.json', summary_view(report))
             if (viewer or show_collision_geometry) and backend is not None and getattr(backend, 'viewer', None) is not None:
                 label = 'Suspended' if report.get('status') == 'suspend' else ('Completed' if report.get('success') else 'Failed')
                 backend.set_status(label + ' | Close window to exit')

@@ -93,10 +93,21 @@ def convert_runtime(snapshot: dict, cache_dir) -> dict:
         ident = int(geom['id'])
         if geom['robot']:
             name = f'runtime_geom_{ident}'
-            node, key = _geometry(geom, folder)
             link = ET.SubElement(xml, 'link', name=name)
-            for tag in ('collision', 'visual'):
-                ET.SubElement(link, tag).append(deepcopy(node))
+            if geom['kind'] == 'sphere_set':
+                key = fingerprint(geom['spheres'])
+                primitive_spheres[name] = deepcopy(geom['spheres'])
+                for sphere in geom['spheres']:
+                    for tag in ('collision', 'visual'):
+                        element = ET.SubElement(link, tag)
+                        local = np.eye(4); local[:3, 3] = sphere['center']
+                        set_origin(element, local)
+                        shape = ET.SubElement(element, 'geometry')
+                        ET.SubElement(shape, 'sphere', radius=str(sphere['radius']))
+            else:
+                node, key = _geometry(geom, folder)
+                for tag in ('collision', 'visual'):
+                    ET.SubElement(link, tag).append(deepcopy(node))
             _fixed(xml, name + '_mount', _link(geom['body']), name, geom['matrix'])
             geometry_links[name], shape_keys[name] = ident, key
             if geom['kind'] == 'sphere':
@@ -142,6 +153,7 @@ def convert_runtime(snapshot: dict, cache_dir) -> dict:
         'geometry_links': geometry_links, 'shape_keys': shape_keys, 'world_geoms': world_geoms,
         'primitive_spheres': primitive_spheres,
         'collision_policy': runtime['policy'], 'payload_bodies': runtime['payload_bodies'],
+        'planning_proxy': runtime.get('planning_proxy'),
         'notes': ['Measured runtime geometry and frozen host pair policy; sphere fitting remains approximate.']}
     (directory / 'conversion_manifest.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
     return result

@@ -47,8 +47,8 @@ class EAIKBackend:
         # At singularities EAIK can flag an exactly correct answer as LS. Final
         # pose accuracy, rather than the flag alone, is checked by the service.
         return IKResult(solutions=[np.asarray(q, dtype=float) for q in raw],
-                        backend="eaik_homogeneous", position_tolerance=1e-7,
-                        orientation_tolerance=1e-7,
+                        backend="eaik_homogeneous", position_tolerance=request.position_tolerance,
+                        orientation_tolerance=request.orientation_tolerance,
                         diagnostics={"kinematic_family": self._solver.getKinematicFamily(),
                                      "raw_candidates": len(raw), "least_squares_flagged": int(sum(least_squares))})
 

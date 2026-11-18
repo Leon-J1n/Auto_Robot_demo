@@ -22,6 +22,23 @@ class DirectPlanner:
         self.joint_limits = np.asarray(joint_limits, dtype=float)
 
     def plan(
+        self, path_request: Mapping[str, Any], move_request: Mapping[str, Any], context: Mapping[str, Any],
+    ) -> Any:
+        proxy = getattr(self.collision_checker, 'planning_proxy', None)
+        if proxy is None or not move_request['constraints']['avoid_collision']:
+            return self._plan(path_request, move_request, context)
+        started = time.perf_counter()
+        cache_before = {name: proxy.stats[name] for name in ('builds', 'structure_hits', 'state_refreshes')}
+        with proxy.query_scope():
+            trajectory = self._plan(path_request, move_request, context)
+        elapsed = time.perf_counter() - started
+        trajectory['diagnostics']['planning_stages_s']['proxy_state_guards'] = max(0., elapsed-trajectory['planning_time'])
+        trajectory['planning_time'] = elapsed
+        trajectory['diagnostics']['planning_proxy_cache'] = {
+            name: proxy.stats[name] - value for name, value in cache_before.items()}
+        return trajectory
+
+    def _plan(
         self,
         path_request: Mapping[str, Any],
         move_request: Mapping[str, Any],
@@ -92,6 +109,9 @@ class DirectPlanner:
                 },
             },
         }
+        proxy = getattr(self.collision_checker, 'planning_proxy', None)
+        if proxy is not None and hasattr(proxy, 'snapshot'):
+            trajectory['diagnostics']['planning_proxy'] = proxy.snapshot['planning_proxy']
         return trajectory
 
 

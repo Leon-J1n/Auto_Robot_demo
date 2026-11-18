@@ -2,13 +2,13 @@
 
 ## 1. 职责与边界
 
-`planning` 将运动策略生成的路径请求转换为经过关节限位和碰撞检查的关节轨迹。当前主流程先验证直接路径；直接路径碰撞且允许改道时，由 cuRobo 搜索自由空间轨迹，再由宿主 FCL 复核。不负责任务解析、IK 服务实现、场景资产加载、仿真推进或实际执行。
+`planning` 将运动策略生成的路径请求转换为经过关节限位和碰撞检查的关节轨迹。当前主流程先验证直接路径；直接路径碰撞且允许改道时，由 RRT-Connect 搜索自由空间轨迹，再由宿主碰撞检查器复核。不负责任务解析、IK 服务实现、场景资产加载、仿真推进或实际执行。
 
 边界规则：
 
 1. 任务命令由 `atomic_skill` 和 `atomic_action` 解析为规范化 Move 请求。
-2. 直接路径和最终复核通过注入的 `collision` 检查器执行；cuRobo 从运行时读取当前机器人和场景快照。
-3. CuRobo 是本模块中的自由空间规划器，适配器位于 `planning/planners/curobo/`；官方运行时和 GPU worker 位于 `libraries/curobo/`。
+2. 直接路径、RRT 扩展和最终复核通过注入的碰撞检查器执行。
+3. cuRobo 作为显式规划后端保留；其适配器位于 `planning/planners/curobo/`，官方运行时和 GPU worker 位于 `libraries/curobo/`。
 4. 规划输出交给 `execution` 执行；执行阶段不重新规划，也不由本模块推进物理仿真。
 5. 规划配置从请求、场景默认值和根目录 `config/global.json` 合并得到，不在策略代码中重复定义。
 
@@ -24,7 +24,7 @@ planning/
 │   └── motion_limits.py
 ├── planners/                  # 具体路径规划算法
 │   ├── direct_planner.py      # 直接路径验证与路点加密
-│   ├── collision_free_planner.py # 旧 RRT 实现；主流程不再调用
+│   ├── collision_free_planner.py # RRT-Connect 避障及 TrajOpt 优化
 │   ├── interaction_planners.py   # 接触/交互路径辅助规划
 │   ├── trajopt_optimizer.py   # 已有可行路径的局部优化
 │   └── curobo/                # cuRobo 规划器及避障适配
@@ -46,7 +46,7 @@ Task command / skill request
 atomic_action.motion.common 规范化请求、IK 候选和 path_request
         └─ joint/linear/circular → DirectPlanner / interaction planner
                                  ├─ 直接路径可行 → 直接轨迹
-                                 └─ 碰撞且允许改道 → CollisionFreePlanner → cuRobo
+                                 └─ 碰撞且允许改道 → CollisionFreePlanner → RRT-Connect
         ↓
 碰撞复核、路径优化、时间参数化
         ↓
@@ -67,7 +67,6 @@ avoidance = CollisionFreePlanner(
     config,
     collision_checker=checker,
     joint_limits=limits,
-    robot_runtime=runtime,
 )
 trajectory = direct.plan(path_request, move_request, context)
 ```
@@ -75,7 +74,7 @@ trajectory = direct.plan(path_request, move_request, context)
 | 接口 | 用途 |
 | --- | --- |
 | `DirectPlanner.plan(path_request, move_request, context)` | 验证或整理直接关节/笛卡尔路径，检查限位和碰撞，不搜索绕行路径 |
-| `CollisionFreePlanner.plan(path_request, move_request, context)` | 使用 cuRobo 搜索自由空间避障轨迹，再用宿主碰撞检查器复核 |
+| `CollisionFreePlanner.plan(path_request, move_request, context)` | 使用 RRT-Connect 搜索自由空间避障轨迹，优化后再用宿主碰撞检查器复核 |
 | `CuroboPlanner.plan(request)` | 使用官方 CuRobo 规划自由空间 joint 轨迹；不支持接触、严格直线/圆弧和全程姿态约束 |
 | `TrajOptOptimizer.optimize(path, safety_distance=...)` | 固定起终点优化已有可行路径；失败时保留输入路径 |
 | `prepare_continuous_trajectory(...)` | 对已验证路点建立连续路径并进行时间参数化 |
@@ -98,24 +97,24 @@ trajectory = direct.plan(path_request, move_request, context)
 
 规划器选择规则：
 
-1. `planner_type: auto` 或未填写时，先验证直接路径；碰撞且 `allow_replan` 允许时使用 cuRobo 避障。
-2. 显式 `planner_type: curobo` 在 demo 入口直接调用 cuRobo；失败时不回退 RRT。旧值 `rrt` 由普通 Move 入口兼容接收，但实际避障仍使用 cuRobo。
-3. 硬性几何路径、全程固定姿态、接触目标例外和持物运动不在当前 cuRobo 避障适配范围；不可满足时返回规划错误。可行的直接几何路径照常执行。
-4. `planning.mode: direct` 禁止避障回退；`planning.mode: collision_free` 在直接路径碰撞后允许使用 cuRobo。
+1. `planner_type: auto` 或未填写时，先验证直接路径；碰撞且 `allow_replan` 允许时使用 RRT-Connect 避障。
+2. 显式 `planner_type: curobo` 在 demo 入口直接调用 cuRobo；失败时不回退 RRT。`rrt` 使用 RRT-Connect 避障。
+3. 硬性几何路径和全程固定姿态在碰撞后不能由 cuRobo 放宽。实时 articulated 检查器已支持持物和阶段碰撞规则；普通 JSON 入口仍有相应限制。
+4. `planning.mode: direct` 禁止避障回退；`planning.mode: collision_free` 在直接路径碰撞后允许使用 RRT-Connect。
 
 典型流程为：
 
 ```text
 DirectPlanner
     ├─ 路径可行 → 路点复核与时间参数化
-    └─ 碰撞且允许回退 → cuRobo
-                         → 宿主 FCL 最终碰撞复核
+    └─ 碰撞且允许回退 → RRT-Connect + TrajOpt
+                         → 宿主最终碰撞复核（启用简化代理时使用同一代理，否则原检查器）
 ```
 
 默认碰撞采样从根目录 `config/global.json` 读取：
 
 - `planning.collision_validation.resolution_rad`：最终碰撞复核采样分辨率；
-- `planning.collision_free.rrt_resolution_rad`：仅供旧 RRT 模块使用，当前主流程不读取。
+- `planning.collision_free.rrt_resolution_rad`：RRT 扩展边的碰撞采样分辨率。
 
 规划输出至少包含：
 
@@ -129,6 +128,17 @@ diagnostics
 ```
 
 Demo 还会在每个请求的 `output/commands/<序号>_<command_id>/planning_timing.json` 中写出各阶段耗时、规划器、候选构型、碰撞检查和路径质量信息。
+
+RRT 启用代理碰撞检查时，一次同步规划共享状态签名，进入和退出各校验一次；
+规划中发生场景或规则变化则拒绝结果。耗时因素、参数默认值和真实配置入口见
+[`docs/rrt_performance.md`](../docs/rrt_performance.md)。
+
+所有场景默认启用 `planning_collision_proxy`：Direct/RRT 的 CPU 检查、cuRobo 的
+GPU 模型及最终复核共享简化球／盒体。视觉／物理模型不变，原精细 FCL 改为离线对照，
+CPU 对圆柱—环境的代理碰撞候选额外用原始 MuJoCo 凸几何复核，避免球包络突出
+圆柱端面造成误报；cuRobo GPU 仍保留较保守的球包络。
+详见 `collision/README.md`。极短 Direct 动作的状态校验可能比原热检查更耗时，
+不能将长路径或避障回放的加速比例当作每个技能的收益。
 
 ## 6. 验证与限制
 

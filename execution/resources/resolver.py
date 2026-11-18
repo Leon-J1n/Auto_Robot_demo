@@ -17,6 +17,12 @@ def component(obj, name):
 
 
 DEFAULT_SCENE_SETTINGS = {
+    'planning_collision_proxy': {
+        'enabled': True,
+        'sphere_cell_size': 0.035,
+        'container_names': ['Tray', 'Basket'],
+        'batch_size': 32,
+    },
     'named_targets': {},
     'move_defaults': {
         'constraints': {
@@ -28,7 +34,7 @@ DEFAULT_SCENE_SETTINGS = {
             'mode': 'auto',
             'planning_time': 10.0,
             'allow_replan': True,
-            'collision_validation': {'resolution_rad': .04, 'spline_subdivisions': 2},
+            'collision_validation': {'spline_subdivisions': 2},
         },
     },
     'object_library': {
@@ -58,6 +64,8 @@ def apply_default_scene_settings(scene, global_config=None):
             elif isinstance(nested_value, dict) and isinstance(current[nested_key], dict):
                 for leaf_key, leaf_value in nested_value.items():
                     current[nested_key].setdefault(leaf_key, deepcopy(leaf_value))
+    result['move_defaults']['planning'].setdefault('collision_validation', {}).setdefault(
+        'resolution_rad', config['planning']['collision_validation']['resolution_rad'])
     return result
 
 
@@ -67,7 +75,7 @@ def apply_runtime_config(scene, config):
         raise ValueError('Runtime configuration scene identity mismatch')
     result = deepcopy(scene)
     settings = config.get('scene_settings', {})
-    if set(settings) - {'named_targets', 'move_defaults', 'object_library', 'trajectory'}:
+    if set(settings) - {'named_targets', 'move_defaults', 'object_library', 'trajectory', 'planning_collision_proxy'}:
         raise ValueError('Unsupported runtime scene settings')
     result.update(deepcopy(settings))
     objects = {str(o['object_id_in_scene']): o for o in result['objects']}

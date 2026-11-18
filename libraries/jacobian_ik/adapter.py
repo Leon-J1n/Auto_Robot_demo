@@ -30,12 +30,15 @@ class JacobianBackend:
                 weighted[3:] *= .35
                 residual = float(np.linalg.norm(weighted))
                 best = min(best, residual)
-                if np.linalg.norm(error[:3]) < 2e-4 and np.linalg.norm(error[3:]) < 2e-3:
+                if (np.linalg.norm(error[:3]) <= request.position_tolerance
+                        and np.linalg.norm(error[3:]) <= request.orientation_tolerance):
                     candidate = normalize(q, request.seed, limits, periods)
                     if request.max_joint_step is None or np.max(np.abs(candidate-request.seed)) <= request.max_joint_step:
                         append_distinct(solutions, candidate, periods)
                         if not request.enumerate_solutions or len(solutions) >= request.max_solutions:
-                            return IKResult(solutions=solutions, backend="damped_least_squares", residual=residual)
+                            return IKResult(solutions=solutions, backend="damped_least_squares", residual=residual,
+                                            position_tolerance=request.position_tolerance,
+                                            orientation_tolerance=request.orientation_tolerance)
                     break
                 jac = self.robot.jacobian(q).copy()
                 jac[3:] *= .35
@@ -47,7 +50,9 @@ class JacobianBackend:
                     break
         if not solutions:
             raise IKError(f"No numerical IK solution within budget/continuity limit; best residual={best:.6f}")
-        return IKResult(solutions=solutions, backend="damped_least_squares", residual=best)
+        return IKResult(solutions=solutions, backend="damped_least_squares", residual=best,
+                        position_tolerance=request.position_tolerance,
+                        orientation_tolerance=request.orientation_tolerance)
 
 
 def create_backend(robot):

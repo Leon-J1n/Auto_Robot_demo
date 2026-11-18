@@ -161,6 +161,8 @@ class Engine:
         # IK/LBFGS. Use eager GPU execution for this bridge until that capture
         # path is qualified; the asset-only entry retains upstream graphs.
         graph_setting=self.defaults.get('runtime_cuda_graphs',False)
+        if converted.get('planning_proxy') and (request or {}).get('target',{}).get('type') == 'joint':
+            graph_setting=self.defaults.get('runtime_proxy_cuda_graphs', True)
         if not isinstance(graph_setting,bool):
             raise ValueError('runtime_cuda_graphs must be a boolean')
         self.cuda_graphs=graph_setting if is_runtime else True
@@ -174,7 +176,7 @@ class Engine:
             self.compiled_policy = compile_policy(converted)
         self_rules = None if self.compiled_policy is None else self.compiled_policy['self_ignores']
         key=fingerprint([converted['robot_key'],converted.get('collision_ignores',{}),self.defaults,
-                         margin,position_tolerance,orientation_tolerance,self_rules])
+                         margin,position_tolerance,orientation_tolerance,self_rules,self.cuda_graphs])
         world_key=fingerprint(converted['world'])
         world_changed=self.world_key!=world_key
         required={'cuboid':len(converted['world'].get('cuboid',{})),
@@ -287,9 +289,12 @@ class Engine:
                 'arm_environment_pair_count': len(converted['collision_policy'].get('arm_environment_pairs', ())),
                 'distance_override_count': len(self.compiled_policy['overrides']),
                 'held_name': converted['collision_policy']['held_name'],
-                'payload_bodies': converted['payload_bodies'], 'geometry_source': 'measured_runtime',
+                'payload_bodies': converted['payload_bodies'],
+                'geometry_source': ('shared_simplified_proxy' if converted.get('planning_proxy') else 'measured_runtime'),
                 'sphere_approximation': True, 'cuda_graph_enabled': self.cuda_graphs,
                 'distance_numerical_tolerance_m': GPU_DISTANCE_EPS_M}
+            if converted.get('planning_proxy'):
+                report['planning_proxy'] = converted['planning_proxy']
         import yaml
         scene_path=Path(converted['robot_dir'])/'scene.yml'
         if world_changed or not scene_path.exists():

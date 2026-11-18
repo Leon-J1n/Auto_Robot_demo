@@ -85,6 +85,12 @@ solver_info = result.metadata()  # 供轨迹日志使用，不包含关节数组
 `solve_one` 的解析后端可以保留多个候选，首项是选中解；`solve_all` 按 `max_solutions` 截断。
 数值求解只能给出预算内找到的解，不保证枚举所有分支。
 
+IK 筛选精度由根目录 `config/global.json` 的 `planning.ik_validation` 控制：
+`position_tolerance_m: 0.003`（3mm）、`orientation_tolerance_rad: 0.01`（约 0.57°）。
+EAIK 候选的 FK 复核与 Jacobian 数值收敛使用同一组容差；其他插件仍可要求更严格的复核，
+不能自行放宽全局上限。关节限位和 `max_joint_step` 继续独立检查。
+容差在创建运动学服务时读取，修改配置后重启任务即可生效。
+
 | 参数 | 含义 |
 | --- | --- |
 | `backend` | 单库名称/别名，显式指定时不回退；默认 `auto` |

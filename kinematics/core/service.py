@@ -11,6 +11,8 @@ from .registry import SolverRegistry, get_registry
 
 class KinematicsService:
     def __init__(self, robot: RobotModel, registry: SolverRegistry | None = None):
+        from execution.config import load_global_config
+        self.ik_validation = load_global_config()['planning']['ik_validation']
         self.robot = robot
         self.registry = registry if registry is not None else get_registry()
         self.limits = np.asarray(robot.limits, dtype=float).copy()
@@ -92,7 +94,9 @@ class KinematicsService:
             chain = self.registry.auto_backends if backend == "auto" else [self.registry.resolve(backend)]
         request = IKRequest(position.copy(), rotation.copy(), reference.copy(),
                             time.perf_counter()+timeout, max_solutions,
-                            enumerate_solutions, max_joint_step)
+                            enumerate_solutions, max_joint_step,
+                            position_tolerance=self.ik_validation['position_tolerance_m'],
+                            orientation_tolerance=self.ik_validation['orientation_tolerance_rad'])
         for value in (request.position, request.rotation, request.seed):
             value.setflags(write=False)  # Failed plugins cannot rewrite the fallback target/seed.
         errors = []
@@ -115,20 +119,20 @@ class KinematicsService:
                     solutions = solutions[:max_solutions]
                 return IKResult(solutions=solutions, solver=name, backend=raw.backend or name,
                                 residual=raw.residual, fallback_reason="; ".join(errors) or None,
-                                position_tolerance=raw.position_tolerance,
-                                orientation_tolerance=raw.orientation_tolerance,
+                                position_tolerance=min(raw.position_tolerance, request.position_tolerance),
+                                orientation_tolerance=min(raw.orientation_tolerance, request.orientation_tolerance),
                                 diagnostics={**raw.diagnostics, "rejected_candidates": rejected})
             except Exception as exc:
                 errors.append(f"{name}: {exc}")
         raise IKError("; ".join(errors) or "No automatic IK backends registered")
 
     def _validate(self, result, request):
-        # Plugins can request stricter verification, never relax the service ceiling.
+        # Plugins can request stricter verification, never relax configured limits.
         if (not np.isfinite(result.position_tolerance) or not np.isfinite(result.orientation_tolerance)
                 or result.position_tolerance <= 0 or result.orientation_tolerance <= 0):
             raise IKError("Invalid backend verification tolerances")
-        position_tolerance = min(result.position_tolerance, 2e-4)
-        orientation_tolerance = min(result.orientation_tolerance, 2e-3)
+        position_tolerance = min(result.position_tolerance, request.position_tolerance)
+        orientation_tolerance = min(result.orientation_tolerance, request.orientation_tolerance)
         solutions, rejected = [], []
         for raw in result.solutions:
             try:
@@ -141,11 +145,14 @@ class KinematicsService:
                 if request.max_joint_step is not None and np.max(np.abs(q-request.seed)) > request.max_joint_step:
                     raise ValueError("joint continuity limit")
                 pose = self.forward(q)
+                position_error = float(np.linalg.norm(pose["position"]-request.position))
+                orientation_error = float(np.linalg.norm(rotation_error(request.rotation, pose["rotation_matrix"])))
                 if (not np.all(np.isfinite(pose["position"]))
                         or not np.all(np.isfinite(pose["rotation_matrix"]))
-                        or np.linalg.norm(pose["position"]-request.position) > position_tolerance
-                        or np.linalg.norm(rotation_error(request.rotation, pose["rotation_matrix"])) > orientation_tolerance):
-                    raise ValueError("FK target mismatch")
+                        or position_error > position_tolerance
+                        or orientation_error > orientation_tolerance):
+                    raise ValueError(f"FK target mismatch (position_error_m={position_error:.9g}, "
+                                     f"orientation_error_rad={orientation_error:.9g})")
                 append_distinct(solutions, q, self.joint_periods,
                                 tolerance=1e-6 if result.position_tolerance <= 1e-6 else 1e-3)
             except (ValueError, TypeError) as exc:

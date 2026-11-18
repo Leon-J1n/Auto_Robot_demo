@@ -11,13 +11,20 @@ import hashlib
 import json
 
 import numpy as np
+from demo.interaction.carrying_safety import payload_pair_limit
 
 
-def planning_signature(runtime, checker) -> str:
-    """Reject stale plans after geometry, articulation, grasp or policy changes."""
+def planning_signature(runtime, checker, *, include_state=True) -> str:
+    """Hash exact validation state, or reusable model/policy inputs only.
+
+    Omitting state never authorizes reuse of a collision result: FK, world poses,
+    scene revision and full before/after guards still have to be refreshed.
+    """
     digest = hashlib.sha256()
-    for owner, names in ((runtime.data, ('qpos', 'mocap_pos', 'mocap_quat')),
-            (runtime.model, ('body_pos', 'body_quat', 'body_parentid', 'jnt_pos', 'jnt_axis',
+    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'options', None)).encode())
+    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'lift_bounds', None)).encode())
+    for owner, names in ((runtime.data, ('qpos', 'mocap_pos', 'mocap_quat') if include_state else ()),
+            (runtime.model, ('qpos0', 'body_mocapid', 'body_pos', 'body_quat', 'body_parentid', 'jnt_pos', 'jnt_axis',
                 'jnt_type', 'jnt_range', 'site_pos', 'site_quat', 'geom_pos', 'geom_quat',
                 'geom_size', 'geom_type', 'geom_bodyid', 'geom_contype', 'geom_conaffinity',
                 'mesh_vert', 'mesh_face', 'mesh_vertadr', 'mesh_vertnum',
@@ -35,16 +42,23 @@ def planning_signature(runtime, checker) -> str:
                 '_lift_clearance_pairs', '_lift_ignored_payload_geoms', 'allowed_target_names',
                 '_physical_closure_target', '_ignore_collisions', 'excluded', 'adjacent',
                 '_arm_environment_geom_pairs',
+                'carrying_safety_distance',
                 'geoms', 'tool_geoms', 'robot_bodies', 'dynamic_names', 'body_names',
                 '_lift_ignored_payload_names', 'tcp_site_id')),
-            (runtime, ('base_id', 'joint_ids', 'qpos_indices', 'joint_names', 'object_ids'))):
+            (runtime, ('base_id', 'joint_ids', 'qpos_indices', 'joint_names', 'joint_limits', 'object_ids'))):
         for name in names:
+            if not include_state and name == 'scene_revision':
+                continue
             value = getattr(owner, name, None)
             digest.update(name.encode())
             digest.update(value.tobytes() if isinstance(value, np.ndarray) else repr(value).encode())
+    scene = getattr(getattr(runtime, 'resources', None), 'scene', {})
+    digest.update(repr([(obj.get('object_id_in_scene'), obj.get('object_name_in_scene'))
+                        for obj in scene.get('objects', ())]).encode())
     return digest.hexdigest()
 
-def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: bool = True) -> tuple[dict, object]:
+def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: bool = True,
+                  gripper_width=None, allowed_geom_ids=None) -> tuple[dict, object]:
     """Return a JSON policy and an independent, current kinematic probe."""
     import mujoco
 
@@ -58,14 +72,17 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
     probe.probe = mujoco.MjData(checker.backend.model)
     probe._query_cache = OrderedDict()
     probe._pair_key = None
-    probe.check(joints, safety_distance=safety_distance)
+    probe._policy_only = True
+    extra = {}
+    if gripper_width is not None:
+        extra['gripper_width'] = gripper_width
+    if allowed_geom_ids is not None:
+        extra['allowed_geom_ids'] = allowed_geom_ids
+    probe.check(joints, safety_distance=safety_distance, **extra)
     model = checker.backend.model
-    moving = checker.tool_geoms | {
-        g for g in checker.geoms if checker.body_names[int(model.geom_bodyid[g])] in checker.dynamic_names
-    }
     articulated = {frozenset((int(a), int(b))): bool(support) for a, b, support in probe._pairs}
-    allowed, thresholds = [], []
-    allowed_names = set(getattr(checker, 'allowed_target_names', ()))
+    allowed, thresholds, base_thresholds = [], [], []
+    allowed_names = set(getattr(checker, 'allowed_target_names', ())) | set(map(str, allowed_geom_ids or ()))
     held = getattr(checker.backend.gripper_controller, 'held_name', None)
     held_body = getattr(checker.backend, 'object_ids', {}).get(held)
     attached_bodies = set()
@@ -80,6 +97,10 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
                         break
                     ancestor = int(model.body_parentid[ancestor])
     planned_bodies = checker.robot_bodies | attached_bodies
+    moving = checker.tool_geoms | {
+        g for g in checker.geoms if checker.body_names[int(model.geom_bodyid[g])] in checker.dynamic_names
+        or int(model.geom_bodyid[g]) in attached_bodies
+    }
     lift_ignored = getattr(checker, '_lift_ignored_payload_geoms', ())
     def named_allowance(body):
         while body:
@@ -110,7 +131,11 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
             if ignore:
                 allowed.append([int(a), int(b)])
                 continue
-            limit = -.001 if articulated.get(pair, False) else float(safety_distance)
+            limit = payload_pair_limit(safety_distance, getattr(checker, 'carrying_safety_distance', 0.),
+                                       ba, bb, attached_bodies, checker.robot_bodies,
+                                       support=articulated.get(pair, False))
+            if limit != float(safety_distance):
+                base_thresholds.append([int(a), int(b), limit])
             initial = getattr(checker, '_lift_clearance_pairs', {}).get(pair)
             if initial is not None:
                 bound = initial - 1e-6 if initial < 0 else max(0., initial - 1e-6)
@@ -124,6 +149,7 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
         'arm_environment_pairs': [sorted(pair) for pair in sorted(
             getattr(checker, '_arm_environment_geom_pairs', ()), key=lambda pair: tuple(sorted(pair)))],
         'distance_overrides': thresholds, 'scene_revision': int(getattr(checker, 'scene_revision', 0)),
+        'base_distance_overrides': base_thresholds,
         'held_name': getattr(checker.backend.gripper_controller, 'held_name', None),
         'contact_target': getattr(checker.backend, 'contact_target', None),
         'allow_gripper_environment_contact': bool(checker.allow_gripper_environment_contact),

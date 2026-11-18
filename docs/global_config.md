@@ -14,11 +14,15 @@
     "pause_seconds": 1.0
   },
   "planning": {
+    "ik_validation": {
+      "position_tolerance_m": 0.003,
+      "orientation_tolerance_rad": 0.01
+    },
     "collision_validation": {
-      "resolution_rad": 0.04
+      "resolution_rad": 0.02
     },
     "collision_free": {
-      "rrt_resolution_rad": 0.03
+      "rrt_resolution_rad": 0.02
     }
   },
   "gripper": {
@@ -40,7 +44,17 @@
   仅影响导出回放，不增加仿真执行时间。停顿换算为最近的整数帧，半帧向上取整；
   单帧段不额外停顿。setup 段如果有多帧，也保留相同的停顿规则。
 - `planning.collision_validation.resolution_rad`：普通路径和最终轨迹复核的默认关节采样分辨率。
-- `planning.collision_free.rrt_resolution_rad`：旧 RRT 模块的扩展边碰撞采样分辨率；当前 cuRobo 避障主流程不使用。
+- `planning.collision_free.rrt_resolution_rad`：RRT-Connect 扩展边的碰撞采样分辨率。
+
+- `planning.ik_validation.position_tolerance_m`：IK 正运动学复核的位置误差上限，当前为 `0.003`m（3mm）。
+- `planning.ik_validation.orientation_tolerance_rad`：IK 旋转误差角上限，当前为 `0.01`rad（约 0.57°）。
+
+IK 两项由运动学服务创建时读取，统一传给 EAIK 候选复核和 Jacobian 收敛判断。
+修改后重新创建运动学服务或重启任务；不改变关节限位、关节连续性阈值、碰撞安全距离。
+它们与执行到位容差及碰撞采样分辨率是不同参数。
+
+两项当前均为 `0.02` rad：前者控制 Direct、TrajOpt 默认检查和最终轨迹复核，
+后者控制 RRT 扩展与 shortcut。场景和请求显式指定的复核分辨率仍可覆盖全局默认值。
 - `gripper.open_speed` / `gripper.close_speed`：夹爪原子张开和闭合的默认速度；抓取或释放请求中的同名参数可以覆盖。
 - `gripper.grasp_force`：默认闭合抓取力，单位 N。
 - `gripper.hold_force`：默认保持夹持力，单位 N。

@@ -10,7 +10,35 @@
   --viewer
 ```
 
-执行结束后保存报告，窗口手动关闭。默认输出 `tests/output/unified_scene/`，可用 `--output` 修改。
+执行结束后保存报告，窗口手动关闭。默认输出到命令文件同级的 `output/`，可用 `--output` 修改。
+每次运行前清空指定输出目录，仅保留本次结果。相同输出目录不允许并发运行；
+输入文件所在目录和工作区根目录不能作为清空目标。
+
+输出分类：
+
+| 路径 | 内容 |
+| --- | --- |
+| `summary.json` | 整体结果、命令数量、失败位置与结果文件引用 |
+| `commands/results.jsonl` | 每条命令一行，含执行序号、命令 ID、请求、子步骤、IK／碰撞／抓持诊断；执行完立即写入 |
+| `metrics/planning.jsonl` | 每条命令一行耗时与关键计数，不复制完整视觉或候选碰撞详情 |
+| `trajectories/planned/step_029_command_33.json` | 规划路径、时间参数化轨迹及时间戳，由命令文件引用 |
+| `trajectories/frames.jsonl` | 执行过程的逐帧状态 |
+| `trajectories/execution.traj` | WebEditor 回放 |
+| `snapshots/` | 黑板、最终运行状态 JSON 和 MuJoCo 末态 NPZ |
+| `snapshots/final_scene.json` | 原场景格式的结束场景：更新实测物体位姿和驱动关节，保留资产、安装和相机定义；成功或中途失败均保存可用末态 |
+| `runtime/mujoco/` | 本次编译的仿真场景 |
+
+进程内 `run()` 返回的完整报告结构保留，便于现有诊断工具使用；磁盘仅写分类后的视图。
+不再生成旧的 `report.json`、`report.<pid>.json` 或逐命令 `planning_timing.<pid>.json`。
+
+控制台耗时格式为 `timing|command=16|planning=0.562s|vlm_request=5.400s`。
+`planning` 汇总目标解析与候选选择、IK、碰撞检查、路径搜索和轨迹准备，
+包括失败候选和重试的准备时间，排除 VLM 请求与实际运动执行；
+命令及指标记录中的 `planning_preparation_s` 使用同一口径。
+仅在本条命令实际调用 VLM 时显示 `vlm_request`，数值为所有客户端请求的完整响应
+等待时间之和，包含失败调用、显式重试及 SDK 内部重试等待，不含客户端初始化、
+图像编码、响应解析、深度投影或 IK。粗估计与腕部精估计的请求均计入当前命令，
+复用缓存不计时；命令与耗时记录同时保存请求次数和客户端请求异常次数。
 
 
 ## 文件分工

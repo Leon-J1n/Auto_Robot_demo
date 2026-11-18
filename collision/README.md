@@ -105,3 +105,65 @@ result = checker.check(joints)
 
 当前实现以 SimPlatform FCL 为主，MuJoCo 和 Bullet 属于可替换后端。不同后端的网格预处理、凸分解和接触算法可能产生差异，因此跨后端只保证接口和坐标约定一致，不保证每个网格接触结果逐点相同。
 
+## 7. 统一简化规划代理（sorting 场景试用）
+
+`collision/proxy.py` 维护独立于视觉／物理网格的规划碰撞模型。
+所有场景解析时默认启用；场景可通过 `planning_collision_proxy` 覆盖参数，
+显式指定 `enabled: false` 可恢复原检查链路。默认值位于
+`execution/resources/resolver.py` 的 `DEFAULT_SCENE_SETTINGS`，已有场景无需逐个修改。
+
+```json
+"planning_collision_proxy": {
+  "enabled": true,
+  "sphere_cell_size": 0.035,
+  "container_names": ["Tray", "Basket"],
+  "batch_size": 32
+}
+```
+
+`GraspCollisionChecker` 绑定实时后端后启用代理。Direct、IK 候选的普通
+`check/check_path`、cuRobo 导出和最终路径复核均读取它；不在每次规划后再强制
+运行原精细 FCL。原检查器仍用于启动一致性检查、部分专用抓取探针和离线对照。
+仿真接触／动力学几何保持不变。`--show-collision-geometry` 仍显示物理几何，不是代理。
+
+代理规则：
+
+- 仅合并同一实际 body、且对所有计划几何具有完全相同豁免／距离规则的碎片；
+  source IDs 保留在 `source_geoms`，不按旧编号直接复制规则。
+- 机械臂圆柱用轴向覆盖球；普通持物用包络盒的网格覆盖球。环境使用有向盒体；
+  指定的开口容器按底面及四侧分组，每个源凸块完整归入一个包络板，保留内部空间。
+- Robotiq 的细小机构空隙不能直接用大盒填充。`proxies/robotiq_2f85.json` 保留了
+  上一版已验证的 VOXEL 球拟合，并按形状／网格内容 SHA256 匹配。更换资产后不匹配
+  会报错，需要重新制作和验证模板；不依赖本机 `.cache` 才能读取现有模板。
+- 新增盒／球为外包络，但**保留的夹爪球拟合仍是近似**，不能声称完整覆盖精细网格。
+  `sphere_cell_size` 是覆盖网格尺寸，不是允许误差；包络额外占据空间与请求间距分开。
+  3 mm 请求阈值保持，不能据此承诺相对原网格恰好 3 mm。过窄通道可能被代理拒绝。
+- CPU 路径检查先计算独立 MuJoCo FK，再按几何组包围球保守筛选，批量计算球—球、
+  球—盒距离；GPU 直接使用同一批球心、半径和盒体，不重新拟合。
+- 有限圆柱的轴向覆盖球会突出平端面。CPU 对圆柱—环境的代理碰撞候选，使用当前
+  候选关节姿态下的原始 MuJoCo 凸几何距离复核，并应用源几何的冻结阈值／豁免规则。
+  阈值比较容差为 1 nm，恰好达到安全距离视为通过。其他代理对仍沿用球／盒检查；
+  cuRobo GPU 仍使用外包络，可能比 CPU 更保守。
+- Direct 一次规划内共享场景快照，进入和退出时各做一次完整状态校验。路径缓存有界，
+  场景、策略、夹爪构型、抓取／释放或代理设置变化即失效，校验期间状态漂移会拒绝结果。
+- 代理的几何／碰撞对编译与逐帧状态分开缓存。仅 `qpos`、mocap 或场景同步序号变化时，
+  重新计算当前机械臂、夹爪、持物、世界盒体及导出运动链变换，清空旧路径结果，
+  不重复简化网格或冻结相同规则。最多保留四份模型／策略编译结果；临时豁免恢复时，
+  只有完整模型、抓取、阈值及规则签名匹配才复用编译，碰撞结果仍按当前状态重新计算。
+  新规则／新形状未命中缓存时仍完整构建。`planning_proxy_cache` 诊断记录本次 direct
+  的 `builds`、`structure_hits`、`state_refreshes`，方便区分首次构建与状态刷新。
+- 支撑／lift 规则保留。lift 开始时在代理上重新测量已有接触距离，之后不随运动重置，
+  不把精细网格的初始间距直接当作代理间距。释放后持物恢复为世界障碍物。
+
+`planning_proxy` 诊断记录代理来源、源／代理几何数量、球数、盒数和包络说明。
+关闭场景中的 `enabled` 并重新加载，即恢复原检查链路。
+
+离线模板导出工具：
+
+```powershell
+python collision/proxies/export_templates.py --snapshot raw_runtime.json --robot-yaml validated_robot.yml --output reviewed_templates.json
+```
+
+输出只供审核和验证后替换；工具不会执行运动。CPU 测试为
+`python -B -m unittest planning.tests.test_collision_proxy -v`。
+

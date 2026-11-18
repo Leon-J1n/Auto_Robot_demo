@@ -55,7 +55,7 @@ tool={'object_id': 3, 'link': '实际工具link',
 {"planning": {"planner_type": "curobo"}, "motion": {"path_type": "joint"}}
 ```
 
-`demo/run_demo.py` 延迟创建并复用显式选择的 `CuroboPlanner`，读取执行后端当前关节、夹爪、机构和物体状态，规划后调用原 `execute_trajectory()`。默认路径经 `CollisionFreePlanner` 在直接路径碰撞时调用 cuRobo，并经原 FCL 检查器复核。显式 cuRobo 不重新交给原 RRT 规划；时间与导数转换为原项目字段后直接交给执行器。
+`demo/run_demo.py` 延迟创建并复用显式选择的 `CuroboPlanner`，读取执行后端当前关节、夹爪、机构和物体状态，规划后调用原 `execute_trajectory()`。默认路径经 `CollisionFreePlanner` 在直接路径碰撞时调用 cuRobo，并经当前碰撞检查器复核：未启用简化代理时使用原 FCL／articulated 检查，启用后使用与 cuRobo 同源的简化代理。显式 cuRobo 不重新交给原 RRT 规划；时间与导数转换为原项目字段后直接交给执行器。
 
 运行时配有 `GraspCollisionChecker` 时，适配层读取实测夹爪构型、持物相对变换及当前接触策略，支持持物的关节空间避障。严格直线/圆弧和全程姿态约束仍未接入 cuRobo 避障适配层，碰撞后会明确拒绝放宽硬路径。没有实时几何及策略的普通 JSON 入口仍不支持持物／目标接触豁免。
 
@@ -69,7 +69,7 @@ tool={'object_id': 3, 'link': '实际工具link',
 
 当前场景离线装配及原生 FCL 检查器验证得到 36 对原生允许对、9 对 MuJoCo／cuRobo 几何允许对（两者碰撞几何拆分不同）。肩部 geom 20 与底座 geom 143 明确豁免；80 个夹爪几何及 72 个持物几何与底座仍保留 3 mm 阈值。验证未发送运动命令。源配置在场景重新加载时生效。
 
-`policy_checker.py`／`policy_kernels.py` 在 GPU 的普通及 swept 查询中应用逐几何对距离表，IK、图搜索、轨迹优化和内部可行性检查使用同一个 SceneCollision。允许对从自碰撞矩阵严格生成，不使用默认姿态碰撞自动排除。策略表原位更新；几何容量或自碰撞矩阵改变时重新建立规划器，策略改变时清空图搜索缓存。场景／抓持／策略签名在捕获和规划后校验；最终轨迹仍通过原检查器复核。
+`policy_checker.py`／`policy_kernels.py` 在 GPU 的普通及 swept 查询中应用逐几何对距离表，IK、图搜索、轨迹优化和内部可行性检查使用同一个 SceneCollision。允许对从自碰撞矩阵严格生成，不使用默认姿态碰撞自动排除。策略表原位更新；几何容量或自碰撞矩阵改变时重新建立规划器，策略改变时清空图搜索缓存。场景／抓持／策略签名在捕获和规划后校验；最终轨迹通过当前宿主碰撞检查器复核。
 
 查询按完整轨迹批次分批发射，避免超大场景的扁平线程索引溢出；AABB 预筛覆盖整个 swept 中心线段。规划前使用官方直接 metrics rollout 检查起点及关节目标；不可行时明确拒绝，不自动缩小安全距离、扩大允许对或删除几何。若当前策略允许全部自碰撞对，配置为空检查集合，避免调用不支持空集合的官方自碰撞内核。
 
@@ -163,7 +163,54 @@ python libraries/curobo/demo_plan.py --scene libraries/curobo/examples/current_s
 
 示例请求显式使用 0 额外间距，并保留完整碰撞检查。调用方实际使用时应传入最新完整场景，不能把示例快照当实时场景。第一次拟合和每次新工作进程预热可能较慢；应用应复用同一动作实例，并在接收任务前调用 `prepare()`。
 
-## 运行时持物场景性能记录（2026-11-18）
+## 统一简化代理试用（2026-11-18）
+
+sorting 场景的 `planning_collision_proxy.enabled=true` 使 CPU／GPU 共用同一套
+规划球和环境盒体。当前持物快照由 411 个源几何（161 个机器人／持物几何、250 个环境几何）
+变为 42 个代理几何、350 个机器人／持物球和 20 个环境盒。夹爪细机构保留已验证的
+272 个球模板，其他部分简化；未用大盒填掉夹爪空隙或容器内腔。
+
+仅对这类代理的**关节目标**默认启用 `runtime_proxy_cuda_graphs=true`。完整精细
+运行时模型和 pose 入口仍保留原 `runtime_cuda_graphs=false`。目标类型切换会按实际
+执行模式重建规划器，不复用错误模式的捕获结果。可显式将代理 Graph 开关设为 false。
+
+同一记录 `approach(Tray)` 目标，离线回放的完整热调用约 0.5 s，其中 GPU 求解约
+0.14 s、首次代理路径复核约 0.18～0.20 s；每轮清空整路径缓存后测量，外层第二次
+复核可复用同状态结果。首次代理生成约 1 s；新 worker 的首次完整调用约 10 s，含
+初始化和捕获，模型／抓持装配变化也可能触发冷初始化。不是所有技能或场景的亚秒保证。
+
+重新规划得到的新轨迹额外通过了原精细 FCL／articulated 的离线复核（约 5.2 s），
+该精细复核不在默认规划关键路径。旧轨迹在简化包络下靠 Basket 过近，明确拒绝后
+重新规划，没有通过放宽距离或增加豁免接受它。未执行机器人运动。
+
+详细模型、包络误差及策略规则见 `collision/README.md`；实测数据位于本机生成的
+`.cache/shared_proxy_verification.json` 和 `.cache/shared_proxy_state_verification.json`。
+
+### approach 搜索预算修复（2026-11-18）
+
+运行 `106744` 暴露了固定关节目标回放未覆盖的上层重试：10 s 被按 IK 构型数切分，
+首次绕障只得到约 2.46 s 求解时间；超时杀掉 worker 后，下一个构型／距离又冷启动。
+失败阶段还同时累加 `planning` 和包含它的 `total`，把实际约 132.7 s 显示成 255.7 s。
+
+现在首次绕障使用剩余规划搜索预算，不按尚未尝试的 IK 构型数量切碎。新建规划器的
+初始化时间单独记录在 `configuration_selection.initialization_s`，与 client 的初始化／
+求解预算一致；整个请求仍受 `constraints.timeout` 限制，宿主最终复核超时也拒绝返回。
+worker 超时／致命错误需要重启时，当前构型与 approach 搜索立即终止，下一次独立命令
+才可重新启动。普通不可行失败仍保留健康 worker，并允许在剩余时间内尝试其他候选。
+
+approach 的全部距离、相机对齐尝试和最终 move_to 回退共享一次有效 Move 请求的
+`constraints.timeout`，后续尝试只获得剩余时间，且不会修改原请求。这个时限从
+approach 距离搜索开始；此前的目标解析／放置高度选择仍单独计时。终端阶段计时优先使用
+`planning`；只有缺少该字段的旧记录才使用 `curobo_attempt` 或失败阶段 `total`。
+
+离线验证从运行 `106744` 的第 1211 帧重建机械臂／物体位姿及夹爪开口，指爪 mimic
+关节由开口重建，没有回放物理接触或执行运动。两次完整距离搜索都在第一档 100 mm
+用 cuRobo 成功，只有一次绕障调用，没有 worker 超时重启。冷启动仍需十余秒，热调用
+约 0.6～1.0 s；这不是所有技能、精确物理状态或任意场景的亚秒保证。本机结果在
+`.cache/approach_search_budget_verification.json`，CPU 回归测试位于
+`planning/tests/test_planning_search_budget.py`。
+
+## 精细运行时持物场景性能记录（简化代理前，2026-11-18）
 
 原 OLS 小场景的亚秒记录不能代表完整 `approach(Tray)`。最新离线回放包含 161 个机器人／持物几何 link、1,234 个球和 250 个环境几何，保留 3 mm 间距及现有阶段策略。没有执行机器人运动。
 

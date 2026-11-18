@@ -103,7 +103,9 @@
       "command_id": "14",
       "skill_name": "put",
       "parameters": {
-        "target": 13
+        "target": 13,
+        "relation": "behind",
+        "distance_m": 0.05
       }
     },
     {

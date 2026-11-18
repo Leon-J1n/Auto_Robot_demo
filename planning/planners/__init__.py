@@ -1,4 +1,4 @@
-from .curobo.collision_free import CollisionFreePlanner
+from .collision_free_planner import CollisionFreePlanner
 from .direct_planner import DirectPlanner
 from .trajopt_optimizer import TrajOptOptimizer
 from .curobo import CuroboPlanner

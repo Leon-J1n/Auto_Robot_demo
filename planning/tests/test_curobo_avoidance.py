@@ -7,7 +7,8 @@ import unittest
 import numpy as np
 
 from atomic_action.motion.common.action import _MoveExecutor
-from planning import CollisionFreePlanner
+from planning import CollisionFreePlanner as DefaultPlanner
+from planning.planners.curobo.collision_free import CollisionFreePlanner
 from planning.common.errors import CollisionPlanningError, PlanningError
 from planning.planners.collision_free_planner import CollisionFreePlanner as LegacyImport
 from planning.trajectory.prepared import PreparedTrajectory
@@ -43,8 +44,10 @@ class _Curobo:
 
 
 class CuroboAvoidanceTests(unittest.TestCase):
-    def test_legacy_import_resolves_to_curobo_adapter(self):
-        self.assertIs(LegacyImport, CollisionFreePlanner)
+    def test_default_import_resolves_to_rrt(self):
+        self.assertIs(LegacyImport, DefaultPlanner)
+        self.assertIsNot(DefaultPlanner, CollisionFreePlanner)
+        self.assertEqual(DefaultPlanner.planner_id, "rrt")
 
     def setUp(self):
         self.start = np.zeros(6)

@@ -10,9 +10,18 @@ from time import perf_counter
 
 from collision.backends.simplatform_fcl import SimPlatformFCLCollisionChecker, CollisionResult
 from execution.resources import component
+from demo.interaction.carrying_safety import payload_pair_limit
 
 
 class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
+    def enable_planning_proxy(self, options=None):
+        """Use one simplified model for direct checks and cuRobo export."""
+        from collision.proxy import PlanningProxy
+        if not hasattr(self, 'backend'):
+            raise RuntimeError('Bind the live backend before enabling planning proxies')
+        self.planning_proxy = PlanningProxy(self, options)
+        self._query_cache.clear()
+
     def _path_validation_state(self):
         """Exact live scene/model/policy guard, never a rounded joint key."""
         from planning.trajectory.prepared import planning_state_signature
@@ -40,6 +49,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             np.asarray(b.qpos_indices).tobytes(),
             tuple(sorted(getattr(b, 'object_ids', {}).items())),
             self.allow_gripper_environment_contact, frozenset(self.support_geoms),
+            getattr(self, 'carrying_safety_distance', 0.),
             frozenset(getattr(self, '_lift_clearance_pairs', {}).items()),
             getattr(self, '_lift_ignored_payload_geoms', frozenset()),
             getattr(self, '_lift_ignored_payload_names', frozenset()),
@@ -47,6 +57,9 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         return planning_state_signature(b, self), policy
 
     def check_path(self, waypoints, *, resolution=.05, safety_distance=0., allowed_geom_ids=None):
+        if getattr(self, 'planning_proxy', None) is not None:
+            return self.planning_proxy.check_path(waypoints, resolution=resolution,
+                safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
         # The base FCL path cache is disabled for live articulated geometry.
         # Reuse only an identical whole query guarded by BOTH live and FCL state.
         if not hasattr(self, 'backend') or not getattr(self, 'path_validation_cache_enabled', False):
@@ -403,9 +416,14 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     m, d, tool, other, max(.005, float(safety_distance) + .001), None))
                 if distance <= max(0., float(safety_distance)):
                     self._lift_clearance_pairs[frozenset((tool, other))] = distance
+        if getattr(self, 'planning_proxy', None) is not None:
+            self.planning_proxy.capture_lift_clearance(safety_distance)
 
     def clear_lift_clearance(self):
         self._lift_clearance_pairs = {}
+        if getattr(self, 'planning_proxy', None) is not None:
+            self.planning_proxy.lift_bounds.clear()
+            self.planning_proxy._key = None
 
     def _leaves_lift_clearance(self, a, z, distance):
         initial_gap = getattr(self, '_lift_clearance_pairs', {}).get(frozenset((int(a), int(z))))
@@ -417,6 +435,9 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         return distance >= lower_bound
 
     def check(self, joints, *, safety_distance=0.0, allowed_geom_ids=None, gripper_width=None):
+        if getattr(self, 'planning_proxy', None) is not None and not getattr(self, '_policy_only', False):
+            return self.planning_proxy.check(joints, safety_distance=safety_distance,
+                allowed_geom_ids=allowed_geom_ids, gripper_width=gripper_width)
         if hasattr(self, 'backend'):
             held = getattr(self.backend.gripper_controller, 'held_name', None)
             if held != self._policy_held:
@@ -440,6 +461,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                getattr(b, 'contact_target_object_id', None),
                getattr(self, '_physical_closure_target', None),
                self.allow_gripper_environment_contact,
+               getattr(self, 'carrying_safety_distance', 0.),
                getattr(self, '_arm_environment_geom_pairs', frozenset()),
                frozenset(getattr(self, '_lift_clearance_pairs', {}).items()),
                getattr(self, '_lift_ignored_payload_geoms', frozenset()),
@@ -448,11 +470,14 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         if cached is not None:
             self._query_cache.move_to_end(query_key)
             return deepcopy(cached)
-        base = super().check(joints, safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
+        base = (CollisionResult(False, float('inf'), ()) if getattr(self, '_policy_only', False) else
+                super().check(joints, safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids))
         if not hasattr(self, 'backend'):
             return base
         b, d, m = self.backend, self.probe, self.backend.model
         d.qpos[:] = b.data.qpos
+        d.mocap_pos[:] = b.data.mocap_pos
+        d.mocap_quat[:] = b.data.mocap_quat
         d.qvel[:] = 0
         d.qpos[b.qpos_indices] = joints
         if gripper_width is not None:
@@ -466,6 +491,15 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         controller = b.gripper_controller
         held = getattr(controller, 'held_name', None)
         payload_body = b.object_ids[held] if held else None
+        payload_bodies = set()
+        if payload_body is not None:
+            for body in range(1, m.nbody):
+                ancestor = body
+                while ancestor:
+                    if ancestor == payload_body:
+                        payload_bodies.add(body)
+                        break
+                    ancestor = int(m.body_parentid[ancestor])
         if held and m.jnt_type[m.body_jntadr[payload_body]] == mujoco.mjtJoint.mjJNT_FREE:
             t = np.eye(4); t[:3, :3] = d.xmat[controller.base_id].reshape(3, 3); t[:3, 3] = d.xpos[controller.base_id]
             # Forecast physical carrying from the measured relative pose; only the
@@ -477,7 +511,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             d.qpos[address + 3:address + 7] = Rotation.from_matrix(t[:3, :3]).as_quat()[[3, 0, 1, 2]]
             mujoco.mj_kinematics(m, d)
         dynamic_geoms = {g for g in self.geoms if self.body_names[m.geom_bodyid[g]] in self.dynamic_names}
-        moving = self.tool_geoms | dynamic_geoms
+        moving = self.tool_geoms | dynamic_geoms | {g for g in self.geoms if int(m.geom_bodyid[g]) in payload_bodies}
         target = held or b.contact_target or closure_target
         target_text = str(target) if target else ''
         target_prefix = target_text.rsplit('_', 1)[0] if target_text else ''
@@ -543,7 +577,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     if gripper_width is not None and a in self.tool_geoms and z in self.tool_geoms:
                         continue
                     ba, bz = int(m.geom_bodyid[a]), int(m.geom_bodyid[z])
-                    if ba not in self.robot_bodies and bz not in self.robot_bodies and payload_body not in (ba, bz):
+                    if ba not in self.robot_bodies and bz not in self.robot_bodies and not ({ba, bz} & payload_bodies):
                         continue
                     if self.allow_gripper_environment_contact and (
                             (a in self.tool_geoms and bz not in self.robot_bodies) or
@@ -580,10 +614,12 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                             (target_body_match or target_match) and
                             any(n.startswith('robotiq_2f85') for n in names)):
                         continue
-                    support = payload_body in (ba, bz) and (a in self.support_geoms or z in self.support_geoms)
+                    support = bool({ba, bz} & payload_bodies) and (a in self.support_geoms or z in self.support_geoms)
                     pairs.append((a, z, support))
             self._pairs = np.asarray(pairs, dtype=int).reshape(-1, 3)
             self._pair_key = pair_key
+        if getattr(self, '_policy_only', False):
+            return CollisionResult(False, float('inf'), ())
         contacts = list(base_contacts)
         minimum = base.minimum_distance
         if len(base_contacts) != len(base.contacts) and minimum < 0:
@@ -593,9 +629,12 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             aa, zz = self._pairs[:, 0], self._pairs[:, 1]
             # Conservative bounding spheres avoid expensive exact mesh-distance queries.
             gap = np.linalg.norm(d.geom_xpos[aa] - d.geom_xpos[zz], axis=1) - m.geom_rbound[aa] - m.geom_rbound[zz]
-            for a, z, support in self._pairs[gap <= max(float(safety_distance), .005)]:
+            broad_margin = max(float(safety_distance), .005,
+                               getattr(self, 'carrying_safety_distance', 0.) if safety_distance > 0 and held else 0.)
+            for a, z, support in self._pairs[gap <= broad_margin]:
                 ba, bz = int(m.geom_bodyid[a]), int(m.geom_bodyid[z])
-                limit = -.001 if support else float(safety_distance)
+                limit = payload_pair_limit(safety_distance, getattr(self, 'carrying_safety_distance', 0.),
+                                           ba, bz, payload_bodies, self.robot_bodies, support=support)
                 distance = float(mujoco.mj_geomDistance(m, d, int(a), int(z), max(.005, limit + .001), None))
                 minimum = min(minimum, distance)
                 if distance <= limit + 1e-9:

@@ -8,9 +8,10 @@ from pathlib import Path
 GLOBAL_CONFIG_PATH = Path(__file__).resolve().parents[1] / 'config' / 'global.json'
 _KEYS = {'motion': {'velocity_scale', 'acceleration_scale'},
          'trajectory': {'fps', 'pause_seconds'},
-         'planning': {'collision_validation', 'collision_free'},
+         'planning': {'ik_validation', 'collision_validation', 'collision_free'},
          'gripper': {'open_speed', 'close_speed', 'grasp_force', 'hold_force', 'maximum_force'}}
 _PLANNING_KEYS = {
+    'ik_validation': {'position_tolerance_m', 'orientation_tolerance_rad'},
     'collision_validation': {'resolution_rad'},
     'collision_free': {'rrt_resolution_rad'},
 }

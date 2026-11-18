@@ -39,6 +39,16 @@ class PolicyAdapterTests(unittest.TestCase):
         self.assertEqual(self.checker.set_allowed_target_names.call_args_list[0].args, ({'selected'},))
         self.assertEqual(self.checker.set_allowed_target_names.call_args_list[-1].args, ({'previous'},))
 
+    def test_explicit_planner_preserves_timeout_and_stops_automatic_pose_retries(self):
+        failure = TimeoutError('worker stopped')
+        failure.curobo_error = {'error_code': 'CUROBO_TIMEOUT', 'worker_restart_required': True}
+        self.client.plan.side_effect = failure
+        result = self.planner.plan(self.request)
+        self.assertFalse(result['success'])
+        self.assertEqual(result['error']['error_code'], 'CUROBO_TIMEOUT')
+        self.assertFalse(result['error']['recoverable'])
+        self.assertEqual(result['status'], 'timeout')
+
     def test_host_validation_honors_finer_requested_sampling(self):
         request = deepcopy(self.request)
         request['planning'] = {'collision_validation': {'resolution_rad': .004}}

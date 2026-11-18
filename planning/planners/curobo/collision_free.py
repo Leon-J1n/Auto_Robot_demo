@@ -83,10 +83,21 @@ class CollisionFreePlanner:
         try:
             result = self.curobo_planner.plan(planned_request)
         except Exception as exc:
+            runtime_error = getattr(exc, 'curobo_error', None)
+            if isinstance(runtime_error, dict) and runtime_error.get('worker_restart_required'):
+                raise PlanningError(str(exc), code=runtime_error.get('error_code', 'CUROBO_FAILED'),
+                                    recoverable=False, details=runtime_error) from exc
             raise PlanningError(str(exc), code="CUROBO_FAILED", recoverable=True,
-                                details=getattr(exc, "curobo_error", None)) from exc
+                                details=runtime_error) from exc
         if not result.get("success"):
             error = result.get("error") or {}
+            runtime_error = error.get('details')
+            if isinstance(runtime_error, dict) and runtime_error.get('worker_restart_required'):
+                # A timeout/fatal CUDA error has discarded the process. Do not
+                # respawn it for each branch or approach distance of this search.
+                raise PlanningError(error.get('error_message') or 'cuRobo worker stopped.',
+                                    code=runtime_error.get('error_code', 'CUROBO_FAILED'),
+                                    recoverable=False, details=runtime_error)
             raise PlanningError(error.get("error_message") or "cuRobo could not find a collision-free path.",
                                 code=error.get("error_code") or "CUROBO_FAILED", recoverable=True,
                                 details=error.get("details"))
@@ -116,6 +127,11 @@ class CollisionFreePlanner:
             raise PlanningError("Host collision validation rejected the cuRobo trajectory.",
                                 code="TRAJECTORY_INVALID", recoverable=True,
                                 details={"stage": "final_collision_check", "contacts": list(check.contacts)})
+        timeout = float(move_request['constraints'].get('timeout', 30.))
+        if time.perf_counter() - started > timeout:
+            raise PlanningError('cuRobo validation exceeded the enclosing request timeout.',
+                                code='PLANNING_TIMEOUT', recoverable=False,
+                                details={'timeout_s': timeout, 'elapsed_s': time.perf_counter() - started})
         trajectory["planner"] = self.planner_id
         trajectory["original_path_type"] = path_request["path_type"]
         trajectory["planning_time"] = time.perf_counter() - started

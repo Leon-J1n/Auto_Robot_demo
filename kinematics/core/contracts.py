@@ -36,6 +36,8 @@ class IKRequest:
     max_solutions: int = 1
     enumerate_solutions: bool = False
     max_joint_step: float | None = None
+    position_tolerance: float = 2e-4  # metres; service resolves configured values
+    orientation_tolerance: float = 2e-3  # radians
 
     @property
     def remaining_time(self) -> float:

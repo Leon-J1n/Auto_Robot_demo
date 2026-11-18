@@ -298,6 +298,42 @@ class GPUPolicyTests(unittest.TestCase):
 
 @unittest.skipUnless(ENABLED, 'Set ROBOT_AGENT_CUROBO_GPU_TESTS=1 in an isolated CUDA process')
 class WorkerPolicyTests(unittest.TestCase):
+    def test_shared_proxy_graph_replay_world_policy_and_pose_mode(self):
+        import numpy as np
+        from libraries.curobo import CuroboClient
+        bodies=[{'id':0,'parent':None}]
+        transform=np.eye(4)
+        for i in range(6):
+            local=np.eye(4);local[:3,3]=[.1,0,.1]
+            bodies.append(dict(id=i+1,parent=i,matrix=local.tolist(),pivot=np.eye(4).tolist(),
+                joint_name=f'joint_{i}',axis=[0,0,1],kind='revolute',limit=[-3.14,3.14]))
+            transform=transform@local
+        obstacle=np.eye(4);obstacle[0,3]=10.
+        snapshot={'_runtime_collision':dict(schema_version=1,bodies=bodies,root=0,payload_bodies=[],
+            base_world=np.eye(4).tolist(),joint_names=[f'joint_{i}' for i in range(6)],joints=[0.]*6,
+            tcp_body=6,tcp_local=np.eye(4).tolist(),tcp_world=transform.tolist(),
+            geometries=[dict(id=0,body=6,robot=True,kind='sphere_set',size=[0,0,0],matrix=np.eye(4).tolist(),
+                             spheres=[dict(center=[0,0,0],radius=.02)]),
+                        dict(id=1,body=7,robot=False,kind='box',size=[.1,.1,.1],matrix=obstacle.tolist())],
+            planning_proxy=dict(schema_version=1,geometry_source='shared_simplified_proxy'),
+            policy=dict(schema_version=1,safety_distance=.003,avoid_collision=True,allowed_pairs=[],
+                        distance_overrides=[],held_name=None,fingerprint='proxy_graph_test'))}
+        request={'target':{'type':'joint','joint_positions':[.02]+[0.]*5},
+                 'constraints':{'safety_distance':.003},'planning':{'max_attempts':2}}
+        with CuroboClient({'request_timeout':120}) as client:
+            for _ in range(3):
+                result=client.plan(request,snapshot)
+                self.assertTrue(result['diagnostics']['curobo']['cuda_graph_enabled'])
+                self.assertEqual(result['diagnostics']['curobo']['collision_policy']['geometry_source'],'shared_simplified_proxy')
+            snapshot['_runtime_collision']['geometries'][1]['matrix']=transform.tolist()
+            with self.assertRaisesRegex(RuntimeError,'Runtime start is infeasible'):
+                client.plan(request,snapshot)
+            snapshot['_runtime_collision']['policy'].update(allowed_pairs=[[0,1]],fingerprint='explicit_target_pair')
+            result=client.plan(request,snapshot)
+            self.assertTrue(result['diagnostics']['curobo']['cuda_graph_enabled'])
+            prepared=client.prepare(snapshot,request={'target':{'type':'pose'},'constraints':{'safety_distance':.003}})
+            self.assertFalse(prepared['cuda_graph_enabled'])
+
     def test_six_joint_planning_with_attached_payload(self):
         import numpy as np
         from scipy.spatial.transform import Rotation

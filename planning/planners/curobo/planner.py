@@ -178,8 +178,12 @@ class CuroboPlanner:
         except Exception as exc:
             from atomic_action.motion.common.utils.error_codes import failure_result
             code='INVALID_REQUEST' if stage=='validation' else 'CUROBO_FAILED' if stage=='planning' else 'EXECUTION_FAILED'
-            result=failure_result(code,str(exc),failed_stage=stage,recoverable=True,
-                                  details=getattr(exc,'curobo_error',None))
+            runtime_error = getattr(exc, 'curobo_error', None)
+            stopped = isinstance(runtime_error, dict) and runtime_error.get('worker_restart_required')
+            if stopped:
+                code = runtime_error.get('error_code', code)
+            result=failure_result(code,str(exc),failed_stage=stage,recoverable=not stopped,
+                                  details=runtime_error)
             if isinstance(exc,TimeoutError):
                 result['status']='timeout'
             result.update(selection=selection,timing={**timing,'total':time.perf_counter()-started})

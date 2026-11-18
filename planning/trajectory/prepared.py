@@ -15,6 +15,8 @@ def planning_state_signature(runtime, checker) -> str:
     clock. Geometry and filter changes invalidate the cache even at fixed qpos.
     """
     digest = hashlib.sha256()
+    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'options', None)).encode())
+    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'lift_bounds', None)).encode())
     for owner, names in (
         (runtime.data, ("qpos", "qvel", "ctrl", "mocap_pos", "mocap_quat", "eq_active")),
         (runtime.model, ("body_pos", "body_quat", "body_parentid", "body_jntadr", "body_jntnum",
