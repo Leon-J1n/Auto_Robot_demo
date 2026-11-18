@@ -1,0 +1,70 @@
+<mujoco model="drawer">
+  <compiler angle="radian"/>
+
+  <asset>
+    <mesh name="4ab1f14ec798d216_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\4ab1f14ec798d216_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="6ef93f49e4b7a375_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\6ef93f49e4b7a375_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="ca03ee1e25309a99_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\ca03ee1e25309a99_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="e5d525546c9242b8_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\e5d525546c9242b8_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="73f1408d30ea2abd_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\73f1408d30ea2abd_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="34c9ef92042f6313_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\34c9ef92042f6313_mesh.obj" scale="0.65 0.65 0.65"/>
+    <mesh name="5a8eafa89e03b760_mesh" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.007\output\runtime\mujoco\urdf_meshes\5a8eafa89e03b760_mesh.obj" scale="0.65 0.65 0.65"/>
+  </asset>
+
+  <worldbody>
+    <body name="root">
+      <body name="Nightstand0017" quat="0.707107 0 0 -0.707107">
+        <inertial pos="2.275e-06 0.0022885 0.198115" quat="0.707107 0 0 0.707107" mass="1.8" diaginertia="0.0470915 0.0368077 0.0367983"/>
+        <geom size="0.198087 0.148655 0.0065" pos="-2.6e-06 0.00228865 0.389719" type="box"/>
+        <geom size="0.013 0.148655 0.0065" pos="-0.185076 0.0022854 0.0151444" type="box"/>
+        <geom size="0.013 0.148655 0.0065" pos="0.185077 0.00229125 0.0151444" type="box"/>
+        <geom size="0.013 0.0065 0.181578" pos="0.185071 0.144433 0.202268" type="box"/>
+        <geom size="0.013 0.0065 0.181285" pos="0.18508 -0.139851 0.202558" type="box"/>
+        <geom size="0.013 0.0065 0.181155" pos="-0.185076 0.144427 0.202535" type="box"/>
+        <geom size="0.013 0.0065 0.181318" pos="-0.185076 -0.139857 0.202727" type="box"/>
+        <geom size="0.009425 0.13975 0.151353" pos="-0.163472 0.0108316 0.220427" type="box"/>
+        <geom size="0.009425 0.13975 0.15132" pos="0.163489 0.0108296 0.220397" type="box"/>
+        <geom size="0.15444 0.13052 0.0078975" pos="-2.34e-05 0.00159965 0.35363" type="box"/>
+        <geom size="0.154928 0.130617 0.0095225" pos="0.0001079 0.00170495 0.209144" type="box"/>
+        <geom size="0.17355 0.148427 0.006435" pos="0 0.00236665 0.376778" type="box"/>
+        <geom size="0.172965 0.148492 0.0045825" pos="-6.825e-05 0.00242775 0.366201" type="box"/>
+        <geom size="0.172218 0.13975 0.00741" pos="-1.235e-05 0.010831 0.0764771" type="box"/>
+        <geom size="0.00965 0.00745" pos="0.185413 -0.107386 0.0048334" type="cylinder"/>
+        <geom size="0.00965 0.00745" pos="0.185413 0.111341 0.0048334" type="cylinder"/>
+        <geom size="0.00965 0.00745" pos="-0.185409 -0.107386 0.0048334" type="cylinder"/>
+        <geom size="0.00965 0.00745" pos="-0.185409 0.111341 0.0048334" type="cylinder"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="4ab1f14ec798d216_mesh"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="6ef93f49e4b7a375_mesh"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="ca03ee1e25309a99_mesh"/>
+        <body name="Nightstand0017_drawer01" pos="2.6e-06 -0.133722 0.282197">
+          <inertial pos="-3.8675e-07 0.113351 -0.000470389" quat="0 0.707107 0 0.707107" mass="0.35" diaginertia="0.00549542 0.00344137 0.00311499"/>
+          <joint name="Nightstand0017_drawer01" type="slide" range="0 0.238215" actuatorfrcrange="-100 100" damping="0.8" frictionloss="0.2" axis="0 -1 0"/>
+          <geom size="0.15795 0.004875 0.0674375" pos="-6.5e-07 0.0002496 -0.0004706" type="box"/>
+          <geom size="0.0052 0.1287 0.0459875" pos="0.143008 0.133479 -0.0117" type="box"/>
+          <geom size="0.0052 0.1287 0.0459875" pos="-0.143008 0.133492 -0.0117" type="box"/>
+          <geom size="0.13845 0.0052 0.0459875" pos="-0.00012805 0.256991 -0.0117" type="box"/>
+          <geom size="0.138547 0.12402 0.0052" pos="-0.00012675 0.128989 -0.0524804" type="box"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="e5d525546c9242b8_mesh"/>
+          <geom name="graspable_handle_bar_Nightstand0017_drawer01" size="0.0639734 0.00386421 0.00511346" pos="3.7856e-05 -0.0316233 0.0237971" type="box"/>
+          <geom name="graspable_handle_support_a_Nightstand0017_drawer01" size="0.00775443 0.0157519 0.0107215" pos="-0.0697811 -0.0197356 0.0237708" type="box"/>
+          <geom name="graspable_handle_support_b_Nightstand0017_drawer01" size="0.00775443 0.0157519 0.0107215" pos="0.0697987 -0.0197356 0.0237708" type="box"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="73f1408d30ea2abd_mesh"/>
+        </body>
+        <body name="Nightstand0017_drawer02" pos="2.6e-06 -0.133723 0.136091">
+          <inertial pos="-3.8675e-07 0.113351 -0.000451938" quat="0 0.707107 0 0.707107" mass="0.35" diaginertia="0.00549542 0.00344137 0.00311499"/>
+          <joint name="Nightstand0017_drawer02" type="slide" range="0 0.238215" actuatorfrcrange="-100 100" damping="0.8" frictionloss="0.2" axis="0 -1 0"/>
+          <geom size="0.15795 0.004875 0.0674375" pos="-6.5e-07 0.0002496 -0.00045175" type="box"/>
+          <geom size="0.0052 0.1287 0.0424125" pos="0.143008 0.133476 -0.0081328" type="box"/>
+          <geom size="0.0052 0.1287 0.0424125" pos="-0.143008 0.133489 -0.0081328" type="box"/>
+          <geom size="0.13845 0.0052 0.0424125" pos="-0.00013065 0.256991 -0.0081328" type="box"/>
+          <geom size="0.138482 0.123825 0.0052" pos="-0.00015535 0.128829 -0.045346" type="box"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="34c9ef92042f6313_mesh"/>
+          <geom name="graspable_handle_bar_Nightstand0017_drawer02" size="0.0639734 0.00386421 0.00511345" pos="3.78495e-05 -0.0316233 0.0228896" type="box"/>
+          <geom name="graspable_handle_support_a_Nightstand0017_drawer02" size="0.00775443 0.0157523 0.0107219" pos="-0.0697811 -0.0197352 0.0228626" type="box"/>
+          <geom name="graspable_handle_support_b_Nightstand0017_drawer02" size="0.00775443 0.0157523 0.0107219" pos="0.0697987 -0.0197352 0.0228626" type="box"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="5a8eafa89e03b760_mesh"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

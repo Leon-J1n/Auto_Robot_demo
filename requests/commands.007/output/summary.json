@@ -1,0 +1,17 @@
+{
+  "request_id": "open-close-drawer-007",
+  "success": true,
+  "status": "success",
+  "frame_count": 3009,
+  "physics_steps": 23016,
+  "execution_backend": "mujoco",
+  "trajectory_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.007\\output\\trajectories\\execution.traj",
+  "blackboard_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.007\\output\\snapshots\\blackboard.json",
+  "final_scene_file": "snapshots/final_scene.json",
+  "commands_file": "commands/results.jsonl",
+  "command_count": 18,
+  "successful_command_count": 18,
+  "failed_command_count": 0,
+  "failure": null,
+  "final_state_file": "snapshots/state.json"
+}
