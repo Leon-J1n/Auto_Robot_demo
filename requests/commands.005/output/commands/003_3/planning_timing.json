@@ -14,21 +14,21 @@
       "planner": "direct",
       "planning_mode": "direct",
       "timing_s": {
-        "validation": 0.0012586999218910933,
-        "context": 0.0001426998060196638,
-        "selection": 5.699926987290382e-06,
-        "path_generation": 0.25491290003992617,
-        "planning": 0.0007562998216599226,
-        "trajectory_preparation": 0.03381610009819269,
-        "posture_scoring": 3.400025889277458e-06,
-        "pre_execution_total": 0.29090470005758107
+        "validation": 0.0011624000035226345,
+        "context": 0.00011930009350180626,
+        "selection": 4.399800673127174e-06,
+        "path_generation": 0.2554275000002235,
+        "planning": 0.0006194000598043203,
+        "trajectory_preparation": 0.03422469994984567,
+        "posture_scoring": 2.200016751885414e-06,
+        "pre_execution_total": 0.29156739986501634
       },
       "planner_diagnostics": {
         "planning_stages_s": {
-          "endpoint_collision_check": 3.720005042850971e-05,
+          "endpoint_collision_check": 3.6400044336915016e-05,
           "endpoint_collision_prechecked": false,
-          "path_densification": 4.820013418793678e-05,
-          "direct_path_collision_check": 0.0002590999938547611,
+          "path_densification": 4.509999416768551e-05,
+          "direct_path_collision_check": 0.0002508999314159155,
           "collision_resolution_rad": 0.04
         },
         "ik_branch_selection": {
@@ -44,9 +44,9 @@
           "backend": "continuous_precomputed",
           "path_interpolator": "cubic_c2",
           "collision_fallback": null,
-          "trajectory_sampling_s": 0.0008070999756455421,
-          "linear_path_validation_s": 0.0013397999573498964,
-          "collision_validation_s": 0.031049299985170364,
+          "trajectory_sampling_s": 0.0008185999467968941,
+          "linear_path_validation_s": 0.00136340013705194,
+          "collision_validation_s": 0.0315140001475811,
           "circular_path_validation_s": 0.0,
           "validation_waypoint_count": 5,
           "planner_waypoint_count": 3,

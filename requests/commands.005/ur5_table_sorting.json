@@ -238,6 +238,9 @@
               "wrist_2_joint": -1.5707963,
               "wrist_3_joint": 0.0
             },
+            "allowed_arm_environment_names": [
+              "RobotPedestal"
+            ],
             "available_connect_joints": [
               "wrist_3_joint"
             ]

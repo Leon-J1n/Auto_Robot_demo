@@ -1,0 +1,1072 @@
+{
+  "command_id": "6",
+  "skill_name": "put",
+  "success": true,
+  "target_resolution_timing_s": {
+    "resolve_total": 0.002104500017594546,
+    "candidate_selection": 0.01969520002603531,
+    "adapter_prepare_total": 0.024410499987425283
+  },
+  "vlm_request_s": null,
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {
+    "visual_estimate": {
+      "point_type": "place",
+      "pixel": {
+        "x": 406,
+        "y": 299
+      },
+      "world_point": {
+        "x": -0.21782963346475537,
+        "y": 0.12933935958080878,
+        "z": 0.817507
+      },
+      "depth_m": 1.0468217134475708,
+      "frame": "world",
+      "confidence": null,
+      "timestamp": 6.127999999999547,
+      "sequence": 1,
+      "placement_center_fallback": {
+        "used": true,
+        "radius_fraction_xy": 0.2,
+        "max_points": 3,
+        "sample_index": 0,
+        "trigger": "vlm_point_infeasible",
+        "attempts": [
+          {
+            "world_point": {
+              "x": -0.21782963346475537,
+              "y": 0.12933935958080878,
+              "z": 0.817507
+            },
+            "height_attempts": [
+              {
+                "placement_height_offset_m": -0.03,
+                "success": true,
+                "evaluated": true,
+                "elapsed_s": 0.019544200011296198,
+                "rejected": []
+              },
+              {
+                "placement_height_offset_m": -0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": -0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.0,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.01,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.02,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.03,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.04,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              },
+              {
+                "placement_height_offset_m": 0.05,
+                "success": true,
+                "evaluated": false,
+                "inferred_by_monotonicity": true,
+                "inference": "binary search inferred feasible above the selected height"
+              }
+            ],
+            "success": true,
+            "elapsed_s": 0.01981930001056753
+          }
+        ],
+        "primary_height_attempts": [
+          {
+            "placement_height_offset_m": -0.03,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 0.3574285999929998,
+            "error": {
+              "error_code": "TARGET_POSE_COLLISION",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0004929074176157075, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.00065506559975217, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.000379289612463817, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0025264935917739873, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018560502866374073, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012347973602192388, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0008022849053200652, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01641188133645185, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01143192564574854, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0011029868070434033, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018806286915015513, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012334955085632773, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0017204328658620193, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.00451167125148147, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.010611832620953126, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0062445318671432775, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0069461872732235795, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.002035490979347094, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001844478582559237, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0018489120923994482, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005103253699532944, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005019254086748518, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006944681672386422, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.00047162458592590623, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0011608088176074099, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0017344430095496668, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005409903330211562, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0012226403895035135, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0008367023859614451, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0004929074176157284, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0006550655997522404, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0003792896124638929, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0025264935917740277, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018560502866374076, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012347973602192436, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0008022849053201733, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01641188133645184, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01143192564574856, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0011029868070432762, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01880628691501546, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012334955085632562, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0017204328658619512, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.004511671251481545, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.010611832620953148, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0062445318671433235, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006946187273223634, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0020354909793470787, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0018444785825591596, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0018489120923993719, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005103253699532871, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005019254086748591, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006944681672386479, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.00047162458592588943, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001160808817607485, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0017344430095497351, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005409903330211574, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001222640389503572, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0008367023859614328, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0004929074436757159, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0006550655547578558, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.00037928957338134717, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0025264934705514393, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018560502880540983, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012347973580448177, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0008022848125396652, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01641188135617867, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.011431925695260746, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0011029870620612565, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018806287003207665, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012334955460656319, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0017204329541067203, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.004511671163264527, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.010611832600829011, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0062445317725475695, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006946187197895619, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.002035491038314767, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001844478677699431, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0018489121879196615, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0051032537949515415, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005019253981161624, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006944681596960484, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.00047162460074168683, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001160808711266015, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.001734442904372847, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005409903314673146, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0012226403052434487, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.000836702400849795, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0004929074436756766, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.0006550655547578035, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': -0.000379289573381337, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.002526493470551449, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018560502880540813, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01234797358044808, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0008022848125396788, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.01641188135617846, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.011431925695260711, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0011029870620613564, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.018806287003207574, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.012334955460656495, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001720432954106846, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.004511671163264401, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.010611832600828918, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006244531772547418, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.00694618719789545, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0020354910383150312, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0018444786776996643, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.00184891218791991, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005103253794951729, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005019253981161352, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.006944681596960317, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0004716246007418197, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.001160808711266083, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.0017344429043725333, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': -0.005409903314672879, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0012226403052436254, 'self_collision': False}, {'geom1': 'Apple', 'geom2': 'Basket', 'distance': 0.0008367024008500622, 'self_collision': False})}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0004929074176157075,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.00065506559975217,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.000379289612463817,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0025264935917739873,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018560502866374073,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012347973602192388,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0008022849053200652,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01641188133645185,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01143192564574854,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0011029868070434033,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018806286915015513,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012334955085632773,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0017204328658620193,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.00451167125148147,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.010611832620953126,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0062445318671432775,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0069461872732235795,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.002035490979347094,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001844478582559237,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0018489120923994482,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005103253699532944,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005019254086748518,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006944681672386422,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.00047162458592590623,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0011608088176074099,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0017344430095496668,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005409903330211562,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0012226403895035135,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0008367023859614451,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0004929074176157284,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0006550655997522404,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0003792896124638929,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0025264935917740277,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018560502866374076,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012347973602192436,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0008022849053201733,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01641188133645184,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01143192564574856,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0011029868070432762,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01880628691501546,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012334955085632562,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0017204328658619512,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.004511671251481545,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.010611832620953148,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0062445318671433235,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006946187273223634,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0020354909793470787,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0018444785825591596,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0018489120923993719,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005103253699532871,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005019254086748591,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006944681672386479,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.00047162458592588943,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001160808817607485,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0017344430095497351,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005409903330211574,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001222640389503572,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0008367023859614328,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0004929074436757159,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0006550655547578558,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.00037928957338134717,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0025264934705514393,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018560502880540983,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012347973580448177,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0008022848125396652,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01641188135617867,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.011431925695260746,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0011029870620612565,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018806287003207665,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012334955460656319,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0017204329541067203,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.004511671163264527,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.010611832600829011,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0062445317725475695,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006946187197895619,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.002035491038314767,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001844478677699431,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0018489121879196615,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0051032537949515415,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005019253981161624,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006944681596960484,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.00047162460074168683,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001160808711266015,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.001734442904372847,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005409903314673146,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0012226403052434487,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.000836702400849795,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0004929074436756766,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0006550655547578035,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": -0.000379289573381337,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.002526493470551449,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018560502880540813,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01234797358044808,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0008022848125396788,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.01641188135617846,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.011431925695260711,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0011029870620613564,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.018806287003207574,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.012334955460656495,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001720432954106846,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.004511671163264401,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.010611832600828918,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006244531772547418,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.00694618719789545,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0020354910383150312,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0018444786776996643,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.00184891218791991,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005103253794951729,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005019253981161352,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.006944681596960317,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0004716246007418197,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.001160808711266083,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.0017344429043725333,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": -0.005409903314672879,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0012226403052436254,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Apple",
+                      "geom2": "Basket",
+                      "distance": 0.0008367024008500622,
+                      "self_collision": false
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": -0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": -0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.0,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.01,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.04,
+            "success": false,
+            "evaluated": false,
+            "inferred_by_monotonicity": true,
+            "inference": "all higher tested heights were infeasible"
+          },
+          {
+            "placement_height_offset_m": 0.05,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 1.379951999988407,
+            "error": {
+              "error_code": "TARGET_POSE_UNREACHABLE",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'ik_failed', 'message': 'eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.037002'}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "ik_failed",
+                  "message": "eaik: No valid solution (FK target mismatch; FK target mismatch; FK target mismatch; FK target mismatch); jacobian: No numerical IK solution within budget/continuity limit; best residual=0.037002"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "crop_origin_pixel": {
+        "x": 340,
+        "y": 251
+      },
+      "rgbd_world_point": {
+        "x": -0.21782963346475537,
+        "y": 0.12933935958080878,
+        "z": 0.6151008591449783
+      },
+      "placement_aabb_top_world": {
+        "x": -0.21782963346475537,
+        "y": 0.12933935958080878,
+        "z": 0.817507
+      },
+      "held_object": "Apple",
+      "placement_cycle_id": "6",
+      "placement_height_selected": true,
+      "placement_height_candidates_m": [
+        -0.03,
+        -0.02,
+        -0.01,
+        0.0,
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05
+      ],
+      "placement_request": {
+        "relation": "at",
+        "distance_m": 0.0
+      },
+      "placement_height_offset_m": -0.03,
+      "placement_height_attempts": [
+        {
+          "placement_height_offset_m": -0.03,
+          "success": true,
+          "evaluated": true,
+          "elapsed_s": 0.019544200011296198,
+          "rejected": []
+        },
+        {
+          "placement_height_offset_m": -0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": -0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.0,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.01,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.02,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.03,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.04,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        },
+        {
+          "placement_height_offset_m": 0.05,
+          "success": true,
+          "evaluated": false,
+          "inferred_by_monotonicity": true,
+          "inference": "binary search inferred feasible above the selected height"
+        }
+      ],
+      "target_point_world": {
+        "x": -0.21782963346475537,
+        "y": 0.12933935958080875,
+        "z": 0.787507
+      }
+    }
+  },
+  "motions": [
+    {
+      "phase": "contact",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0011378000199329108,
+        "context": 0.00011569997877813876,
+        "selection": 4.8000074457377195e-06,
+        "path_generation": 0.18549249999341555,
+        "planning": 0.0008594999962951988,
+        "trajectory_preparation": 0.18083880000631325,
+        "posture_scoring": 2.900022082030773e-06,
+        "pre_execution_total": 0.36845930002164096
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 3.130000550299883e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 0.00010269999620504677,
+          "direct_path_collision_check": 0.0004044999950565398,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0008521999989170581,
+          "linear_path_validation_s": 0.00716499998816289,
+          "collision_validation_s": 0.17217320000054315,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 23,
+          "planner_waypoint_count": 12,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

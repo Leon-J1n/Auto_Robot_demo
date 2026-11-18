@@ -1,9 +1,9 @@
 """Existing numerical algorithm, decoupled from the MuJoCo implementation."""
 from __future__ import annotations
 import numpy as np
-from kinematics.contracts import IKError, IKResult
-from kinematics.geometry import rotation_error
-from kinematics.policies import append_distinct, normalize
+from kinematics.core.contracts import IKError, IKResult
+from kinematics.core.geometry import rotation_error
+from kinematics.core.policies import append_distinct, normalize
 
 
 class JacobianBackend:

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kinematics.models.mujoco_model import MujocoRobotModel
+from kinematics.models.mujoco import MujocoRobotModel
 from utils import SceneRobotRuntime
 from .model_data import extract_model_data, parameter_forward
 

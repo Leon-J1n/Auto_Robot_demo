@@ -189,6 +189,11 @@ class SimPlatformFCLCollisionChecker:
         self.robot_base_link = robot_base_link
         self.robot_tip_link = robot_tip_link
         self._allowed_link_pairs = (robot_ref or {}).get('allowed_collision_link_pairs', [])
+        fixture_names = (robot_ref or {}).get('allowed_arm_environment_names', [])
+        if (not isinstance(fixture_names, list)
+                or any(not isinstance(name, str) or not name for name in fixture_names)):
+            raise ValueError('allowed_arm_environment_names must be a list of scene object names')
+        self._allowed_arm_environment_names = frozenset(fixture_names)
         self._sim = Simulator(physics="none", collision="fcl")
         self.world = self._sim.create_world()
         self.robot = self.world.load_robot(self.robot_urdf)
@@ -222,9 +227,9 @@ class SimPlatformFCLCollisionChecker:
         q = np.asarray(initial_joints if initial_joints is not None else self._runtime_joints(), dtype=float)
         if q.shape != (len(self._project_joint_names),):
             raise ValueError(f"FCL robot expects {len(self._project_joint_names)} project joint values")
-        # Only structural same/adjacent-link contacts are excluded. Never
-        # whitelist an initial robot/environment collision for the whole task.
-        self._baseline = self._structural_pairs()
+        # Structural contacts and explicitly declared arm/fixture pairs only;
+        # never infer permissions from an initial robot/environment collision.
+        self._baseline = self._structural_pairs() | self._arm_environment_pairs()
         self.allowed_target_geom_ids: set[Any] | None = None
         self.allowed_target_names: set[str] = set()
         # Temporary, exact contact pairs captured at the beginning of a
@@ -285,6 +290,7 @@ class SimPlatformFCLCollisionChecker:
                 source = _component(obj, 'GripperModel') or {}
                 path = _asset_path(source.get('urdf'), self.scene_file, self.asset_root)
                 attachment_links.update(e.get('name') for e in ET.parse(path).getroot().findall('link'))
+        self._arm_link_names = frozenset(links.values()) - attachment_links
         adjacent = {frozenset((j.find('parent').get('link'), j.find('child').get('link'))) for j in joints}
         for pair in self._allowed_link_pairs:
             if len(pair) != 2 or any(name not in set(links.values()) | attachment_links for name in pair):
@@ -304,6 +310,16 @@ class SimPlatformFCLCollisionChecker:
         return {frozenset((a, b)) for a, la in self._collider_links.items()
                 for b, lb in self._collider_links.items()
                 if a != b and (group(la) == group(lb) or frozenset((la, lb)) in adjacent)}
+
+    def _arm_environment_pairs(self):
+        """Declared arm/fixture pairs, excluding attachments and held objects."""
+        names = self._allowed_arm_environment_names
+        missing = names - set(self._entities)
+        if missing:
+            raise ValueError(f'Arm collision exemption references unloaded objects: {sorted(missing)}')
+        arm = {h for h, link in self._collider_links.items() if link in self._arm_link_names}
+        fixtures = {h for h, name in self._names.items() if name in names}
+        return {frozenset((a, b)) for a in arm for b in fixtures if a != b}
 
     def _to_sdk_joints(self, joints: Sequence[float]) -> np.ndarray:
         values = np.asarray(joints, dtype=float)

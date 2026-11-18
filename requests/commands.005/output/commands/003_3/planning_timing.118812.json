@@ -1,0 +1,62 @@
+{
+  "command_id": "3",
+  "skill_name": "lift_up",
+  "success": true,
+  "target_resolution_timing_s": {},
+  "vlm_request_s": null,
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {},
+  "motions": [
+    {
+      "phase": "move",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.0015236000181175768,
+        "context": 0.0001501999795436859,
+        "selection": 6.000016583129764e-06,
+        "path_generation": 0.25745370000367984,
+        "planning": 0.0007023999933153391,
+        "trajectory_preparation": 0.03699550000601448,
+        "posture_scoring": 2.4999899324029684e-06,
+        "pre_execution_total": 0.2968414000060875
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 4.789998638443649e-05,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 5.609999061562121e-05,
+          "direct_path_collision_check": 0.00025010001263581216,
+          "collision_resolution_rad": 0.04
+        },
+        "ik_branch_selection": {
+          "candidate_count": 1,
+          "evaluated_count": 1,
+          "selected_branch": 0,
+          "explicit_seed": false,
+          "search_mode": "fast",
+          "ik_cache_hits": 0,
+          "collision_cache_hits": 0
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0008248999947682023,
+          "linear_path_validation_s": 0.0014011999883223325,
+          "collision_validation_s": 0.03414850000990555,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 5,
+          "planner_waypoint_count": 3,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

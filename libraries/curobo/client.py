@@ -9,6 +9,10 @@ import queue
 import subprocess
 import sys
 import threading
+import time
+import uuid
+
+from .runtime_control import request_budgets
 
 
 PACKAGE = Path(__file__).resolve().parent
@@ -28,11 +32,14 @@ class CuroboClient:
         self._lock = threading.RLock()
         self._responses = queue.Queue()
         self._log = None
+        self.last_stage = None
         atexit.register(self.close)
 
     def _start(self):
         if self.process is not None and self.process.poll() is None:
             return
+        if self.process is not None or self._log is not None:
+            self.close(force=True)
         self.cache.mkdir(parents=True, exist_ok=True)
         self._responses = queue.Queue()
         self._log = (self.cache / 'worker.log').open('a', encoding='utf-8')
@@ -67,16 +74,55 @@ class CuroboClient:
 
     def call(self, op, **payload):
         with self._lock:
-            self._start()
+            total_budget, initialization_budget, solve_budget = request_budgets(self.config, op, payload)
+            started = time.monotonic()
+            total_deadline = started + total_budget
+            initialization_deadline = started + initialization_budget
+            solve_deadline = None
+            request_id = uuid.uuid4().hex
+            self.last_stage = 'worker_start'
             try:
-                self.process.stdin.write(json.dumps({'op':op, **payload}, allow_nan=False)+'\n')
+                # Encode before writing so malformed requests cannot leave a
+                # partial JSON line in an otherwise reusable worker.
+                message = json.dumps({'op':op, 'request_id':request_id, **payload}, allow_nan=False)+'\n'
+                self._start()
+                self.process.stdin.write(message)
                 self.process.stdin.flush()
-                reply=self._responses.get(timeout=float(self.config.get('request_timeout',1800)))
+                while True:
+                    deadline = min(total_deadline, solve_deadline if solve_deadline is not None
+                                   else initialization_deadline)
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise queue.Empty
+                    reply = self._responses.get(timeout=remaining)
+                    if time.monotonic() > deadline:
+                        raise queue.Empty
+                    if reply.get('request_id') not in (None, request_id):
+                        continue
+                    if reply.get('event') == 'stage':
+                        self.last_stage = reply['stage']
+                        if self.last_stage == 'planning' and solve_deadline is None:
+                            solve_deadline = time.monotonic() + solve_budget
+                        continue
+                    break
             except queue.Empty as exc:
-                self.close()
-                raise TimeoutError('cuRobo worker timed out and was stopped') from exc
+                stage = self.last_stage
+                self.close(force=True)
+                error = {'error_code':'CUROBO_TIMEOUT', 'failed_stage':stage,
+                    'error_message':f'cuRobo timed out during {stage}; worker was stopped',
+                    'recoverable':True, 'worker_restart_required':True,
+                    'details':{'elapsed_s':time.monotonic()-started, 'total_budget_s':total_budget,
+                               'initialization_budget_s':initialization_budget, 'solve_budget_s':solve_budget}}
+                exception = TimeoutError(error['error_message'])
+                exception.curobo_error = error
+                raise exception from exc
+            except BaseException:
+                self.close(force=True)
+                raise
             if not reply.get('ok'):
                 error=reply.get('error',{})
+                if error.get('worker_restart_required') or error.get('error_code') == 'CUROBO_WORKER_EXITED':
+                    self.close(force=True)
                 exception=RuntimeError(error.get('error_message','cuRobo worker failed'))
                 exception.curobo_error=error
                 raise exception
@@ -97,17 +143,31 @@ class CuroboClient:
     def refresh_assets(self):
         return self.call('refresh')
 
-    def close(self):
+    @staticmethod
+    def _kill_worker(process):
+        # Windows venv python.exe can be a launcher with an interpreter child.
+        # Killing just Popen.pid leaves that child (and its CUDA context) alive.
+        if os.name == 'nt':
+            subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5,
+                creationflags=subprocess.CREATE_NO_WINDOW, check=False)
+        if process.poll() is None:
+            process.kill()
+
+    def close(self, *, force=False):
         with self._lock:
             process=self.process
             self.process=None
             if process is not None:
                 if process.poll() is None:
                     try:
-                        process.stdin.close()
-                        process.wait(timeout=3)
+                        if force:
+                            self._kill_worker(process)
+                        else:
+                            process.stdin.close()
+                        process.wait(timeout=3 if not force else 5)
                     except (OSError, subprocess.TimeoutExpired):
-                        process.kill()
+                        self._kill_worker(process)
                         process.wait(timeout=5)
                 for stream in (process.stdin,process.stdout):
                     if stream and not stream.closed:

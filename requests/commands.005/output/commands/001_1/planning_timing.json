@@ -3,8 +3,8 @@
   "skill_name": "approach",
   "success": true,
   "target_resolution_timing_s": {
-    "resolve_total": 5.075679500121623,
-    "candidate_selection": 1.5050199998077005
+    "resolve_total": 5.367926200153306,
+    "candidate_selection": 1.2151927999220788
   },
   "vlm_request_s": null,
   "wrist_observation": {
@@ -52,7 +52,7 @@
   "pose_search_precheck": [
     {
       "distance_m": 0.1,
-      "elapsed_s": 0.0031814000103622675,
+      "elapsed_s": 0.001766099827364087,
       "status": "analytic_solution"
     }
   ],
@@ -65,7 +65,7 @@
         "gripper_pose_precheck": [
           {
             "status": "clear",
-            "elapsed_s": 0.007519699865952134
+            "elapsed_s": 0.0074262002017349005
           }
         ],
         "rejected": []
@@ -93,7 +93,7 @@
       },
       "frame": "world",
       "confidence": 0.9,
-      "vlm_request_s": 4.437003599945456,
+      "vlm_request_s": 3.082618599990383,
       "is_elongated": false,
       "axis_points": null,
       "axis_status": "not_elongated",
@@ -102,7 +102,7 @@
       "timestamp": 2.957999999999896,
       "sequence": 0,
       "vlm_request_count": 1,
-      "visual_estimation_s": 4.454677199944854,
+      "visual_estimation_s": 4.8409104000311345,
       "crop_origin_pixel": {
         "x": 220,
         "y": 149
@@ -193,11 +193,11 @@
         },
         "status": "validated",
         "timing_s": {
-          "capture": 0.006188699975609779,
-          "vlm": 4.44165170006454,
-          "validation": 0.8290699999779463
+          "capture": 0.00523889996111393,
+          "vlm": 3.086577400099486,
+          "validation": 0.8059664000757039
         },
-        "elapsed_s": 5.276973699918017
+        "elapsed_s": 3.8978363999631256
       },
       "grasp_depth_attempts": [
         {
@@ -206,7 +206,7 @@
           "gripper_pose_precheck": [
             {
               "status": "clear",
-              "elapsed_s": 0.007519699865952134
+              "elapsed_s": 0.0074262002017349005
             }
           ],
           "rejected": []
@@ -241,22 +241,22 @@
       "planner": "direct",
       "planning_mode": "direct",
       "timing_s": {
-        "validation": 0.0012721000239253044,
-        "context": 0.00019919988699257374,
-        "selection": 8.899951353669167e-06,
-        "path_generation": 0.007304399972781539,
-        "planning": 0.5131878000684083,
-        "trajectory_preparation": 0.19381080009043217,
-        "posture_scoring": 2.500135451555252e-06,
-        "pre_execution_total": 0.7157972001004964,
-        "curobo_attempt": 15.925979000050575
+        "validation": 0.001122599933296442,
+        "context": 0.00018170010298490524,
+        "selection": 7.400056347250938e-06,
+        "path_generation": 0.007975999964401126,
+        "planning": 0.4971232998650521,
+        "trajectory_preparation": 0.17294770013540983,
+        "posture_scoring": 3.400025889277458e-06,
+        "pre_execution_total": 0.6793717998079956,
+        "curobo_attempt": 2.511893300106749
       },
       "planner_diagnostics": {
         "planning_stages_s": {
           "endpoint_collision_check": 0.0,
           "endpoint_collision_prechecked": true,
-          "path_densification": 9.360001422464848e-05,
-          "direct_path_collision_check": 0.0007617000956088305,
+          "path_densification": 9.560002945363522e-05,
+          "direct_path_collision_check": 0.000740499934181571,
           "collision_resolution_rad": 0.04
         },
         "configuration_selection": {
@@ -303,7 +303,7 @@
                 -1.5707963656194202,
                 -0.8834691074999064
               ],
-              "endpoint_check_s": 0.18918829993344843,
+              "endpoint_check_s": 0.1843459999654442,
               "endpoint_collision": false,
               "status": "pending"
             },
@@ -316,7 +316,7 @@
                 -1.5707963656194202,
                 -0.8834691074999064
               ],
-              "endpoint_check_s": 0.03353770007379353,
+              "endpoint_check_s": 0.03256839979439974,
               "endpoint_collision": true,
               "status": "endpoint_collision"
             },
@@ -329,7 +329,7 @@
                 -1.5707963441183797,
                 3.013156228262932
               ],
-              "endpoint_check_s": 0.029138099867850542,
+              "endpoint_check_s": 0.028503800043836236,
               "endpoint_collision": true,
               "status": "endpoint_collision"
             },
@@ -342,7 +342,7 @@
                 -4.712388941560166,
                 2.258123546089887
               ],
-              "endpoint_check_s": 0.015459399903193116,
+              "endpoint_check_s": 0.014494300121441483,
               "endpoint_collision": false,
               "status": "pending"
             },
@@ -355,7 +355,7 @@
                 1.5707963441183797,
                 -0.12843642532686103
               ],
-              "endpoint_check_s": 0.00431600003503263,
+              "endpoint_check_s": 0.004147599916905165,
               "endpoint_collision": false,
               "status": "pending"
             },
@@ -368,7 +368,7 @@
                 1.5707963441183797,
                 -0.12843642532686103
               ],
-              "endpoint_check_s": 0.030375400092452765,
+              "endpoint_check_s": 0.02886299998499453,
               "endpoint_collision": true,
               "status": "endpoint_collision"
             },
@@ -381,7 +381,7 @@
                 -1.5707963441183797,
                 3.013156228262932
               ],
-              "endpoint_check_s": 0.0082330999430269,
+              "endpoint_check_s": 0.008391700219362974,
               "endpoint_collision": false,
               "status": "pending"
             },
@@ -394,7 +394,7 @@
                 -4.712388941560166,
                 2.258123546089887
               ],
-              "endpoint_check_s": 0.02512080012820661,
+              "endpoint_check_s": 0.02442719996906817,
               "endpoint_collision": true,
               "status": "endpoint_collision"
             },
@@ -408,10 +408,10 @@
                 -0.8834691074999064
               ],
               "status": "direct_pending",
-              "coarse_path_check_s": 0.17635449999943376,
-              "fine_direct_plan_s": 0.0012294999323785305,
+              "coarse_path_check_s": 0.17001819983124733,
+              "fine_direct_plan_s": 0.001154900062829256,
               "direct_success": true,
-              "direct_elapsed_s": 0.17765830014832318
+              "direct_elapsed_s": 0.17123920004814863
             },
             {
               "goal": [
@@ -455,9 +455,9 @@
           "backend": "continuous_precomputed",
           "path_interpolator": "cubic_c2",
           "collision_fallback": null,
-          "trajectory_sampling_s": 0.00806890008971095,
+          "trajectory_sampling_s": 0.001189500093460083,
           "linear_path_validation_s": 0.0,
-          "collision_validation_s": 0.18498490005731583,
+          "collision_validation_s": 0.1710885998327285,
           "circular_path_validation_s": 0.0,
           "validation_waypoint_count": 57,
           "planner_waypoint_count": 29,

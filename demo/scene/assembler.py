@@ -215,6 +215,10 @@ class SceneAssembler:
             "allowed_collision_link_pairs": current.get(
                 "allowed_collision_link_pairs", default_pairs,
             ),
+            "allowed_arm_environment_names": deepcopy(current.get(
+                "allowed_arm_environment_names",
+                _component(robot, "RobotDriver").get("allowed_arm_environment_names", []),
+            )),
         }
         # The current OLS UR5e + Robotiq assembly has a calibrated grasp
         # center.  Keep this as an adapter default; a future OLS robot can

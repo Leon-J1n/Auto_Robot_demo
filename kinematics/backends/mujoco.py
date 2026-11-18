@@ -1,10 +1,13 @@
 """MuJoCo implementation of the unified kinematics service."""
 from __future__ import annotations
-from .models.mujoco_model import MujocoRobotModel
-from .service import KinematicsService
+
+from ..models.mujoco import MujocoRobotModel
+from ..core.service import KinematicsService
 
 
 class MujocoKinematics(KinematicsService):
+    """Kinematics service backed by a live MuJoCo runtime."""
+
     def __init__(self, runtime, registry=None):
         self.runtime = runtime
         robot = MujocoRobotModel(runtime)

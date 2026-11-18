@@ -26,7 +26,9 @@ class SolverRegistry:
     @classmethod
     def discover(cls, root: str | Path | None = None) -> SolverRegistry:
         registry = cls()
-        directory = Path(root) if root is not None else Path(__file__).resolve().parents[1] / "libraries"
+        # This module lives in ``kinematics/core``; the solver manifests live
+        # beside ``kinematics`` in the repository-level ``libraries`` folder.
+        directory = Path(root) if root is not None else Path(__file__).resolve().parents[2] / "libraries"
         for manifest in sorted(directory.glob("*/solver.json")):
             try:
                 spec = json.loads(manifest.read_text(encoding="utf-8"))

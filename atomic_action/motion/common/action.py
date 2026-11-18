@@ -34,7 +34,7 @@ DEFAULT_SCENE = PROJECT_ROOT / "world_model" / "robotsim" / "scene_000.xml"
 class _MoveExecutor:
     """Validate, select, plan, collision-check, and execute one motion request."""
 
-    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None, kinematics: KinematicsService | None = None, collision_checker: Any = None) -> None:
+    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None, kinematics: KinematicsService | None = None, collision_checker: Any = None, curobo_planner: Any = None) -> None:
         self.config: Mapping[str, Any] = config or {}
         if robot_runtime is None:
             from utils import SceneRobotRuntime
@@ -60,7 +60,10 @@ class _MoveExecutor:
             "joint_limits": self.robot_runtime.joint_limits,
         }
         self.direct_planner = DirectPlanner(self.config, **planner_kwargs)
-        self.collision_free_planner = CollisionFreePlanner(self.config, kinematics=self.kinematics, **planner_kwargs)
+        self.collision_free_planner = CollisionFreePlanner(
+            self.config, kinematics=self.kinematics, robot_runtime=self.robot_runtime,
+            curobo_planner=curobo_planner, **planner_kwargs,
+        )
 
     def execute(self, request: Mapping[str, Any], *, prepared_trajectory: PreparedTrajectory | None = None) -> Dict[str, Any]:
         """Run the complete Move pipeline and always return a structured result."""
@@ -106,7 +109,8 @@ class _MoveExecutor:
             if self.trajectory_callback is not None:
                 stage_started = time.perf_counter()
                 try:
-                    self.trajectory_callback(trajectory, normalized, selection)
+                    callback_trajectory = deepcopy(trajectory) if trajectory.get("planner") == "curobo" else trajectory
+                    self.trajectory_callback(callback_trajectory, normalized, selection)
                 finally:
                     timing["trajectory_preparation"] = time.perf_counter() - stage_started
             stage_started = time.perf_counter()
@@ -188,9 +192,13 @@ class _MoveExecutor:
         """Delegate scene and robot-state acquisition to the root utils module."""
         return self.robot_runtime.get_context(request)
 
+    def close(self) -> None:
+        self.collision_free_planner.close()
+
     def _reuse_prepared_trajectory(self, prepared, request, context, selection):
         if (not isinstance(prepared, PreparedTrajectory) or request != prepared.request
                 or selection["path_strategy"] != "joint_move"
+                or prepared.trajectory.get("planner") not in {"direct", "curobo"}
                 or planning_state_signature(self.robot_runtime, self.collision_checker) != prepared.state_signature):
             return None
         trajectory = deepcopy(dict(prepared.trajectory))
@@ -230,7 +238,8 @@ class _MoveExecutor:
         """Plan around an already checked blocked segment without probing it twice."""
         mode = request["planning"]["mode"]
         hard_constraint = request["motion"]["path_constraint"] == "hard"
-        fallback_allowed = mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])
+        fallback_allowed = (request["planning"].get("planner_type") != "direct"
+                            and (mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])))
         if hard_constraint and path_request["path_type"] != "joint":
             raise PlanningError(
                 "Direct path collides and its hard Cartesian constraint cannot be relaxed.",
@@ -241,8 +250,9 @@ class _MoveExecutor:
             raise collision_error
         trajectory = self.collision_free_planner.plan(path_request, request, context)
         selection["planning_mode"] = "collision_free"
+        selection["planner_type"] = "curobo"
         selection["fallback_used"] = True
-        selection["selection_reason"] = selection.get("selection_reason", "") + "; direct path collision triggered RRT-Connect"
+        selection["selection_reason"] = selection.get("selection_reason", "") + "; direct path collision triggered cuRobo"
         return trajectory
 
     def _plan_joint_candidates(self, request, context, selection, path_request):
@@ -315,7 +325,7 @@ class _MoveExecutor:
             return timing['success']
 
         # Reject colliding endpoints before spending the shared budget on long
-        # segment checks. Such goals cannot be repaired by an RRT detour.
+        # segment checks. Such goals cannot be repaired by a cuRobo detour.
         viable_goals = []
         for goal in goals:
             endpoint_started = time.perf_counter()
@@ -515,7 +525,11 @@ class MoveExecutionError(RuntimeError):
 
 def run(request: Mapping[str, Any], *, scene_path: str | Path = DEFAULT_SCENE) -> Dict[str, Any]:
     """Convenience entrypoint used by agents and simple scripts."""
-    return _MoveExecutor(scene_path=scene_path).execute(request)
+    action = _MoveExecutor(scene_path=scene_path)
+    try:
+        return action.execute(request)
+    finally:
+        action.close()
 # Backward-compatible aliases for callers still using the former Skill names.
 
 

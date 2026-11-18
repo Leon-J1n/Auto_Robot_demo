@@ -3,9 +3,9 @@
   "skill_name": "pick",
   "success": true,
   "target_resolution_timing_s": {
-    "resolve_total": 0.0009388001635670662,
-    "candidate_selection": 0.017209700075909495,
-    "adapter_prepare_total": 0.02097980002872646
+    "resolve_total": 0.0006803001742810011,
+    "candidate_selection": 0.014152899850159883,
+    "adapter_prepare_total": 0.016513500129804015
   },
   "vlm_request_s": null,
   "wrist_observation": null,
@@ -34,7 +34,7 @@
       },
       "frame": "world",
       "confidence": 0.9,
-      "vlm_request_s": 4.437003599945456,
+      "vlm_request_s": 3.082618599990383,
       "is_elongated": false,
       "axis_points": null,
       "axis_status": "not_elongated",
@@ -43,7 +43,7 @@
       "timestamp": 2.957999999999896,
       "sequence": 0,
       "vlm_request_count": 1,
-      "visual_estimation_s": 4.454677199944854,
+      "visual_estimation_s": 4.8409104000311345,
       "crop_origin_pixel": {
         "x": 220,
         "y": 149
@@ -134,11 +134,11 @@
         },
         "status": "validated",
         "timing_s": {
-          "capture": 0.006188699975609779,
-          "vlm": 4.44165170006454,
-          "validation": 0.8290699999779463
+          "capture": 0.00523889996111393,
+          "vlm": 3.086577400099486,
+          "validation": 0.8059664000757039
         },
-        "elapsed_s": 5.276973699918017
+        "elapsed_s": 3.8978363999631256
       },
       "grasp_depth_attempts": [
         {
@@ -147,7 +147,7 @@
           "gripper_pose_precheck": [
             {
               "status": "clear",
-              "elapsed_s": 0.007519699865952134
+              "elapsed_s": 0.0074262002017349005
             }
           ],
           "rejected": []
@@ -182,21 +182,21 @@
       "planner": "direct",
       "planning_mode": "direct",
       "timing_s": {
-        "validation": 0.001243300037458539,
-        "context": 0.00013299984857439995,
-        "selection": 6.3998159021139145e-06,
-        "path_generation": 0.16086649987846613,
-        "planning": 0.0009418001864105463,
-        "trajectory_preparation": 0.15589680010452867,
-        "posture_scoring": 3.4999102354049683e-06,
-        "pre_execution_total": 0.3190999000798911
+        "validation": 0.0011680999305099249,
+        "context": 0.00012059998698532581,
+        "selection": 5.200039595365524e-06,
+        "path_generation": 0.15406329999677837,
+        "planning": 0.0009216000325977802,
+        "trajectory_preparation": 0.1516490001231432,
+        "posture_scoring": 2.9997900128364563e-06,
+        "pre_execution_total": 0.30793899996206164
       },
       "planner_diagnostics": {
         "planning_stages_s": {
-          "endpoint_collision_check": 3.620004281401634e-05,
+          "endpoint_collision_check": 3.269989974796772e-05,
           "endpoint_collision_prechecked": false,
-          "path_densification": 0.00011699995957314968,
-          "direct_path_collision_check": 0.00042699999175965786,
+          "path_densification": 0.00012159999459981918,
+          "direct_path_collision_check": 0.000421999953687191,
           "collision_resolution_rad": 0.04
         },
         "ik_branch_selection": {
@@ -212,9 +212,9 @@
           "backend": "continuous_precomputed",
           "path_interpolator": "cubic_c2",
           "collision_fallback": null,
-          "trajectory_sampling_s": 0.0009099000599235296,
-          "linear_path_validation_s": 0.005041900090873241,
-          "collision_validation_s": 0.14932329999282956,
+          "trajectory_sampling_s": 0.0009014999959617853,
+          "linear_path_validation_s": 0.006033899961039424,
+          "collision_validation_s": 0.1441138000227511,
           "circular_path_validation_s": 0.0,
           "validation_waypoint_count": 25,
           "planner_waypoint_count": 13,

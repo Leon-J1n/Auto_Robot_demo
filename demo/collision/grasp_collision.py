@@ -25,6 +25,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             frozenset(self.dynamic_names), frozenset(self.dynamic_handles),
             frozenset(self.tool_geoms), frozenset(self.robot_bodies),
             frozenset(self.geoms), frozenset(self.excluded), frozenset(self.adjacent),
+            getattr(self, '_arm_environment_geom_pairs', frozenset()),
             tuple(self.body_names), frozenset(self._collider_links.items()),
             getattr(b, 'contact_target', None), getattr(b, 'contact_target_object_id', None),
             getattr(self, '_physical_closure_target', None),
@@ -51,7 +52,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         if not hasattr(self, 'backend') or not getattr(self, 'path_validation_cache_enabled', False):
             return super().check_path(waypoints, resolution=resolution,
                 safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
-        points = np.asarray(waypoints, dtype=float)
+        points = np.array(waypoints, dtype=float, copy=True)
         # RRT edges and TrajOpt local probes are small; hashing a whole scene
         # for those would cost more than the reuse opportunity is worth.
         if (points.ndim != 2 or len(points) < 4 or not np.all(np.isfinite(points))
@@ -179,11 +180,37 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         self.excluded = {frozenset((int(v) >> 16, int(v) & 65535)) for v in model.exclude_signature}
         for a, b in component(backend.resources.robot_object, 'RobotModelRef').get('allowed_collision_link_pairs', []):
             self.excluded.add(frozenset((self.body_names.index(a), self.body_names.index(b))))
+        self._bind_arm_environment_policy()
         self.support_geoms = set()
         self._tool_environment_pairs = np.asarray([
             (tool, other) for tool in self.tool_geoms for other in self.geoms
             if other not in self.tool_geoms
             and int(model.geom_bodyid[other]) not in self.robot_bodies], dtype=int).reshape(-1, 2)
+
+    def _bind_arm_environment_policy(self):
+        """Resolve the same declared FCL arm/fixture policy to MuJoCo geometry."""
+        model = self.backend.model
+        roots = set()
+        for name in self._allowed_arm_environment_names:
+            root = self.backend.object_ids.get(name)
+            if root is None or root in self.robot_bodies:
+                raise ValueError(f'Arm collision exemption has no environment body: {name}')
+            roots.add(int(root))
+        fixture_bodies = set()
+        for body in range(1, model.nbody):
+            ancestor = body
+            while ancestor:
+                if ancestor in roots:
+                    fixture_bodies.add(body)
+                    break
+                ancestor = int(model.body_parentid[ancestor])
+        arm = {g for g in self.geoms if g not in self.tool_geoms
+               and int(model.geom_bodyid[g]) in self.robot_bodies
+               and (int(model.geom_bodyid[g]) == self.backend.base_id
+                    or self.body_names[int(model.geom_bodyid[g])] in self._arm_link_names)}
+        fixtures = {g for g in self.geoms if int(model.geom_bodyid[g]) in fixture_bodies}
+        self._arm_environment_geom_pairs = frozenset(
+            frozenset((a, b)) for a in arm for b in fixtures)
 
     def set_entity_transform(self, name, **pose):
         dynamic = getattr(self, 'dynamic_names', set())
@@ -413,6 +440,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                getattr(b, 'contact_target_object_id', None),
                getattr(self, '_physical_closure_target', None),
                self.allow_gripper_environment_contact,
+               getattr(self, '_arm_environment_geom_pairs', frozenset()),
                frozenset(getattr(self, '_lift_clearance_pairs', {}).items()),
                getattr(self, '_lift_ignored_payload_geoms', frozenset()),
                frozenset(self.support_geoms), gripper_width)
@@ -495,6 +523,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         pair_key = (held, target, target_object_id, frozenset(target_bodies),
                     frozenset(self.support_geoms), self.allow_gripper_environment_contact,
                     allow_target_contact, gripper_width is not None,
+                    getattr(self, '_arm_environment_geom_pairs', frozenset()),
                     getattr(self, '_lift_ignored_payload_geoms', frozenset()))
         if getattr(self, '_pair_key', None) != pair_key:
             pairs, visited = [], set()
@@ -504,6 +533,8 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     if a == z or pair in visited:
                         continue
                     visited.add(pair)
+                    if pair in getattr(self, '_arm_environment_geom_pairs', ()):
+                        continue
                     if a in getattr(self, '_lift_ignored_payload_geoms', ()) or z in getattr(self, '_lift_ignored_payload_geoms', ()):
                         continue
                     # A commanded fully closed shape can contain internal

@@ -1,0 +1,53 @@
+{
+  "command_id": "8",
+  "skill_name": "move_to",
+  "success": true,
+  "target_resolution_timing_s": {},
+  "vlm_request_s": null,
+  "wrist_observation": null,
+  "pose_search_precheck": [],
+  "successful_distance_m": null,
+  "target_resolution_diagnostics": {},
+  "motions": [
+    {
+      "phase": "move",
+      "planner": "direct",
+      "planning_mode": "direct",
+      "timing_s": {
+        "validation": 0.001043500000378117,
+        "context": 0.00011529997573234141,
+        "selection": 5.4000120144337416e-06,
+        "path_generation": 2.609999501146376e-05,
+        "planning": 0.43713489998481236,
+        "trajectory_preparation": 0.2557121000136249,
+        "posture_scoring": 3.100023604929447e-06,
+        "pre_execution_total": 0.6940475000010338
+      },
+      "planner_diagnostics": {
+        "planning_stages_s": {
+          "endpoint_collision_check": 0.17324299999745563,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 0.00016580001101829112,
+          "direct_path_collision_check": 0.26349180002580397,
+          "collision_resolution_rad": 0.04
+        },
+        "time_parameterization": {
+          "backend": "continuous_precomputed",
+          "path_interpolator": "cubic_c2",
+          "collision_fallback": null,
+          "trajectory_sampling_s": 0.0010415999859105796,
+          "linear_path_validation_s": 0.0,
+          "collision_validation_s": 0.253973999992013,
+          "circular_path_validation_s": 0.0,
+          "validation_waypoint_count": 65,
+          "planner_waypoint_count": 33,
+          "collision_resolution_rad": 0.04,
+          "spline_subdivisions": 2,
+          "path_validation_cache_enabled": false,
+          "validation_waypoints_identical_to_planner": false,
+          "path_validation_cache": {}
+        }
+      }
+    }
+  ]
+}

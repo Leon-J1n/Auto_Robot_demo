@@ -1,15 +1,17 @@
-"""Robot kinematics and inverse-kinematics solvers."""
+"""Public kinematics API with optional simulator integrations."""
 
-from .contracts import IKBackend, IKError, IKRequest, IKResult, RobotModel
-from .registry import SolverDescriptor, SolverRegistry
-from .service import KinematicsService
+from .core import (
+    IKBackend, IKError, IKRequest, IKResult, KinematicsService, RobotModel,
+    SolverDescriptor, SolverRegistry,
+)
 
-__all__ = ["IKError", "IKBackend", "IKRequest", "IKResult", "RobotModel",
-           "SolverDescriptor", "SolverRegistry", "KinematicsService", "MujocoKinematics"]
-
+__all__ = [
+    "IKError", "IKBackend", "IKRequest", "IKResult", "RobotModel",
+    "SolverDescriptor", "SolverRegistry", "KinematicsService", "MujocoKinematics",
+]
 
 def __getattr__(name):
     if name == "MujocoKinematics":
-        from .mujoco_kinematics import MujocoKinematics
+        from .backends.mujoco import MujocoKinematics
         return MujocoKinematics
     raise AttributeError(name)

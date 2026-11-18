@@ -6,10 +6,10 @@
 
 | 部分 | 职责 | 所在位置 |
 | --- | --- | --- |
-| 统一服务 | FK/Jacobian 分发、IK 后端选择与回退、候选复核和排序 | `service.py` |
-| 协议与结果类型 | RobotModel、IKBackend、IKRequest、IKResult、IKError | `contracts.py` |
-| 注册表 | 清单发现、名称/别名解析、按需创建后端 | `registry.py` |
-| 位姿和构型处理 | 坐标格式转换、旋转误差、周期归一化、去重和等价构型 | `geometry.py`、`policies.py` |
+| 统一服务 | FK/Jacobian 分发、IK 后端选择与回退、候选复核和排序 | `core/service.py` |
+| 协议与结果类型 | RobotModel、IKBackend、IKRequest、IKResult、IKError | `core/contracts.py` |
+| 注册表 | 清单发现、名称/别名解析、按需创建后端 | `core/registry.py` |
+| 位姿和构型处理 | 坐标格式转换、旋转误差、周期归一化、去重和等价构型 | `core/geometry.py`、`core/policies.py` |
 | 具体机器人模型 | 几何加载、FK/Jacobian 计算、参考状态绑定 | `libraries/kinematic_chain/`；本目录 `models/` 保留 MuJoCo 参考模型 |
 | 具体 IK 算法 | 第三方依赖、坐标适配、模型支持检查和候选生成 | `libraries/ikfast/`、`libraries/jacobian_ik/`、`libraries/eaik/` |
 
@@ -24,13 +24,16 @@
 
 ```text
 kinematics/
-  contracts.py             RobotModel、IKBackend、IKRequest、IKResult、IKError
-  registry.py              发现 solver.json，解析名称/别名，按需加载工厂
-  service.py               FK/雅可比入口，IK 分发、FK 复核、回退与选择
-  policies.py              周期关节角归一化、去重、等价构型
-  geometry.py              位姿转换、旋转误差
-  models/mujoco_model.py   显式参考模型：MuJoCo FK、雅可比与基座适配
-  mujoco_kinematics.py     创建 MuJoCo 参考服务；默认执行链不创建它
+  core/                    仿真无关的稳定 API
+    contracts.py           RobotModel、IKBackend、IKRequest、IKResult、IKError
+    registry.py            发现 solver.json，解析名称/别名，按需加载工厂
+    service.py             FK/雅可比入口，IK 分发、复核、回退与选择
+    geometry.py            位姿转换、旋转误差
+    policies.py            周期关节角归一化、去重、等价构型
+  models/                  机器人模型适配器
+    mujoco.py              MuJoCo FK、雅可比与基座适配
+  backends/                可选仿真器后端
+    mujoco.py              创建 MuJoCo 参考服务
 libraries/
   kinematic_chain/         独立 FK/Jacobian、JSON/MJCF/URDF 模型与状态绑定
   ikfast/                  adapter.py、solver.json、原生 UR5e IKFast

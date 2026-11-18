@@ -1,4 +1,4 @@
-"""Dependency-free bidirectional RRT-Connect planner."""
+"""Legacy RRT implementation and compatibility import for cuRobo avoidance."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from ..constraints.arm_posture import preference_for, path_cost
 from ..constraints.collision_sampling import collision_sampling_settings
 
 
-class CollisionFreePlanner:
+class LegacyRRTPlanner:
     """Search for a safe alternative trajectory while preserving legal constraints."""
 
     planner_id = "collision_free"
@@ -648,4 +648,9 @@ def _densify(points: np.ndarray, max_step: float) -> np.ndarray:
         count = max(1, int(np.ceil(np.max(np.abs(goal - start)) / max_step)))
         output.extend(start + alpha * (goal - start) for alpha in np.linspace(0.0, 1.0, count + 1)[1:])
     return np.asarray(output)
+
+
+# Existing direct imports now resolve to the same cuRobo implementation as
+# ``from planning import CollisionFreePlanner``.
+from .curobo.collision_free import CollisionFreePlanner
 

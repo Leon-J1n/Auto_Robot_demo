@@ -71,6 +71,38 @@ def serializable(value):
     raise TypeError(type(value).__name__)
 
 
+def _write_json(path, value):
+    """Write a report atomically so Windows readers cannot interrupt it."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(f'.{target.name}.{os.getpid()}.tmp')
+    payload = json.dumps(value, indent=2, default=serializable)
+    try:
+        temporary.write_text(payload, encoding='utf-8')
+        os.replace(temporary, target)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _write_command_report(output_dir, index, row):
+    """Persist one command result to a process-unique file.
+
+    Command reports are intentionally never written to the shared aggregate
+    report while a task is running. This prevents concurrent demo processes
+    from racing on ``report.json`` (especially on Windows, where os.replace
+    fails if another process has the destination open).
+    """
+    output = Path(output_dir) / 'commands'
+    output.mkdir(parents=True, exist_ok=True)
+    command_id = re.sub(r'[^A-Za-z0-9_.-]+', '_', str(row.get('command_id', index)))
+    target = output / f'{int(index):03d}_{command_id}.{os.getpid()}.json'
+    _write_json(target, row)
+    return target
+
+
 SUCCESS_ACTIONS = {
     'move_to': '已移动到目标', 'lift_up': '已竖直抬升',
     'put_down': '已竖直下降', 'shift_down': '已竖直下降',
@@ -231,7 +263,8 @@ def _write_command_planning_timing(output_dir, index, row):
         })
     command_id = str(row.get('command_id', 'command'))
     safe_id = re.sub(r'[^A-Za-z0-9_.-]+', '_', command_id).strip('._') or 'command'
-    relative_path = Path('commands') / f'{index:03d}_{safe_id}' / 'planning_timing.json'
+    relative_path = (Path('commands') / f'{index:03d}_{safe_id}' /
+                     f'planning_timing.{os.getpid()}.json')
     target = Path(output_dir) / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     target_resolution_timing = row.get('target_resolution_timing_s')
@@ -525,13 +558,22 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             trajectory.update(timed)
             backend.set_status(f"{report['active_command_id']} | Executing / {report.get('active_substep', 'move')}")
 
+        from planning.planners.curobo import CuroboPlanner
+        curobo_action = CuroboPlanner(
+            robot_runtime=backend,
+            robot_object_id=resources.robot_object.get('object_id_in_scene'),
+            collision_checker=checker,
+        )
         motion_actions = {
             "linear": MoveLinearAction(robot_runtime=backend, kinematics=kin,
-                                       collision_checker=checker, trajectory_callback=prepare_trajectory),
+                                       collision_checker=checker, trajectory_callback=prepare_trajectory,
+                                       curobo_planner=curobo_action),
             "joint": MoveJointAction(robot_runtime=backend, kinematics=kin,
-                                     collision_checker=checker, trajectory_callback=prepare_trajectory),
+                                     collision_checker=checker, trajectory_callback=prepare_trajectory,
+                                     curobo_planner=curobo_action),
             "circular": MoveCircularAction(robot_runtime=backend, kinematics=kin,
-                                           collision_checker=checker, trajectory_callback=prepare_trajectory),
+                                           collision_checker=checker, trajectory_callback=prepare_trajectory,
+                                           curobo_planner=curobo_action),
         }
         def execute_motion(request):
             # Select the concrete motion action from the request geometry.
@@ -540,47 +582,12 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             request = _deep_merge(resources.scene['move_defaults'], request)
             sync.sync(backend, kin, checker)
             # Validation applies the same default later, but planner selection
-            # happens before action validation. Treat omitted values as auto so
-            # legacy requests also receive the CuRobo priority policy.
+            # happens before action validation. Treat omitted values as auto.
+            # Auto uses the host planner's direct -> cuRobo fallback chain.
             requested_planner = request.get('planning', {}).get('planner_type', 'auto')
-            planner_type = requested_planner
-            motion = request.get('motion', {})
-            # CuRobo has highest priority for every eligible joint move,
-            # including approach and retreat. Unsupported contact or geometric
-            # requests fall back to the existing planners below.
-            if (planner_type == 'auto'
-                    and motion.get('path_type', 'joint') in {'auto', 'joint'}
-                    and not request.get('target_body_name')):
-                planner_type = 'curobo'
-            if planner_type == 'curobo':
-                nonlocal curobo_action
-                if curobo_action is None:
-                    from planning.planners.curobo import CuroboPlanner
-                    from libraries.curobo.runtime_scene import runtime_snapshot
-                    robot_id = resources.robot_object.get('object_id_in_scene')
-                    curobo_action = CuroboPlanner(
-                        robot_runtime=backend,
-                        scene_provider=lambda: runtime_snapshot(backend),
-                        robot_object_id=robot_id,
-                        collision_checker=checker,
-                    )
+            if requested_planner == 'curobo':
                 curobo_result = curobo_action.execute(request)
-                if curobo_result.get('success') or requested_planner == 'curobo':
-                    return curobo_result
-                # Auto selection is a priority policy, not a hard dependency:
-                # if CuRobo cannot solve a scene, preserve the existing joint
-                # planner as the compatible fallback.
-                fallback_path = request.get('motion', {}).get('path_type', 'joint')
-                fallback_action = motion_actions.get(fallback_path, motion_actions['joint'])
-                fallback_result = fallback_action.execute(request)
-                if isinstance(fallback_result, dict):
-                    selection = fallback_result.setdefault('selection', {})
-                    selection['curobo_fallback'] = True
-                    selection['curobo_error'] = curobo_result.get('error')
-                    curobo_timing = curobo_result.get('timing', {})
-                    if isinstance(curobo_timing, dict) and isinstance(curobo_timing.get('total'), (int, float)):
-                        fallback_result.setdefault('timing', {})['curobo_attempt'] = float(curobo_timing['total'])
-                return fallback_result
+                return curobo_result
             path_type = request.get("motion", {}).get("path_type", "joint")
             action = motion_actions.get(path_type, motion_actions["joint"])
             return action.execute(request)
@@ -656,6 +663,7 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                             row['error'] = error_from_exception(exc, stage=stage, existing=row.get('error'))
                             _write_command_planning_timing(output, index, row)
                             report['steps'].append(row)
+                            _write_command_report(output, index, row)
                             raise
                         clear_detach = getattr(checker, 'clear_detach_contacts', None)
                         if callable(clear_detach):
@@ -676,7 +684,7 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                     row['completion'] = 'partial'
                 _write_command_planning_timing(output, index, row)
                 report['steps'].append(row)
-                (output / 'report.json').write_text(json.dumps(report, indent=2, default=serializable), encoding='utf-8')
+                _write_command_report(output, index, row)
                 print(step_message(command, success=bool(row.get('success')),
                                    error=display_error, stage=stage,
                                    target_name=active_target_name, status=display_status), flush=True)
@@ -704,6 +712,7 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             row.setdefault('success', False)
             row.setdefault('error', error)
             _write_command_planning_timing(output, index, row)
+            _write_command_report(output, index, row)
             if not any(step.get('command_id') == active_command.get('command_id')
                        for step in report['steps']):
                 report['steps'].append(row)
@@ -756,7 +765,10 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             blackboard_path.write_text(json.dumps(blackboard.snapshot(), indent=2, default=serializable), encoding='utf-8')
             report['blackboard_file'] = str(blackboard_path)
             report['allowed_carrying_contacts'] = list(getattr(checker, 'carrying_contact_log', {}).values())
-            (output / 'report.json').write_text(json.dumps(report, indent=2, default=serializable), encoding='utf-8')
+            # Do not overwrite the shared report.json: multiple demo runs may
+            # use the same output directory. The final aggregate is unique to
+            # this process and each command has already been persisted above.
+            _write_json(output / f'report.{os.getpid()}.json', report)
             if (viewer or show_collision_geometry) and backend is not None and getattr(backend, 'viewer', None) is not None:
                 label = 'Suspended' if report.get('status') == 'suspend' else ('Completed' if report.get('success') else 'Failed')
                 backend.set_status(label + ' | Close window to exit')

@@ -48,7 +48,7 @@ class DirectPlanner:
             if goal_check.in_collision:
                 # A colliding endpoint cannot be repaired by routing around an
                 # obstacle. Let candidate selection try another configuration;
-                # only an interior path collision should trigger RRT fallback.
+                # only an interior path collision should trigger cuRobo fallback.
                 raise PlanningError(
                     "Goal state is in collision.", code="COLLISION_DETECTED", recoverable=True,
                     details={"location": "goal", "contacts": list(goal_check.contacts)},

@@ -1,8 +1,8 @@
 """UR5e IKFast plugin, including generated-model/tool-frame calibration."""
 from __future__ import annotations
 import numpy as np
-from kinematics.contracts import IKError, IKResult
-from kinematics.geometry import transform
+from kinematics.core.contracts import IKError, IKResult
+from kinematics.core.geometry import transform
 from . import ur5e_backend
 
 
