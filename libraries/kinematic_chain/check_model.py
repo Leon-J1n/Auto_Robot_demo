@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kinematics.models.mujoco_model import MujocoRobotModel
+from kinematics.models.mujoco import MujocoRobotModel
 from utils import SceneRobotRuntime
 
 

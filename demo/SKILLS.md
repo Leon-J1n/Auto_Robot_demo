@@ -17,9 +17,9 @@
 
 抓取碰撞分类：全部候选未通过预检查时为 `GRASP_CLOSURE_INFEASIBLE / grasp_precheck`，详情在 `rejected`；实际闭合碰撞为 `GRASP_CLOSURE_COLLISION / grasp_closure`；打开夹爪时碰撞为 `GRASP_OPENING_COLLISION / grasp_opening`。接触详情包含部件名称、距离及 `geometry_basis=simulation_collision_geometry`，表示仿真碰撞几何的相交，不应直接解读为原始视觉网格精确相交。这些错误可通过更换抓取位姿或修正碰撞资产恢复，不再归为 `INTERNAL_ERROR / unknown`。
 
-携带安全距离由 `pick.parameters.grasp_request.strategy_params.safety_distance` 指定，单位为米，例如 `0.01` 表示 10 mm；独立 `grasp` 命令使用 `parameters.strategy_params.safety_distance`。值必须是有限非负数，省略或设为 0 表示不增加额外余量。此参数由 demo 解析和校验，底层 grasp 技能接口保持原样。
+携带安全距离由 `pick.parameters.grasp_request.strategy_params.safety_distance` 指定，单位为米，例如 `0.01` 表示 10 mm；独立 `grasp` 命令使用 `parameters.strategy_params.safety_distance`。值必须是有限数，省略时默认为 `-0.003`（规划允许约 3 mm 穿透）；显式设为 0 表示不增加额外余量，沿用命令原有安全距离。负值表示规划中允许有限穿透，例如 `-0.002` 表示允许约 2 mm 穿透。此参数由 demo 解析和校验，底层 grasp 技能接口保持原样。
 
-抓取成功后，demo 在使用正安全距离的规划检查中，对“携带物与外部环境”取命令原有距离与该参数的较大值，覆盖 retreat、后续目标选解和运动规划。机械臂、夹爪内部及夹爪与非持物之间保持原有规则；夹爪与已确认持物的接触按下文规则处理，初始支撑面接触仍使用原有抬离豁免。release 解除携带后取消额外余量，恢复后续命令原有距离（当前场景默认 `0.003 m`）；下一次抓取重新读取自己的参数，不继承上一次设置。执行时零余量的碰撞判定保持不变。报告子步骤的 `payload_safety_distance_m` 记录有效规划距离。
+抓取成功后，demo 在使用正安全距离的规划检查中，仅对“携带物与外部环境”应用该参数：非负值取命令原有距离与该参数的较大值，负值直接作为该碰撞对的距离阈值，覆盖 retreat、后续目标选解和运动规划。机械臂、夹爪内部及夹爪与非持物之间保持原有规则；夹爪与已确认持物的接触按下文规则处理，初始支撑面接触仍使用原有抬离豁免。release 解除携带后取消额外余量，恢复后续命令原有距离（当前场景默认 `0.003 m`）；下一次抓取重新读取自己的参数，不继承上一次设置。执行时零余量的碰撞判定保持不变，规划允许的穿透仍可能在执行检查时被拒绝。简化代理的阈值针对代理几何，不保证等于原网格的穿透深度。报告子步骤的 `payload_safety_distance_m` 记录有效规划距离。
 
 ```json
 "grasp_request": {

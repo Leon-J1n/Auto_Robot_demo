@@ -18,7 +18,7 @@ def ensure_component(obj,kind):
     return result
 
 
-def runtime_snapshot(runtime):
+def runtime_snapshot(runtime, *, collision_checker=None, constraints=None, cache_dir=None):
     resources=getattr(runtime,'resources',None)
     if resources is None:
         raise ConversionError('A runtime must provide resources.scene and robot_object')
@@ -61,6 +61,9 @@ def runtime_snapshot(runtime):
                 current[joint]=float(runtime.data.qpos[runtime.model.jnt_qposadr[jid]])
             ensure_component(obj,'RobotDriver')['now_joint_positions_rad']=current
     payload=state.get('gripper') or {}
-    if payload.get('holding') or payload.get('object_id'):
+    if collision_checker is not None and hasattr(collision_checker, 'tool_geoms'):
+        from .runtime_policy import export_runtime
+        scene['_runtime_collision'] = export_runtime(runtime, collision_checker, constraints or {}, cache_dir)
+    elif payload.get('holding') or payload.get('object_id'):
         raise ConversionError('cuRobo free-space motion requires an empty gripper; held payload geometry must be explicitly assembled first')
     return scene,arm_id

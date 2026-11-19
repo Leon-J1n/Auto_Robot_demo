@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import Any, Dict, Mapping
-from kinematics.registry import get_registry
+from kinematics.core.registry import get_registry
 
 
 class MoveValidationError(ValueError):

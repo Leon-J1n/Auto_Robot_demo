@@ -6,7 +6,6 @@ import base64
 import io
 import json
 import os
-from time import perf_counter
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +23,7 @@ _PROMPT_FILES = {
 
 from .config import load_vlm_config
 from .depth import InvalidPointDepth, sample_depth
+from .timing import request_timer
 
 
 class VLMPointEstimator:
@@ -115,17 +115,18 @@ class VLMPointEstimator:
         if instruction:
             prompt += f"补充要求：{instruction.strip()}\n"
         prompt += "请严格按照输出结构返回结果，只返回 JSON，不要 Markdown 或其他说明。"
-        request_started = perf_counter()
+        client = self._get_client()
         try:
-            response = self._get_client().responses.create(
-                model=self.model,
-                input=[{"role": "user", "content": [
-                    {"type": "input_text", "text": prompt},
-                    {"type": "input_image", "image_url": image_url},
-                ]}],
-            )
+            with request_timer() as measurement:
+                response = client.responses.create(
+                    model=self.model,
+                    input=[{"role": "user", "content": [
+                        {"type": "input_text", "text": prompt},
+                        {"type": "input_image", "image_url": image_url},
+                    ]}],
+                )
         except Exception as exc:
-            request_elapsed = perf_counter() - request_started
+            request_elapsed = measurement['elapsed_s']
             exception_name = type(exc).__name__.lower()
             timed_out = isinstance(exc, TimeoutError) or 'timeout' in exception_name
             response_failed = any(marker in exception_name for marker in ('apistatus', 'ratelimit'))
@@ -175,7 +176,7 @@ class VLMPointEstimator:
             "world_point": {"x": float(world_point[0]), "y": float(world_point[1]), "z": float(world_point[2])},
             "frame": "world",
             "confidence": point.get("confidence"),
-            "vlm_request_s": perf_counter() - request_started,
+            "vlm_request_s": measurement['elapsed_s'],
         }
         if point_type in {'grasp', 'handle'}:
             from .axis import estimate_axis

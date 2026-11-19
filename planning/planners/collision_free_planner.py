@@ -1,4 +1,4 @@
-"""Dependency-free bidirectional RRT-Connect planner."""
+"""RRT-Connect collision-free planner."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from ..constraints.collision_sampling import collision_sampling_settings
 class CollisionFreePlanner:
     """Search for a safe alternative trajectory while preserving legal constraints."""
 
-    planner_id = "collision_free"
+    planner_id = "rrt"
 
     def __init__(self, config: Mapping[str, Any] | None = None, *, collision_checker: Any = None, joint_limits: Any = None, kinematics: Any = None) -> None:
         self.config = config or {}
@@ -41,6 +41,27 @@ class CollisionFreePlanner:
         )
 
     def plan(
+        self,
+        path_request: Mapping[str, Any],
+        move_request: Mapping[str, Any],
+        context: Mapping[str, Any],
+    ) -> Any:
+        proxy = getattr(self.collision_checker, 'planning_proxy', None)
+        if proxy is None:
+            return self._plan(path_request, move_request, context)
+        started = time.perf_counter()
+        cache_before = {name: proxy.stats[name] for name in ('builds', 'structure_hits', 'state_refreshes')}
+        with proxy.query_scope():
+            trajectory = self._plan(path_request, move_request, context)
+        elapsed = time.perf_counter() - started
+        stages = trajectory['diagnostics']['planning_stages_s']
+        stages['proxy_state_guards'] = max(0., elapsed - trajectory['planning_time'])
+        trajectory['diagnostics']['planning_proxy_cache'] = {
+            name: proxy.stats[name] - value for name, value in cache_before.items()}
+        trajectory['planning_time'] = elapsed
+        return trajectory
+
+    def _plan(
         self,
         path_request: Mapping[str, Any],
         move_request: Mapping[str, Any],
@@ -167,6 +188,10 @@ class CollisionFreePlanner:
             },
         }
         return trajectory
+
+    def close(self) -> None:
+        """Keep planner lifecycle compatible with stateful planner adapters."""
+        return None
 
     def _plan_fixed_orientation(
         self,
@@ -648,4 +673,3 @@ def _densify(points: np.ndarray, max_step: float) -> np.ndarray:
         count = max(1, int(np.ceil(np.max(np.abs(goal - start)) / max_step)))
         output.extend(start + alpha * (goal - start) for alpha in np.linspace(0.0, 1.0, count + 1)[1:])
     return np.asarray(output)
-

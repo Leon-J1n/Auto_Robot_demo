@@ -31,6 +31,7 @@ def grasp_pose_move_request(request):
 def planning_failed_without_motion(result, backend, physics_steps_before):
     """Retry planning only; execution failures or any live steps prohibit fallback."""
     return (not result.get('success') and
+            (result.get('error') or {}).get('recoverable', True) is not False and
             (result.get('error') or {}).get('failed_stage') in {'planning', 'kinematics', 'path_generation'} and
             not result.get('motion_executed') and
             backend.physics_steps == physics_steps_before)

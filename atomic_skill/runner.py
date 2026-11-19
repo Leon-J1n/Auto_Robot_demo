@@ -17,6 +17,17 @@ from atomic_skill.retreat import RetreatSkill
 from atomic_skill.pick import DemoInteractionPick, execute_retreat_candidates, resolve_post_grasp_target
 from atomic_skill.put import DemoInteractionPut, put_release_request, validate_put_destination
 from atomic_skill.pour import DemoPourExecutor
+from atomic_action.perception.vlm_estimate.timing import request_elapsed
+
+
+def _planning_prepare(row, operation, *args, **kwargs):
+    """Measure target/IK preparation even on failure, excluding API requests."""
+    started, vlm_before = time.perf_counter(), request_elapsed()
+    try:
+        return operation(*args, **kwargs)
+    finally:
+        elapsed = max(0., time.perf_counter() - started - (request_elapsed() - vlm_before))
+        row['target_preparation_s'] = row.get('target_preparation_s', 0.) + elapsed
 
 
 class TaskSkillExecutor:
@@ -119,10 +130,10 @@ class TaskSkillExecutor:
         )
         if relative_move_to:
             target_started = time.perf_counter()
-            resolved_move = self.resolver.resolve(parameters['target'], self.resources, state)
+            resolved_move = _planning_prepare(row, self.resolver.resolve, parameters['target'], self.resources, state)
             target_resolve_s = time.perf_counter() - target_started
             select_started = time.perf_counter()
-            selected_move = self.resolver.select(
+            selected_move = _planning_prepare(row, self.resolver.select,
                 resolved_move, self.kinematics, self.checker, state['joints'],
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
@@ -180,6 +191,9 @@ class TaskSkillExecutor:
             request = _deep_merge(self.resources.scene['move_defaults'], step['request'])
 
         request = _deep_merge(request, parameters.get('request', {}))
+        pick_carrying_distance = 0.
+        if skill == 'pick':
+            _, pick_carrying_distance = split_carrying_safety(parameters.get('grasp_request', {}))
         row['substeps'] = []
         resolved = None
         if request['target']['type'] == 'object':
@@ -191,13 +205,13 @@ class TaskSkillExecutor:
                     # Pick only resolves and reaches the grasp pose here.
                     # Closure is a target-free gripper action performed after
                     # contact; do not run the legacy target-body closure probe.
-                    parts, resolved = adapter.prepare(request, state, grasp_request=None,
+                    parts, resolved = _planning_prepare(row, adapter.prepare, request, state, grasp_request=None,
                         retreat_lift_height=0.0)
                     if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
                         backend.contact_target = resolved['target_name']
                         backend.contact_target_object_id = parameters['target']
                 else:
-                    parts, resolved = adapter.prepare(request, state)
+                    parts, resolved = _planning_prepare(row, adapter.prepare, request, state)
                 row['target_resolution_timing_s'] = dict(
                     getattr(adapter, 'last_resolution_timing_s', {}) or {})
                 row['target_resolution_timing_s']['adapter_prepare_total'] = (
@@ -328,7 +342,7 @@ class TaskSkillExecutor:
                     'grasp': {'mode': 'physical'},
                     'strategy_params': {'hold_force': gripper_defaults['hold_force']},
                 }
-                carrying_distance = 0.0
+                carrying_distance = pick_carrying_distance
                 previous_grasp_goal = getattr(backend, 'grasp_approach_goal', None)
                 selected_control = np.asarray(resolved['selected']['world_from_control'], dtype=float)
                 selected_quat = Rotation.from_matrix(selected_control[:3, :3]).as_quat()
@@ -442,10 +456,10 @@ class TaskSkillExecutor:
             target = parameters.pop('target', None)
             self.stage = 'target_resolution'
             resolve_started = time.perf_counter()
-            resolved = self.resolver.resolve(target, self.resources, state)
+            resolved = _planning_prepare(row, self.resolver.resolve, target, self.resources, state)
             resolve_elapsed = time.perf_counter() - resolve_started
             select_started = time.perf_counter()
-            selected = self.resolver.select(
+            selected = _planning_prepare(row, self.resolver.select,
                 resolved, self.kinematics, self.checker, state['joints'],
                 safety_distance=float(self.resources.scene.get('move_defaults', {})
                                       .get('constraints', {}).get('safety_distance', 0.003)),
@@ -517,7 +531,7 @@ class TaskSkillExecutor:
                 current = self.sync.sync(self.backend, self.kinematics, self.checker)
                 row['coarse_target_resolution'] = deepcopy(resolved)
                 try:
-                    resolved = refine(resolved, self.resources, current, self.kinematics, self.checker)
+                    resolved = _planning_prepare(row, refine, resolved, self.resources, current, self.kinematics, self.checker)
                 except Exception as exc:
                     row.update(success=False, status='error', error=getattr(exc, 'details', {
                         'error_code': 'WRIST_GRASP_REFINEMENT_FAILED', 'failed_stage': self.stage,

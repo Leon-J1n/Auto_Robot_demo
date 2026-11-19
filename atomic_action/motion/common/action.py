@@ -34,7 +34,7 @@ DEFAULT_SCENE = PROJECT_ROOT / "world_model" / "robotsim" / "scene_000.xml"
 class _MoveExecutor:
     """Validate, select, plan, collision-check, and execute one motion request."""
 
-    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None, kinematics: KinematicsService | None = None, collision_checker: Any = None) -> None:
+    def __init__(self, config: Optional[Mapping[str, Any]] = None, *, robot_runtime: SceneRobotRuntime | None = None, scene_path: str | Path = DEFAULT_SCENE, trajectory_callback: Callable[[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]], None] | None = None, kinematics: KinematicsService | None = None, collision_checker: Any = None, curobo_planner: Any = None) -> None:
         self.config: Mapping[str, Any] = config or {}
         if robot_runtime is None:
             from utils import SceneRobotRuntime
@@ -60,7 +60,9 @@ class _MoveExecutor:
             "joint_limits": self.robot_runtime.joint_limits,
         }
         self.direct_planner = DirectPlanner(self.config, **planner_kwargs)
-        self.collision_free_planner = CollisionFreePlanner(self.config, kinematics=self.kinematics, **planner_kwargs)
+        self.collision_free_planner = CollisionFreePlanner(
+            self.config, kinematics=self.kinematics, **planner_kwargs,
+        )
 
     def execute(self, request: Mapping[str, Any], *, prepared_trajectory: PreparedTrajectory | None = None) -> Dict[str, Any]:
         """Run the complete Move pipeline and always return a structured result."""
@@ -106,7 +108,8 @@ class _MoveExecutor:
             if self.trajectory_callback is not None:
                 stage_started = time.perf_counter()
                 try:
-                    self.trajectory_callback(trajectory, normalized, selection)
+                    callback_trajectory = deepcopy(trajectory) if trajectory.get("planner") == "curobo" else trajectory
+                    self.trajectory_callback(callback_trajectory, normalized, selection)
                 finally:
                     timing["trajectory_preparation"] = time.perf_counter() - stage_started
             stage_started = time.perf_counter()
@@ -188,9 +191,13 @@ class _MoveExecutor:
         """Delegate scene and robot-state acquisition to the root utils module."""
         return self.robot_runtime.get_context(request)
 
+    def close(self) -> None:
+        self.collision_free_planner.close()
+
     def _reuse_prepared_trajectory(self, prepared, request, context, selection):
         if (not isinstance(prepared, PreparedTrajectory) or request != prepared.request
                 or selection["path_strategy"] != "joint_move"
+                or prepared.trajectory.get("planner") not in {"direct", "curobo"}
                 or planning_state_signature(self.robot_runtime, self.collision_checker) != prepared.state_signature):
             return None
         trajectory = deepcopy(dict(prepared.trajectory))
@@ -230,7 +237,8 @@ class _MoveExecutor:
         """Plan around an already checked blocked segment without probing it twice."""
         mode = request["planning"]["mode"]
         hard_constraint = request["motion"]["path_constraint"] == "hard"
-        fallback_allowed = mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])
+        fallback_allowed = (request["planning"].get("planner_type") != "direct"
+                            and (mode == "collision_free" or (mode == "auto" and request["planning"]["allow_replan"])))
         if hard_constraint and path_request["path_type"] != "joint":
             raise PlanningError(
                 "Direct path collides and its hard Cartesian constraint cannot be relaxed.",
@@ -241,14 +249,18 @@ class _MoveExecutor:
             raise collision_error
         trajectory = self.collision_free_planner.plan(path_request, request, context)
         selection["planning_mode"] = "collision_free"
+        planner_type = getattr(self.collision_free_planner, "planner_id", "rrt")
+        selection["planner_type"] = "rrt" if planner_type == "collision_free" else planner_type
         selection["fallback_used"] = True
-        selection["selection_reason"] = selection.get("selection_reason", "") + "; direct path collision triggered RRT-Connect"
+        planner_label = "cuRobo" if selection["planner_type"] == "curobo" else "RRT-Connect"
+        selection["selection_reason"] = selection.get("selection_reason", "") + f"; direct path collision triggered {planner_label}"
         return trajectory
 
     def _plan_joint_candidates(self, request, context, selection, path_request):
         """Compare feasible paths by joint travel and elevated-arm preference."""
         started = time.perf_counter()
         deadline = started + float(request["planning"]["planning_time"])
+        wall_deadline = started + float(request['constraints'].get('timeout', 30.))
         start = np.asarray(path_request["start"], dtype=float)
         def periodic_delta(q):
             delta = np.asarray(q, dtype=float) - start
@@ -268,11 +280,13 @@ class _MoveExecutor:
         untested = []
         candidate_timings = []
         first_solution_at = None
+        initialization_s = 0.0
         extra_budget = max(0., float(getattr(self, 'config', {}).get('planning', {})
                                    .get('collision_free', {}).get('post_solution_search_time', .15)))
 
         def search_deadline():
-            return min(deadline, first_solution_at + extra_budget) if first_solution_at is not None else deadline
+            limit = min(deadline, wall_deadline)
+            return min(limit, first_solution_at + extra_budget) if first_solution_at is not None else limit
 
         def consider(trajectory, candidate_selection):
             nonlocal best, best_base_cost, first_solution_at
@@ -293,21 +307,42 @@ class _MoveExecutor:
                 best = (score, trajectory, candidate_selection)
 
         def bypass(entry, budget):
-            nonlocal bypass_attempts
+            nonlocal bypass_attempts, deadline, initialization_s
+            wall_remaining = wall_deadline - time.perf_counter()
+            if min(budget, wall_remaining) < .1:
+                raise PlanningError('Planning search exhausted its request timeout.',
+                                    code='PLANNING_TIMEOUT', recoverable=False)
             _, path, collision_error = entry
             bounded = deepcopy(request)
             bounded["planning"].update(planning_time=budget, max_attempts=1)
+            # Initialization has its own client budget, but may never extend
+            # the enclosing request/skill wall-clock deadline.
+            bounded['constraints']['timeout'] = min(
+                float(bounded['constraints'].get('timeout', 30.)),
+                wall_remaining)
             candidate_selection = dict(selection)
             bypass_attempts += 1
             timing = {'goal': np.asarray(path['goal'], dtype=float).tolist(), 'elapsed_s': 0.0}
             bypass_started = time.perf_counter()
             try:
-                consider(self._plan_collision_fallback(
-                    bounded, context, candidate_selection, path, collision_error), candidate_selection)
+                trajectory = self._plan_collision_fallback(
+                    bounded, context, candidate_selection, path, collision_error)
+                diagnostics = trajectory.get('diagnostics', {})
+                if diagnostics.get('curobo', {}).get('planner_reused') is False:
+                    # Match the worker's separate initialization/solve budgets.
+                    # Wall time is still capped by wall_deadline across retries.
+                    preparation = max(0., float(diagnostics.get('planning_stages_s', {}).get('preparation', 0.)))
+                    preparation = min(preparation, time.perf_counter() - bypass_started)
+                    initialization_s += preparation
+                    deadline += preparation
+                consider(trajectory, candidate_selection)
                 timing['success'] = True
             except PlanningError as exc:
+                if not exc.recoverable:
+                    raise
                 failures.append(exc)
-                timing.update(success=False, error_code=exc.code)
+                timing.update(success=False, error_code=exc.code,
+                              error_message=str(exc), error_details=deepcopy(exc.details))
             finally:
                 timing['elapsed_s'] = time.perf_counter() - bypass_started
                 timing['budget_s'] = float(budget)
@@ -315,7 +350,7 @@ class _MoveExecutor:
             return timing['success']
 
         # Reject colliding endpoints before spending the shared budget on long
-        # segment checks. Such goals cannot be repaired by an RRT detour.
+        # segment checks. Such goals cannot be repaired by a cuRobo detour.
         viable_goals = []
         for goal in goals:
             endpoint_started = time.perf_counter()
@@ -409,7 +444,10 @@ class _MoveExecutor:
                 remaining = search_deadline() - time.perf_counter()
                 entry = (lower_bound, path, exc)
                 if remaining > 0 and best is None:
-                    budget = min(remaining, max(.25, remaining / (len(viable_goals) - goal_index)))
+                    # A cold solve captures CUDA graphs on its first call.
+                    # Dividing by IK branch count repeatedly killed that call
+                    # just before completion, forcing another cold worker.
+                    budget = remaining
                     if not bypass(entry, budget):
                         pending.append(entry)
                 else:
@@ -444,9 +482,13 @@ class _MoveExecutor:
                          'untested_direct_count': len(untested), 'bypass_attempts': bypass_attempts,
                          'planning_time_budget_s': float(request['planning']['planning_time']),
                          'planning_elapsed_s': time.perf_counter() - started,
-                         'budget_exhausted': time.perf_counter() >= deadline,
+                         'initialization_s': initialization_s,
+                         'budget_exhausted': time.perf_counter() >= min(deadline, wall_deadline),
                          'candidate_timings': candidate_timings,
                          'rejected': attempts})
+        if time.perf_counter() >= wall_deadline:
+            raise PlanningError('Planning search exceeded its request timeout.',
+                                code='PLANNING_TIMEOUT', recoverable=False)
         score, trajectory, chosen = best
         selection.update(chosen)
         trajectory["planning_time"] = time.perf_counter() - started
@@ -464,7 +506,8 @@ class _MoveExecutor:
             "untested_direct_count": len(untested), "bypass_attempts": bypass_attempts,
             "contact_candidates_validated": validated, "contact_candidates_rejected": rejected,
             "candidates_pruned_by_lower_bound": pruned,
-            "budget_exhausted": time.perf_counter() >= deadline,
+            "budget_exhausted": time.perf_counter() >= min(deadline, wall_deadline),
+            "initialization_s": initialization_s,
             "post_solution_search_budget_s": extra_budget,
             "stopped_after_feasible_solution": best is not None and (bool(pending) or bool(untested)),
             "candidate_timings": candidate_timings,
@@ -515,7 +558,11 @@ class MoveExecutionError(RuntimeError):
 
 def run(request: Mapping[str, Any], *, scene_path: str | Path = DEFAULT_SCENE) -> Dict[str, Any]:
     """Convenience entrypoint used by agents and simple scripts."""
-    return _MoveExecutor(scene_path=scene_path).execute(request)
+    action = _MoveExecutor(scene_path=scene_path)
+    try:
+        return action.execute(request)
+    finally:
+        action.close()
 # Backward-compatible aliases for callers still using the former Skill names.
 
 

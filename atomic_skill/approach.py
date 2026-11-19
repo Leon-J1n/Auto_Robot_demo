@@ -1,5 +1,6 @@
 """Task-level approach skill with a minimal public request."""
 from copy import deepcopy
+from time import perf_counter
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -155,6 +156,7 @@ class ApproachSkill:
         return fail(code, message) if callable(fail) else False
 
     def execute(self, operation=None, *, params=None):
+        search_started = perf_counter()
         e = self.executor
         params = e.params if params is None else params
         target_pose = params.get("target_pose")
@@ -185,6 +187,33 @@ class ApproachSkill:
             return self._fail("INVALID_APPROACH_REQUEST", str(exc))
 
         operation = operation or getattr(e, "operation", None) or "approach"
+        # Every distance, camera-alignment attempt and final move_to fallback
+        # belongs to this one wall-clock budget; retries must not reset it.
+        from atomic_action.motion.common.utils.validation import validate_move_request
+        base = _deep_merge(e.resources.scene.get('move_defaults', {}), params.get('request', {}))
+        base['target'] = pose_request(np.block([[rotation, position[:, None]],
+                                               [np.zeros((1, 3)), np.ones((1, 1))]]))
+        try:
+            base = validate_move_request(base)
+        except ValueError as exc:
+            return self._fail('INVALID_APPROACH_REQUEST', str(exc))
+        search_budget = float(base['constraints']['timeout'])
+        search_deadline = search_started + search_budget
+
+        def move(name, **kwargs):
+            remaining = search_deadline - perf_counter()
+            if remaining < .1:  # Minimum validated Move request budget.
+                self._fail('PLANNING_TIMEOUT', 'Approach exhausted its shared search timeout')
+                e.phases[-1]['error'].update(failed_stage='planning', recoverable=False,
+                    details={'search_timeout_s': search_budget,
+                             'elapsed_s': perf_counter() - search_started})
+                return False
+            return e._move(name, **kwargs, override={
+                'motion': {'path_type': 'joint', 'path_constraint': 'soft', 'phase': 'approach'},
+                'planning': {'mode': 'collision_free', 'allow_replan': True,
+                             'planning_time': min(float(base['planning']['planning_time']), remaining)},
+                'constraints': {'timeout': remaining}})
+
         observation = params.get('_wrist_observation')
         if observation is not None:
             e.wrist_observation = {'status': 'searching', 'rejected': []}
@@ -222,11 +251,9 @@ class ApproachSkill:
             candidate_pose["position"] = candidate_transform[:3, 3].tolist()
             candidate_pose["rotation_matrix"] = candidate_transform[:3, :3].tolist()
             before = e.backend.physics_steps
-            moved = e._move(
+            moved = move(
                     f"{operation}_approach_{int(round(float(distance) * 1000))}mm",
-                    spec={"mechanism_pose": candidate_pose}, contact=False,
-                    override={"motion": {"path_type": "joint", "path_constraint": "soft", "phase": "approach"},
-                              "planning": {"mode": "collision_free", "allow_replan": True}})
+                    spec={"mechanism_pose": candidate_pose}, contact=False)
             if alignment is not None:
                 e.phases[-1]['wrist_observation'] = alignment
                 if moved:
@@ -261,9 +288,7 @@ class ApproachSkill:
         # Reuse the already resolved grasp/place pose. Resolving a new move_to
         # command could change its semantic point type or repeat perception.
         previous_error = deepcopy(failed.get('error'))
-        moved = e._move(
-            f'{operation}_move_to', position=position, rotation=rotation, contact=False,
-            override={'motion': {'path_type': 'joint', 'path_constraint': 'soft', 'phase': 'approach'},
-                      'planning': {'mode': 'collision_free', 'allow_replan': True}})
+        moved = move(
+            f'{operation}_move_to', position=position, rotation=rotation, contact=False)
         e.phases[-1].update(fallback_from='approach', approach_search_error=previous_error)
         return moved

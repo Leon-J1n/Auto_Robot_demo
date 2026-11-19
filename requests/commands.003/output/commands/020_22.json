@@ -1,0 +1,545 @@
+{
+  "command_id": "22",
+  "skill_name": "retreat",
+  "retreat_reference": {
+    "target_id": 9,
+    "command_id": "20",
+    "skill_name": "pick",
+    "world_from_control": [
+      [
+        -0.0014798522421263654,
+        4.9872603678255314e-06,
+        0.9999989050056352,
+        -0.004830848347180883
+      ],
+      [
+        -0.9999989047071466,
+        -2.4944317971525527e-05,
+        -0.001479852117280682,
+        -0.2861706797401917
+      ],
+      [
+        2.4936910249823005e-05,
+        -0.9999999996764543,
+        5.024168810193622e-06,
+        0.8827670644070115
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "control_from_grasp": [
+      [
+        -3.2051055066709227e-09,
+        0.9999999999999996,
+        2.679489718993002e-08,
+        6.854134196032632e-09
+      ],
+      [
+        -7.222403494449669e-08,
+        -2.6794897421415603e-08,
+        0.9999999999999969,
+        0.25579998376523305
+      ],
+      [
+        0.9999999999999973,
+        3.2051035714353234e-09,
+        7.222403503037711e-08,
+        2.0972402433272473e-08
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "success": true,
+  "status": "success",
+  "error": null,
+  "substeps": [
+    {
+      "phase": "retreat_100mm",
+      "request": {
+        "constraints": {
+          "avoid_collision": true,
+          "safety_distance": 0.003,
+          "timeout": 60.0,
+          "velocity_scale": 0.4,
+          "acceleration_scale": 0.8,
+          "keep_end_effector_orientation": true
+        },
+        "planning": {
+          "mode": "direct",
+          "planning_time": 10.0,
+          "allow_replan": false,
+          "collision_validation": {
+            "spline_subdivisions": 2,
+            "resolution_rad": 0.02
+          },
+          "time_parameterization": {
+            "max_velocity": [
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0
+            ],
+            "max_acceleration": [
+              6.0,
+              6.0,
+              6.0,
+              6.0,
+              6.0,
+              6.0
+            ],
+            "limit_source": {
+              "urdf": "C:\\Users\\21474\\Desktop\\robot-agent\\services\\object_library_server\\data\\robots\\1\\ur5.urdf",
+              "joint_names": [
+                "shoulder_pan_joint",
+                "shoulder_lift_joint",
+                "elbow_joint",
+                "wrist_1_joint",
+                "wrist_2_joint",
+                "wrist_3_joint"
+              ],
+              "velocity": "urdf.limit.velocity",
+              "acceleration": [
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global"
+              ]
+            }
+          }
+        },
+        "motion": {
+          "path_type": "linear",
+          "path_constraint": "hard"
+        },
+        "strategy_params": {
+          "max_joint_step": 0.8
+        },
+        "target": {
+          "type": "pose",
+          "frame": "world",
+          "position": {
+            "x": -0.005103601495583257,
+            "y": -0.2863601019721273,
+            "z": 1.0040399568948617
+          },
+          "orientation": {
+            "representation": "quaternion",
+            "x": -0.49880366703503903,
+            "y": 0.5001313387008781,
+            "z": -0.5003453468056629,
+            "w": 0.5007175648322978
+          }
+        }
+      },
+      "success": true,
+      "status": "completed",
+      "selection": {
+        "path_strategy": "linear_move",
+        "planning_mode": "direct",
+        "selection_reason": "explicit path_type; explicit direct-only planning",
+        "fallback_used": false
+      },
+      "execution_result": {
+        "final_joint_state": [
+          -0.5137079422714853,
+          -2.2434918691594787,
+          2.2222104882434763,
+          -1.5521807410862996,
+          -1.5718157001722706,
+          1.0580432008867233
+        ],
+        "joint_error": 0.00020832834437389813,
+        "execution_time": 0.8548729000031017,
+        "simulation_duration": 1.0480000000012808,
+        "physics_steps": 524,
+        "max_tracking_error_rad": 0.050369140919649835,
+        "motion_completed": true,
+        "grasp_error": null,
+        "contact_diagnostics": {
+          "mode": "command_end",
+          "samples": 0
+        },
+        "completion": {
+          "converged": true,
+          "joint_error_rad": 0.00020832834437389813,
+          "joint_speed_rad_s": 0.0027362297463019306,
+          "position_error_m": 2.18993770247167e-05,
+          "orientation_error_rad": 0.0001401257626894097,
+          "contact_valid": true,
+          "holding_required": true,
+          "joint_tolerance_rad": 0.002,
+          "position_tolerance_m": 0.002,
+          "orientation_tolerance_rad": 0.02,
+          "stable_duration_s": 0.10000000000012221
+        },
+        "velocity_feedforward": false,
+        "final_gripper_state": {
+          "known": true,
+          "initialized": true,
+          "width": 0.017374010548607557,
+          "force": 16.86540136473361,
+          "contact_detected": true,
+          "object_present": true,
+          "holding": true,
+          "mode": "physical",
+          "slip_detected": false,
+          "bilateral_contact": true,
+          "contact_lost": false,
+          "left_force_n": 7.582840356224629,
+          "right_force_n": 9.282561008508981,
+          "hold_force_target_n": 15.0,
+          "filtered_hold_force_n": 16.96221318672591,
+          "hold_force_torque_saturated": false,
+          "relative_position_error_m": 0.000641307729545131,
+          "relative_orientation_error_rad": 0.059614427663281504,
+          "confirmation": {
+            "left_force_n": 6.464767023882587,
+            "right_force_n": 6.4528082462599095,
+            "measured_left_force_n": 6.464767023882587,
+            "measured_right_force_n": 6.4528082462599095,
+            "closure_completed": false,
+            "no_contact_time_s": 0.0,
+            "command_reached": true,
+            "driver_reached": false,
+            "width_reached": false,
+            "measured_width_m": 0.017421797092666662,
+            "requested_width_m": 0.0,
+            "no_contact_threshold_n": 0.1,
+            "stable_time_s": 0.10000000000012221,
+            "width_range_m": 0.00011506002843101812,
+            "position_range_m": 6.636702301445164e-05,
+            "orientation_range_rad": 0.006020507213625949,
+            "bilateral_contact": true,
+            "confirmed": true,
+            "reason": "stable_bilateral_grasp",
+            "mode": "physical"
+          },
+          "object_id": "Marker"
+        },
+        "planning_time": 0.04278299998259172,
+        "planned_duration": 0.75
+      },
+      "trajectory": {
+        "planner": "direct",
+        "path_type": "linear",
+        "cartesian_joint_waypoints": [
+          [
+            -0.513714648093048,
+            -2.2038507830401075,
+            2.4667089453453417,
+            -1.8361801673666303,
+            -1.57181542668308,
+            1.0580358463032795
+          ],
+          [
+            -0.5137134235165107,
+            -2.218191176090591,
+            2.427758695274093,
+            -1.7828895234071411,
+            -1.5718154297759623,
+            1.058037070876547
+          ],
+          [
+            -0.5137121989443186,
+            -2.2289245923039744,
+            2.388047058820105,
+            -1.7324444694918064,
+            -1.571815432868832,
+            1.0580382954454692
+          ],
+          [
+            -0.5137109743764727,
+            -2.2364825962862382,
+            2.347609623274071,
+            -1.6844490287155454,
+            -1.5718154359616894,
+            1.0580395200100452
+          ],
+          [
+            -0.5137097498129729,
+            -2.2412289154376515,
+            2.3064689402300553,
+            -1.6385620252721544,
+            -1.5718154390545342,
+            1.0580407445702753
+          ],
+          [
+            -0.5137085252538189,
+            -2.2434699918437806,
+            2.264636530800736,
+            -1.5944885381887446,
+            -1.5718154421473665,
+            1.058041969126159
+          ],
+          [
+            -0.513707300699011,
+            -2.2434639444087483,
+            2.222114359166846,
+            -1.5519724127419257,
+            -1.5718154452401862,
+            1.0580431936776973
+          ]
+        ],
+        "duration": 0.75,
+        "planning_time": 0.04278299998259172,
+        "diagnostics": {
+          "ik": [
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            },
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            },
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            },
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            },
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            },
+            {
+              "solver": "eaik",
+              "backend": "eaik_homogeneous",
+              "diagnostics": {
+                "kinematic_family": "6R-THREE_INNER_PARALLEL",
+                "raw_candidates": 8,
+                "least_squares_flagged": 0,
+                "rejected_candidates": []
+              }
+            }
+          ],
+          "ik_branch_selection": {
+            "candidate_count": 1,
+            "rejected": [],
+            "selected_branch": 0,
+            "evaluated_count": 1,
+            "explicit_seed": false,
+            "exhaustive_search": false,
+            "search_mode": "fast",
+            "ik_cache_hits": 0,
+            "collision_cache_hits": 0
+          },
+          "planning_stages_s": {
+            "endpoint_collision_check": 0.0013417000009212643,
+            "endpoint_collision_prechecked": false,
+            "path_densification": 0.00010629999451339245,
+            "direct_path_collision_check": 0.019024599983822554,
+            "collision_resolution_rad": 0.02,
+            "proxy_state_guards": 0.02198689995566383
+          },
+          "planning_proxy": {
+            "schema_version": 1,
+            "geometry_source": "shared_simplified_proxy",
+            "source_geometry_count": 411,
+            "proxy_geometry_count": 42,
+            "robot_spheres": 346,
+            "world_boxes": 20,
+            "options": {
+              "sphere_cell_size": 0.035,
+              "container_names": [
+                "Tray",
+                "Basket"
+              ],
+              "batch_size": 32
+            },
+            "coverage": "outer_envelope_except_retained_gripper_sphere_fit",
+            "gripper_fit": "retained_validated_cuRobo_voxel_templates",
+            "maximum_box_cover_extra_m": 0.030310889132455353
+          },
+          "planning_proxy_cache": {
+            "builds": 0,
+            "structure_hits": 0,
+            "state_refreshes": 0
+          },
+          "time_parameterization": {
+            "backend": "continuous_precomputed",
+            "path_interpolator": "cubic_c2",
+            "collision_fallback": null,
+            "max_velocity": [
+              1.2000000000000002,
+              1.2000000000000002,
+              1.2000000000000002,
+              1.2000000000000002,
+              1.2000000000000002,
+              1.2000000000000002
+            ],
+            "corner_slowdown": 0.25,
+            "max_acceleration": [
+              4.800000000000001,
+              4.800000000000001,
+              4.800000000000001,
+              4.800000000000001,
+              4.800000000000001,
+              4.800000000000001
+            ],
+            "max_jerk": null,
+            "acceleration_limited": true,
+            "jerk_limited": false,
+            "time_law": "global_quintic",
+            "limit_source": {
+              "urdf": "C:\\Users\\21474\\Desktop\\robot-agent\\services\\object_library_server\\data\\robots\\1\\ur5.urdf",
+              "joint_names": [
+                "shoulder_pan_joint",
+                "shoulder_lift_joint",
+                "elbow_joint",
+                "wrist_1_joint",
+                "wrist_2_joint",
+                "wrist_3_joint"
+              ],
+              "velocity": "urdf.limit.velocity",
+              "acceleration": [
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global",
+                "velocity_x2_global"
+              ]
+            },
+            "trajectory_sampling_s": 0.0010771999950520694,
+            "linear_path_validation_s": 0.004911199997877702,
+            "collision_validation_s": 0.03935849998379126,
+            "circular_path_validation_s": 0.0,
+            "validation_waypoint_count": 25,
+            "collision_resolution_rad": 0.02,
+            "spline_subdivisions": 2,
+            "path_validation_cache_enabled": false,
+            "planner_waypoint_count": 13,
+            "validation_waypoints_identical_to_planner": false,
+            "path_validation_cache": {}
+          }
+        },
+        "data_file": "trajectories/planned/020_22.json",
+        "data_key": "trajectory_1"
+      },
+      "timing": {
+        "validation": 0.0011471000034362078,
+        "context": 0.00012509999214671552,
+        "selection": 5.299982149153948e-06,
+        "path_generation": 0.6645264000108,
+        "planning": 0.0427950999874156,
+        "trajectory_preparation": 0.046088799979770556,
+        "posture_scoring": 3.1999952625483274e-06,
+        "pre_execution_total": 0.7546995999873616,
+        "planner_stages": {
+          "endpoint_collision_check": 0.0013417000009212643,
+          "endpoint_collision_prechecked": false,
+          "path_densification": 0.00010629999451339245,
+          "direct_path_collision_check": 0.019024599983822554,
+          "collision_resolution_rad": 0.02,
+          "proxy_state_guards": 0.02198689995566383
+        },
+        "execution": 0.8554773000068963,
+        "total": 1.6101791000110097
+      },
+      "motion_time": 0.8548729000031017,
+      "error": null
+    }
+  ],
+  "pose_search_precheck": [
+    {
+      "distance_m": 0.1,
+      "elapsed_s": 0.0019078999757766724,
+      "status": "analytic_solution"
+    }
+  ],
+  "successful_distance_m": 0.1,
+  "grasp_verification": {
+    "mode": "command_end",
+    "success": true,
+    "evidence": {
+      "known": true,
+      "initialized": true,
+      "width": 0.017374010548607557,
+      "force": 16.86540136473361,
+      "contact_detected": true,
+      "object_present": true,
+      "holding": true,
+      "mode": "physical",
+      "slip_detected": false,
+      "bilateral_contact": true,
+      "contact_lost": false,
+      "left_force_n": 7.582840356224629,
+      "right_force_n": 9.282561008508981,
+      "hold_force_target_n": 15.0,
+      "filtered_hold_force_n": 16.96221318672591,
+      "hold_force_torque_saturated": false,
+      "relative_position_error_m": 0.000641307729545131,
+      "relative_orientation_error_rad": 0.059614427663281504,
+      "confirmation": {
+        "left_force_n": 6.464767023882587,
+        "right_force_n": 6.4528082462599095,
+        "measured_left_force_n": 6.464767023882587,
+        "measured_right_force_n": 6.4528082462599095,
+        "closure_completed": false,
+        "no_contact_time_s": 0.0,
+        "command_reached": true,
+        "driver_reached": false,
+        "width_reached": false,
+        "measured_width_m": 0.017421797092666662,
+        "requested_width_m": 0.0,
+        "no_contact_threshold_n": 0.1,
+        "stable_time_s": 0.10000000000012221,
+        "width_range_m": 0.00011506002843101812,
+        "position_range_m": 6.636702301445164e-05,
+        "orientation_range_rad": 0.006020507213625949,
+        "bilateral_contact": true,
+        "confirmed": true,
+        "reason": "stable_bilateral_grasp",
+        "mode": "physical"
+      }
+    }
+  },
+  "planning_timing_file": "metrics/planning.jsonl",
+  "command_file": "commands/020_22.json"
+}
