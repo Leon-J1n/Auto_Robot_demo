@@ -371,18 +371,22 @@ def _resolve_command_file(command_file):
 
 def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         output_dir=None, viewer=False, collision_probe=False,
-        object_library_url=None, start_object_library=False, show_collision_geometry=False):
+        object_library_url=None, start_object_library=False, show_collision_geometry=False,
+        collision_model=None):
+    if collision_model not in (None, 'proxy', 'precise'):
+        raise ValueError('collision_model_invalid')
     output = output_dir if output_dir is not None else _default_output_dir(command_file)
     with output_lock(output), command_timing_scope():
         return _run(command_file, catalog=catalog, scene_file=scene_file, backend_name=backend_name,
                     output_dir=output, viewer=viewer, collision_probe=collision_probe,
                     object_library_url=object_library_url, start_object_library=start_object_library,
-                    show_collision_geometry=show_collision_geometry)
+                    show_collision_geometry=show_collision_geometry, collision_model=collision_model)
 
 
 def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
          output_dir=None, viewer=False, collision_probe=False,
-         object_library_url=None, start_object_library=False, show_collision_geometry=False):
+         object_library_url=None, start_object_library=False, show_collision_geometry=False,
+         collision_model=None):
     from libraries.eaik import load_urdf
     from collision import SimPlatformFCLCollisionChecker
     from planning.trajectory.time_parameterization import prepare_continuous_trajectory
@@ -440,6 +444,11 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
     row = None
     try:
         resources = coordinator.resolve(task, backend_name)
+        if collision_model is not None:
+            # Explicit execution-only selection of two supported collision
+            # representations. Never change the authored Scene or safety policy.
+            resources.scene['planning_collision_proxy']['enabled'] = collision_model == 'proxy'
+        report['collision_model'] = ('proxy' if resources.scene['planning_collision_proxy']['enabled'] else 'precise')
         for item in visual_estimates:
             scene_object_by_id(resources.scene, item['target_id'])
         report['effective_defaults'] = {
@@ -809,6 +818,10 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                     final_state = backend.get_state()
                     blackboard.observe(final_state)
                     report['final_state'] = final_state
+                    from execution.output.trajectory_export import append_final_frame
+                    frame_index = append_final_frame(output / 'trajectories/frames.jsonl',
+                                                     final_state, frame_index)
+                    report['frame_count'] = frame_index
                 except Exception as state_error:
                     # A stale earlier snapshot must not certify an interrupted run.
                     report.pop('final_state', None)
@@ -878,6 +891,8 @@ def main():
     parser.add_argument('--catalog', type=Path, default=None,
                         help='Legacy scene catalog; new requests use scene_file in the task')
     parser.add_argument('--backend', default='mujoco')
+    parser.add_argument('--collision-model', choices=('proxy', 'precise'), default=None,
+                        help='Explicit collision representation; precise retains the original full geometry checker')
     parser.add_argument('--library', type=Path, default=DEFAULT_SIMPLATFORM_LIBRARY,
                         help='SimPlatform native DLL (default: libraries/simplatform/bin/sim_platform_c.dll)')
     parser.add_argument('--output', type=Path, default=None,
@@ -901,7 +916,7 @@ def main():
     result = run(args.commands, catalog=args.catalog, backend_name=args.backend, output_dir=args.output,
                  viewer=args.viewer, collision_probe=args.collision_probe,
                  object_library_url=args.object_library_url, start_object_library=args.start_object_library,
-                 show_collision_geometry=args.show_collision_geometry)
+                 show_collision_geometry=args.show_collision_geometry, collision_model=args.collision_model)
     raise SystemExit(0 if result['success'] else 2 if result.get('status') == 'suspend' else 1)
 
 

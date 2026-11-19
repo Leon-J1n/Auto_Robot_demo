@@ -108,7 +108,10 @@ def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *, _raw=
             if len(joints) != 1 or model.body_jntnum[body] != 1:
                 raise ConversionError('A planned runtime body must have one hinge or slide joint')
             joint = joints[0]
-            if model.jnt_type[joint] not in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE):
+            # MuJoCo 3.12 enums and NumPy 2.2 scalars have asymmetric
+            # equality during tuple membership. Compare integer values so
+            # a real hinge is not rejected as an unsupported joint.
+            if int(model.jnt_type[joint]) not in (int(mujoco.mjtJoint.mjJNT_HINGE), int(mujoco.mjtJoint.mjJNT_SLIDE)):
                 raise ConversionError('Only hinge and slide arm joints are supported')
             q = float(data.qpos[model.jnt_qposadr[joint]])
             axis = model.jnt_axis[joint].copy()

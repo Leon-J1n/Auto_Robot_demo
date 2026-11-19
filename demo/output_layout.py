@@ -100,7 +100,7 @@ def command_view(row, output, stem, write_json):
 
 def summary_view(report):
     result = {key: report[key] for key in (
-        'request_id', 'success', 'status', 'frame_count', 'physics_steps', 'execution_backend',
+        'request_id', 'success', 'status', 'frame_count', 'physics_steps', 'execution_backend', 'collision_model',
         'trajectory_file', 'blackboard_file', 'final_scene_file', 'final_scene_export_error',
         'trajectory_export_error', 'execution_started', 'no_effect_verified',
         'state_capture_error') if key in report}

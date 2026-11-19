@@ -30,3 +30,7 @@ def test_summary_retains_failure_state_evidence():
     assert result['execution_started'] is False
     assert result['state_capture_error'] == 'capture failed'
     assert 'final_state_file' not in result
+
+
+def test_summary_records_explicit_collision_representation():
+    assert summary_view({'collision_model': 'precise'})['collision_model'] == 'precise'

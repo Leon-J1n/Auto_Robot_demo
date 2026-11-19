@@ -74,6 +74,15 @@ def scene():
 
 
 class PolicyTests(unittest.TestCase):
+    def test_runtime_export_accepts_numpy_hinge_joint_with_mujoco_enums(self):
+        # MuJoCo 3.12 / NumPy 2.2 tuple membership can compare enum==scalar
+        # differently from scalar==enum. A supported joint must still export.
+        with scene() as (runtime, checker, _), tempfile.TemporaryDirectory() as directory:
+            exported = export_runtime(runtime, checker, {'safety_distance': .003}, directory)
+            articulated = [body for body in exported['bodies'] if 'joint_name' in body]
+            self.assertEqual(len(articulated), len(runtime.joint_names))
+            self.assertTrue(all(body['kind'] in ('revolute', 'prismatic') for body in articulated))
+
     def test_arm_pedestal_policy_preserves_tool_payload_and_other_obstacles(self):
         with scene() as (runtime, checker, g), tempfile.TemporaryDirectory() as directory:
             checker._arm_link_names = frozenset({'base', 'arm'})

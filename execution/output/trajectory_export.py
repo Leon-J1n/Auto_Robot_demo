@@ -13,6 +13,23 @@ MAGIC = 0x5452414A
 WORLD_ID = 0xFFFFFFFF
 
 
+def append_final_frame(path: Path, state: Mapping[str, Any], frame_index: int) -> int:
+    """Close replay with the same measured snapshot used for Scene publication.
+
+    Sampling may miss a settling integration step. Never synthesize a final
+    frame when initialization failed before the trajectory stream was opened.
+    """
+    path = Path(path)
+    if not path.is_file():
+        return frame_index
+    record = {**state, 'frame_index': frame_index,
+              'command_id': 'final', 'substep': 'final_state'}
+    with path.open('a', encoding='utf-8') as stream:
+        stream.write(json.dumps(record, allow_nan=False,
+                                default=lambda value: value.tolist()) + '\n')
+    return frame_index + 1
+
+
 def _component(obj: Mapping[str, Any], kind: str) -> Mapping[str, Any]:
     for entry in obj.get("components", ()):
         if entry.get("component_type") == kind:
@@ -89,7 +106,9 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
         mechanisms = state.get("mechanisms") or {}
         values = []
         for joint in joints:
-            sample = mechanisms.get(f"{name}__{joint}") or mechanisms.get(joint)
+            # A bare joint name cannot identify an articulated scene object.
+            # Match the same object namespace used by final Scene writeback.
+            sample = mechanisms.get(f"{name}__{joint}")
             if not sample or "joint_position" not in sample:
                 return None
             values.append(float(sample["joint_position"]))

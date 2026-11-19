@@ -47,6 +47,7 @@ class MuJoCoExecutionBackend:
         self.data.ctrl[self.actuator_ids] = resources.initial_joints
         source = json.loads(Path(resources.scene_file).read_text(encoding='utf-8'))
         self.scene_driver_joints = {}
+        restored_joint_ids = set()
         for obj in source.get('objects', []):
             driver = component(obj, 'RobotDriver')
             sequence = driver.get('joint_sequence') or []
@@ -70,11 +71,15 @@ class MuJoCoExecutionBackend:
                     if not np.isfinite(value):
                         raise ValueError('Non-finite current joint state')
                     self.data.qpos[address] = value
+                    restored_joint_ids.add(next(j for j in range(self.model.njnt)
+                                                if int(self.model.jnt_qposadr[j]) == address))
                     actuator_name = ('grasp_servo' if joint == 'robotiq_2f85_right_driver_joint'
                                      else joint + '_servo')
                     actuator = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_name)
                     if actuator >= 0:
                         self.data.ctrl[actuator] = value
+        from .joint_restore import restore_dependent_joints
+        restore_dependent_joints(self.model, self.data, restored_joint_ids)
         self.frame_callback = None
         from execution.config import trajectory_settings
         self.trajectory_fps = trajectory_settings(resources.scene)['fps']

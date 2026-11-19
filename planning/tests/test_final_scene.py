@@ -42,7 +42,8 @@ class FinalSceneTests(unittest.TestCase):
         self.assertEqual(component(exported['objects'][1], 'Transform'), component(source['objects'][1], 'Transform'))
         for index, joint, expected in ((0, 'arm_joint', .3), (1, 'finger_joint', .4), (2, 'slide', .2)):
             driver = component(exported['objects'][index], 'RobotDriver')
-            self.assertEqual(driver['initial_joint_positions_rad'][joint], expected)
+            self.assertEqual(driver['now_joint_positions_rad'][joint], expected)
+            self.assertNotIn('initial_joint_positions_rad', driver)
             self.assertEqual(driver['now_joint_positions_rad'][joint], expected)
 
 

@@ -59,9 +59,9 @@ class BindingGripperController:
         if self.model.body_jntnum[body] != 1:
             return False
         joint = int(self.model.body_jntadr[body])
-        return self.model.jnt_type[joint] in (mujoco.mjtJoint.mjJNT_FREE,
-                                               mujoco.mjtJoint.mjJNT_HINGE,
-                                               mujoco.mjtJoint.mjJNT_SLIDE)
+        return int(self.model.jnt_type[joint]) in (int(mujoco.mjtJoint.mjJNT_FREE),
+                                                 int(mujoco.mjtJoint.mjJNT_HINGE),
+                                                 int(mujoco.mjtJoint.mjJNT_SLIDE))
 
     def _contact_forces(self):
         forces = {}
