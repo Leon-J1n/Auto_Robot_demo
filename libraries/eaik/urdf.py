@@ -8,7 +8,7 @@ from libraries.kinematic_chain.urdf import UrdfRobotModel
 def load_urdf(path: str | Path, *, tip_link: str, base_link: str | None = None,
               tcp_transform=None, world_from_base=None, initial_joints=None,
               continuous_limits=None, current_joints_provider=None,
-              base_transform_provider=None) -> KinematicsService:
+              base_transform_provider=None, validation_backend="eaik") -> KinematicsService:
     """Load and validate a selected URDF chain; return the uniform IK service.
 
     This standalone service defaults to EAIK. It calculates kinematics only and
@@ -24,5 +24,5 @@ def load_urdf(path: str | Path, *, tip_link: str, base_link: str | None = None,
     registry = SolverRegistry.discover()
     service = KinematicsService(robot, registry)
     # Initialize and verify through the same public API used by callers.
-    service.solve_one(robot.forward(robot.current_joints()), backend="eaik")
+    service.solve_one(robot.forward(robot.current_joints()), backend=validation_backend)
     return service

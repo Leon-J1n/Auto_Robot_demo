@@ -116,5 +116,18 @@
 
 统一演示会生成任务结果、阶段状态、轨迹统计、碰撞缓存统计和错误诊断。默认运行输出目录为对应请求目录下的 `output/`，例如 `requests/commands.001/output/`。
 
+### WebEditor 集成输出（2026-11-19）
+
+- 请求输入保留在独立请求目录，桥接层不得复用请求 ID 清空历史。
+- `demo/output_layout.py` 负责摘要和逐命令结果；消费方读取
+  `output/summary.json`、`output/commands/results.jsonl` 和 `output/snapshots/state.json`。
+- `execution/output/trajectory_export.py` 负责导出 `output/trajectories/execution.traj`；
+  历史 `execution/trajectory_export.py` 只保留兼容导入。
+- `demo/final_scene.py` 将实测状态写入 `output/snapshots/final_scene.json`，只更新
+  `RobotDriver.now_joint_positions_rad`，不覆盖部署 `initial_joint_positions_rad`。
+- 最终 Scene 和轨迹供 Brain 经同一任务的 Gateway 事务与回放接口发送；失败也可保存
+  可信实际状态，但不能据此将任务标记成功。最终状态采集失败时不导出旧快照冒充当前状态。
+- 本地夹爪网格必须匹配 `collision/proxies/robotiq_2f85.json` 的已验证模板；
+  `No validated gripper proxy template` 需要核对网格/模板来源，不能关闭碰撞检查兜底。
 
 

@@ -407,14 +407,22 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
     output = prepare_output(output_dir, protected=(command_file, catalog,
         (Path(command_file).parent / source_scene) if source_scene else None))
     report = {'request_id': task.get('request_id'), 'success': False, 'steps': [],
+              'execution_started': False,
               'collision_policy': 'planning_only'}
     if scene_file is None:
         scene_file = task.get('scene_file')
     if scene_file:
         scene_path = (Path(command_file).parent / scene_file).resolve()
+        asset_root = ROOT / 'services' / 'object_library_server' / 'data'
+        if catalog:
+            # The integration catalog may select a matching local OLS revision.
+            catalog_path = Path(catalog).resolve()
+            configured_root = json.loads(catalog_path.read_text(encoding='utf-8')).get('asset_root')
+            if configured_root:
+                asset_root = (catalog_path.parent / configured_root).resolve()
         coordinator = SceneResourceCoordinator(
             scene_file=scene_path,
-            asset_root=ROOT / 'services' / 'object_library_server' / 'data',
+            asset_root=asset_root,
         )
     else:
         coordinator = SceneResourceCoordinator(catalog)
@@ -534,7 +542,7 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         # Created without importing/constructing MuJoCo; planning does not need runtime geometry.
         kin = load_urdf(resources.robot_urdf, base_link=ref['base_link'], tip_link=ref['tip_link'],
                         tcp_transform=ref.get('tcp_transform'), world_from_base=pose_matrix(resources.robot_object),
-                        initial_joints=resources.initial_joints)
+                        initial_joints=resources.initial_joints, validation_backend="auto")
         # Load the selected plugin before SimPlatform: its distribution contains
         # a different mujoco.dll. Windows resolves loaded DLL basenames globally.
         backend = ExecutionBackendRegistry().create(backend_name)
@@ -546,6 +554,9 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         if start_check.in_collision:
             raise ValueError(f'Initial state collides: {start_check.contacts}')
         stage = 'execution_initialization'
+        # From backend initialization onward, effects cannot be ruled out by
+        # the absence of completed commands (settling/gripper startup included).
+        report['execution_started'] = True
         if visual_estimates:
             if backend_name != 'mujoco':
                 raise ValueError('Visual estimates require the MuJoCo backend')
@@ -793,14 +804,22 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             if curobo_action is not None:
                 curobo_action.close()
             if backend is not None and hasattr(backend, 'data'):
-                final_state = backend.get_state()
-                report['final_state'] = final_state
-                blackboard.observe(final_state)
+                final_state = None
+                try:
+                    final_state = backend.get_state()
+                    blackboard.observe(final_state)
+                    report['final_state'] = final_state
+                except Exception as state_error:
+                    # A stale earlier snapshot must not certify an interrupted run.
+                    report.pop('final_state', None)
+                    report['state_capture_error'] = str(state_error)
                 np.savez_compressed(output / 'snapshots/final_state.npz', qpos=backend.data.qpos, qvel=backend.data.qvel,
                                     ctrl=backend.data.ctrl, eq_active=backend.data.eq_active,
                                     eq_data=backend.model.eq_data, time=float(backend.data.time))
                 try:
                     from demo.final_scene import final_scene
+                    if final_state is None:
+                        raise ValueError('Fresh final state unavailable; scene export refused')
                     authored_scene = json.loads(Path(resources.scene_file).read_text(encoding='utf-8'))
                     _write_json(output / 'snapshots/final_scene.json', final_scene(authored_scene, backend, final_state))
                     report['final_scene_file'] = 'snapshots/final_scene.json'

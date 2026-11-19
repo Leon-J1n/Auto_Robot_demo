@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import sys
 import types
+import tempfile
 import xml.etree.ElementTree as ET
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -196,16 +197,24 @@ class SimPlatformFCLCollisionChecker:
         self._allowed_arm_environment_names = frozenset(fixture_names)
         self._sim = Simulator(physics="none", collision="fcl")
         self.world = self._sim.create_world()
-        self.robot = self.world.load_robot(self.robot_urdf)
+        from ..assets.kinematic_urdf import write_kinematic_copy
+        self._kinematic_directory = tempfile.TemporaryDirectory(prefix='control-fcl-urdf-')
+        sdk_urdf = write_kinematic_copy(self.robot_urdf,
+                                      Path(self._kinematic_directory.name) / 'robot.urdf')
+        self.robot = self.world.load_robot(sdk_urdf)
         # SimPlatform exposes all URDF joints (including fixed joints) and
-        # uses its own joint ordering.  The rest of this project uses the six
-        # UR5e actuated joints in ``UR5E_JOINT_NAMES`` order, so keep an
+        # uses its own joint ordering. The runner uses the scene's six
+        # actuated joints in RobotDriver order, so keep an
         # explicit adapter map instead of leaking the SDK ordering upward.
         sdk_names = tuple(str(name) for name in self.robot.joint_names)
-        project_names = (
+        default_names = (
             "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
             "wrist_1_joint", "wrist_2_joint", "wrist_3_joint",
         )
+        driver = _component(robot_object, "RobotDriver") or {}
+        project_names = tuple(driver.get("joint_sequence", default_names))
+        if len(project_names) != 6 or len(set(project_names)) != len(project_names):
+            raise ValueError('FCL requires six unique scene robot joints')
         missing = [name for name in project_names if name not in sdk_names]
         if missing:
             raise ValueError(f"FCL robot URDF is missing project joints: {missing}")
@@ -548,4 +557,3 @@ class SimPlatformFCLCollisionChecker:
 def _identity_or_transform(entity: Any, Transform: Any):
     # Keep the robot at the origin unless the scene contains an explicit robot transform.
     return Transform()
-

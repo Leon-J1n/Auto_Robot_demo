@@ -1,5 +1,7 @@
 """MuJoCo execution plugin. MJCF is generated from the canonical JSON/URDF."""
 from contextlib import nullcontext
+import json
+from pathlib import Path
 import time
 
 import mujoco
@@ -43,6 +45,36 @@ class MuJoCoExecutionBackend:
                 self.mechanism_bodies.add(name)
         self.data.qpos[self.qpos_indices] = resources.initial_joints
         self.data.ctrl[self.actuator_ids] = resources.initial_joints
+        source = json.loads(Path(resources.scene_file).read_text(encoding='utf-8'))
+        self.scene_driver_joints = {}
+        for obj in source.get('objects', []):
+            driver = component(obj, 'RobotDriver')
+            sequence = driver.get('joint_sequence') or []
+            if not sequence:
+                continue
+            mapped = {}
+            is_arm = obj['object_id_in_scene'] == resources.robot_object['object_id_in_scene']
+            for joint in sequence:
+                candidate = joint if is_arm or component(obj, 'RobotAttachment') else obj['object_name_in_scene'] + '__' + joint
+                jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, candidate)
+                if jid >= 0 and int(self.model.jnt_type[jid]) in (2, 3):
+                    mapped[joint] = int(self.model.jnt_qposadr[jid])
+            if len(mapped) == len(sequence):
+                self.scene_driver_joints[obj['object_id_in_scene']] = mapped
+            current = driver.get('now_joint_positions_rad')
+            if current is not None:
+                if set(current) != set(sequence) or len(mapped) != len(sequence):
+                    raise ValueError('Cannot restore complete current joint state: ' + obj['object_name_in_scene'])
+                for joint, address in mapped.items():
+                    value = float(current[joint])
+                    if not np.isfinite(value):
+                        raise ValueError('Non-finite current joint state')
+                    self.data.qpos[address] = value
+                    actuator_name = ('grasp_servo' if joint == 'robotiq_2f85_right_driver_joint'
+                                     else joint + '_servo')
+                    actuator = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_name)
+                    if actuator >= 0:
+                        self.data.ctrl[actuator] = value
         self.frame_callback = None
         from execution.config import trajectory_settings
         self.trajectory_fps = trajectory_settings(resources.scene)['fps']
@@ -239,11 +271,21 @@ class MuJoCoExecutionBackend:
             c = self.gripper_controller
             payload = c.get_state()
             payload['object_id'] = c.held_name
-        return {'joint_names': list(self.joint_names), 'joints': self.get_joint_positions().tolist(),
+        mechanisms = {}
+        for name in getattr(self, 'mechanism_bodies', ()):
+            body_joint_id = int(self.model.body_jntadr[self.object_ids[name]])
+            joint_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, body_joint_id)
+            mechanisms[name] = {
+                'joint_name': joint_name or name,
+                'joint_position': float(self.data.qpos[self.model.jnt_qposadr[body_joint_id]]),
+                'joint_type': int(self.model.jnt_type[body_joint_id]),
+            }
+        return {'robot_object_id': self.resources.robot_object['object_id_in_scene'],
+                'scene_driver_joints': {str(identifier): {name: float(self.data.qpos[address])
+                    for name, address in joints.items()} for identifier, joints in self.scene_driver_joints.items()},
+                'joint_names': list(self.joint_names), 'joints': self.get_joint_positions().tolist(),
                 'gripper': payload,
-                'mechanisms': {name: {'joint_position': float(self.data.qpos[self.model.jnt_qposadr[self.model.body_jntadr[self.object_ids[name]]]]),
-                    'joint_type': int(self.model.jnt_type[self.model.body_jntadr[self.object_ids[name]]])}
-                    for name in getattr(self, 'mechanism_bodies', ())},
+                'mechanisms': mechanisms,
                 'arm_control': {
                     'joint_error_rad': (self.data.ctrl[self.actuator_ids] - self.get_joint_positions()).tolist(),
                     'servo_torque_nm': self.data.actuator_force[self.actuator_ids].tolist(),
@@ -395,4 +437,3 @@ class MuJoCoExecutionBackend:
         if getattr(self, 'viewer', None) is not None:
             self.viewer.close()
         self.viewer = None
-

@@ -35,15 +35,17 @@ def final_scene(source, backend, state):
             continue
         values = {}
         for joint in driver.get('joint_sequence', []):
-            candidates = (joint,) if obj['object_id_in_scene'] == backend.resources.robot_object['object_id_in_scene'] or component(obj, 'RobotAttachment') else (f'{name}__{joint}', joint)
+            candidates = (joint,) if obj['object_id_in_scene'] == backend.resources.robot_object['object_id_in_scene'] or component(obj, 'RobotAttachment') else (f'{name}__{joint}',)
             for candidate in candidates:
                 ident = mujoco.mj_name2id(backend.model, mujoco.mjtObj.mjOBJ_JOINT, candidate)
                 if ident >= 0:
-                    values[joint] = float(backend.data.qpos[backend.model.jnt_qposadr[ident]])
+                    value = float(backend.data.qpos[backend.model.jnt_qposadr[ident]])
+                    if not np.isfinite(value):
+                        raise ValueError(f'Nonfinite measured scene joint: {name}/{joint}')
+                    values[joint] = value
                     break
             else:
                 raise ValueError(f'Cannot export unmeasured scene joint: {name}/{joint}')
         if values:
-            driver['initial_joint_positions_rad'] = values.copy()
             driver['now_joint_positions_rad'] = values.copy()
     return result

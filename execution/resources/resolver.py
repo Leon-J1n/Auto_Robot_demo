@@ -120,8 +120,22 @@ def pose_matrix(obj):
         raise ValueError('Transform requires finite position and unit xyzw quaternion')
     if norm != 1.0:
         q = q / norm
-    if p.get('parent') is not None or not np.allclose(p.get('scale', [1, 1, 1]), [1, 1, 1]):
-        raise ValueError('This scene compiler currently requires world-parented objects with unit scale')
+    scale = np.asarray(p.get('scale', [1, 1, 1]), dtype=float)
+    if scale.shape != (3,) or not np.all(np.isfinite(scale)) or np.any(scale <= 0):
+        raise ValueError('Transform scale requires three finite positive values')
+    if p.get('parent') is not None:
+        raise ValueError('This scene compiler requires world-parented objects')
+    if not np.allclose(scale, [1, 1, 1]):
+        # Both FCL and MuJoCo apply scale to rigid geometry, independently of
+        # this rigid pose. URDF link/joint scaling is not implemented.
+        asset = component(obj, 'AssetRef').get('asset_path', '')
+        shape = component(obj, 'Collider').get('shape')
+        supported = shape in {'box', 'cylinder'} or Path(asset).suffix.lower() in {'.obj', '.stl'}
+        if (component(obj, 'RobotModelRef') or component(obj, 'ArticulatedModel')
+                or Path(asset).suffix.lower() == '.urdf' or not supported):
+            raise ValueError('Scaled articulated or unsupported geometry is not supported')
+        if shape == 'cylinder' and not np.isclose(scale[0], scale[1]):
+            raise ValueError('Non-uniform cylinder scale is unsupported')
     t = np.eye(4)
     t[:3, :3], t[:3, 3] = Rotation.from_quat(q).as_matrix(), xyz
     return t
@@ -271,9 +285,14 @@ class SceneResourceCoordinator:
         active = {j.get('name') for j in ET.parse(urdf).getroot().findall('joint') if j.get('type') == 'revolute'}
         if len(names) != 6 or len(set(names)) != 6 or set(names) != active:
             raise ValueError('RobotDriver joint_sequence must match URDF revolute joints')
-        initial = component(robots[0], 'RobotDriver').get('initial_joint_positions_rad')
+        driver = component(robots[0], 'RobotDriver')
+        initial = driver.get('now_joint_positions_rad')
+        if initial is None:
+            initial = driver.get('initial_joint_positions_rad')
         if initial is None:
             raise ValueError('Scene RobotDriver must define initial_joint_positions_rad')
+        if set(initial) != set(names):
+            raise ValueError('Scene current joint state must match joint_sequence')
         q = np.asarray([initial[name] for name in names], dtype=float)
         if q.shape != (6,) or not np.all(np.isfinite(q)):
             raise ValueError('Invalid initial_joints')
@@ -360,7 +379,8 @@ class SceneResourceCoordinator:
                 raise ValueError(f'Object mismatch: {name}')
             collider = component(obj, 'Collider')
             if collider.get('shape') in {'box', 'cylinder'}:
-                expected_size = np.asarray(collider['size'])
+                expected_size = np.asarray(collider['size']) * np.asarray(
+                    component(obj, 'Transform').get('scale', [1, 1, 1]))
                 if collider['shape'] == 'cylinder':
                     expected_size = expected_size * [2, 2, 1]
                 if not np.allclose(fcl_pose.scale, expected_size, atol=1e-8):

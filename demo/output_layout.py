@@ -102,7 +102,8 @@ def summary_view(report):
     result = {key: report[key] for key in (
         'request_id', 'success', 'status', 'frame_count', 'physics_steps', 'execution_backend',
         'trajectory_file', 'blackboard_file', 'final_scene_file', 'final_scene_export_error',
-        'trajectory_export_error') if key in report}
+        'trajectory_export_error', 'execution_started', 'no_effect_verified',
+        'state_capture_error') if key in report}
     steps = report.get('steps', [])
     result['commands_file'] = 'commands/results.jsonl'
     result['command_count'] = len(steps)

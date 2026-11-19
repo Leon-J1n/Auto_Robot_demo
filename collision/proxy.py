@@ -106,7 +106,8 @@ def _gripper_spheres(g, templates):
         shape['mesh_sha256'] = sha256(Path(g['file_path']).read_bytes()).hexdigest()
     template = templates.get(_digest(shape))
     if template is None or template['shape'] != shape:
-        raise ValueError(f'No validated gripper proxy template for {g["body_name"]}; author a matching template')
+        raise ValueError(f'No validated gripper proxy template for {g["body_name"]}; '
+                         f'shape_key={_digest(shape)} shape={shape}; author a matching template')
     transform = np.asarray(g['matrix'])
     return [dict(center=(transform[:3,:3] @ s['center'] + transform[:3,3]).tolist(), radius=float(s['radius']))
             for s in template['spheres']]
