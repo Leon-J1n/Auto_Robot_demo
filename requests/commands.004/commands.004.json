@@ -1,61 +1,52 @@
 {
   "schema_version": "2.0",
-  "request_id": "approach-pick-cabinet-handle-004",
+  "request_id": "ur10-apple-to-basket-004",
   "scene_id": 4,
-  "scene_version": 3,
+  "scene_version": 4,
+  "scene_file": "ur10_table_sorting.json",
   "commands": [
     {
       "command_id": "1",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 9,
-        "hold_force": 10.0
-      }
-    },
-    {
-      "command_id": "2",
-      "skill_name": "pull",
-      "parameters": {
-        "arc_center": [
-          -0.131939005,
-          0.153781735,
-          0.822811
-        ],
-        "arc_axis": [
-          0,
-          0,
-          1
-        ],
-        "angle_deg": 90
-      }
-    },
-    {
-      "command_id": "3",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 9
-      }
-    },
-    {
-      "command_id": "4",
       "skill_name": "approach",
       "parameters": {
         "target": 7
       }
     },
     {
-      "command_id": "5",
-      "skill_name": "move_to",
+      "command_id": "2",
+      "skill_name": "pick",
       "parameters": {
         "target": 7,
-        "planning_method": "linear"
+        "hold_force": 15.0
+      }
+    },
+    {
+      "command_id": "3",
+      "skill_name": "retreat",
+      "parameters": {
+        "target": 7,
+        "lift_distance": 0.02
+      }
+    },
+    {
+      "command_id": "4",
+      "skill_name": "approach",
+      "parameters": {
+        "target": 12
+      }
+    },
+    {
+      "command_id": "5",
+      "skill_name": "put",
+      "parameters": {
+        "target": 12
       }
     },
     {
       "command_id": "6",
       "skill_name": "retreat",
       "parameters": {
-        "target": 7
+        "target": 12
       }
     },
     {
@@ -65,54 +56,6 @@
         "target": "home",
         "planning_method": "joint"
       }
-    },
-    {
-      "command_id": "8",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 9
-      }
-    },
-    {
-      "command_id": "9",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 9,
-        "hold_force": 10.0
-      }
-    },
-    {
-      "command_id": "10",
-      "skill_name": "push",
-      "parameters": {
-        "arc_center": [
-          -0.131939005,
-          0.153781735,
-          0.822811
-        ],
-        "arc_axis": [
-          0,
-          0,
-          1
-        ],
-        "angle_deg": -90
-      }
-    },
-    {
-      "command_id": "11",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 9
-      }
-    },
-    {
-      "command_id": "12",
-      "skill_name": "move_to",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
     }
-  ],
-  "scene_file": "ur5_table_cabinet.json"
+  ]
 }

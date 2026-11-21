@@ -129,6 +129,92 @@ def urdf_mjcf(path, output_dir, prefix, tree=None):
     return imported
 
 
+def _contact_pair_key(body1, body2):
+    return tuple(sorted((str(body1), str(body2))))
+
+
+def _add_robot_contact_exclusions(root, resources):
+    """Mirror structural and declared arm-fixture allowances in MuJoCo physics."""
+    robot_xml = resources.robot_xml
+    if robot_xml is None:
+        robot_xml = ET.parse(resources.robot_urdf).getroot()
+    arm_xml = ET.parse(resources.robot_urdf).getroot()
+    robot_links = {link.get('name') for link in robot_xml.findall('link')}
+    body_names = {body.get('name') for body in root.iter('body') if body.get('name')}
+    pairs = set()
+
+    for joint in robot_xml.findall('joint'):
+        parent, child = joint.find('parent'), joint.find('child')
+        if parent is None or child is None:
+            continue
+        body1, body2 = parent.get('link'), child.get('link')
+        if body1 in robot_links and body2 in robot_links:
+            pairs.add(_contact_pair_key(body1, body2))
+
+    # Fixed joints form one rigid assembly. Exclude every pair within each
+    # fixed-connected arm group, matching the planning checker's link grouping.
+    rigid_parent = {link.get('name'): link.get('name') for link in arm_xml.findall('link')}
+
+    def rigid_root(link):
+        while rigid_parent[link] != link:
+            rigid_parent[link] = rigid_parent[rigid_parent[link]]
+            link = rigid_parent[link]
+        return link
+
+    for joint in arm_xml.findall('joint'):
+        parent, child = joint.find('parent'), joint.find('child')
+        if joint.get('type') == 'fixed' and parent is not None and child is not None:
+            rigid_parent[rigid_root(child.get('link'))] = rigid_root(parent.get('link'))
+    rigid_groups = {}
+    for link in rigid_parent:
+        rigid_groups.setdefault(rigid_root(link), []).append(link)
+    for links in rigid_groups.values():
+        for index, body1 in enumerate(links):
+            for body2 in links[index + 1:]:
+                pairs.add(_contact_pair_key(body1, body2))
+
+    ref = component(resources.robot_object, 'RobotModelRef')
+    for pair in ref.get('allowed_collision_link_pairs', []):
+        if len(pair) == 2 and all(name in robot_links for name in pair):
+            pairs.add(_contact_pair_key(*pair))
+
+    arm_links = {link.get('name') for link in arm_xml.findall('link')}
+    tool_links = set()
+    for obj in resources.scene.get('objects', []):
+        tool = component(obj, 'GripperModel')
+        if tool.get('urdf'):
+            tool_links.update(link.get('name') for link in
+                              ET.parse(resources.asset(tool['urdf'])).getroot().findall('link'))
+    arm_links.difference_update(tool_links)
+
+    fixture_names = set(ref.get('allowed_arm_environment_names', []))
+    fixture_bodies = set()
+    for obj in resources.scene.get('objects', []):
+        name = obj.get('object_name_in_scene')
+        if name not in fixture_names:
+            continue
+        if name in body_names:
+            fixture_bodies.add(name)
+        asset = component(obj, 'AssetRef').get('asset_path')
+        if asset and Path(asset).suffix.lower() == '.urdf':
+            fixture_bodies.update(f'{name}__{link.get("name")}' for link in
+                                  ET.parse(resources.asset(asset)).getroot().findall('link'))
+        fixture_bodies.update(f'{name}__{link}' for link in
+                              component(obj, 'ArticulatedModel').get('links', []))
+    for link in arm_links & body_names:
+        for fixture in fixture_bodies:
+            pairs.add(_contact_pair_key(link, fixture))
+
+    contact = root.find('contact')
+    if contact is None:
+        contact = ET.SubElement(root, 'contact')
+    existing = {_contact_pair_key(item.get('body1'), item.get('body2'))
+                for item in contact.findall('exclude')}
+    for body1, body2 in sorted(pairs - existing):
+        if body1 in body_names and body2 in body_names:
+            ET.SubElement(contact, 'exclude', body1=body1, body2=body2)
+
+
 def compile_scene(resources, output_dir):
     """Backend-specific conversion, keeping URDF inertias and collision geometry."""
     output_dir = Path(output_dir).resolve()
@@ -257,6 +343,7 @@ def compile_scene(resources, output_dir):
         ET.SubElement(actuators, 'position', name=name + '_servo', joint=name, kp='1200', kv='90')
     from .gripper import add_gripper
     add_gripper(root, resources)
+    _add_robot_contact_exclusions(root, resources)
     path = output_dir / 'scene.mjcf.xml'
     ET.indent(root)
     ET.ElementTree(root).write(path, encoding='utf-8', xml_declaration=True)

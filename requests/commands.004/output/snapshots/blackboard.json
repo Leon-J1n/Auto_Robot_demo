@@ -1,0 +1,2023 @@
+{
+  "revision": 2128,
+  "simulation_time": 23.30599999999796,
+  "targets": {
+    "1": {
+      "name": "WorkTable",
+      "model_id": 29
+    },
+    "2": {
+      "name": "ur10",
+      "model_id": null
+    },
+    "6": {
+      "name": "RobotPedestal",
+      "model_id": null
+    },
+    "7": {
+      "name": "Apple",
+      "model_id": 1
+    },
+    "8": {
+      "name": "Banana",
+      "model_id": 2
+    },
+    "9": {
+      "name": "Marker",
+      "model_id": 10
+    },
+    "10": {
+      "name": "Screwdriver",
+      "model_id": 13
+    },
+    "11": {
+      "name": "RubiksCube",
+      "model_id": 15
+    },
+    "12": {
+      "name": "Basket",
+      "model_id": 12
+    },
+    "13": {
+      "name": "Tray",
+      "model_id": 17
+    }
+  },
+  "objects": {
+    "WorkTable": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "RobotPedestal": {
+      "position": [
+        0.0,
+        -0.5499999999999999,
+        0.25
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "Apple": {
+      "position": [
+        -0.22409809676698747,
+        0.1158047997840994,
+        0.6536773169694222
+      ],
+      "quaternion_xyzw": [
+        0.24623158981214066,
+        -0.5929586263085654,
+        -0.6394994636435981,
+        -0.4228599149415724
+      ]
+    },
+    "Banana": {
+      "position": [
+        0.44482698531948967,
+        -0.18619871259393225,
+        0.6149084137655432
+      ],
+      "quaternion_xyzw": [
+        0.009766168597688469,
+        -0.009146821681572244,
+        0.7091344689497414,
+        0.7049462834510277
+      ]
+    },
+    "Marker": {
+      "position": [
+        -0.008023138445078092,
+        -0.2852690953796801,
+        0.6071431478213111
+      ],
+      "quaternion_xyzw": [
+        9.720249300113283e-05,
+        -0.0004933245448718909,
+        0.7049253578170467,
+        0.7092813173128683
+      ]
+    },
+    "Screwdriver": {
+      "position": [
+        -0.17954124923800746,
+        -0.18364111399706262,
+        0.6144843533361056
+      ],
+      "quaternion_xyzw": [
+        -0.05565172781247593,
+        0.017589293203336936,
+        0.7289819221446262,
+        0.6820402181267747
+      ]
+    },
+    "RubiksCube": {
+      "position": [
+        -0.47992429846756673,
+        -0.18505618720138617,
+        0.6267666351899113
+      ],
+      "quaternion_xyzw": [
+        0.0019951352089546165,
+        0.0011461357799807134,
+        0.7080689905422792,
+        0.7061395120234454
+      ]
+    },
+    "Basket": {
+      "position": [
+        -0.2,
+        0.15499999999999994,
+        0.600036
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    },
+    "Tray": {
+      "position": [
+        0.28,
+        0.16500000000000006,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    }
+  },
+  "mechanisms": {},
+  "gripper": {
+    "known": true,
+    "initialized": true,
+    "width": 0.0815552718976315,
+    "force": 0.0,
+    "contact_detected": false,
+    "object_present": false,
+    "holding": false,
+    "mode": "physical",
+    "slip_detected": false,
+    "bilateral_contact": false,
+    "contact_lost": false,
+    "left_force_n": 0.0,
+    "right_force_n": 0.0,
+    "hold_force_target_n": null,
+    "filtered_hold_force_n": null,
+    "hold_force_torque_saturated": false,
+    "relative_position_error_m": 0.0,
+    "relative_orientation_error_rad": 0.0,
+    "confirmation": {
+      "left_force_n": 9.176055796864732,
+      "right_force_n": 9.182209126122132,
+      "measured_left_force_n": 9.176055796864732,
+      "measured_right_force_n": 9.182209126122132,
+      "closure_completed": false,
+      "no_contact_time_s": 0.0,
+      "command_reached": false,
+      "driver_reached": false,
+      "width_reached": false,
+      "measured_width_m": 0.07427344493444266,
+      "requested_width_m": 0.0,
+      "no_contact_threshold_n": 0.1,
+      "stable_time_s": 0.1000000000000334,
+      "width_range_m": 0.00020771696403422413,
+      "position_range_m": 0.00017020878666527901,
+      "orientation_range_rad": 0.000605474066400201,
+      "bilateral_contact": true,
+      "confirmed": true,
+      "reason": "stable_bilateral_grasp",
+      "mode": "physical"
+    },
+    "object_id": null
+  },
+  "model_cache": {
+    "entries": 8,
+    "hits": 3,
+    "misses": 8
+  },
+  "interaction_anchors": [
+    {
+      "target": "Apple",
+      "grasp_index": 0,
+      "body": "Apple",
+      "body_from_grasp": [
+        [
+          0.9978087495499804,
+          0.0074022282874162066,
+          -0.0657488124446724,
+          -0.0016300236492461373
+        ],
+        [
+          0.006032460028944073,
+          -0.9997611185068503,
+          -0.02100750694229855,
+          -0.0009003139261320181
+        ],
+        [
+          -0.06588860863231917,
+          0.020564847150234426,
+          -0.9976150451522792,
+          -0.0007021082497857822
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "visual_grasps": {
+    "Apple": {
+      "anchor_frame": "Apple",
+      "anchor_from_pose": [
+        [
+          0.9978087495499804,
+          0.0074022282874162066,
+          -0.0657488124446724,
+          -0.0016300236492461373
+        ],
+        [
+          0.006032460028944073,
+          -0.9997611185068503,
+          -0.02100750694229855,
+          -0.0009003139261320181
+        ],
+        [
+          -0.06588860863231917,
+          0.020564847150234426,
+          -0.9976150451522792,
+          -0.0007021082497857822
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "grasp",
+        "pixel": {
+          "x": 309,
+          "y": 236
+        },
+        "normalized": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "depth_m": 0.19472916424274445,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": 0.18112464242592066,
+          "y": -0.18866378201042847,
+          "z": 0.663784605645596
+        },
+        "frame": "world",
+        "confidence": 0.9,
+        "vlm_request_s": 2.8479373999871314,
+        "is_elongated": false,
+        "axis_points": null,
+        "axis_status": "not_elongated",
+        "axis_reason": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "camera_id": "wrist_camera",
+        "timestamp": 8.049999999999358,
+        "sequence": 0,
+        "vlm_request_count": 1,
+        "visual_estimation_s": 3.4282761000213213,
+        "crop_origin_pixel": {
+          "x": 219,
+          "y": 148
+        },
+        "long_axis_aligned": false,
+        "orientation_source": "fixed_downward",
+        "long_axis_fallback": "\u76ee\u6807\u6ca1\u6709\u660e\u663e\u7684\u7ec6\u957f\u7ed3\u6784",
+        "depth_selected": true,
+        "grasp_depth_candidates_m": [
+          0.03,
+          0.025,
+          0.02,
+          0.015,
+          0.01,
+          0.005,
+          0.0
+        ],
+        "depth_search_enabled": true,
+        "target_point_world": {
+          "x": 0.18112468830306697,
+          "y": -0.18866382111389032,
+          "z": 0.6337846056456566
+        },
+        "grasp_point_world": {
+          "x": 0.18112468830306697,
+          "y": -0.18866382111389032,
+          "z": 0.6337846056456566
+        },
+        "yaw_selected": true,
+        "grasp_depth_offset_m": 0.03,
+        "selected_yaw_offset_rad": 0.0,
+        "grasp_rotation_world": [
+          [
+            0.02951281922966992,
+            0.9995644018765266,
+            1.5292382087698018e-06
+          ],
+          [
+            0.999564401876905,
+            -0.02951281922768695,
+            -1.3034487282563605e-06
+          ],
+          [
+            -1.257748817628912e-06,
+            1.5670405221691491e-06,
+            -0.9999999999979813
+          ]
+        ],
+        "surface_normal_world": [
+          -1.5292382087698018e-06,
+          1.3034487282563605e-06,
+          0.9999999999979813
+        ],
+        "wrist_refinement": {
+          "camera_id": "wrist_camera",
+          "timestamp": 8.049999999999358,
+          "sequence": 0,
+          "coarse_surface_world": [
+            0.17578353071413524,
+            -0.18653722693188426,
+            0.6627261988426818
+          ],
+          "refined_surface_world": [
+            0.18112464242592066,
+            -0.18866378201042847,
+            0.663784605645596
+          ],
+          "correction_world_m": [
+            0.005341111711785418,
+            -0.002126555078544201,
+            0.0010584068029142468
+          ],
+          "correction_distance_m": 0.00584550560519008,
+          "image_region": "target_aabb_crop",
+          "coarse_point_in_full_image": {
+            "in_front": true,
+            "optical_depth_m": 0.19578717537055063,
+            "pixel": {
+              "x": 320.3971340007096,
+              "y": 240.53382059105445
+            },
+            "in_frame": true,
+            "distance_from_principal_point_px": 1.3688076671751348
+          },
+          "crop_origin_pixel": {
+            "x": 219,
+            "y": 148
+          },
+          "status": "validated",
+          "timing_s": {
+            "capture": 0.005910499981837347,
+            "vlm": 2.852084600017406,
+            "validation": 1.1414410999859683
+          },
+          "elapsed_s": 3.9994901999889407
+        },
+        "grasp_depth_attempts": [
+          {
+            "grasp_depth_offset_m": 0.03,
+            "success": true,
+            "gripper_pose_precheck": [
+              {
+                "status": "clear",
+                "elapsed_s": 0.007666299992706627
+              }
+            ],
+            "rejected": []
+          }
+        ],
+        "grasp_depth_preflight": {
+          "success": true,
+          "reason": "static_geometry_valid",
+          "contacts": [],
+          "table_clearance": {
+            "success": true,
+            "table_height_m": 0.6000000238418585,
+            "gripper_lowest_z_m": 0.6268187499648548,
+            "clearance_m": 0.00981872612299628,
+            "lowest_link": "robotiq_2f85_left_pad",
+            "table_floor_z_m": 0.6170000238418585,
+            "table_floor_offset_m": 0.017,
+            "gripper_configuration": "preclosure_open",
+            "open_width_m": 0.08
+          },
+          "validation_mode": "static_open_geometry",
+          "contact_preflight": {
+            "distance_m": 0.1,
+            "rejected": []
+          }
+        }
+      }
+    }
+  },
+  "visual_places": {
+    "Basket": {
+      "anchor_frame": "Basket",
+      "anchor_from_pose": [
+        [
+          0.9999999999999998,
+          3.330669073875468e-16,
+          0.0,
+          0.10901101888416254
+        ],
+        [
+          3.330669073875468e-16,
+          -0.9999999999999998,
+          0.0,
+          0.025313617704400493
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          0.237471
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "estimate": {
+        "point_type": "place",
+        "pixel": {
+          "x": 416,
+          "y": 368
+        },
+        "normalized": {
+          "x": 0.5,
+          "y": 0.75
+        },
+        "depth_m": 0.9705814719200134,
+        "depth_sampling": {
+          "method": "pixel",
+          "valid_samples": 1
+        },
+        "world_point": {
+          "x": -0.22531361770440048,
+          "y": 0.2640110188841625,
+          "z": 0.817507
+        },
+        "frame": "world",
+        "confidence": 0.85,
+        "vlm_request_s": 2.432502499985276,
+        "camera_id": "global_camera",
+        "timestamp": 10.522000000000183,
+        "sequence": 1,
+        "vlm_request_count": 1,
+        "visual_estimation_s": 2.4349636000115424,
+        "crop_origin_pixel": {
+          "x": 340,
+          "y": 251
+        },
+        "placement_request": {
+          "relation": "at",
+          "distance_m": 0.0
+        },
+        "rgbd_world_point": {
+          "x": -0.22531361770440048,
+          "y": 0.2640110188841625,
+          "z": 0.7162635465028274
+        },
+        "placement_aabb_top_world": {
+          "x": -0.22531361770440048,
+          "y": 0.2640110188841625,
+          "z": 0.817507
+        },
+        "held_object": "Apple",
+        "placement_height_selected": true,
+        "placement_height_candidates_m": [
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05,
+          0.06,
+          0.07,
+          0.08,
+          0.09,
+          0.1
+        ],
+        "target_point_world": {
+          "x": -0.22531361770440048,
+          "y": 0.2640110188841625,
+          "z": 0.837507
+        },
+        "placement_cycle_id": "5",
+        "placement_height_offset_m": 0.02,
+        "placement_height_attempts": [
+          {
+            "placement_height_offset_m": 0.01,
+            "success": false,
+            "evaluated": true,
+            "elapsed_s": 0.8158924000163097,
+            "error": {
+              "error_code": "TARGET_POSE_COLLISION",
+              "failed_stage": "target_resolution",
+              "error_message": "No reachable collision-free grasp candidate: [{'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003761543349, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0015102209846613712, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0003914047217511648, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0019446485499951093, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003761538746, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0015102209846617656, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.05214376858237598, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.060448266862878436, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.010181794218657808, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.059171434069004845, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.06003441812124435, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0008173153715910954, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0023310474638001204, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0028482178880357848, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003957956581, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.001510220987733796, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.014003240839654289, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.025438732253250447, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.020943665395377897, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.01016120310439681, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.02485805377394198, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.02305799434319959, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003957960911, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0015102209877333342, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.00219654904145466, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.002378496208528687, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.000661633391648358, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.002251233030390567, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_driver', 'geom2': 'forearm_link', 'distance': -0.01719315532809252, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_coupler', 'geom2': 'forearm_link', 'distance': -0.01769331795774202, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0017867480184553064, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.002062037018741743, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0002978313727264851, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0005695946178025528, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.00030950933596266017, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0016789272204680032, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0017731845746641907, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0005802276232270995, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_spring_link', 'geom2': 'forearm_link', 'distance': 0.0015083034775613844, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_follower', 'geom2': 'forearm_link', 'distance': -0.017878370556286938, 'self_collision': True}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003661664552, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0015102210135810494, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.038749578003352846, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.0642318832888205, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.02259716339560814, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.011820656071175979, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.0809937959409253, 'self_collision': False}, {'geom1': 'Screwdriver', 'geom2': 'upper_arm_link', 'distance': -0.02793319609079273, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003537943803, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.001510221019473393, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'forearm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.00244996731173324, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'forearm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'WorkTable', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0011113487020041792, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0026009630517757286, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0008372929335823625, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'upper_arm_link::collision', 'geom2': 'Basket', 'distance': 0.0, 'self_collision': False}, {'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.0005193003537938527, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_driver', 'geom2': 'forearm_link', 'distance': -0.01163532934861424, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_coupler', 'geom2': 'forearm_link', 'distance': -0.015065567436035286, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_spring_link', 'geom2': 'forearm_link', 'distance': 0.001004770646569656, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_spring_link', 'geom2': 'forearm_link', 'distance': 0.0012284522838440178, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_spring_link', 'geom2': 'forearm_link', 'distance': 0.0010956265746245755, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_spring_link', 'geom2': 'forearm_link', 'distance': 0.001318242938238489, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_follower', 'geom2': 'forearm_link', 'distance': -0.009628090847237538, 'self_collision': True}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.00151022101947401, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.05231651884252844, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.06630028490311371, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.010362021198585283, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.06569584777172745, 'self_collision': False}, {'geom1': 'Marker', 'geom2': 'upper_arm_link', 'distance': -0.06612127476729657, 'self_collision': False})}, {'grasp_index': 0, 'reason': 'goal_collision', 'contacts': ({'geom1': 'robotiq_2f85_right_pad', 'geom2': 'Basket', 'distance': -0.000519300366166918, 'self_collision': False}, {'geom1': 'robotiq_2f85_left_pad', 'geom2': 'Basket', 'distance': 0.0015102210135806238, 'self_collision': False})}]",
+              "rejected": [
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003761543349,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0015102209846613712,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0003914047217511648,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0019446485499951093,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003761538746,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0015102209846617656,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.05214376858237598,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.060448266862878436,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.010181794218657808,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.059171434069004845,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.06003441812124435,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0008173153715910954,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0023310474638001204,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0028482178880357848,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003957956581,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.001510220987733796,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.014003240839654289,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.025438732253250447,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.020943665395377897,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.01016120310439681,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02485805377394198,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02305799434319959,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003957960911,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0015102209877333342,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.00219654904145466,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.002378496208528687,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.000661633391648358,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.002251233030390567,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_driver",
+                      "geom2": "forearm_link",
+                      "distance": -0.01719315532809252,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_coupler",
+                      "geom2": "forearm_link",
+                      "distance": -0.01769331795774202,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0017867480184553064,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.002062037018741743,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0002978313727264851,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0005695946178025528,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.00030950933596266017,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0016789272204680032,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0017731845746641907,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0005802276232270995,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0015083034775613844,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_follower",
+                      "geom2": "forearm_link",
+                      "distance": -0.017878370556286938,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003661664552,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0015102210135810494,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.038749578003352846,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0642318832888205,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02259716339560814,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.011820656071175979,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.0809937959409253,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Screwdriver",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.02793319609079273,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003537943803,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.001510221019473393,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.00244996731173324,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "forearm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "WorkTable",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0011113487020041792,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0026009630517757286,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0008372929335823625,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "upper_arm_link::collision",
+                      "geom2": "Basket",
+                      "distance": 0.0,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.0005193003537938527,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_driver",
+                      "geom2": "forearm_link",
+                      "distance": -0.01163532934861424,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_coupler",
+                      "geom2": "forearm_link",
+                      "distance": -0.015065567436035286,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.001004770646569656,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0012284522838440178,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.0010956265746245755,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_spring_link",
+                      "geom2": "forearm_link",
+                      "distance": 0.001318242938238489,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_follower",
+                      "geom2": "forearm_link",
+                      "distance": -0.009628090847237538,
+                      "self_collision": true
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.00151022101947401,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.05231651884252844,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.06630028490311371,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.010362021198585283,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.06569584777172745,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "Marker",
+                      "geom2": "upper_arm_link",
+                      "distance": -0.06612127476729657,
+                      "self_collision": false
+                    }
+                  ]
+                },
+                {
+                  "grasp_index": 0,
+                  "reason": "goal_collision",
+                  "contacts": [
+                    {
+                      "geom1": "robotiq_2f85_right_pad",
+                      "geom2": "Basket",
+                      "distance": -0.000519300366166918,
+                      "self_collision": false
+                    },
+                    {
+                      "geom1": "robotiq_2f85_left_pad",
+                      "geom2": "Basket",
+                      "distance": 0.0015102210135806238,
+                      "self_collision": false
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "placement_height_offset_m": 0.02,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.03671379998559132,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": 0.03,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.036975700000766665,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": 0.05,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.033536800008732826,
+            "rejected": []
+          },
+          {
+            "placement_height_offset_m": 0.1,
+            "success": true,
+            "evaluated": true,
+            "elapsed_s": 0.02682020000065677,
+            "rejected": []
+          }
+        ]
+      }
+    }
+  }
+}

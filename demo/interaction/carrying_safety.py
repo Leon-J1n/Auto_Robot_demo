@@ -4,7 +4,7 @@
 import math
 from copy import deepcopy
 
-DEFAULT_CARRYING_SAFETY_DISTANCE = -0.003
+DEFAULT_CARRYING_SAFETY_DISTANCE = -0.03
 
 
 def split_carrying_safety(request):

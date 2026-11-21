@@ -20,16 +20,10 @@
       }
     },
     {
-      "command_id": "3",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
       "command_id": "4",
       "skill_name": "retreat",
       "parameters": {
+        "lift_distance": 0.02,
         "target": 7
       }
     },
@@ -78,16 +72,10 @@
       }
     },
     {
-      "command_id": "12",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
       "command_id": "13",
       "skill_name": "retreat",
       "parameters": {
+        "lift_distance": 0.02,
         "target": 8
       }
     },
@@ -114,180 +102,6 @@
     },
     {
       "command_id": "18",
-      "skill_name": "move_to",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "19",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 9
-      }
-    },
-    {
-      "command_id": "20",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 9,
-        "hold_force": 15.0
-      }
-    },
-    {
-      "command_id": "21",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "22",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 9
-      }
-    },
-    {
-      "command_id": "24",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "25",
-      "skill_name": "put",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "26",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "27",
-      "skill_name": "move_to",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "28",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 10
-      }
-    },
-    {
-      "command_id": "29",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 10,
-        "hold_force": 15.0
-      }
-    },
-    {
-      "command_id": "30",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "31",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 10
-      }
-    },
-    {
-      "command_id": "33",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "34",
-      "skill_name": "put",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "35",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "36",
-      "skill_name": "move_to",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "37",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 11
-      }
-    },
-    {
-      "command_id": "38",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 11,
-        "hold_force": 15.0
-      }
-    },
-    {
-      "command_id": "39",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "40",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 11
-      }
-    },
-    {
-      "command_id": "42",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "43",
-      "skill_name": "put",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "44",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "45",
       "skill_name": "move_to",
       "parameters": {
         "target": "home",

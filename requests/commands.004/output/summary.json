@@ -1,0 +1,17 @@
+{
+  "request_id": "ur10-apple-to-basket-004",
+  "success": true,
+  "status": "success",
+  "frame_count": 1435,
+  "physics_steps": 11653,
+  "execution_backend": "mujoco",
+  "trajectory_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.004\\output\\trajectories\\execution.traj",
+  "blackboard_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.004\\output\\snapshots\\blackboard.json",
+  "final_scene_file": "snapshots/final_scene.json",
+  "commands_file": "commands/results.jsonl",
+  "command_count": 7,
+  "successful_command_count": 7,
+  "failed_command_count": 0,
+  "failure": null,
+  "final_state_file": "snapshots/state.json"
+}

@@ -38,7 +38,7 @@ MuJoCo execution → 实测关节、物体位姿与抓持状态
 output/：摘要、命令诊断、耗时、轨迹、末态场景
 ```
 
-默认自动规划采用 `direct → RRT`。场景解析默认启用简化碰撞代理，可在场景的 `planning_collision_proxy` 中显式覆盖。规划、碰撞与执行配置分别见 [Planning](../planning/README.md)、[Collision](../collision/README.md) 和 [Execution](../execution/README.md)。
+默认自动规划采用 `direct → RRT`。规划与最终复核使用场景和机器人资产中的精细碰撞几何。规划、碰撞与执行配置分别见 [Planning](../planning/README.md)、[Collision](../collision/README.md) 和 [Execution](../execution/README.md)。
 
 ## 4. 对外接口
 

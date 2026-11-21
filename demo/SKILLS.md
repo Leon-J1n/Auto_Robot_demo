@@ -17,7 +17,7 @@
 
 抓取碰撞分类：全部候选未通过预检查时为 `GRASP_CLOSURE_INFEASIBLE / grasp_precheck`，详情在 `rejected`；实际闭合碰撞为 `GRASP_CLOSURE_COLLISION / grasp_closure`；打开夹爪时碰撞为 `GRASP_OPENING_COLLISION / grasp_opening`。接触详情包含部件名称、距离及 `geometry_basis=simulation_collision_geometry`，表示仿真碰撞几何的相交，不应直接解读为原始视觉网格精确相交。这些错误可通过更换抓取位姿或修正碰撞资产恢复，不再归为 `INTERNAL_ERROR / unknown`。
 
-携带安全距离由 `pick.parameters.grasp_request.strategy_params.safety_distance` 指定，单位为米，例如 `0.01` 表示 10 mm；独立 `grasp` 命令使用 `parameters.strategy_params.safety_distance`。值必须是有限数，省略时默认为 `-0.003`（规划允许约 3 mm 穿透）；显式设为 0 表示不增加额外余量，沿用命令原有安全距离。负值表示规划中允许有限穿透，例如 `-0.002` 表示允许约 2 mm 穿透。此参数由 demo 解析和校验，底层 grasp 技能接口保持原样。
+携带安全距离由 `pick.parameters.grasp_request.strategy_params.safety_distance` 指定，单位为米，例如 `0.01` 表示 10 mm；独立 `grasp` 命令使用 `parameters.strategy_params.safety_distance`。值必须是有限数，省略时默认为 `-0.03`（规划允许约 30 mm 穿透）；显式设为 0 表示不增加额外余量，沿用命令原有安全距离。负值表示规划中允许有限穿透，例如 `-0.002` 表示允许约 2 mm 穿透。此参数由 demo 解析和校验，底层 grasp 技能接口保持原样。
 
 抓取成功后，demo 在使用正安全距离的规划检查中，仅对“携带物与外部环境”应用该参数：非负值取命令原有距离与该参数的较大值，负值直接作为该碰撞对的距离阈值，覆盖 retreat、后续目标选解和运动规划。机械臂、夹爪内部及夹爪与非持物之间保持原有规则；夹爪与已确认持物的接触按下文规则处理，初始支撑面接触仍使用原有抬离豁免。release 解除携带后取消额外余量，恢复后续命令原有距离（当前场景默认 `0.003 m`）；下一次抓取重新读取自己的参数，不继承上一次设置。执行时零余量的碰撞判定保持不变，规划允许的穿透仍可能在执行检查时被拒绝。简化代理的阈值针对代理几何，不保证等于原网格的穿透深度。报告子步骤的 `payload_safety_distance_m` 记录有效规划距离。
 
@@ -396,7 +396,7 @@
 `commands.002.json` 对应 `scene.002`，命令使用抽屉目标、活动 `link`、`distance` 和 `contact_mode`。pull 默认启用 `move → grasp → pull` 编排，push 可使用 grasp 或 contact 模式；静态规划碰撞、关节限位或连续 IK 不可达时整段不执行并返回 error。
 
 - `parameters.target`：场景对象 ID（柜子为 9）。只有一个已声明活动 link 时，demo 自动选用该 link；多个活动 link 时必须显式指定，避免选错门。
-- 编排式 pull 在省略 `contact` 和 `contact_normal_local` 时，从活动 link 上唯一的把手横杆及支座几何推导交互位姿、外法向和抓取姿态。ApproachSkill 以该交互位姿为目标，沿目标位姿局部 `+Z` 的反方向搜索接近点；搜索范围默认 `3～10 cm`、步长 `5 mm`。把手几何缺失或不唯一时返回错误。
+- 编排式 pull 在省略 `contact` 和 `contact_normal_local` 时，从活动 link 上唯一的把手横杆及支座几何推导交互位姿、外法向和抓取姿态。ApproachSkill 以该交互位姿为目标，沿目标位姿局部 `+Z` 的反方向搜索接近点；搜索范围默认 `2～8 cm`、步长 `10 mm`。把手几何缺失或不唯一时返回错误。
 - 显式 move 的 `mechanism_pose.position/rpy` 或 `quaternion_xyzw`：活动 link 局部坐标中的米和姿态，每次调用根据实际 link 姿态换算。默认 frame=grasp，通过已加载模型的控制点—抓取点标定转换为 TCP；frame=control 表示直接指定 TCP。
 - 自由换点 motion 使用 joint 规划并允许绕障；接触/撤离的 linear 路径保持直线约束。`allow_contact=true` 仅在该命令中允许指垫接触目标 link，不允许机械臂或夹爪结构撞柜体。
 - grasp/release 的 target+link 定位门板；抓取依靠活动 link 与双侧指垫之间的物理接触，释放后门板继续由自身活动关节约束。

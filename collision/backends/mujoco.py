@@ -43,8 +43,9 @@ class MujocoCollisionChecker:
         if allowed_geom_ids is None:
             allowed_geom_ids = getattr(self, "allowed_target_geom_ids", None)
         values = np.asarray(joints, dtype=float)
-        if values.shape != (6,):
-            raise ValueError("Collision check requires a 6-value UR5e joint vector.")
+        expected = len(self.runtime.qpos_indices)
+        if values.shape != (expected,):
+            raise ValueError(f"Collision check requires a {expected}-value robot joint vector.")
         self._data.qpos[:] = self.runtime.data.qpos
         self._data.qpos[self.runtime.qpos_indices] = values
         mujoco.mj_forward(self.model, self._data)

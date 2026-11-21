@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 
 
-GRASP_DEPTHS_M = tuple(mm / 1000. for mm in range(30, -1, -5))
+GRASP_DEPTHS_M = tuple(mm / 1000. for mm in range(30, -1, -10))
 
 
 def floor_fallback_candidates(resolved, checker, seed):
@@ -96,4 +96,5 @@ def validate_depth_candidate(resolved, candidate, joints, kin, checker, seed, sa
         requested_path='joint', distances=(.10, .07, .04, .03, .02), pose_request=pose_request)
     if planned is None:
         return {'success': False, 'reason': 'contact_planning', 'rejected': rejected}
-    return {**geometry, 'contact_preflight': {'distance_m': planned['distance'], 'rejected': rejected}}
+    return {**geometry, 'contact_preflight': {'distance_m': planned['distance'],
+            'ik_search_pass': planned.get('ik_search_pass'), 'rejected': rejected}}

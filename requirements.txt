@@ -1,5 +1,6 @@
 # Python 3.10; install from the repository root.
 # EAIK is an optional source-built IK backend; see libraries/eaik/README.md.
+# SSIK is optional; install -r libraries/ssik/requirements.txt (pinned upstream).
 numpy==2.2.6
 mujoco==3.12.0
 urchin==0.0.30

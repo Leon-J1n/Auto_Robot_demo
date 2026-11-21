@@ -14,14 +14,6 @@ from demo.interaction.carrying_safety import payload_pair_limit
 
 
 class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
-    def enable_planning_proxy(self, options=None):
-        """Use one simplified model for direct checks and cuRobo export."""
-        from collision.proxy import PlanningProxy
-        if not hasattr(self, 'backend'):
-            raise RuntimeError('Bind the live backend before enabling planning proxies')
-        self.planning_proxy = PlanningProxy(self, options)
-        self._query_cache.clear()
-
     def _path_validation_state(self):
         """Exact live scene/model/policy guard, never a rounded joint key."""
         from planning.trajectory.prepared import planning_state_signature
@@ -57,9 +49,6 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         return planning_state_signature(b, self), policy
 
     def check_path(self, waypoints, *, resolution=.05, safety_distance=0., allowed_geom_ids=None):
-        if getattr(self, 'planning_proxy', None) is not None:
-            return self.planning_proxy.check_path(waypoints, resolution=resolution,
-                safety_distance=safety_distance, allowed_geom_ids=allowed_geom_ids)
         # The base FCL path cache is disabled for live articulated geometry.
         # Reuse only an identical whole query guarded by BOTH live and FCL state.
         if not hasattr(self, 'backend') or not getattr(self, 'path_validation_cache_enabled', False):
@@ -416,14 +405,8 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     m, d, tool, other, max(.005, float(safety_distance) + .001), None))
                 if distance <= max(0., float(safety_distance)):
                     self._lift_clearance_pairs[frozenset((tool, other))] = distance
-        if getattr(self, 'planning_proxy', None) is not None:
-            self.planning_proxy.capture_lift_clearance(safety_distance)
-
     def clear_lift_clearance(self):
         self._lift_clearance_pairs = {}
-        if getattr(self, 'planning_proxy', None) is not None:
-            self.planning_proxy.lift_bounds.clear()
-            self.planning_proxy._key = None
 
     def _leaves_lift_clearance(self, a, z, distance):
         initial_gap = getattr(self, '_lift_clearance_pairs', {}).get(frozenset((int(a), int(z))))
@@ -435,9 +418,6 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         return distance >= lower_bound
 
     def check(self, joints, *, safety_distance=0.0, allowed_geom_ids=None, gripper_width=None):
-        if getattr(self, 'planning_proxy', None) is not None and not getattr(self, '_policy_only', False):
-            return self.planning_proxy.check(joints, safety_distance=safety_distance,
-                allowed_geom_ids=allowed_geom_ids, gripper_width=gripper_width)
         if hasattr(self, 'backend'):
             held = getattr(self.backend.gripper_controller, 'held_name', None)
             if held != self._policy_held:

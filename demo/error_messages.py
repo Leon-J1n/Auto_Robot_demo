@@ -179,6 +179,116 @@ _ERROR_CATEGORY_BY_STAGE = {
     'pour': '结果验证',
 }
 
+_TARGET_LOCATION_CODES = {
+    'TARGET_RESOLUTION_FAILED', 'TARGET_UNREACHABLE', 'NO_VALID_CANDIDATE', 'NO_VALID_TARGET_POSE',
+    'TARGET_NOT_FOUND', 'TARGET_DESCRIPTION_AMBIGUOUS', 'MODEL_NOT_FOUND',
+    'INSTANCE_AMBIGUOUS', 'SENSOR_DATA_UNAVAILABLE', 'DEPTH_UNAVAILABLE',
+    'INSUFFICIENT_POINTS', 'PROJECTION_FAILED', 'ORIENTATION_ESTIMATION_FAILED',
+    'POSE_ESTIMATION_FAILED', 'GRASP_POSE_PREDICTION_FAILED', 'LOW_CONFIDENCE',
+    'LOCALIZATION_TIMEOUT', 'VLM_DEPTH_INVALID', 'HANDLE_POSE_ESTIMATION_FAILED',
+    'PLACEMENT_PERCEPTION_FAILED', 'AABB_FACE_AMBIGUOUS', 'FRAME_TRANSFORM_FAILED',
+    'REFERENCE_INVALID', 'DIRECTION_UNRESOLVED', 'SEMANTIC_DIRECTION_AMBIGUOUS',
+    'INVALID_OFFSET', 'PLACEMENT_REGION_UNOBSERVED',
+}
+_JOINT_LIMIT_CODES = {'JOINT_LIMIT_VIOLATION', 'ROBOT_JOINT_LIMIT', 'JOINT_LIMIT'}
+_NO_POSE_CODES = {
+    'IK_FAILED', 'TARGET_POSE_UNREACHABLE', 'PREPOINT_UNREACHABLE',
+    'CONTACT_PATH_UNREACHABLE', 'SINGULARITY_RISK',
+}
+_UNSAFE_PATH_CODES = {
+    'PATH_NOT_FOUND', 'PLANNING_FAILED', 'PLANNING_TIMEOUT',
+    'PATH_CONSTRAINT_INFEASIBLE', 'COLLISION_DETECTED', 'TRAJECTORY_INVALID',
+    'PREPOINT_COLLISION', 'CONTACT_PATH_COLLISION', 'CONTACT_PATH_PLANNING_FAILED',
+    'NO_VALID_APPROACH', 'JOINT_CONFIGURATION_SEARCH_FAILED',
+}
+_MOTION_NOT_REACHED_CODES = {
+    'EXECUTION_FAILED', 'EXECUTION_TIMEOUT', 'TARGET_NOT_REACHED',
+    'GOAL_TOLERANCE_EXCEEDED', 'ACTUATOR_TRACKING_FAILED',
+    'DOOR_TARGET_NOT_REACHED', 'DRAWER_TARGET_NOT_REACHED',
+    'POSE_VERIFICATION_FAILED', 'STOPPED_BY_SAFETY',
+}
+_GRIPPER_CODES = {'CONTACT_LOST', 'GRASP_FAILED', 'GRASP_NOT_CONFIRMED'}
+_GRASP_LOCATION_CODES = {
+    'GRASP_DEPTH_SEARCH_FAILED', 'GRASP_CLOSURE_INFEASIBLE', 'GRASP_PRECHECK_FAILED',
+    'GRASP_CLOSURE_COLLISION', 'GRASP_OPENING_COLLISION',
+}
+
+
+def _display_detail(error, *keys):
+    """Find a short user-facing name without exposing nested diagnostics."""
+    if not isinstance(error, dict):
+        return None
+    for key in keys:
+        value = error.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    details = error.get('details')
+    if isinstance(details, dict):
+        value = _display_detail(details, *keys)
+        if value:
+            return value
+    joints = error.get('joints')
+    if isinstance(joints, (list, tuple)) and joints and isinstance(joints[0], dict):
+        value = _display_detail(joints[0], *keys)
+        if value:
+            return value
+    evidence = error.get('evidence')
+    if isinstance(evidence, dict):
+        value = _display_detail(evidence, *keys)
+        if value:
+            return value
+    nested = error.get('error')
+    return _display_detail(nested, *keys) if isinstance(nested, dict) else None
+
+
+def display_error(error, *, stage=None):
+    """Return a concise category and message for the console's user-facing output."""
+    error = error if isinstance(error, dict) else {}
+    code = str(error.get('error_code') or '').upper()
+    failed_stage = str(error.get('failed_stage') or stage or '').lower()
+
+    if code == 'TARGET_POSE_COLLISION' or (
+            code == 'COLLISION_DETECTED' and failed_stage in {
+                'target_resolution', 'kinematics', 'interaction_position_verification'}):
+        return '目标位置解析', '目标位置与周围环境冲突，无法到达。'
+    if code in _TARGET_LOCATION_CODES:
+        if code in {'TARGET_NOT_FOUND', 'TARGET_DESCRIPTION_AMBIGUOUS', 'MODEL_NOT_FOUND',
+                    'INSTANCE_AMBIGUOUS', 'LOW_CONFIDENCE'}:
+            return '目标位置解析', '未能识别目标物体，请确认物体在视野内且清晰可见。'
+        return '目标位置解析', '未能找到可用的目标位置，请检查场景和操作指令。'
+    if code in _GRASP_LOCATION_CODES:
+        return '目标位置解析', '未能找到可用的抓取位置，请检查目标物和场景。'
+    if code in _GRIPPER_CODES or (code == 'CONTACT_NOT_ESTABLISHED' and failed_stage == 'grasp'):
+        item = (_display_detail(error, 'item_name', 'object_name', 'payload_name', 'held_name',
+                                'object_id', 'target_name'))
+        item_text = f'「{item}」' if item else ''
+        if code == 'GRASP_NOT_CONFIRMED':
+            return '夹爪操作', '夹爪未能确认抓住目标，请检查抓取物状态。'
+        if code == 'CONTACT_NOT_ESTABLISHED':
+            return '夹爪操作', '夹爪未能与目标建立有效接触，请检查抓取物状态。'
+        return '夹爪操作', f'夹爪与抓取物{item_text}失去接触，请检查抓取物状态。'
+    if code in _JOINT_LIMIT_CODES:
+        joint = _display_detail(error, 'joint', 'joint_name')
+        message = f'关节 {joint} 超出活动范围，请调整目标位置。' if joint else \
+            '机械臂关节超出活动范围，请调整目标位置。'
+        return '机械臂运动', message
+    if code in _NO_POSE_CODES:
+        return '机械臂运动', '无法规划出合适的机械臂姿态，请调整目标位置或方向。'
+    if code in _UNSAFE_PATH_CODES:
+        return '机械臂运动', '目标路径受阻，机械臂无法安全移动。'
+    if code in _MOTION_NOT_REACHED_CODES:
+        return '机械臂运动', '机械臂未能到达目标位置，请重试或检查设备状态。'
+    if code in {'FORCE_LIMIT', 'TRAVEL_LIMIT', 'PUSH_PULL_TIMEOUT', 'PUSH_PULL_EXECUTION_ERROR',
+                'CONTACT_NOT_ESTABLISHED'}:
+        return '机械臂运动', '机械臂未能完成运动，请检查目标位置和设备状态。'
+    if failed_stage in {'target_resolution', 'perception', 'localization'}:
+        return '目标位置解析', '未能找到可用的目标位置，请检查场景和操作指令。'
+    if failed_stage in {'planning', 'path_generation', 'kinematics'}:
+        return '机械臂运动', '机械臂未能完成运动，请调整目标位置或检查设备状态。'
+    if failed_stage in {'grasp', 'release', 'post_command_verification'}:
+        return '夹爪操作', '夹爪操作未能完成，请检查抓取物状态。'
+    return '操作执行', '操作未能完成，请检查设备状态后重试。'
+
 
 def error_category(error, *, stage=None):
     """Return the broad lifecycle category for a structured runtime error."""

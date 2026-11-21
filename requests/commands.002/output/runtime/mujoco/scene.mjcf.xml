@@ -15,28 +15,22 @@
     <mesh name="WorkTable__feet" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\29\table_meshes\feet.obj" />
     <texture name="WorkTable__tabletop_diffuse" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\29\table_meshes\tabletop.png" />
     <material name="WorkTable__tabletop_diffuse" texture="WorkTable__tabletop_diffuse" rgba="1 1 1 1" texuniform="false" />
-    <mesh name="base_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\base_0.obj" />
-    <mesh name="base_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\base_1.obj" />
-    <mesh name="shoulder_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\shoulder_0.obj" />
-    <mesh name="shoulder_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\shoulder_1.obj" />
-    <mesh name="shoulder_2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\shoulder_2.obj" />
-    <mesh name="upperarm_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\upperarm_0.obj" />
-    <mesh name="upperarm_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\upperarm_1.obj" />
-    <mesh name="upperarm_2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\upperarm_2.obj" />
-    <mesh name="upperarm_3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\upperarm_3.obj" />
-    <mesh name="forearm_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\forearm_0.obj" />
-    <mesh name="forearm_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\forearm_1.obj" />
-    <mesh name="forearm_2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\forearm_2.obj" />
-    <mesh name="forearm_3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\forearm_3.obj" />
-    <mesh name="wrist1_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist1_0.obj" />
-    <mesh name="wrist1_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist1_1.obj" />
-    <mesh name="wrist1_2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist1_2.obj" />
-    <mesh name="wrist2_0" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist2_0.obj" />
-    <mesh name="wrist2_1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist2_1.obj" />
-    <mesh name="wrist2_2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist2_2.obj" />
-    <mesh name="wrist3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\1\ur5_meshes\wrist3.obj" />
+    <mesh name="d22b1fcfa7da6050_base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\d22b1fcfa7da6050_base.obj" />
+    <mesh name="55de2260a36bd1ac_base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\55de2260a36bd1ac_base.obj" />
+    <mesh name="cdf542e939a7fc09_shoulder" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\cdf542e939a7fc09_shoulder.obj" />
+    <mesh name="a4e6312b6144382c_shoulder" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\a4e6312b6144382c_shoulder.obj" />
+    <mesh name="378d51debf366a3e_upperarm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\378d51debf366a3e_upperarm.obj" />
+    <mesh name="378378040b2a979d_upperarm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\378378040b2a979d_upperarm.obj" />
+    <mesh name="108a931468efec08_forearm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\108a931468efec08_forearm.obj" />
+    <mesh name="5d9c443d4f73b852_forearm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\5d9c443d4f73b852_forearm.obj" />
+    <mesh name="be15d73dbbe81ff6_wrist1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\be15d73dbbe81ff6_wrist1.obj" />
+    <mesh name="9234c33190e167f9_wrist1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\9234c33190e167f9_wrist1.obj" />
+    <mesh name="918cce422904b9ab_wrist2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\918cce422904b9ab_wrist2.obj" />
+    <mesh name="39945fd899212d48_wrist2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\39945fd899212d48_wrist2.obj" />
+    <mesh name="a5e6d9bbb488600b_wrist3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\a5e6d9bbb488600b_wrist3.obj" />
+    <mesh name="af7ff8a2400f11ca_wrist3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\af7ff8a2400f11ca_wrist3.obj" />
     <mesh name="base_mount" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\base_mount.obj" />
-    <mesh name="base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\base.obj" />
+    <mesh name="17767d9c7c1579bc_base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.002\output\runtime\mujoco\urdf_meshes\17767d9c7c1579bc_base.obj" />
     <mesh name="driver" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\driver.obj" />
     <mesh name="coupler" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\coupler.obj" />
     <mesh name="spring_link" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\spring_link.obj" />
@@ -95,6 +89,321 @@
     <mesh name="Apple_part_0016" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\94cd40c6f9f6d57b6342651152f76368a4448815df47ae16bcac2e6d699798af\part_0016.obj" scale="1 1 1" />
     <mesh name="Apple_part_0017" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\94cd40c6f9f6d57b6342651152f76368a4448815df47ae16bcac2e6d699798af\part_0017.obj" scale="1 1 1" />
     <mesh name="Apple_part_0018" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\94cd40c6f9f6d57b6342651152f76368a4448815df47ae16bcac2e6d699798af\part_0018.obj" scale="1 1 1" />
+    <mesh name="Banana_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\2\banana.obj" scale="1 1 1" />
+    <texture name="Banana_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\2\banana.png" />
+    <material name="Banana_material" texture="Banana_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="Banana_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\95d513c273e789f1009ceccd1efe91ed5f2b6731ac1cbe9610df38ef7127f7de\part_0000.obj" scale="1 1 1" />
+    <mesh name="Banana_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\95d513c273e789f1009ceccd1efe91ed5f2b6731ac1cbe9610df38ef7127f7de\part_0001.obj" scale="1 1 1" />
+    <mesh name="Banana_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\95d513c273e789f1009ceccd1efe91ed5f2b6731ac1cbe9610df38ef7127f7de\part_0002.obj" scale="1 1 1" />
+    <mesh name="Banana_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\95d513c273e789f1009ceccd1efe91ed5f2b6731ac1cbe9610df38ef7127f7de\part_0003.obj" scale="1 1 1" />
+    <mesh name="Marker_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\10\marker.obj" scale="1 1 1" />
+    <texture name="Marker_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\10\marker.png" />
+    <material name="Marker_material" texture="Marker_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="Marker_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0000.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0001.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0002.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0003.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0004" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0004.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0005" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0005.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0006" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0006.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0007" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0007.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0008" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0008.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0009" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0009.obj" scale="1 1 1" />
+    <mesh name="Marker_part_0010" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\ce9c0aa0799815da4480d93f79397d41ef93a1980872931600ecaa5902b8512b\part_0010.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\13\screwdriver.obj" scale="1 1 1" />
+    <texture name="Screwdriver_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\13\screwdriver.png" />
+    <material name="Screwdriver_material" texture="Screwdriver_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="Screwdriver_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0000.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0001.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0002.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0003.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_part_0004" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0004.obj" scale="1 1 1" />
+    <mesh name="Screwdriver_part_0005" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\1cd07608dd90c727b8aa78efacbc48177ed4f2b5887aa3e44520d78019ae9643\part_0005.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\15\rubiks_cube.obj" scale="1 1 1" />
+    <texture name="RubiksCube_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\15\rubiks_cube.png" />
+    <material name="RubiksCube_material" texture="RubiksCube_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="RubiksCube_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0000.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0001.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0002.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0003.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0004" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0004.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0005" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0005.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0006" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0006.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0007" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0007.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0008" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0008.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0009" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0009.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0010" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0010.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0011" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0011.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0012" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0012.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0013" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0013.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0014" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0014.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0015" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0015.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0016" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0016.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0017" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0017.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0018" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0018.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0019" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0019.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0020" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0020.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0021" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0021.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0022" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0022.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0023" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0023.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0024" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0024.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0025" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0025.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0026" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0026.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0027" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0027.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0028" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0028.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0029" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0029.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0030" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0030.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0031" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0031.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0032" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0032.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0033" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0033.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0034" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0034.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0035" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0035.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0036" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0036.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0037" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0037.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0038" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0038.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0039" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0039.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0040" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0040.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0041" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0041.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0042" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0042.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0043" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0043.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0044" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0044.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0045" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0045.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0046" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0046.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0047" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0047.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0048" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0048.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0049" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0049.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0050" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0050.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0051" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0051.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0052" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0052.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0053" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0053.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0054" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0054.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0055" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0055.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0056" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0056.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0057" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0057.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0058" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0058.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0059" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0059.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0060" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0060.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0061" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0061.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0062" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0062.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0063" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0063.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0064" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0064.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0065" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0065.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0066" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0066.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0067" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0067.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0068" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0068.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0069" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0069.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0070" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0070.obj" scale="1 1 1" />
+    <mesh name="RubiksCube_part_0071" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\8c0b0cf2b0d01a7c61f60900a63bc82d3f60936ba774f3e9e2c73f7fd68cef93\part_0071.obj" scale="1 1 1" />
+    <mesh name="Basket_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\12\basket.obj" scale="1 1 1" />
+    <texture name="Basket_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\12\basket.png" />
+    <material name="Basket_material" texture="Basket_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="Basket_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0000.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0001.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0002.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0003.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0004" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0004.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0005" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0005.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0006" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0006.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0007" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0007.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0008" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0008.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0009" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0009.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0010" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0010.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0011" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0011.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0012" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0012.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0013" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0013.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0014" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0014.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0015" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0015.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0016" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0016.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0017" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0017.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0018" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0018.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0019" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0019.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0020" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0020.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0021" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0021.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0022" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0022.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0023" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0023.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0024" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0024.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0025" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0025.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0026" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0026.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0027" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0027.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0028" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0028.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0029" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0029.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0030" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0030.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0031" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0031.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0032" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0032.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0033" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0033.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0034" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0034.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0035" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0035.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0036" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0036.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0037" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0037.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0038" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0038.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0039" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0039.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0040" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0040.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0041" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0041.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0042" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0042.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0043" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0043.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0044" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0044.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0045" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0045.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0046" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0046.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0047" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0047.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0048" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0048.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0049" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0049.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0050" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0050.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0051" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0051.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0052" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0052.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0053" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0053.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0054" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0054.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0055" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0055.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0056" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0056.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0057" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0057.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0058" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0058.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0059" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0059.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0060" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0060.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0061" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0061.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0062" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0062.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0063" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0063.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0064" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0064.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0065" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0065.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0066" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0066.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0067" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0067.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0068" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0068.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0069" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0069.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0070" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0070.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0071" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0071.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0072" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0072.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0073" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0073.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0074" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0074.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0075" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0075.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0076" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0076.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0077" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0077.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0078" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0078.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0079" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0079.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0080" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0080.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0081" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0081.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0082" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0082.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0083" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0083.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0084" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0084.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0085" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0085.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0086" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0086.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0087" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0087.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0088" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0088.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0089" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0089.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0090" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0090.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0091" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0091.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0092" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0092.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0093" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0093.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0094" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0094.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0095" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0095.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0096" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0096.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0097" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0097.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0098" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0098.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0099" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0099.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0100" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0100.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0101" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0101.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0102" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0102.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0103" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0103.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0104" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0104.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0105" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0105.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0106" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0106.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0107" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0107.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0108" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0108.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0109" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0109.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0110" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0110.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0111" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0111.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0112" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0112.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0113" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0113.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0114" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0114.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0115" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0115.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0116" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0116.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0117" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0117.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0118" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0118.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0119" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0119.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0120" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0120.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0121" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0121.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0122" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0122.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0123" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0123.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0124" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0124.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0125" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0125.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0126" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0126.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0127" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0127.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0128" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0128.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0129" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0129.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0130" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0130.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0131" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0131.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0132" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0132.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0133" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0133.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0134" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0134.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0135" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0135.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0136" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0136.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0137" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0137.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0138" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0138.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0139" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0139.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0140" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0140.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0141" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0141.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0142" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0142.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0143" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0143.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0144" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0144.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0145" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0145.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0146" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0146.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0147" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0147.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0148" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0148.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0149" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0149.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0150" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0150.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0151" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0151.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0152" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0152.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0153" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0153.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0154" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0154.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0155" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0155.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0156" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0156.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0157" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0157.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0158" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0158.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0159" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0159.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0160" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0160.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0161" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0161.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0162" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0162.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0163" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0163.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0164" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0164.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0165" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0165.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0166" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0166.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0167" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0167.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0168" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0168.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0169" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0169.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0170" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0170.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0171" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0171.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0172" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0172.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0173" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0173.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0174" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0174.obj" scale="1 1 1" />
+    <mesh name="Basket_part_0175" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\74210a11020ff1acc7837e3a9507b9b8233c8fca1199746e647d11a2a30e9fc4\part_0175.obj" scale="1 1 1" />
+    <mesh name="Tray_mesh" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\17\tray.obj" scale="1 1 1" />
+    <texture name="Tray_texture" type="2d" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\models\17\tray.png" />
+    <material name="Tray_material" texture="Tray_texture" rgba="1 1 1 1" texuniform="false" />
+    <mesh name="Tray_part_0000" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0000.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0001" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0001.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0002" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0002.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0003" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0003.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0004" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0004.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0005" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0005.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0006" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0006.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0007" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0007.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0008" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0008.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0009" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0009.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0010" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0010.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0011" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0011.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0012" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0012.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0013" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0013.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0014" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0014.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0015" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0015.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0016" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0016.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0017" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0017.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0018" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0018.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0019" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0019.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0020" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0020.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0021" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0021.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0022" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0022.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0023" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0023.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0024" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0024.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0025" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0025.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0026" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0026.obj" scale="1 1 1" />
+    <mesh name="Tray_part_0027" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\6da3e127238e06015c1f094b0b9a05cc0403c4850ca9c3bc831a0d9628b29b3b\part_0027.obj" scale="1 1 1" />
   </asset>
   <worldbody>
     <light pos="0 -2 4" dir="0 0 -1" directional="true" diffuse="0.4 0.4 0.4" />
@@ -126,219 +435,210 @@
         </body>
       </body>
     </body>
-    <body name="ur5" pos="0 -0.54999999999999993 0.5" quat="0.70710678118654768 0 0 0.70710678118654746">
-      <body name="base">
-        <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="4" diaginertia="0.0072 0.00443333 0.00443333" />
-        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="base_0" />
-        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="base_1" />
-        <body name="shoulder_link" pos="0 0 0.163">
-          <inertial pos="0 0 0" mass="3.7" diaginertia="0.0102675 0.0102675 0.00666" />
-          <joint name="shoulder_pan_joint" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="4" armature="0.05" />
-          <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.49 0.678 0.8 1" density="0" mesh="shoulder_0" />
-          <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="shoulder_1" />
-          <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="shoulder_2" />
-          <geom size="0.06 0.12" pos="0 0 -0.04" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-          <body name="upper_arm_link" pos="0 0.138 0" quat="0.707107 0 0.707107 0">
-            <inertial pos="0 0 0.2125" mass="8.393" diaginertia="0.133886 0.133886 0.0151074" />
-            <joint name="shoulder_lift_joint" range="-6.28319 6.28319" actuatorfrcrange="-150 150" axis="0 1 0" damping="4" armature="0.05" />
-            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.82 0.82 0.82 1" density="0" mesh="upperarm_0" />
-            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="upperarm_1" />
-            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="upperarm_2" />
-            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.49 0.678 0.8 1" density="0" mesh="upperarm_3" />
-            <geom size="0.06 0.12" pos="0 -0.04 0" quat="0.707107 0.707107 0 0" type="cylinder" rgba="0.49 0.678 0.8 1" group="3" />
-            <geom size="0.05 0.25" pos="0 0 0.2" type="cylinder" rgba="0.49 0.678 0.8 1" group="3" />
-            <body name="forearm_link" pos="0 -0.131 0.425">
-              <inertial pos="0 0 0.196" mass="2.275" diaginertia="0.0311796 0.0311796 0.004095" />
-              <joint name="elbow_joint" range="-3.1415 3.1415" actuatorfrcrange="-150 150" axis="0 1 0" damping="4" armature="0.05" />
-              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.49 0.678 0.8 1" density="0" mesh="forearm_0" />
-              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.82 0.82 0.82 1" density="0" mesh="forearm_1" />
-              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="forearm_2" />
-              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="forearm_3" />
-              <geom size="0.055 0.115" pos="0 0.08 0" quat="0.707107 0.707107 0 0" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-              <geom size="0.038 0.228" pos="0 0 0.2" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-              <body name="wrist_1_link" pos="0 0 0.392" quat="0.707107 0 0.707107 0">
-                <inertial pos="0 0.127 0" mass="1.219" diaginertia="0.0025599 0.0025599 0.0021942" />
-                <joint name="wrist_1_joint" range="-6.28319 6.28319" actuatorfrcrange="-150 150" axis="0 1 0" damping="4" armature="0.05" />
-                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="wrist1_0" />
-                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.49 0.678 0.8 1" density="0" mesh="wrist1_1" />
-                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="wrist1_2" />
-                <geom size="0.04 0.11" pos="0 0.05 0" quat="0.707107 0.707107 0 0" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-                <body name="wrist_2_link" pos="0 0.127 0">
-                  <inertial pos="0 0 0.1" mass="1.219" diaginertia="0.0025599 0.0025599 0.0021942" />
-                  <joint name="wrist_2_joint" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="4" armature="0.05" />
-                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.033 0.033 0.033 1" density="0" mesh="wrist2_0" />
-                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.49 0.678 0.8 1" density="0" mesh="wrist2_1" />
-                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.278 0.278 0.278 1" density="0" mesh="wrist2_2" />
-                  <geom size="0.04 0.1" pos="0 0 0.04" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-                  <geom size="0.04 0.08" pos="0 0.02 0.1" quat="0.707107 0.707107 0 0" type="cylinder" rgba="0.278 0.278 0.278 1" group="3" />
-                  <body name="wrist_3_link" pos="0 0 0.1">
-                    <inertial pos="0 0.0771683 0" mass="0.1889" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
-                    <joint name="wrist_3_joint" range="-6.28319 6.28319" actuatorfrcrange="-150 150" axis="0 1 0" damping="4" armature="0.05" />
-                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.82 0.82 0.82 1" density="0" mesh="wrist3" />
-                    <geom size="0.04 0.02" pos="0 0.08 0" quat="0.707107 0.707107 0 0" type="cylinder" rgba="0.82 0.82 0.82 1" group="3" />
-                    <body name="attachment_site" pos="0 0.1 0" quat="0.707107 -0.707107 0 0" />
-                    <body name="robotiq_2f85_mount" pos="2.67949e-09 0.1 9.7199e-09" quat="0.707107 -0.707107 9.47343e-09 -9.47343e-09">
-                      <body name="robotiq_2f85_base_mount" pos="0 0 0.007">
-                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="base_mount" />
-                        <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="base_mount" group="3" />
-                        <body name="robotiq_2f85_base" pos="0 0 0.0038" quat="0.707107 0 0 -0.707107">
-                          <inertial pos="0 0 0" mass="0.777441" diaginertia="0.000260285 0.000225381 0.000152708" />
-                          <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="base" />
-                          <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="base" group="3" />
-                          <body name="robotiq_2f85_right_driver" pos="0 0.0306011 0.054904">
-                            <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06" />
-                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver" />
-                            <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver" group="3" />
-                            <body name="robotiq_2f85_right_coupler" pos="0 0.0315 -0.0041">
-                              <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06" />
-                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler" />
-                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler" group="3" />
-                            </body>
-                            <joint name="robotiq_2f85_right_driver_joint" type="hinge" axis="1 0 0" range="0 0.8" damping="0.05" armature="0.001" />
-                          </body>
-                          <body name="robotiq_2f85_right_spring_link" pos="0 0.0132 0.0609">
-                            <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06" />
-                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0000" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0001" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0002" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0003" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0004" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0005" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0006" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0007" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026" group="3" />
-                            <geom name="robotiq_2f85_right_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027" group="3" />
-                            <body name="robotiq_2f85_right_follower" pos="0 0.055 0.0375">
-                              <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06" />
-                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower" />
-                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower" group="3" />
-                              <body name="robotiq_2f85_right_pad" pos="0 -0.0189 0.01352">
-                                <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06" />
-                                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad" />
-                                <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad" group="3" contype="0" conaffinity="0" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <body name="robotiq_2f85_right_silicone_pad">
-                                  <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06" />
-                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad" />
-                                  <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad" group="3" contype="0" conaffinity="0" />
+    <body name="ur3" pos="0 -0.45000000000000001 0.5" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <body name="base_link">
+        <body name="base_link_inertia" quat="0 0 0 1">
+          <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="2" diaginertia="0.005625 0.00305317 0.00305317" />
+          <geom quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="d22b1fcfa7da6050_base" />
+          <geom quat="0 0 0 1" type="mesh" mesh="55de2260a36bd1ac_base" group="3" />
+          <body name="shoulder_link" pos="0 0 0.1519">
+            <inertial pos="0 0 0" mass="2" diaginertia="0.00809316 0.00809316 0.005625" />
+            <joint name="shoulder_pan_joint" range="-6.28319 6.28319" actuatorfrcrange="-56 56" damping="4" armature="0.05" />
+            <geom quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="cdf542e939a7fc09_shoulder" />
+            <geom quat="0 0 0 1" type="mesh" mesh="a4e6312b6144382c_shoulder" group="3" />
+            <body name="upper_arm_link" quat="0.707107 0.707107 0 0">
+              <inertial pos="-0.121825 0 0.12" mass="3.42" diaginertia="0.0217285 0.0217285 0.00961875" />
+              <joint name="shoulder_lift_joint" range="-6.28319 6.28319" actuatorfrcrange="-56 56" damping="4" armature="0.05" />
+              <geom pos="0 0 0.1198" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="378d51debf366a3e_upperarm" />
+              <geom pos="0 0 0.1198" quat="0.5 0.5 -0.5 -0.5" type="mesh" mesh="378378040b2a979d_upperarm" group="3" />
+              <body name="forearm_link" pos="-0.24365 0 0">
+                <inertial pos="-0.106625 0 0.0275" mass="1.26" diaginertia="0.00654681 0.00654681 0.00354375" />
+                <joint name="elbow_joint" range="-3.14159 3.14159" actuatorfrcrange="-28 28" damping="4" armature="0.05" />
+                <geom pos="0 0 0.0275" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="108a931468efec08_forearm" />
+                <geom pos="0 0 0.0275" quat="0.5 0.5 -0.5 -0.5" type="mesh" mesh="5d9c443d4f73b852_forearm" group="3" />
+                <body name="wrist_1_link" pos="-0.21325 0 0.11235">
+                  <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.8" diaginertia="0.00225 0.00161064 0.00161064" />
+                  <joint name="wrist_1_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12" damping="4" armature="0.05" />
+                  <geom pos="0 0 -0.085" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="be15d73dbbe81ff6_wrist1" />
+                  <geom pos="0 0 -0.085" quat="0.707107 0.707107 0 0" type="mesh" mesh="9234c33190e167f9_wrist1" group="3" />
+                  <body name="wrist_2_link" pos="0 -0.08535 -1.75056e-11" quat="0.707107 0.707107 0 0">
+                    <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.8" diaginertia="0.00225 0.00157217 0.00157217" />
+                    <joint name="wrist_2_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12" damping="4" armature="0.05" />
+                    <geom pos="0 0 -0.085" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="918cce422904b9ab_wrist2" />
+                    <geom pos="0 0 -0.085" quat="1 0 0 0" type="mesh" mesh="39945fd899212d48_wrist2" group="3" />
+                    <body name="wrist_3_link" pos="0 0.0819 -1.6798e-11" quat="0.707107 -0.707107 0 0">
+                      <inertial pos="0 0 -0.02" quat="0.5 0.5 -0.5 0.5" mass="0.35" diaginertia="0.0001792 0.000136267 0.000136267" />
+                      <joint name="wrist_3_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12" damping="4" armature="0.05" />
+                      <geom pos="0 0 -0.082" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="a5e6d9bbb488600b_wrist3" />
+                      <geom pos="0 0 -0.082" quat="0.707107 0.707107 0 0" type="mesh" mesh="af7ff8a2400f11ca_wrist3" group="3" />
+                      <body name="flange" quat="0.5 -0.5 -0.5 -0.5">
+                        <body name="tool0" quat="0.5 0.5 0.5 0.5">
+                          <body name="robotiq_2f85_mount">
+                            <body name="robotiq_2f85_base_mount" pos="0 0 0.007">
+                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="base_mount" />
+                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="base_mount" group="3" />
+                              <body name="robotiq_2f85_base" pos="0 0 0.0038" quat="0.707107 0 0 -0.707107">
+                                <inertial pos="0 0 0" mass="0.777441" diaginertia="0.000260285 0.000225381 0.000152708" />
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="17767d9c7c1579bc_base" />
+                                <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="17767d9c7c1579bc_base" group="3" />
+                                <body name="robotiq_2f85_right_driver" pos="0 0.0306011 0.054904">
+                                  <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06" />
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver" />
+                                  <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver" group="3" />
+                                  <body name="robotiq_2f85_right_coupler" pos="0 0.0315 -0.0041">
+                                    <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06" />
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler" />
+                                    <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler" group="3" />
+                                  </body>
+                                  <joint name="robotiq_2f85_right_driver_joint" type="hinge" axis="1 0 0" range="0 0.8" damping="0.05" armature="0.001" />
                                 </body>
-                              </body>
-                              <joint name="robotiq_2f85_right_follower_joint" type="hinge" axis="1 0 0" range="-0.872665 0.872665" damping="0.05" armature="0.001" />
-                            </body>
-                            <joint name="robotiq_2f85_right_spring_link_joint" type="hinge" axis="1 0 0" range="-0.296706 0.8" damping="0.05" armature="0.001" />
-                          </body>
-                          <body name="robotiq_2f85_left_driver" pos="0 -0.0306011 0.054904" quat="1.7949e-09 0 0 1">
-                            <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06" />
-                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver" />
-                            <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver" group="3" />
-                            <body name="robotiq_2f85_left_coupler" pos="0 0.0315 -0.0041">
-                              <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06" />
-                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler" />
-                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler" group="3" />
-                            </body>
-                            <joint name="robotiq_2f85_left_driver_joint" type="hinge" axis="1 0 0" range="0 0.8" damping="0.05" armature="0.001" />
-                          </body>
-                          <body name="robotiq_2f85_left_spring_link" pos="0 -0.0132 0.0609" quat="1.7949e-09 0 0 1">
-                            <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06" />
-                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0000" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0001" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0002" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0003" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0004" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0005" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0006" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0007" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026" group="3" />
-                            <geom name="robotiq_2f85_left_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027" group="3" />
-                            <body name="robotiq_2f85_left_follower" pos="0 0.055 0.0375">
-                              <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06" />
-                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower" />
-                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower" group="3" />
-                              <body name="robotiq_2f85_left_pad" pos="0 -0.0189 0.01352">
-                                <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06" />
-                                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad" />
-                                <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad" group="3" contype="0" conaffinity="0" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
-                                <body name="robotiq_2f85_left_silicone_pad">
-                                  <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06" />
-                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad" />
-                                  <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad" group="3" contype="0" conaffinity="0" />
+                                <body name="robotiq_2f85_right_spring_link" pos="0 0.0132 0.0609">
+                                  <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06" />
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0000" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0001" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0002" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0003" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0004" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0005" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0006" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0007" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026" group="3" />
+                                  <geom name="robotiq_2f85_right_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027" group="3" />
+                                  <body name="robotiq_2f85_right_follower" pos="0 0.055 0.0375">
+                                    <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06" />
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower" />
+                                    <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower" group="3" />
+                                    <body name="robotiq_2f85_right_pad" pos="0 -0.0189 0.01352">
+                                      <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06" />
+                                      <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad" />
+                                      <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad" group="3" contype="0" conaffinity="0" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <body name="robotiq_2f85_right_silicone_pad">
+                                        <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06" />
+                                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad" />
+                                        <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad" group="3" contype="0" conaffinity="0" />
+                                      </body>
+                                    </body>
+                                    <joint name="robotiq_2f85_right_follower_joint" type="hinge" axis="1 0 0" range="-0.872665 0.872665" damping="0.05" armature="0.001" />
+                                  </body>
+                                  <joint name="robotiq_2f85_right_spring_link_joint" type="hinge" axis="1 0 0" range="-0.296706 0.8" damping="0.05" armature="0.001" />
                                 </body>
+                                <body name="robotiq_2f85_left_driver" pos="0 -0.0306011 0.054904" quat="1.7949e-09 0 0 1">
+                                  <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06" />
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver" />
+                                  <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver" group="3" />
+                                  <body name="robotiq_2f85_left_coupler" pos="0 0.0315 -0.0041">
+                                    <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06" />
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler" />
+                                    <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler" group="3" />
+                                  </body>
+                                  <joint name="robotiq_2f85_left_driver_joint" type="hinge" axis="1 0 0" range="0 0.8" damping="0.05" armature="0.001" />
+                                </body>
+                                <body name="robotiq_2f85_left_spring_link" pos="0 -0.0132 0.0609" quat="1.7949e-09 0 0 1">
+                                  <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06" />
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0000" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0001" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0002" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0003" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0004" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0005" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0006" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0007" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026" group="3" />
+                                  <geom name="robotiq_2f85_left_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027" group="3" />
+                                  <body name="robotiq_2f85_left_follower" pos="0 0.055 0.0375">
+                                    <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06" />
+                                    <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower" />
+                                    <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower" group="3" />
+                                    <body name="robotiq_2f85_left_pad" pos="0 -0.0189 0.01352">
+                                      <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06" />
+                                      <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad" />
+                                      <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad" group="3" contype="0" conaffinity="0" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0234375" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0328125" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="-0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0046875" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <geom size="0.0055 0.004 0.0046875" pos="0.0055 -0.0026 0.0140625" type="box" rgba="0.42 0.43 0.45 1" group="3" solref="0.005 1" condim="4" friction="0.69999999999999996 0.01 0.001" />
+                                      <body name="robotiq_2f85_left_silicone_pad">
+                                        <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06" />
+                                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad" />
+                                        <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad" group="3" contype="0" conaffinity="0" />
+                                      </body>
+                                    </body>
+                                    <joint name="robotiq_2f85_left_follower_joint" type="hinge" axis="1 0 0" range="-0.872665 0.872665" damping="0.05" armature="0.001" />
+                                  </body>
+                                  <joint name="robotiq_2f85_left_spring_link_joint" type="hinge" axis="1 0 0" range="-0.296706 0.8" damping="0.05" armature="0.001" />
+                                </body>
+                                <site name="grasp_center" pos="0 0 0.14499999999999999" quat="1 0 0 0" size="0.004" rgba="0 0.8 0.8 1" />
                               </body>
-                              <joint name="robotiq_2f85_left_follower_joint" type="hinge" axis="1 0 0" range="-0.872665 0.872665" damping="0.05" armature="0.001" />
                             </body>
-                            <joint name="robotiq_2f85_left_spring_link_joint" type="hinge" axis="1 0 0" range="-0.296706 0.8" damping="0.05" armature="0.001" />
                           </body>
-                          <site name="grasp_center" pos="0 0 0.14499999999999999" quat="1 0 0 0" size="0.004" rgba="0 0.8 0.8 1" />
+                          <site name="tcp" pos="0 0 0" quat="1 0 0 0" size="0.008" />
                         </body>
                       </body>
                     </body>
-                    <site name="tcp" pos="0 0 0" quat="1 0 0 0" size="0.008" />
                   </body>
                 </body>
               </body>
             </body>
           </body>
         </body>
+        <body name="base" quat="0 0 0 1" />
       </body>
     </body>
-    <body name="RobotPedestal" pos="0 -0.54999999999999993 0.25" quat="1 0 0 0">
+    <body name="RobotPedestal" pos="0 -0.45000000000000001 0.25" quat="1 0 0 0">
       <geom type="mesh" mesh="RobotPedestal_mesh" name="RobotPedestal_visual" rgba="0.55000000000000004 0.57999999999999996 0.62 1" contype="0" conaffinity="0" group="1" mass="0" />
       <geom type="mesh" mesh="RobotPedestal_part_0000" name="RobotPedestal_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" group="3" />
     </body>
-    <body name="Apple" pos="1.1102230246251566e-18 -0.005000000000000001 0.63737299999999997" quat="0.70710678118654768 0 0 0.70710678118654746">
+    <body name="Apple" pos="0.18000000000000008 -0.18499999999999997 0.63737299999999997" quat="0.70710678118654768 0 0 0.70710678118654746">
       <freejoint name="Apple_free" />
       <geom type="mesh" mesh="Apple_mesh" name="Apple_visual" material="Apple_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
       <geom type="mesh" mesh="Apple_part_0000" name="Apple_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.80000000000000004 0.0050000000000000001 0.00050000000000000001" mass="0.019033462183274532" group="3" />
@@ -361,6 +661,325 @@
       <geom type="mesh" mesh="Apple_part_0017" name="Apple_part_0017" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.80000000000000004 0.0050000000000000001 0.00050000000000000001" mass="0.0004987925016808697" group="3" />
       <geom type="mesh" mesh="Apple_part_0018" name="Apple_part_0018" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.80000000000000004 0.0050000000000000001 0.00050000000000000001" mass="0.000822691537353823" group="3" />
     </body>
+    <body name="Banana" pos="0.44500000000000001 -0.18499999999999997 0.61737699999999995" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <freejoint name="Banana_free" />
+      <geom type="mesh" mesh="Banana_mesh" name="Banana_visual" material="Banana_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="Banana_part_0000" name="Banana_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="1.8 0.0050000000000000001 0.00050000000000000001" mass="0.02098802006149162" group="3" />
+      <geom type="mesh" mesh="Banana_part_0001" name="Banana_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="1.8 0.0050000000000000001 0.00050000000000000001" mass="0.017481881273418865" group="3" />
+      <geom type="mesh" mesh="Banana_part_0002" name="Banana_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="1.8 0.0050000000000000001 0.00050000000000000001" mass="0.026936152557259205" group="3" />
+      <geom type="mesh" mesh="Banana_part_0003" name="Banana_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="1.8 0.0050000000000000001 0.00050000000000000001" mass="0.0005939461078303127" group="3" />
+    </body>
+    <body name="Marker" pos="-0.0079999999999999967 -0.28500000000000014 0.60923799999999995" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <freejoint name="Marker_free" />
+      <geom type="mesh" mesh="Marker_mesh" name="Marker_visual" material="Marker_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="Marker_part_0000" name="Marker_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.006050897111258801" group="3" />
+      <geom type="mesh" mesh="Marker_part_0001" name="Marker_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0007082542931182861" group="3" />
+      <geom type="mesh" mesh="Marker_part_0002" name="Marker_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.004404235363017962" group="3" />
+      <geom type="mesh" mesh="Marker_part_0003" name="Marker_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0018642020320552232" group="3" />
+      <geom type="mesh" mesh="Marker_part_0004" name="Marker_part_0004" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0007196094072671034" group="3" />
+      <geom type="mesh" mesh="Marker_part_0005" name="Marker_part_0005" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0003276606389436894" group="3" />
+      <geom type="mesh" mesh="Marker_part_0006" name="Marker_part_0006" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0002376692959321884" group="3" />
+      <geom type="mesh" mesh="Marker_part_0007" name="Marker_part_0007" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0004056858273799274" group="3" />
+      <geom type="mesh" mesh="Marker_part_0008" name="Marker_part_0008" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.0004582115626469416" group="3" />
+      <geom type="mesh" mesh="Marker_part_0009" name="Marker_part_0009" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.00044186167129654325" group="3" />
+      <geom type="mesh" mesh="Marker_part_0010" name="Marker_part_0010" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.5 0.0030000000000000001 0.00029999999999999997" mass="0.00018171279708333518" group="3" />
+    </body>
+    <body name="Screwdriver" pos="-0.17999999999999999 -0.18400000000000011 0.61732100000000001" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <freejoint name="Screwdriver_free" />
+      <geom type="mesh" mesh="Screwdriver_mesh" name="Screwdriver_visual" material="Screwdriver_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="Screwdriver_part_0000" name="Screwdriver_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.0038234188914110364" group="3" />
+      <geom type="mesh" mesh="Screwdriver_part_0001" name="Screwdriver_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.014080422144760962" group="3" />
+      <geom type="mesh" mesh="Screwdriver_part_0002" name="Screwdriver_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.01137965545457768" group="3" />
+      <geom type="mesh" mesh="Screwdriver_part_0003" name="Screwdriver_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.010136379957542511" group="3" />
+      <geom type="mesh" mesh="Screwdriver_part_0004" name="Screwdriver_part_0004" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.05202933734235717" group="3" />
+      <geom type="mesh" mesh="Screwdriver_part_0005" name="Screwdriver_part_0005" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.65000000000000002 0.0050000000000000001 0.00029999999999999997" mass="0.005550786209350644" group="3" />
+    </body>
+    <body name="RubiksCube" pos="-0.48000000000000004 -0.18500000000000005 0.62900900000000004" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <freejoint name="RubiksCube_free" />
+      <geom type="mesh" mesh="RubiksCube_mesh" name="RubiksCube_visual" material="RubiksCube_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="RubiksCube_part_0000" name="RubiksCube_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.003672804308059695" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0001" name="RubiksCube_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0013242770743139946" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0002" name="RubiksCube_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0036206758813140997" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0003" name="RubiksCube_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.003726525311337819" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0004" name="RubiksCube_part_0004" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0013134708994682602" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0005" name="RubiksCube_part_0005" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.002368873390527028" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0006" name="RubiksCube_part_0006" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00018020847167951557" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0007" name="RubiksCube_part_0007" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0009399571165632815" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0008" name="RubiksCube_part_0008" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0006292123557461534" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0009" name="RubiksCube_part_0009" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0005746238036554525" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0010" name="RubiksCube_part_0010" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0030163817529701726" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0011" name="RubiksCube_part_0011" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0028272553520159597" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0012" name="RubiksCube_part_0012" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.004954195819273424" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0013" name="RubiksCube_part_0013" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0035392323717608268" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0014" name="RubiksCube_part_0014" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0036963427751995973" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0015" name="RubiksCube_part_0015" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.004545205815423814" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0016" name="RubiksCube_part_0016" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0020376148941483015" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0017" name="RubiksCube_part_0017" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0003134799781386845" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0018" name="RubiksCube_part_0018" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0026131153976600295" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0019" name="RubiksCube_part_0019" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.002400832471752292" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0020" name="RubiksCube_part_0020" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0024249616433590485" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0021" name="RubiksCube_part_0021" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0001499495728928565" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0022" name="RubiksCube_part_0022" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00011591639732965624" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0023" name="RubiksCube_part_0023" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="6.864082666400012e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0024" name="RubiksCube_part_0024" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.001144554776666179" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0025" name="RubiksCube_part_0025" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0012131493590152233" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0026" name="RubiksCube_part_0026" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0021098545833462858" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0027" name="RubiksCube_part_0027" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0011985270039719749" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0028" name="RubiksCube_part_0028" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="6.52391126959242e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0029" name="RubiksCube_part_0029" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00028264335273217714" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0030" name="RubiksCube_part_0030" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.000980722869467107" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0031" name="RubiksCube_part_0031" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.001366701038823009" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0032" name="RubiksCube_part_0032" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.004742278678627776" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0033" name="RubiksCube_part_0033" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="9.017171446026471e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0034" name="RubiksCube_part_0034" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.004859044818877862" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0035" name="RubiksCube_part_0035" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0024939194570433726" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0036" name="RubiksCube_part_0036" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0026617431153239976" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0037" name="RubiksCube_part_0037" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00014003521655654705" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0038" name="RubiksCube_part_0038" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0001917654211366335" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0039" name="RubiksCube_part_0039" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00019931948277281846" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0040" name="RubiksCube_part_0040" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0004228101961525422" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0041" name="RubiksCube_part_0041" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0006144825379526359" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0042" name="RubiksCube_part_0042" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0006099970769127989" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0043" name="RubiksCube_part_0043" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00012167796522225357" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0044" name="RubiksCube_part_0044" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0005172345984778896" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0045" name="RubiksCube_part_0045" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0005365011427696382" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0046" name="RubiksCube_part_0046" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.001098998379986579" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0047" name="RubiksCube_part_0047" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0004137776884071847" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0048" name="RubiksCube_part_0048" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="5.1633414510738544e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0049" name="RubiksCube_part_0049" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0020620283926530555" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0050" name="RubiksCube_part_0050" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00023986742987376216" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0051" name="RubiksCube_part_0051" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00023320006389998256" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0052" name="RubiksCube_part_0052" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0003204448503998041" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0053" name="RubiksCube_part_0053" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00020984568922120724" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0054" name="RubiksCube_part_0054" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0011053809769814263" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0055" name="RubiksCube_part_0055" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00014465571086853398" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0056" name="RubiksCube_part_0056" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0036513671116993416" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0057" name="RubiksCube_part_0057" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.001234883210255988" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0058" name="RubiksCube_part_0058" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.002898183623279136" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0059" name="RubiksCube_part_0059" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00015263933428502196" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0060" name="RubiksCube_part_0060" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00026959089329909425" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0061" name="RubiksCube_part_0061" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="6.847117218082864e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0062" name="RubiksCube_part_0062" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.000402483351941089" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0063" name="RubiksCube_part_0063" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00018996639425900353" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0064" name="RubiksCube_part_0064" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="3.830899680502655e-05" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0065" name="RubiksCube_part_0065" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00017836949973630933" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0066" name="RubiksCube_part_0066" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.001334352042190875" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0067" name="RubiksCube_part_0067" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.003437459741531296" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0068" name="RubiksCube_part_0068" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0003504890973258637" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0069" name="RubiksCube_part_0069" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.00020778590125753626" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0070" name="RubiksCube_part_0070" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="0.0020783549606481944" group="3" />
+      <geom type="mesh" mesh="RubiksCube_part_0071" name="RubiksCube_part_0071" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.00050000000000000001" mass="1.1334872244224832e-05" group="3" />
+    </body>
+    <body name="Basket" pos="-0.20000000000000001 0.15499999999999994 0.60003600000000001" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <geom type="mesh" mesh="Basket_mesh" name="Basket_visual" material="Basket_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="Basket_part_0000" name="Basket_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0001" name="Basket_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0002" name="Basket_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0003" name="Basket_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0004" name="Basket_part_0004" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0005" name="Basket_part_0005" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0006" name="Basket_part_0006" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0007" name="Basket_part_0007" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0008" name="Basket_part_0008" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0009" name="Basket_part_0009" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0010" name="Basket_part_0010" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0011" name="Basket_part_0011" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0012" name="Basket_part_0012" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0013" name="Basket_part_0013" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0014" name="Basket_part_0014" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0015" name="Basket_part_0015" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0016" name="Basket_part_0016" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0017" name="Basket_part_0017" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0018" name="Basket_part_0018" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0019" name="Basket_part_0019" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0020" name="Basket_part_0020" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0021" name="Basket_part_0021" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0022" name="Basket_part_0022" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0023" name="Basket_part_0023" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0024" name="Basket_part_0024" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0025" name="Basket_part_0025" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0026" name="Basket_part_0026" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0027" name="Basket_part_0027" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0028" name="Basket_part_0028" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0029" name="Basket_part_0029" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0030" name="Basket_part_0030" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0031" name="Basket_part_0031" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0032" name="Basket_part_0032" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0033" name="Basket_part_0033" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0034" name="Basket_part_0034" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0035" name="Basket_part_0035" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0036" name="Basket_part_0036" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0037" name="Basket_part_0037" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0038" name="Basket_part_0038" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0039" name="Basket_part_0039" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0040" name="Basket_part_0040" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0041" name="Basket_part_0041" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0042" name="Basket_part_0042" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0043" name="Basket_part_0043" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0044" name="Basket_part_0044" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0045" name="Basket_part_0045" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0046" name="Basket_part_0046" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0047" name="Basket_part_0047" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0048" name="Basket_part_0048" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0049" name="Basket_part_0049" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0050" name="Basket_part_0050" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0051" name="Basket_part_0051" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0052" name="Basket_part_0052" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0053" name="Basket_part_0053" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0054" name="Basket_part_0054" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0055" name="Basket_part_0055" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0056" name="Basket_part_0056" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0057" name="Basket_part_0057" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0058" name="Basket_part_0058" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0059" name="Basket_part_0059" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0060" name="Basket_part_0060" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0061" name="Basket_part_0061" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0062" name="Basket_part_0062" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0063" name="Basket_part_0063" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0064" name="Basket_part_0064" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0065" name="Basket_part_0065" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0066" name="Basket_part_0066" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0067" name="Basket_part_0067" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0068" name="Basket_part_0068" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0069" name="Basket_part_0069" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0070" name="Basket_part_0070" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0071" name="Basket_part_0071" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0072" name="Basket_part_0072" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0073" name="Basket_part_0073" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0074" name="Basket_part_0074" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0075" name="Basket_part_0075" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0076" name="Basket_part_0076" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0077" name="Basket_part_0077" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0078" name="Basket_part_0078" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0079" name="Basket_part_0079" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0080" name="Basket_part_0080" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0081" name="Basket_part_0081" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0082" name="Basket_part_0082" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0083" name="Basket_part_0083" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0084" name="Basket_part_0084" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0085" name="Basket_part_0085" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0086" name="Basket_part_0086" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0087" name="Basket_part_0087" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0088" name="Basket_part_0088" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0089" name="Basket_part_0089" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0090" name="Basket_part_0090" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0091" name="Basket_part_0091" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0092" name="Basket_part_0092" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0093" name="Basket_part_0093" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0094" name="Basket_part_0094" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0095" name="Basket_part_0095" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0096" name="Basket_part_0096" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0097" name="Basket_part_0097" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0098" name="Basket_part_0098" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0099" name="Basket_part_0099" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0100" name="Basket_part_0100" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0101" name="Basket_part_0101" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0102" name="Basket_part_0102" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0103" name="Basket_part_0103" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0104" name="Basket_part_0104" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0105" name="Basket_part_0105" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0106" name="Basket_part_0106" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0107" name="Basket_part_0107" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0108" name="Basket_part_0108" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0109" name="Basket_part_0109" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0110" name="Basket_part_0110" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0111" name="Basket_part_0111" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0112" name="Basket_part_0112" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0113" name="Basket_part_0113" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0114" name="Basket_part_0114" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0115" name="Basket_part_0115" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0116" name="Basket_part_0116" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0117" name="Basket_part_0117" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0118" name="Basket_part_0118" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0119" name="Basket_part_0119" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0120" name="Basket_part_0120" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0121" name="Basket_part_0121" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0122" name="Basket_part_0122" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0123" name="Basket_part_0123" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0124" name="Basket_part_0124" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0125" name="Basket_part_0125" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0126" name="Basket_part_0126" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0127" name="Basket_part_0127" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0128" name="Basket_part_0128" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0129" name="Basket_part_0129" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0130" name="Basket_part_0130" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0131" name="Basket_part_0131" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0132" name="Basket_part_0132" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0133" name="Basket_part_0133" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0134" name="Basket_part_0134" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0135" name="Basket_part_0135" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0136" name="Basket_part_0136" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0137" name="Basket_part_0137" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0138" name="Basket_part_0138" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0139" name="Basket_part_0139" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0140" name="Basket_part_0140" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0141" name="Basket_part_0141" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0142" name="Basket_part_0142" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0143" name="Basket_part_0143" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0144" name="Basket_part_0144" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0145" name="Basket_part_0145" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0146" name="Basket_part_0146" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0147" name="Basket_part_0147" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0148" name="Basket_part_0148" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0149" name="Basket_part_0149" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0150" name="Basket_part_0150" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0151" name="Basket_part_0151" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0152" name="Basket_part_0152" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0153" name="Basket_part_0153" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0154" name="Basket_part_0154" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0155" name="Basket_part_0155" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0156" name="Basket_part_0156" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0157" name="Basket_part_0157" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0158" name="Basket_part_0158" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0159" name="Basket_part_0159" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0160" name="Basket_part_0160" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0161" name="Basket_part_0161" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0162" name="Basket_part_0162" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0163" name="Basket_part_0163" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0164" name="Basket_part_0164" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0165" name="Basket_part_0165" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0166" name="Basket_part_0166" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0167" name="Basket_part_0167" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0168" name="Basket_part_0168" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0169" name="Basket_part_0169" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0170" name="Basket_part_0170" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0171" name="Basket_part_0171" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0172" name="Basket_part_0172" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0173" name="Basket_part_0173" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0174" name="Basket_part_0174" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+      <geom type="mesh" mesh="Basket_part_0175" name="Basket_part_0175" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.69999999999999996 0.0050000000000000001 0.001" group="3" />
+    </body>
+    <body name="Tray" pos="0.28000000000000003 0.16500000000000006 0.59999999999999998" quat="0.70710678118654768 0 0 0.70710678118654746">
+      <geom type="mesh" mesh="Tray_mesh" name="Tray_visual" material="Tray_material" rgba="1 1 1 1" contype="0" conaffinity="0" group="1" mass="0" />
+      <geom type="mesh" mesh="Tray_part_0000" name="Tray_part_0000" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0001" name="Tray_part_0001" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0002" name="Tray_part_0002" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0003" name="Tray_part_0003" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0004" name="Tray_part_0004" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0005" name="Tray_part_0005" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0006" name="Tray_part_0006" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0007" name="Tray_part_0007" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0008" name="Tray_part_0008" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0009" name="Tray_part_0009" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0010" name="Tray_part_0010" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0011" name="Tray_part_0011" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0012" name="Tray_part_0012" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0013" name="Tray_part_0013" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0014" name="Tray_part_0014" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0015" name="Tray_part_0015" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0016" name="Tray_part_0016" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0017" name="Tray_part_0017" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0018" name="Tray_part_0018" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0019" name="Tray_part_0019" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0020" name="Tray_part_0020" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0021" name="Tray_part_0021" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0022" name="Tray_part_0022" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0023" name="Tray_part_0023" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0024" name="Tray_part_0024" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0025" name="Tray_part_0025" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0026" name="Tray_part_0026" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+      <geom type="mesh" mesh="Tray_part_0027" name="Tray_part_0027" rgba="0.55000000000000004 0.57999999999999996 0.62 1" friction="0.45000000000000001 0.0040000000000000001 0.00040000000000000002" group="3" />
+    </body>
   </worldbody>
   <actuator>
     <position name="shoulder_pan_joint_servo" joint="shoulder_pan_joint" kp="1200" kv="90" />
@@ -381,5 +1000,44 @@
   <contact>
     <exclude body1="robotiq_2f85_left_coupler" body2="robotiq_2f85_left_follower" />
     <exclude body1="robotiq_2f85_right_coupler" body2="robotiq_2f85_right_follower" />
+    <exclude body1="RobotPedestal" body2="base" />
+    <exclude body1="RobotPedestal" body2="base_link" />
+    <exclude body1="RobotPedestal" body2="base_link_inertia" />
+    <exclude body1="RobotPedestal" body2="flange" />
+    <exclude body1="RobotPedestal" body2="forearm_link" />
+    <exclude body1="RobotPedestal" body2="shoulder_link" />
+    <exclude body1="RobotPedestal" body2="tool0" />
+    <exclude body1="RobotPedestal" body2="upper_arm_link" />
+    <exclude body1="RobotPedestal" body2="wrist_1_link" />
+    <exclude body1="RobotPedestal" body2="wrist_2_link" />
+    <exclude body1="RobotPedestal" body2="wrist_3_link" />
+    <exclude body1="base" body2="base_link" />
+    <exclude body1="base" body2="base_link_inertia" />
+    <exclude body1="base_link" body2="base_link_inertia" />
+    <exclude body1="base_link_inertia" body2="shoulder_link" />
+    <exclude body1="flange" body2="tool0" />
+    <exclude body1="flange" body2="wrist_3_link" />
+    <exclude body1="forearm_link" body2="upper_arm_link" />
+    <exclude body1="forearm_link" body2="wrist_1_link" />
+    <exclude body1="robotiq_2f85_base" body2="robotiq_2f85_base_mount" />
+    <exclude body1="robotiq_2f85_base" body2="robotiq_2f85_left_driver" />
+    <exclude body1="robotiq_2f85_base" body2="robotiq_2f85_left_spring_link" />
+    <exclude body1="robotiq_2f85_base" body2="robotiq_2f85_right_driver" />
+    <exclude body1="robotiq_2f85_base" body2="robotiq_2f85_right_spring_link" />
+    <exclude body1="robotiq_2f85_base_mount" body2="robotiq_2f85_mount" />
+    <exclude body1="robotiq_2f85_base_mount" body2="wrist_2_link" />
+    <exclude body1="robotiq_2f85_left_coupler" body2="robotiq_2f85_left_driver" />
+    <exclude body1="robotiq_2f85_left_follower" body2="robotiq_2f85_left_pad" />
+    <exclude body1="robotiq_2f85_left_follower" body2="robotiq_2f85_left_spring_link" />
+    <exclude body1="robotiq_2f85_left_pad" body2="robotiq_2f85_left_silicone_pad" />
+    <exclude body1="robotiq_2f85_mount" body2="tool0" />
+    <exclude body1="robotiq_2f85_right_coupler" body2="robotiq_2f85_right_driver" />
+    <exclude body1="robotiq_2f85_right_follower" body2="robotiq_2f85_right_pad" />
+    <exclude body1="robotiq_2f85_right_follower" body2="robotiq_2f85_right_spring_link" />
+    <exclude body1="robotiq_2f85_right_pad" body2="robotiq_2f85_right_silicone_pad" />
+    <exclude body1="shoulder_link" body2="upper_arm_link" />
+    <exclude body1="tool0" body2="wrist_3_link" />
+    <exclude body1="wrist_1_link" body2="wrist_2_link" />
+    <exclude body1="wrist_2_link" body2="wrist_3_link" />
   </contact>
 </mujoco>

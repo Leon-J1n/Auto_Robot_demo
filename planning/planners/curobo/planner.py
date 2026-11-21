@@ -24,6 +24,22 @@ class CuroboPlanner:
         self.client=client or CuroboClient(self.config.get('runtime'))
         self._own_client=client is None
 
+    def _joint_count(self, snapshot=None):
+        runtime_names = getattr(self.robot_runtime, 'joint_names', None)
+        if runtime_names:
+            return len(runtime_names)
+        collision = (snapshot or {}).get('_runtime_collision', {})
+        names = collision.get('joint_names')
+        if names:
+            return len(names)
+        for obj in (snapshot or {}).get('objects', ()):
+            driver = next((item.get('properties', {}) for item in obj.get('components', ())
+                           if item.get('component_type') == 'RobotDriver'), {})
+            sequence = driver.get('joint_sequence', ())
+            if sequence:
+                return len(sequence)
+        return None
+
     def _snapshot(self,request=None):
         from libraries.curobo.runtime_scene import runtime_snapshot
         explicit=(request or {}).get('scene')
@@ -45,7 +61,8 @@ class CuroboPlanner:
             defaults = _deep_merge(defaults, self.config.get('move_defaults', {}))
             current_request = request or {'target': {'type': 'joint',
                 'joint_positions': self.robot_runtime.get_joint_positions().tolist()}}
-            constraints = validate_move_request(_deep_merge(defaults, current_request), self.config)['constraints']
+            constraints = validate_move_request(_deep_merge(defaults, current_request), self.config,
+                joint_count=self._joint_count())['constraints']
             return runtime_snapshot(self.robot_runtime, collision_checker=self.collision_checker,
                 constraints=constraints, cache_dir=getattr(self.client, 'cache', None))
         raise ValueError('Provide the current scene JSON or a scene_provider')
@@ -55,8 +72,16 @@ class CuroboPlanner:
         from demo.interaction.command_converter import _deep_merge
         from atomic_action.motion.common.utils.validation import validate_move_request
         defaults=_deep_merge(snapshot.get('move_defaults',{}),self.config.get('move_defaults',{}))
+        dof = self._joint_count(snapshot)
+        if dof is None:
+            target = (request or {}).get('target', {})
+            joints = target.get('joint_positions') if isinstance(target, dict) else None
+            dof = len(joints) if isinstance(joints, (list, tuple)) and joints else None
+        if dof is None:
+            raise ValueError('cuRobo scene must provide the selected robot joint sequence')
         normalized=validate_move_request(_deep_merge(defaults,request or {
-            'target':{'type':'joint','joint_positions':[0.]*6}}))
+            'target':{'type':'joint','joint_positions':[0.]*dof}}),
+            joint_count=dof)
         return self.client.prepare(snapshot,robot_object_id=ident,tool=self.tool,request=normalized)
 
     def plan(self,request):
@@ -92,7 +117,8 @@ class CuroboPlanner:
             from atomic_action.motion.common.utils.validation import validate_move_request
             snapshot,ident=self._snapshot(request)
             defaults=_deep_merge(snapshot.get('move_defaults',{}),self.config.get('move_defaults',{}))
-            normalized=validate_move_request(_deep_merge(defaults,request))
+            normalized=validate_move_request(_deep_merge(defaults,request),
+                joint_count=self._joint_count(snapshot))
             if normalized['motion']['path_type'] not in {'auto','joint'}:
                 raise ValueError('CuRobo is a free-space joint planner; use existing linear/circular planners for geometric paths')
             if normalized['constraints'].get('keep_end_effector_orientation'):

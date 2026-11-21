@@ -22,8 +22,8 @@ from demo.interaction.relative_placement import (
     validate_relative_point, random_region_estimates)
 
 
-PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(-3, 6))
-RELATIVE_PLACEMENT_HEIGHTS_M = tuple(cm / 100. for cm in range(9))
+PLACEMENT_HEIGHTS_M = tuple(mm / 1000. for mm in range(10, 101, 15))
+RELATIVE_PLACEMENT_HEIGHTS_M = PLACEMENT_HEIGHTS_M
 # Rz(+90 degrees) @ Rx(180 degrees), expressed in the world frame.
 _DOWNWARD_GRASP_ROTATION = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., -1.]])
 _DOWNWARD_PLACE_ROTATION = _DOWNWARD_GRASP_ROTATION.copy()
@@ -192,6 +192,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 evidence['placement_height_selected'] = False
                 recovery = {'trigger': 'cached_place_pose_infeasible',
                             'previous_height_offset_m': selected_height,
+                            'previous_world_from_control': deepcopy(
+                                resolved['candidates'][0]['world_from_control']),
                             'previous_error_code': getattr(exc, 'details', {}).get('error_code')}
                 evidence['placement_revalidation'] = recovery
                 try:
@@ -324,7 +326,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             self.backend.contact_target_object_id = previous_id
 
     def _search_place_heights(self, resolved, kin, checker, seed, **kwargs):
-        """Find the lowest feasible offset using the monotone-height assumption."""
+        """Find the lowest feasible height using a discrete binary search."""
         attempts = []
         heights = sorted({float(c['placement_height_offset_m']) for c in resolved['candidates']})
         groups = {
@@ -372,26 +374,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                     else:
                         upper = middle
                         selected = result
-
-        # Keep diagnostics in physical height order and make inferred results
-        # explicit; only measured candidates contribute elapsed time.
-        for index, height in enumerate(heights):
-            result = tested.get(height)
-            if result is None:
-                if selected is None:
-                    success = False
-                    reason = 'all higher tested heights were infeasible'
-                elif index < heights.index(selected['attempt']['placement_height_offset_m']):
-                    success = False
-                    reason = 'binary search inferred infeasible below the selected height'
-                else:
-                    success = True
-                    reason = 'binary search inferred feasible above the selected height'
-                attempts.append({'placement_height_offset_m': height, 'success': success,
-                                 'evaluated': False, 'inferred_by_monotonicity': True,
-                                 'inference': reason})
-            else:
-                attempts.append(result['attempt'])
+        # Report actual evaluations only; untested heights are not evidence.
+        attempts = [tested[h]['attempt'] for h in heights if h in tested]
         if selected is None:
             return None, attempts
         selected['choice']['placement_height_attempts'] = attempts

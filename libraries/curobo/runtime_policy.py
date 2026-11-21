@@ -18,59 +18,17 @@ def matrix(position, rotation) -> np.ndarray:
     return result
 
 
-def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *, _raw=False,
-                   gripper_width=None, allowed_geom_ids=None, _template=None) -> dict:
+def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *,
+                   gripper_width=None, allowed_geom_ids=None) -> dict:
     """Snapshot one motion without modifying the simulator or live policy."""
     import mujoco
 
-    proxy = getattr(checker, 'planning_proxy', None)
-    if proxy is not None and not _raw:
-        initial = planning_signature(runtime, checker)
-        current, override = checker, False
-        while '_checker' in vars(current):
-            override = override or bool(getattr(current, '_ignore_collisions', False))
-            current = current._checker
-        effective = {**constraints, 'avoid_collision': False} if override else constraints
-        result = proxy.export_runtime(effective)
-        if initial != planning_signature(runtime, checker):
-            raise ConversionError('Runtime changed while exporting the planning proxy')
-        result['state_signature'] = initial
-        if override:
-            result['policy']['avoid_collision'] = constraints.get('avoid_collision', True)
-            result['policy']['collision_override'] = True
-            result['policy']['fingerprint'] = hashlib.sha256((result['policy']['fingerprint'] + ':explicit_override').encode()).hexdigest()
-        return result
-
     model = runtime.model
     initial_signature = planning_signature(runtime, checker)
-    if _template is None:
-        policy, data = freeze_policy(checker, runtime.get_joint_positions(),
-            float(constraints.get('safety_distance', 0.)),
-            avoid_collision=constraints.get('avoid_collision', True),
-            gripper_width=gripper_width, allowed_geom_ids=allowed_geom_ids)
-    else:
-        # Only PlanningProxy supplies this template, after an exact model/policy
-        # signature check. State-dependent transforms must still be recaptured.
-        policy = _template['policy']
-        data = mujoco.MjData(model)
-        data.qpos[:] = runtime.data.qpos
-        data.mocap_pos[:] = runtime.data.mocap_pos
-        data.mocap_quat[:] = runtime.data.mocap_quat
-        if gripper_width is not None:
-            from demo.interaction.table_clearance import set_static_gripper_width
-            set_static_gripper_width(model, data, gripper_width)
-        mujoco.mj_kinematics(model, data)
-        controller = runtime.gripper_controller
-        held = getattr(controller, 'held_name', None)
-        payload = runtime.object_ids.get(held) if held else None
-        if (payload is not None and model.body_jntnum[payload]
-                and model.jnt_type[model.body_jntadr[payload]] == mujoco.mjtJoint.mjJNT_FREE):
-            relative = controller._relative(payload) if controller.mode == 'physical' else controller.relative_pose
-            pose = matrix(data.xpos[controller.base_id], data.xmat[controller.base_id]) @ relative
-            address = model.jnt_qposadr[model.body_jntadr[payload]]
-            data.qpos[address:address + 3] = pose[:3, 3]
-            data.qpos[address + 3:address + 7] = Rotation.from_matrix(pose[:3, :3]).as_quat()[[3, 0, 1, 2]]
-            mujoco.mj_kinematics(model, data)
+    policy, data = freeze_policy(checker, runtime.get_joint_positions(),
+        float(constraints.get('safety_distance', 0.)),
+        avoid_collision=constraints.get('avoid_collision', True),
+        gripper_width=gripper_width, allowed_geom_ids=allowed_geom_ids)
     cache = Path(cache_dir or Path(__file__).resolve().parents[2] / '.cache/curobo') / 'runtime_geometry'
     cache.mkdir(parents=True, exist_ok=True)
     root = int(runtime.base_id)
@@ -127,7 +85,7 @@ def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *, _raw=
                 limit=np.asarray(runtime.joint_limits[active[joint]]).tolist())
         bodies.append(entry)
     geometries = []
-    for geom in (() if _template is not None else checker.geoms):
+    for geom in checker.geoms:
         body = int(model.geom_bodyid[geom])
         kind = int(model.geom_type[geom])
         entry = {'id': int(geom), 'body': body, 'robot': body in assembly,
@@ -154,18 +112,11 @@ def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *, _raw=
         else:
             raise ConversionError(f'Unsupported runtime collision geometry: {entry["name"]}/{kind}')
         geometries.append(entry)
-    if _template is not None:
-        from copy import deepcopy
-        geometries = deepcopy(_template['geometries'])
-        for entry in geometries:
-            if not entry['robot']:
-                entry['matrix'] = (world[entry['body']] @ np.asarray(entry['local_matrix'])).tolist()
     site = int(checker.tcp_site_id)
     tcp_body = int(model.site_bodyid[site])
     if planning_signature(runtime, checker) != initial_signature:
         raise ConversionError('Runtime or collision policy changed while capturing the planning scene')
-    return {**({'planning_proxy': _template['planning_proxy']} if _template is not None else {}),
-        'schema_version': 1, 'policy': policy, 'state_signature': initial_signature,
+    return {'schema_version': 1, 'policy': policy, 'state_signature': initial_signature,
         'body_world': {str(i): value.tolist() for i, value in world.items()},
         'bodies': bodies, 'geometries': geometries,
         'root': root, 'base_world': world[root].tolist(), 'payload_bodies': sorted(attached),

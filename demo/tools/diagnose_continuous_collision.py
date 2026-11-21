@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -43,23 +42,20 @@ def main():
             fractions = np.r_[0., np.cumsum(np.max(np.abs(np.diff(points, axis=0)), axis=1))]
             row = {'request': request, 'error': exc.to_dict() if hasattr(exc, 'to_dict') else exc.details,
                    'planner_diagnostics': trajectory.get('diagnostics'), 'checks': []}
-            proxy = getattr(checker, 'planning_proxy', None)
-            scope = proxy.query_scope() if proxy is not None else nullcontext()
             arrays = {'polyline': points}
-            with scope:
-                for name in ('polyline', 'cubic_c2', 'pchip'):
-                    profile = None if name == 'polyline' else ContinuousJointPath(points, fractions, interpolator=name)
-                    for resolution in (.04, .01, .002):
-                        samples = points if profile is None else spline_collision_samples(profile, resolution, 2)
-                        hit = checker.check_path(samples, resolution=resolution,
-                            safety_distance=request['constraints']['safety_distance'],
-                            allowed_geom_ids=getattr(checker, 'allowed_target_geom_ids', None))
-                        row['checks'].append({'representation': name, 'resolution': resolution,
-                            'points': len(samples), 'in_collision': bool(hit.in_collision),
-                            'minimum_distance': float(hit.minimum_distance), 'contacts': list(hit.contacts)})
-                        arrays[f'{name}_{resolution}'] = samples
-                row['knot_collisions'] = [i for i,q in enumerate(points)
-                    if checker.check(q, safety_distance=request['constraints']['safety_distance']).in_collision]
+            for name in ('polyline', 'cubic_c2', 'pchip'):
+                profile = None if name == 'polyline' else ContinuousJointPath(points, fractions, interpolator=name)
+                for resolution in (.04, .01, .002):
+                    samples = points if profile is None else spline_collision_samples(profile, resolution, 2)
+                    hit = checker.check_path(samples, resolution=resolution,
+                        safety_distance=request['constraints']['safety_distance'],
+                        allowed_geom_ids=getattr(checker, 'allowed_target_geom_ids', None))
+                    row['checks'].append({'representation': name, 'resolution': resolution,
+                        'points': len(samples), 'in_collision': bool(hit.in_collision),
+                        'minimum_distance': float(hit.minimum_distance), 'contacts': list(hit.contacts)})
+                    arrays[f'{name}_{resolution}'] = samples
+            row['knot_collisions'] = [i for i,q in enumerate(points)
+                if checker.check(q, safety_distance=request['constraints']['safety_distance']).in_collision]
             index = len(failures) + 1
             np.savez(args.output / f'failure_{index}.npz', **arrays)
             failures.append(row)

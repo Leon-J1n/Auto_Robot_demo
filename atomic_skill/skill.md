@@ -47,7 +47,7 @@
 
 ### pick：到达抓取位姿并抓住物体
 
-移动到目标的抓取位姿，闭合夹爪并确认抓持；接触力不足、无法确认抓持时返回错误。通常先执行 `approach`；抬升与撤退由后续的 `lift_up`、`retreat` 完成。
+移动到目标的抓取位姿，闭合夹爪并确认抓持；接触力不足、无法确认抓持时返回错误。通常先执行 `approach`；抬升与撤退由后续的 `retreat` 一并完成。
 
 ```json
 {"command_id": "2", "skill_name": "pick", "parameters": {"target": 7, "hold_force": 15.0}}
@@ -61,6 +61,8 @@
 ### put：到达放置位姿并释放物体
 
 在已夹持物体的前提下，移动到目的地的放置位姿并打开夹爪。释放的是当前夹持物体，`target` 表示放置目的地；后续单独执行 `retreat`。
+
+`put` 开始时会复检已缓存的放置位姿。原 XY 可通过调整高度恢复时直接执行；恢复搜索换了 XY 时，先自动接近新放置点，成功后再放置，接近失败则停止且不松爪。
 
 ```json
 {"command_id": "7", "skill_name": "put", "parameters": {"target": 12}}
@@ -101,7 +103,7 @@
 
 `search` 可整体省略。默认按 10、9.5、9……2 cm，从远到近尝试，找到可执行路径后执行。只有尚未产生真实运动的规划失败才继续尝试下一档。
 
-### retreat：沿原交互方向撤离
+### retreat：先抬升，再沿原交互方向撤离
 
 读取 `target` 最近一次成功的 `approach`、`pick` 或 `put` 的交互朝向，结合当前实际末端位置与撤退距离生成终点，保持当前末端朝向并直线撤离。它沿用原交互方向，从当前状态出发；没有成功交互记录时无法确定方向。
 
@@ -112,12 +114,19 @@
 | 参数 | 必填 / 默认 | 含义 |
 | --- | --- | --- |
 | `target` | 必填 | 用于查询原交互记录的场景对象 ID |
-| `search.min_distance` | `0.03` | 最小撤退距离，即 3 cm |
+| `search.min_distance` | `0.01` | 最小撤退距离，即 1 cm |
 | `search.max_distance` | `0.10` | 最大撤退距离，即 10 cm |
 | `search.step` | `0.005` | 搜索步长，即 5 mm |
+| `lift_distance` | `0.01` | 撤退前沿世界 +Z 抬升的距离，m；有限非负数，0 表示不抬升 |
 | `pose_axis` | 默认使用工具标定轴 | 可选的原交互局部参考轴，如 `+z`、`-z`；实际撤退沿其反向 |
 
-`search` 可整体省略。默认从当前实际位置依次尝试撤退 10～3 cm。
+`search` 可整体省略。默认从当前实际位置依次尝试撤退 10～1 cm。默认先保持朝向沿世界 +Z 直线抬升 1 cm，再从抬升后的实测位置撤退；显式填写 `lift_distance` 可调整距离，0 表示跳过。实际撤退方向与世界 +Z 或 -Z 的夹角不超过 15° 时，无论 `lift_distance` 为何都跳过抬升。抬升失败立即停止；撤退搜索重试不会重复抬升。
+
+例如：`{"skill_name": "retreat", "parameters": {"target": 7, "lift_distance": 0.02}}`。
+
+接近世界 +Z 的撤退本身就是向上脱离：即使不执行额外抬升，也会记录并允许脱离已有接触，禁止比初始状态更深的穿透及新碰撞；向下撤退仍使用正常碰撞阈值。
+
+默认撤退距离从 10 cm 搜索到 1 cm，步长 5 mm；靠近可达边界时可尝试 1.5 cm、1 cm 的短撤退。显式指定 `search.min_distance` 时不会尝试低于该下限的距离，仍保持直线路径、当前朝向及碰撞检查。
 
 ### pull / push：直线推拉抽屉
 
@@ -147,7 +156,6 @@
   "commands": [
     {"command_id": "1", "skill_name": "approach", "parameters": {"target": 7}},
     {"command_id": "2", "skill_name": "pick", "parameters": {"target": 7, "hold_force": 15.0}},
-    {"command_id": "3", "skill_name": "lift_up", "parameters": {"distance": 0.02}},
     {"command_id": "4", "skill_name": "retreat", "parameters": {"target": 7}},
     {"command_id": "5", "skill_name": "approach", "parameters": {"target": 12}},
     {"command_id": "6", "skill_name": "put", "parameters": {"target": 12}},
@@ -163,7 +171,7 @@
 - 同一目标的 `pick` / `put` 会关联其前最近的 `approach` 与后最近的 `retreat`，确定抓取或放置语义；同一目标可分别保存两种交互位姿。
 - 当前 VLM 流程根据 commands 自动推断感知类型，默认相机为 `global`，无需额外填写 `visual_estimates`。
 - 抓取位姿在首次需要且没有缓存时感知，后续随目标运动维护；每轮放置在对应 `approach` 开始时重新感知，同轮 `put` 共用结果。直接调用 `put` 时在其开始时感知。
-- `lift_up` 从当前末端位姿沿世界 +Z 直线抬升，保持当前朝向；参数为 `distance`，默认 `0.02`，必须大于 0，无需 `target`。
+- 抬升已并入 `retreat`，新任务无需单独插入 `lift_up`。旧 `lift_up` 命令仍兼容；若手动保留该命令，后续 `retreat` 应设置 `lift_distance: 0` 以避免再次抬升。
 - 抓取后默认直接接近目的地，非必要不插入 `move_to(home)`。任务结束后可按需回 home；明确需要中转姿态时也可显式插入。使用前须配置 `named_targets.home`，并按当前夹持状态通过正常碰撞与路径检查。
 
 ## 4. 常用任务级 Skill Graph
@@ -173,7 +181,7 @@
 ### 抓起来某物
 
 ```text
-approach(object) → pick(object) → lift_up(distance) → retreat(object)
+approach(object) → pick(object) → retreat(object, lift_distance=0.01)
 ```
 
 ### 放置到某处
@@ -187,7 +195,7 @@ approach(destination) → put(destination) → retreat(destination)
 ### 把某物放置某处
 
 ```text
-approach(object) → pick(object) → lift_up(distance) → retreat(object)
+approach(object) → pick(object) → retreat(object, lift_distance=0.01)
     → approach(destination) → put(destination) → retreat(destination) → move_to(home)
 ```
 

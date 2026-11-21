@@ -73,7 +73,8 @@ class _MoveExecutor:
         try:
             stage_started = time.perf_counter()
             try:
-                normalized = validate_move_request(request, self.config)
+                normalized = validate_move_request(
+                    request, self.config, joint_count=len(self.robot_runtime.joint_names))
             finally:
                 timing["validation"] = time.perf_counter() - stage_started
             target_body_name = normalized.get("target_body_name")
@@ -202,7 +203,8 @@ class _MoveExecutor:
             return None
         trajectory = deepcopy(dict(prepared.trajectory))
         points = np.asarray(trajectory.get("waypoints", []), dtype=float)
-        if (points.ndim != 2 or points.shape[1] != 6 or len(points) < 2
+        expected_dof = len(self.robot_runtime.joint_names)
+        if (points.ndim != 2 or points.shape[1] != expected_dof or len(points) < 2
                 or not np.all(np.isfinite(points))
                 or np.any(points < self.robot_runtime.joint_limits[:, 0])
                 or np.any(points > self.robot_runtime.joint_limits[:, 1])

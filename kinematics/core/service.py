@@ -23,6 +23,8 @@ class KinematicsService:
                 or not np.all(np.isfinite(self.joint_periods)) or np.any(self.joint_periods < 0)):
             raise ValueError("Invalid robot joint limits/periods")
         self._backends = {}  # Instances and mutable workspaces belong to this service.
+        self._auto_chain = None
+        self._auto_errors = {}
 
     def forward(self, joints):
         return self.robot.forward(joints)
@@ -34,16 +36,47 @@ class KinematicsService:
         """Registered names/aliases; native availability is checked on first use."""
         return self.registry.names
 
+    def automatic_backends(self):
+        """Return a cached, geometry-verified route for this robot chain.
+
+        Optional solver imports and geometry checks happen on first use, so
+        constructing a service for FK alone requires no optional IK packages.
+        A new robot model must use a new service, as with backend workspaces.
+        """
+        if self._auto_chain is None:
+            chain, errors = [], {}
+            for name in self.registry.auto_backends:
+                if name not in {"eaik", "ssik"}:
+                    chain.append(name)
+                    continue
+                try:
+                    if name not in self._backends:
+                        self._backends[name] = self.registry.create(name, self.robot)
+                    prepare = getattr(self._backends[name], "prepare", None)
+                    if prepare is not None:
+                        prepare()
+                    chain.append(name)
+                except Exception as exc:
+                    errors[name] = str(exc)
+            self._auto_chain = tuple(chain)
+            self._auto_errors = errors
+        return list(self._auto_chain)
+
+    def automatic_backend_info(self):
+        """Expose the selected order and unsupported/unavailable solver reasons."""
+        return {"backends": self.automatic_backends(), "excluded": dict(self._auto_errors)}
+
     def quick_reachability(self, target_pose, *, timeout=0.03):
         """Ordering hint only: verify analytic IK without numerical fallback.
 
         False never proves unreachability; unsupported models and solver errors
         must still be allowed through the ordinary full planning chain later.
         """
-        if 'eaik' not in self.registry.names:
+        chain = [name for name in self.automatic_backends() if name in {"eaik", "ssik"}]
+        if not chain:
             return None
         try:
-            self.solve_one(target_pose, backend='eaik', timeout=timeout)
+            self.solve_one(target_pose, backends=chain, timeout=timeout)
         except IKError:
             return False
         return True
@@ -91,7 +124,7 @@ class KinematicsService:
                 raise ValueError("Use either backend or a non-empty backends sequence")
             chain = [self.registry.resolve(name) for name in backends]
         else:
-            chain = self.registry.auto_backends if backend == "auto" else [self.registry.resolve(backend)]
+            chain = self.automatic_backends() if backend == "auto" else [self.registry.resolve(backend)]
         request = IKRequest(position.copy(), rotation.copy(), reference.copy(),
                             time.perf_counter()+timeout, max_solutions,
                             enumerate_solutions, max_joint_step,
@@ -99,7 +132,9 @@ class KinematicsService:
                             orientation_tolerance=self.ik_validation['orientation_tolerance_rad'])
         for value in (request.position, request.rotation, request.seed):
             value.setflags(write=False)  # Failed plugins cannot rewrite the fallback target/seed.
-        errors = []
+        automatic = backend == "auto" and backends is None
+        errors = ([f"{name}: {reason}" for name, reason in self._auto_errors.items()]
+                  if automatic else [])
         for name in dict.fromkeys(chain):
             if request.remaining_time <= 0:
                 errors.append("Shared IK timeout exhausted")
@@ -121,7 +156,9 @@ class KinematicsService:
                                 residual=raw.residual, fallback_reason="; ".join(errors) or None,
                                 position_tolerance=min(raw.position_tolerance, request.position_tolerance),
                                 orientation_tolerance=min(raw.orientation_tolerance, request.orientation_tolerance),
-                                diagnostics={**raw.diagnostics, "rejected_candidates": rejected})
+                                diagnostics={**raw.diagnostics, "rejected_candidates": rejected,
+                                             **({"automatic_routing": self.automatic_backend_info()}
+                                                if automatic else {})})
             except Exception as exc:
                 errors.append(f"{name}: {exc}")
         raise IKError("; ".join(errors) or "No automatic IK backends registered")

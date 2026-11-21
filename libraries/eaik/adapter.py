@@ -33,6 +33,11 @@ class EAIKBackend:
                 raise IKError("EAIK geometry does not match the robot/tool FK")
         self._solver = solver
 
+    def prepare(self):
+        """Classify the geometry and verify FK once, without solving a target."""
+        if self._solver is None:
+            self._initialize()
+
     def solve(self, request):
         if self._solver is None:
             self._initialize()

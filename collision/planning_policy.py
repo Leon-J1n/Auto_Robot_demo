@@ -21,8 +21,6 @@ def planning_signature(runtime, checker, *, include_state=True) -> str:
     scene revision and full before/after guards still have to be refreshed.
     """
     digest = hashlib.sha256()
-    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'options', None)).encode())
-    digest.update(repr(getattr(getattr(checker, 'planning_proxy', None), 'lift_bounds', None)).encode())
     for owner, names in ((runtime.data, ('qpos', 'mocap_pos', 'mocap_quat') if include_state else ()),
             (runtime.model, ('qpos0', 'body_mocapid', 'body_pos', 'body_quat', 'body_parentid', 'jnt_pos', 'jnt_axis',
                 'jnt_type', 'jnt_range', 'site_pos', 'site_quat', 'geom_pos', 'geom_quat',

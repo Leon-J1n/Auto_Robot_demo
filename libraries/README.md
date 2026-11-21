@@ -3,6 +3,7 @@
 第三方库源码和适配入口统一放在本目录。业务代码不得从原始源码目录直接导入。
 
 - `eaik/`：基于 URDF 的 EAIK 逆解，当前 `auto` 默认优先使用。
+- `ssik/`：SSIK 6R/7R 逆解、URDF 入口与固定版本部署；`auto` 中在 EAIK 之后、Jacobian 之前按几何适用性回退，也可显式使用 `backend="ssik"`。
 - `ikfast/`：UR5e IKFast 解析逆解；暂不加入 `auto` 回退链，仍可显式调用。
 - `trac_ik/`：TRAC-IK 原生后端预留；当前 Windows 运行时由 `kinematics` 中的 MuJoCo Jacobian 数值兼容实现提供同类求解能力。
 

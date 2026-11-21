@@ -1,0 +1,46 @@
+name: pointcloud_estimate
+kind: atomic_action
+description: Estimate grasp or placement poses from an input point cloud.
+input:
+  operation:
+    type: string
+    required: true
+    enum: [grasp, placement]
+  point_cloud:
+    type: object
+    required: true
+    description: Point cloud supplied by the caller.
+    properties:
+      points:
+        type: array
+        required: true
+        description: N by 3 XYZ points in the declared frame, in meters.
+      frame_id:
+        type: string
+        required: true
+      timestamp:
+        type: number
+        required: false
+      colors:
+        type: array
+        required: false
+  target:
+    type: object
+    required: false
+    description: Optional target identity or semantic constraints.
+  constraints:
+    type: object
+    required: false
+    description: Optional grasp or placement constraints.
+output:
+  success: {type: boolean}
+  operation: {type: string, enum: [grasp, placement]}
+  pose:
+    type: object
+    description: Estimated pose in frame_id; orientation uses quaternion_wxyz.
+    properties:
+      position: {type: array, length: 3, unit: meter}
+      quaternion_wxyz: {type: array, length: 4}
+      frame_id: {type: string}
+  confidence: {type: number, range: [0.0, 1.0]}
+  diagnostics: {type: object}

@@ -1,9 +1,9 @@
 {
   "schema_version": "2.0",
-  "request_id": "place-apple-right-of-tray-005",
-  "description": "把苹果放到篮子中",
+  "request_id": "piper-table-sorting-005",
+  "description": "PiPER资产机械臂收纳测试，自动按几何选择SSIK并保留Jacobian回退",
   "scene_id": 3,
-  "scene_version": 3,
+  "scene_version": 8,
   "commands": [
     {
       "command_id": "1",
@@ -21,102 +21,15 @@
       }
     },
     {
-      "command_id": "3",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
       "command_id": "4",
       "skill_name": "retreat",
       "parameters": {
+        "lift_distance": 0.02,
         "target": 7
       }
     },
     {
       "command_id": "5",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 12
-      }
-    },
-    {
-      "command_id": "6",
-      "skill_name": "put",
-      "parameters": {
-        "target": 12
-      }
-    },
-    {
-      "command_id": "7",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 12
-      }
-    },
-    {
-      "command_id": "8",
-      "skill_name": "move_to",
-      "parameters": {
-        "target": "home",
-        "planning_method": "joint"
-      }
-    },
-    {
-      "command_id": "9",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 11
-      }
-    },
-    {
-      "command_id": "10",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 11,
-        "hold_force": 15.0
-      }
-    },
-    {
-      "command_id": "11",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "12",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 11
-      }
-    },
-    {
-      "command_id": "13",
-      "skill_name": "approach",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "14",
-      "skill_name": "put",
-      "parameters": {
-        "target": 13,
-        "relation": "behind",
-        "distance_m": 0.05
-      }
-    },
-    {
-      "command_id": "15",
-      "skill_name": "retreat",
-      "parameters": {
-        "target": 13
-      }
-    },
-    {
-      "command_id": "16",
       "skill_name": "move_to",
       "parameters": {
         "target": "home",
@@ -124,5 +37,5 @@
       }
     }
   ],
-  "scene_file": "ur5_table_sorting.json"
+  "scene_file": "piper_table_sorting.json"
 }

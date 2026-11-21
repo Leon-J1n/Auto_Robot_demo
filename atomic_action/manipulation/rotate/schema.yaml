@@ -1,0 +1,11 @@
+name: rotate
+kind: atomic_action
+parameters:
+  degree:
+    type: float
+    unit: degree
+    required: true
+  joint_name:
+    type: string
+    required: false
+    description: Joint to rotate; defaults to wrist_3_joint or the last runtime joint.

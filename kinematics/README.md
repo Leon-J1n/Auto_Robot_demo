@@ -1,232 +1,123 @@
-# 运动学接口与求解器插件
+# Kinematics 模块
 
-更新日期：2026-10-09。本文总结本目录的职责边界和调用接口，并保留插件接入说明。
+## 1. 职责与边界
 
-## 职责边界
+`kinematics` 提供机器人运动学的统一入口：正向运动学（FK）、几何 Jacobian、逆运动学（IK）后端发现与分发、候选解校验和排序。核心 API 与仿真器无关；机器人模型及 IK 算法通过协议接入。
 
-| 部分 | 职责 | 所在位置 |
-| --- | --- | --- |
-| 统一服务 | FK/Jacobian 分发、IK 后端选择与回退、候选复核和排序 | `core/service.py` |
-| 协议与结果类型 | RobotModel、IKBackend、IKRequest、IKResult、IKError | `core/contracts.py` |
-| 注册表 | 清单发现、名称/别名解析、按需创建后端 | `core/registry.py` |
-| 位姿和构型处理 | 坐标格式转换、旋转误差、周期归一化、去重和等价构型 | `core/geometry.py`、`core/policies.py` |
-| 具体机器人模型 | 几何加载、FK/Jacobian 计算、参考状态绑定 | `libraries/kinematic_chain/`；本目录 `models/` 保留 MuJoCo 参考模型 |
-| 具体 IK 算法 | 第三方依赖、坐标适配、模型支持检查和候选生成 | `libraries/ikfast/`、`libraries/jacobian_ik/`、`libraries/eaik/` |
+运动学只计算末端位姿、雅可比和关节解，不验证环境或自碰撞，不生成、平滑或时间参数化路径，也不执行机器人。碰撞检查由 `collision` 负责，路径搜索与轨迹准备由 `planning` 负责，真实执行状态由 `execution` 提供。
 
-本目录输出位姿、雅可比或关节构型。无碰撞轨迹搜索、简化和平滑由 [planning](C:/Users/21474/Desktop/robot-agent/planning/README.md) 负责；碰撞判断由检测器负责；运动执行、实测状态和场景更新由运行时及控制器负责。
+IK 的终点解通过验证不代表连接到该解的整条路径可行。`max_joint_step` 只限制解相对 seed 的单关节变化；连续路径需要规划层沿路径逐点求解并执行碰撞检查。
 
-`max_joint_step` 只限制单次 IK 相对 seed 的变化；逐点使用上一构型作为 seed 才能检查路点衔接。IK 校验通过不表示无碰撞，最近 IK 解也不保证整条运动路径最短。
-
-`kinematics` 定义固定的 v1 接口，负责分发、验证和选择结果。新增符合接口的 IK 方法库时，
-只需在 `libraries` 中添加一个目录和清单，不需要修改 `kinematics`、Move 策略或控制器。
-第三方库原本的接口、坐标系、单位和返回值由该目录里的 adapter 转换。
-未来如果需要接口中尚未定义的能力，需要扩展接口版本；任意第三方库并不能直接原样接入。
+## 2. 目录结构与职责
 
 ```text
 kinematics/
-  core/                    仿真无关的稳定 API
-    contracts.py           RobotModel、IKBackend、IKRequest、IKResult、IKError
-    registry.py            发现 solver.json，解析名称/别名，按需加载工厂
-    service.py             FK/雅可比入口，IK 分发、复核、回退与选择
-    geometry.py            位姿转换、旋转误差
-    policies.py            周期关节角归一化、去重、等价构型
-  models/                  机器人模型适配器
-    mujoco.py              MuJoCo FK、雅可比与基座适配
-  backends/                可选仿真器后端
-    mujoco.py              创建 MuJoCo 参考服务
+├── core/                    # 仿真无关的 API 和服务
+│   ├── contracts.py         # RobotModel、IKBackend、IKRequest、IKResult、IKError
+│   ├── registry.py          # solver.json 发现、名称解析和后端工厂
+│   ├── service.py           # FK/Jacobian、IK 分发、候选校验与选择
+│   ├── geometry.py          # 位姿解析、坐标/旋转误差计算
+│   └── policies.py          # 周期角归一化、等价构型和候选去重
+├── models/mujoco.py         # MuJoCo 机器人模型适配
+└── backends/mujoco.py       # 从 MuJoCo runtime 创建运动学服务
+
 libraries/
-  kinematic_chain/         独立 FK/Jacobian、JSON/MJCF/URDF 模型与状态绑定
-  ikfast/                  adapter.py、solver.json、原生 UR5e IKFast
-  jacobian_ik/             adapter.py、solver.json、阻尼最小二乘数值 IK
-  eaik/                    EAIK、场景参数提取和 FK/IK 检查；auto 默认优先使用
+├── kinematic_chain/         # 串联链 FK/Jacobian、URDF 与 MJCF 模型
+├── eaik/                    # EAIK 后端和 URDF 加载入口
+├── ssik/                    # SSIK 6R/7R 后端和 URDF 加载入口
+├── jacobian_ik/             # 阻尼最小二乘数值 IK 后端
+└── ikfast/                  # IKFast 后端
 ```
 
-## 调用接口
+每个 `KinematicsService` 持有自己的 RobotModel 和后端实例。注册表读取 `libraries/*/solver.json`，发现阶段不导入可选求解器依赖；后端在首次使用时创建并检查模型支持情况。
 
-构造入口为 `KinematicsService(robot, registry=None)`。未指定注册表时发现 `libraries` 清单；场景中直接使用缓存的 `runtime.kinematics`。
+## 3. 数据流
 
-| 公开接口 | 返回值/含义 |
+```text
+URDF / 串联链参数 / MuJoCo runtime
+                 ↓
+       RobotModel + KinematicsService
+          ├── forward(q) / jacobian(q)
+          └── solve_one / solve_all(target, seed)
+                    ↓
+        solver.json 解析后端回退顺序
+                    ↓
+       IK 候选 → 关节限位与连续性检查
+                    ↓
+       周期角归一化 → RobotModel FK 复核
+                    ↓
+       去重、按 seed 距离排序 → IKResult
+                    ↓
+             planning 后续处理
+```
+
+所有后端共享一次 IK 调用的绝对 deadline。某个后端无解、不可用、不支持当前模型或候选未通过校验时，服务可在剩余预算内继续下一个后端。返回的是首个产生有效结果的后端候选，不会合并多个后端的解。
+
+## 4. 对外接口
+
+主要公开类型从 `kinematics` 导出：`KinematicsService`、`RobotModel`、`IKBackend`、`IKRequest`、`IKResult`、`IKError`、`SolverRegistry` 和 `SolverDescriptor`。
+
+| 接口 | 输入 / 输出及用途 |
 | --- | --- |
-| `forward(joints)` | 世界坐标 TCP 位姿字典：`position` 为 (3,)，`rotation_matrix` 为 (3,3) |
-| `jacobian(joints)` | 世界坐标几何雅可比 (6,N)，线速度在前、角速度在后 |
-| `solve_one(target_pose, *, seed=None, backend="auto", backends=None, policy="nearest", timeout=1.0, max_joint_step=None)` | IKResult，`.solution` 为排序后首项 |
-| `solve_all(target_pose, *, seed=None, backend="auto", backends=None, policy="nearest", timeout=2.0, max_solutions=8, max_joint_step=None)` | IKResult，`.solutions` 为第一个成功后端的候选，不合并多个库 |
-| `equivalent_configurations(joints, reference, max_variants=8)` | 限位内周期等价构型列表，按到 reference 的距离排序 |
-| `available_backends()` | 注册名称/别名元组 |
-| `robot`、`limits`、`joint_periods` | 模型实例、N×2 限位和长度 N 的周期数组 |
+| `KinematicsService(robot, registry=None)` | 创建统一服务；默认发现仓库 `libraries/` 下的求解器清单 |
+| `forward(joints)` | 返回世界坐标 TCP 位姿，含 `position`（米）和 `rotation_matrix` |
+| `jacobian(joints)` | 返回世界坐标几何 Jacobian，形状 `(6, DOF)`，线速度在前、角速度在后 |
+| `solve_one(target_pose, *, seed=None, backend="auto", backends=None, policy="nearest", timeout=1.0, max_joint_step=None)` | 返回 `IKResult`，`.solution` 为选中解 |
+| `solve_all(target_pose, *, seed=None, backend="auto", backends=None, policy="nearest", timeout=2.0, max_solutions=8, max_joint_step=None)` | 返回首个成功后端找到的候选，最多 `max_solutions` 个 |
+| `available_backends()` | 返回已注册名称与别名，不代表可选原生库当前可加载 |
+| `equivalent_configurations(joints, reference, max_variants=8)` | 返回限位内的周期等价关节构型，并按参考构型距离排序 |
 
-位置单位为米，转动关节角与跳变限制为弧度；目标 RPY 使用度，四元数使用 wxyz。未指定 seed 时读取模型 `current_joints()`。`frame="base"` 目前没有自动坐标变换，保留世界对齐语义；建议使用 `world`。
-
-```python
-kin = runtime.kinematics
-print(kin.available_backends())  # 注册名称/别名，尚未检查动态库是否可用
-pose = {"position": [0.33, 0.46, 0.66],
-        "orientation": {"representation": "rpy", "roll": 180, "pitch": -90, "yaw": 0}}
-seed = runtime.get_joint_positions()
-
-result = kin.solve_one(pose, seed=seed, backend="ikfast")
-q = result.solution
-candidates = kin.solve_all(pose, seed=seed, backend="ikfast", max_solutions=8).solutions
-result = kin.solve_one(pose, seed=seed, backends=["ikfast", "jacobian"],
-                       policy="continuous", max_joint_step=0.4, timeout=1.0)
-result = kin.solve_one(pose, seed=seed, backend="jacobian")
-result = kin.solve_all(pose, seed=seed, policy="minimum_travel")
-
-# 执行层使用统一结果类型。
-q = result.solution
-solver_info = result.metadata()  # 供轨迹日志使用，不包含关节数组
-```
-
-`solve_one/solve_all` 都返回 `IKResult`。包含选中解 `solution`、候选 `solutions`、
-真正使用的 `solver/backend`、可选残差与回退原因、诊断信息。
-项目内的 demo、运动策略、按压及推拉控制器均使用这两个接口。
-原来的 `solve()`、`solve_candidates()` 及返回关节字典的兼容层已移除。
-失败统一抛出 `IKError`；需要继续尝试其他规划方案的调用层应捕获它。
-`solve_one` 的解析后端可以保留多个候选，首项是选中解；`solve_all` 按 `max_solutions` 截断。
-数值求解只能给出预算内找到的解，不保证枚举所有分支。
-
-IK 筛选精度由根目录 `config/global.json` 的 `planning.ik_validation` 控制：
-`position_tolerance_m: 0.003`（3mm）、`orientation_tolerance_rad: 0.01`（约 0.57°）。
-EAIK 候选的 FK 复核与 Jacobian 数值收敛使用同一组容差；其他插件仍可要求更严格的复核，
-不能自行放宽全局上限。关节限位和 `max_joint_step` 继续独立检查。
-容差在创建运动学服务时读取，修改配置后重启任务即可生效。
-
-| 参数 | 含义 |
-| --- | --- |
-| `backend` | 单库名称/别名，显式指定时不回退；默认 `auto` |
-| `backends` | 调用者指定的有序回退列表，与显式 `backend` 互斥 |
-| `policy="nearest"` | 归一化后，选择距 seed 的 L2 距离最小解，保持原行为 |
-| `policy="minimum_travel"` | 选择各关节绝对变化之和最小的候选 |
-| `policy="continuous"` | 必须指定 `max_joint_step`，过滤后选择距 seed 最近的候选 |
-| `max_joint_step` | 每个关节相对 seed 的最大变化，所有策略都可以指定 |
-| `timeout` | 秒；回退链共享同一个绝对 deadline，不为下一库重新计时 |
-
-`auto` 使用清单优先级：目前 EAIK（10）→ Jacobian（20），遇到无解、库不可用、模型不匹配、
-FK 校验失败或候选全部超出连续性限制时尝试下一库。有有效解析候选时不额外启动数值搜索。
-原来的 `trac_ik` 名称仍作为 `jacobian` 的别名；它是已有雅可比数值算法，未接入原生 TRAC-IK。
-结果始终报告规范名 `jacobian`。Move JSON 中的 `strategy_params.ik_method` 字段仍可使用，
-执行时传给接口的 `backend` 参数，因此已有命令文件不需要改名。
-
-IK 选择只比较终点候选，不能保证整条路径运动幅度最小。现有 JointMove 仍会结合碰撞检查、
-直连/RRT 路径规划和累计关节行程选择实际路径；直线分支的连续性限制继续保留。
-
-## 添加一个方法库
-
-创建 `libraries/my_solver/__init__.py`、`adapter.py` 和 `solver.json`。
-JSON 清单使用标准库解析，兼容项目 Python 3.10，不需要新增 TOML 依赖。
-
-```json
-{
-  "api_version": 1,
-  "name": "my_solver",
-  "aliases": ["my_alias"],
-  "factory": "libraries.my_solver.adapter:create_backend",
-  "auto_priority": null
-}
-```
-
-`auto_priority: null` 或不填写表示只接受显式调用；填写整数后加入 auto 回退链，数值越小越优先。
-同优先级按名称排序，名称和别名不能重复。添加完成后重新创建运动学服务或重启 demo；
-现有服务保留创建时的清单快照。清单发现不导入第三方库。
-
-```python
-# libraries/my_solver/adapter.py
-import numpy as np
-from kinematics import IKError, IKRequest, IKResult, RobotModel
-
-class MyBackend:
-    def __init__(self, robot: RobotModel):
-        self.robot = robot
-        # 可以在这里按需加载第三方库；不能把实例缓存到全局。
-
-    def supports(self, robot: RobotModel) -> bool:
-        # 应检查真实的机器人模型是否受支持；IKFast 还会校准/验证 FK。
-        return len(robot.limits) == 6
-
-    def solve(self, request: IKRequest) -> IKResult:
-        if request.remaining_time <= 0:
-            raise IKError("IK budget exhausted")
-        # 用你的第三方库替换下一行，并转换到 RobotModel 的关节顺序。
-        candidates = your_library.inverse(
-            request.position, request.rotation, request.seed,
-            timeout=request.remaining_time,
-        )
-        return IKResult(solutions=[np.asarray(q, dtype=float) for q in candidates],
-                        backend="my_solver_native")
-
-def create_backend(robot: RobotModel):
-    return MyBackend(robot)
-```
-
-此示例中的 `your_library` 是需要替换和导入的占位符。adapter 必须处理第三方库自身的
-位姿/工具变换、依赖加载、异常与多解枚举。耗时搜索应定期检查 `request.remaining_time`，
-或把剩余预算传给原生库；Python 服务不能强行中断不支持超时的原生函数。
-
-`IKRequest` 提供世界位置（米）、旋转矩阵、关节 seed（转动关节弧度）、deadline、
-是否枚举、多解上限和最大关节变化。服务层拒绝非有限/维度错误的结果，进行限位、
-周期归一化、连续性和 RobotModel FK 复核，并将结果排序、去重。
-位置复核上限为 `2e-4 m`、姿态上限为 `2e-3 rad`；插件可通过结果字段要求更严格的阈值。
-IKFast 使用更严格的阈值。插件不能通过填写更大的阈值绕过复核。
-
-Move 请求无需修改代码即可选用新库：
-
-```json
-{"strategy_params": {"ik_method": "my_solver"}}
-```
-
-## 机器人模型与隔离
-
-| RobotModel 成员 | 约定 |
-| --- | --- |
-| `limits`、`joint_periods` | 关节上下限和周期；协议允许非周期坐标的周期为 0 |
-| `current_joints()` | 长度 N 的参考状态，不执行运动 |
-| `forward(q)`、`jacobian(q)` | 与统一服务相同的世界坐标约定 |
-| `base_transform(q)` | `T_world_base`，4×4 基座到世界齐次变换 |
-
-| 模型入口 | 返回值与装配 |
-| --- | --- |
-| `ChainRobotModel(parameters, *, current_joints_provider=None, base_transform_provider=None, initial_joints=None, world_from_base=None)` | 接收 H/P 零位参数，绑定参考关节及基座回调 |
-| `ChainRobotModel.from_json(path, **kwargs)` | 从参数 JSON 或含 `parameters` 的导出文件创建同一模型 |
-| `UrdfRobotModel(path, *, tip_link, base_link=None, tcp_transform=None, world_from_base=None, initial_joints=None, continuous_limits=None)` | 加载所选 URDF 链，可再传入 `KinematicsService(robot)` |
-| `libraries.eaik.load_urdf(...)` | 加载参数与 UrdfRobotModel 相同；返回仅注册 EAIK 的服务，auto 使用 EAIK，加载时检查模型支持情况 |
-| `libraries.kinematic_chain.mujoco.create_scene_kinematics(runtime, registry=None)` | 一次 MJCF 几何提取，再绑定实时状态，返回独立模型服务 |
-| `libraries.kinematic_chain.mujoco.extract_chain_parameters(runtime)` | 返回可保存的零位模型参数字典 |
+位置单位为米，关节角和 `max_joint_step` 单位为弧度。目标姿态可用 `rotation_matrix`、RPY（角度制）或 wxyz 四元数表示；未提供姿态时使用当前关节状态对应的末端姿态。`frame` 接受 `world` 或 `base`，其中 `base` 沿用现有世界对齐语义，不做基座到世界的自动转换，推荐显式使用 `world`。
 
 ```python
 from kinematics import KinematicsService
 from libraries.kinematic_chain import ChainRobotModel
-from libraries.eaik import load_urdf
 
 robot = ChainRobotModel.from_json("robot_parameters.json", initial_joints=seed)
 kin = KinematicsService(robot)
-kin = load_urdf("robot.urdf", tip_link="tool0", base_link="base_link")
+pose = {
+    "frame": "world",
+    "position": [0.33, 0.46, 0.66],
+    "orientation": {
+        "representation": "rpy",
+        "roll": 180,
+        "pitch": -90,
+        "yaw": 0,
+    },
+}
+result = kin.solve_one(pose, seed=seed, policy="continuous",
+                       max_joint_step=0.4, timeout=1.0)
+q_goal = result.solution
+solver_info = result.metadata()  # 不包含关节数组
 ```
 
-通用 ChainRobotModel 当前只实现串联转动关节。URDF 所选链保留 fixed，支持 revolute/continuous；continuous 需提供有限搜索窗口。`tcp_transform` 为 `T_tip_TCP`，`world_from_base` 为 `T_world_base`；Xacro 先展开为 URDF。解析后端另有机器人几何支持范围。
+策略 `nearest` 按 L2 距离选择离 seed 最近的候选；`minimum_travel` 按各关节绝对变化总和选择；`continuous` 要求提供 `max_joint_step` 并剔除超限候选。`IKResult` 保存候选、规范 solver/backend 名、可选残差、回退原因及诊断信息。失败抛出 `IKError`。
 
-离线模型可通过 `set_current_joints(q)` 更新参考状态；已绑定外部关节回调时禁止调用。模型几何或工具结构变化需重建模型。`chain_parameters` 返回参数深拷贝，可用于保存或后端适配。
+## 5. 配置、输入与输出
 
-`RobotModel` 暴露 `limits`（N×2）、`joint_periods`（N；非周期关节为 0）、
-`current_joints()`、`forward(q)`、`jacobian(q)`（6×N，位置在前、旋转在后）和
-`base_transform(q)`（4×4）。MuJoCo 实现在 `models` 下，不进入通用服务或算法中。
-当前默认模型是 `libraries/kinematic_chain/ChainRobotModel`，MJCF/URDF 共用其 FK/Jacobian，运行时注入实时关节和基座状态。Move、Press、Push/Pull 支持 `kinematics=` 注入；demo 会话支持 `kinematics_factory(runtime)`。其他仿真器/机器人只需提供相同接口并创建 `KinematicsService(robot)`。`MujocoKinematics` 保留为显式参考实现。
-当前 Move 技能和运行时仍面向六轴机器人；通用 IK 接口本身不限定六轴。
+IK 精度读取根目录 `config/global.json` 的 `planning.ik_validation`：当前位置容差为 `0.003 m`，姿态容差为 `0.01 rad`。服务用同一配置生成后端请求并复核候选 FK；后端可以使用更严格的阈值，不能放宽全局上限。修改配置后需重新创建服务或重启任务。
 
-普通 `import kinematics` 或按名称导入通用接口不加载 MuJoCo；显式导入 `MujocoKinematics` 或使用 `from kinematics import *` 会加载参考实现。JSON/URDF 的独立计算无需 MuJoCo，MJCF 参数提取以及现有场景、碰撞和执行仍使用 MuJoCo。
+当前清单将 `auto` 顺序设为 EAIK（优先级 10）→ SSIK（优先级 15）→ Jacobian（优先级 20）。首次自动调用会按实际链几何准备 EAIK/SSIK 并复核 FK，不使用资产中的 `arm_configuration` 字符串；不支持该几何或依赖不可用的解析后端会被排除，并在当前服务实例中缓存。EAIK 不支持的 6R/7R 链自动选择 SSIK，支持移动关节等其他模型可继续使用适用的数值后端。解析后端对某个目标无解时仍按顺序回退，不改变几何识别结果。`automatic_backend_info()` 返回后端顺序和排除原因，`quick_reachability()` 使用适用的 EAIK/SSIK 链，不启用数值回退。显式 `backend` 或 `backends` 保持调用者指定顺序。准备阶段在目标求解 deadline 建立前执行，首次调用可能额外耗时；解析算法运行中无法强制中断。更换链几何后应创建新的服务实例。IKFast（优先级为空）不参加自动回退，但可显式指定。`trac_ik` 是 `jacobian` 的兼容别名，实际使用的是项目内 Jacobian 数值求解器，并非原生 TRAC-IK。
 
-完整模型协议、JSON/MJCF/URDF 加载参数与执行层注入签名见 [运动学接口清单](C:/Users/21474/Desktop/robot-agent/KINEMATICS_INTERFACES.md)，具体引擎边界见 [MuJoCo 依赖清单](C:/Users/21474/Desktop/robot-agent/MUJOCO_DEPENDENCIES.md)。
+服务接受 `RobotModel`：`limits` 为 `(DOF, 2)` 关节限位，`joint_periods` 为每关节周期（非周期坐标用 0）；模型实现 `current_joints()`、`forward(q)`、`jacobian(q)` 和 `base_transform(q)`。项目提供的入口包括：
 
-目标无姿态时保持模型 `current_joints()` 对应的末端姿态。`rotation_matrix` 可直接传入；
-RPY 使用度，四元数使用 wxyz。`base` 标签保留原来的世界对齐坐标约定；本次未改变坐标语义。
+| 入口 | 用途 |
+| --- | --- |
+| `ChainRobotModel(parameters, ...)` / `ChainRobotModel.from_json(path, ...)` | 从串联链参数构建独立运动学模型 |
+| `UrdfRobotModel(path, *, tip_link, base_link=None, ...)` | 从 URDF 选择机器人链并适配为 `RobotModel` |
+| `libraries.eaik.load_urdf(...)` | 创建只注册 EAIK 的 URDF 运动学服务 |
+| `create_scene_kinematics(runtime, registry=None)` | 提取 MuJoCo 链几何并绑定 runtime 的实时状态 |
 
-每个服务独立持有 RobotModel/FK 工作区与后端实例，并行分支应使用独立服务；
-同一个服务实例不提供线程安全保证。损坏的清单记录在 `registry.discovery_errors`，
-不会阻止其他库注册；本地清单/adapter 是可信代码，不应加载不受信任的插件。
+新增求解器时，在 `libraries/<solver>/` 提供 adapter 和 `solver.json`。清单 `api_version` 必须为 1，`factory` 采用 `module.path:callable`；`aliases` 可选，`auto_priority` 为空表示仅显式调用，设置整数后进入自动链（数字越小越优先，同优先级按名称排序）。adapter 实现 `supports(robot)` 和 `solve(request)`，将库自身的坐标系、单位、关节顺序及结果格式转换为统一协议。`IKRequest.remaining_time` 提供共享 deadline 的剩余秒数；不可中断的原生调用无法由服务强制终止。新清单需在创建新服务时发现，现有服务使用创建时的注册表快照。
 
-## 验证
+服务会验证候选形状和有限性、归一化周期关节、检查限位与连续性，并通过 RobotModel FK 复核位置和姿态误差，再去重并排序。`solve_all` 只返回第一个成功后端在预算内找到的结果，数值方法不保证枚举全部 IK 分支。单个服务实例不保证线程安全；并行求解应使用独立服务实例。
+
+## 6. 验证与限制
+
+从仓库根目录运行 IK 容差配置及候选校验测试：
 
 ```powershell
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -p test_kinematics_plugins.py -v
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -p test_linear_continuity.py -v
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -p test_fixed_orientation_shortcut.py -v
+.\.venv\Scripts\python.exe -B -m unittest planning.tests.test_ik_tolerances
 ```
+
+模型目前覆盖串联转动关节；URDF 链支持 fixed、revolute 和 continuous 关节，continuous 关节需给出有限搜索窗口。第三方解析器和数值算法各有机器人结构、模型和超时支持范围。IK 候选校验不包含碰撞或路径可达性；最终运动必须由 planning 和 collision 继续验证。

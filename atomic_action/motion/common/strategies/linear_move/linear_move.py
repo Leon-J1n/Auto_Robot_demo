@@ -40,8 +40,8 @@ class LinearMove:
         collision_resolution, _ = collision_sampling_settings(request)
         seed_value = params.get("ik_seed")
         seed = np.asarray(start_q if seed_value is None else seed_value, dtype=float)
-        if seed.shape != (6,) or not np.all(np.isfinite(seed)):
-            raise ValueError("strategy_params.ik_seed must contain six finite joint values.")
+        if seed.shape != start_q.shape or not np.all(np.isfinite(seed)):
+            raise ValueError(f"strategy_params.ik_seed must contain {len(start_q)} finite joint values.")
         method = params.get("ik_method", "auto")
         alphas = np.linspace(0.0, 1.0, count)[1:]
         waypoint_orientations = _waypoint_orientations(

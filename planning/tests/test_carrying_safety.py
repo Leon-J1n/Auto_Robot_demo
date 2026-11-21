@@ -70,37 +70,31 @@ class CarryingSafetyTests(unittest.TestCase):
             limits = world_limits(compile_policy(converted), [g('payload'), g('tool'), g('arm')], [g('target')])
             np.testing.assert_allclose(limits[:, 0], [-.002, .003, .003])
 
-    def test_actual_shallow_overlap_native_and_proxy(self):
-        for simplified in (False, True):
-            with self.subTest(simplified=simplified), scene() as (runtime, checker, g):
-                runtime.gripper_controller.held_name = 'payload'
-                relative = np.eye(4); relative[0, 3] = .1
-                runtime.gripper_controller.relative_pose = relative
-                model = runtime.model
-                model.geom_type[g('payload')] = mujoco.mjtGeom.mjGEOM_SPHERE
-                model.geom_size[g('payload')] = [.02, 0, 0]
-                tool = runtime.gripper_controller.base_id
-                center = runtime.data.xpos[tool] + runtime.data.xmat[tool].reshape(3, 3) @ relative[:3, 3]
-                target = runtime.object_ids['target']
-                model.body_pos[target] = center + [0, 0, -.119]
-                model.geom_size[g('target')] = [.01, .01, .1]
-                checker.carrying_safety_distance = -.002
-                # This fixture's gripper is an exact sphere, so no production mesh template is needed.
-                with patch('collision.proxy._gripper_spheres', side_effect=lambda geom, _: [
-                        {'center': np.asarray(geom['matrix'])[:3, 3].tolist(), 'radius': geom['size'][0]}]):
-                    if simplified:
-                        checker.enable_planning_proxy()
-                    def payload_contacts(margin):
-                        result = checker.check([.4], safety_distance=margin)
-                        return [c for c in result.contacts if {c['geom1'], c['geom2']} == {'payload', 'target'}]
-                    self.assertFalse(payload_contacts(.003))  # 1 mm overlap allowed in planning.
-                    self.assertTrue(payload_contacts(0.))  # Execution still rejects penetration.
-                    checker.carrying_safety_distance = 0.
-                    self.assertTrue(payload_contacts(.003))  # Setting changes invalidate cached results.
-                    checker.carrying_safety_distance = -.002
-                    model.body_pos[target, 2] += .002
-                    checker.scene_revision = getattr(checker, 'scene_revision', 0) + 1
-                    self.assertTrue(payload_contacts(.003))  # 3 mm overlap exceeds the allowance.
+    def test_actual_shallow_overlap_native(self):
+        with scene() as (runtime, checker, g):
+            runtime.gripper_controller.held_name = 'payload'
+            relative = np.eye(4); relative[0, 3] = .1
+            runtime.gripper_controller.relative_pose = relative
+            model = runtime.model
+            model.geom_type[g('payload')] = mujoco.mjtGeom.mjGEOM_SPHERE
+            model.geom_size[g('payload')] = [.02, 0, 0]
+            tool = runtime.gripper_controller.base_id
+            center = runtime.data.xpos[tool] + runtime.data.xmat[tool].reshape(3, 3) @ relative[:3, 3]
+            target = runtime.object_ids['target']
+            model.body_pos[target] = center + [0, 0, -.119]
+            model.geom_size[g('target')] = [.01, .01, .1]
+            checker.carrying_safety_distance = -.002
+            def payload_contacts(margin):
+                result = checker.check([.4], safety_distance=margin)
+                return [c for c in result.contacts if {c['geom1'], c['geom2']} == {'payload', 'target'}]
+            self.assertFalse(payload_contacts(.003))  # 1 mm overlap allowed in planning.
+            self.assertTrue(payload_contacts(0.))  # Execution still rejects penetration.
+            checker.carrying_safety_distance = 0.
+            self.assertTrue(payload_contacts(.003))  # Setting changes invalidate cached results.
+            checker.carrying_safety_distance = -.002
+            model.body_pos[target, 2] += .002
+            checker.scene_revision = getattr(checker, 'scene_revision', 0) + 1
+            self.assertTrue(payload_contacts(.003))  # 3 mm overlap exceeds the allowance.
 
 
 if __name__ == '__main__':

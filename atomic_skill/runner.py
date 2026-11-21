@@ -251,11 +251,26 @@ class TaskSkillExecutor:
                 backend.grasp_approach_goal = (tuple(selected_control[:3, 3]), tuple(selected_quat),
                                                tuple(resolved['joint_positions']))
                 backend.grasp_motion_phase = True
-            if skill == 'pick' and part['phase'] == 'retreat':
+            if skill == 'put' and part['phase'] == 'placement_reapproach':
+                executor = PoseSearchExecutor(
+                    resources=self.resources, backend=backend, synchronizer=sync,
+                    kinematics=kin, checker=checker, execute_motion=self.execute_motion)
+                def reapproach_motion(request):
+                    self.report['active_substep'] = executor.phase
+                    return self.execute_motion(request)
+                executor.execute_motion = reapproach_motion
+                result = executor.run('approach', part['parameters'])
+                # Contact/release remains the next part and is reached only
+                # after this approach succeeds. Preserve its full diagnostics.
+                self.report['active_substep'] = part['phase']
+                sync.sync(backend, kin, checker)
+            elif skill == 'pick' and part['phase'] == 'retreat':
                 result = execute_retreat_candidates(part, backend.get_end_effector_pose(),
                                                     resolved, self.execute_motion)
             elif skill == 'pick' and part.get('grasp_pose_fallback'):
                 part['request'],result = execute_grasp_pose_move(part['request'],self.execute_motion,backend)
+            elif skill == 'put' and part['phase'] == 'contact':
+                result = self.execute_motion(part['request'])
             else:
                 result = self.execute_motion(part['request'])
             if (skill in {'pick', 'put'} and part['phase'] in {'approach','contact'} and

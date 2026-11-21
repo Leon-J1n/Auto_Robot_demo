@@ -1,49 +1,40 @@
 {
   "schema_version": "2.0",
-  "request_id": "approach-pick-apple-002",
+  "request_id": "ur3-marker-to-basket-002",
   "scene_id": 2,
-  "scene_version": 3,
+  "scene_version": 4,
+  "scene_file": "ur3_table_sorting.json",
   "commands": [
     {
       "command_id": "1",
-      "skill_name": "move_to",
+      "skill_name": "approach",
       "parameters": {
-        "target": 7,
-        "relation": "behind",
-        "distance_m": 0.15
+        "target": 9
       }
     },
     {
       "command_id": "2",
-      "skill_name": "move_to",
+      "skill_name": "pick",
       "parameters": {
-        "target": 7,
-        "relation": "above",
-        "distance_m": 0.15
+        "target": 9,
+        "hold_force": 15.0
       }
     },
     {
       "command_id": "3",
-      "skill_name": "pick",
+      "skill_name": "retreat",
       "parameters": {
-        "target": 7,
-        "hold_force": 10.0
+        "target": 9,
+        "lift_distance": 0.02
       }
     },
     {
       "command_id": "4",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "5",
       "skill_name": "move_to",
       "parameters": {
-        "target": "home"
+        "target": "home",
+        "planning_method": "joint"
       }
     }
-  ],
-  "scene_file": "ur5_table_apple.json"
+  ]
 }

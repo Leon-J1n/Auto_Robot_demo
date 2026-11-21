@@ -163,29 +163,6 @@ python libraries/curobo/demo_plan.py --scene libraries/curobo/examples/current_s
 
 示例请求显式使用 0 额外间距，并保留完整碰撞检查。调用方实际使用时应传入最新完整场景，不能把示例快照当实时场景。第一次拟合和每次新工作进程预热可能较慢；应用应复用同一动作实例，并在接收任务前调用 `prepare()`。
 
-## 统一简化代理试用（2026-11-18）
-
-sorting 场景的 `planning_collision_proxy.enabled=true` 使 CPU／GPU 共用同一套
-规划球和环境盒体。当前持物快照由 411 个源几何（161 个机器人／持物几何、250 个环境几何）
-变为 42 个代理几何、350 个机器人／持物球和 20 个环境盒。夹爪细机构保留已验证的
-272 个球模板，其他部分简化；未用大盒填掉夹爪空隙或容器内腔。
-
-仅对这类代理的**关节目标**默认启用 `runtime_proxy_cuda_graphs=true`。完整精细
-运行时模型和 pose 入口仍保留原 `runtime_cuda_graphs=false`。目标类型切换会按实际
-执行模式重建规划器，不复用错误模式的捕获结果。可显式将代理 Graph 开关设为 false。
-
-同一记录 `approach(Tray)` 目标，离线回放的完整热调用约 0.5 s，其中 GPU 求解约
-0.14 s、首次代理路径复核约 0.18～0.20 s；每轮清空整路径缓存后测量，外层第二次
-复核可复用同状态结果。首次代理生成约 1 s；新 worker 的首次完整调用约 10 s，含
-初始化和捕获，模型／抓持装配变化也可能触发冷初始化。不是所有技能或场景的亚秒保证。
-
-重新规划得到的新轨迹额外通过了原精细 FCL／articulated 的离线复核（约 5.2 s），
-该精细复核不在默认规划关键路径。旧轨迹在简化包络下靠 Basket 过近，明确拒绝后
-重新规划，没有通过放宽距离或增加豁免接受它。未执行机器人运动。
-
-详细模型、包络误差及策略规则见 `collision/README.md`；实测数据位于本机生成的
-`.cache/shared_proxy_verification.json` 和 `.cache/shared_proxy_state_verification.json`。
-
 ### approach 搜索预算修复（2026-11-18）
 
 运行 `106744` 暴露了固定关节目标回放未覆盖的上层重试：10 s 被按 IK 构型数切分，

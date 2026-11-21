@@ -190,17 +190,27 @@ class SceneAssembler:
     def _robot_model_ref(self, robot, robot_path, attachments, gripper):
         current = _component(robot, "RobotModelRef")
         root, links, roots = self._urdf_links(self.asset_root / robot_path)
-        base_link = current.get("base_link") or next(iter(roots), None)
+        ordered_roots = sorted(roots)
+        base_link = current.get("base_link")
+        if base_link not in roots:
+            base_link = ordered_roots[0] if ordered_roots else None
         if not base_link or base_link not in links:
             raise SceneAssemblyError("OLS robot URDF has no valid root link")
         attachment = next(iter(attachments), None)
         attachment_props = _component(attachment, "RobotAttachment") if attachment else {}
-        tip_link = current.get("tip_link") or attachment_props.get("parent_link")
-        if not tip_link:
-            tip_link = "attachment_site" if "attachment_site" in links else base_link
+        tip_link = current.get("tip_link")
+        if tip_link not in links:
+            tip_link = attachment_props.get("parent_link")
+        if tip_link not in links:
+            driver_names = _component(robot, 'RobotDriver').get('joint_sequence', ())
+            joints = {joint.get('name'): joint for joint in root.findall('joint')}
+            terminal = next((joints[name].find('child').get('link') for name in reversed(driver_names)
+                             if name in joints and joints[name].find('child') is not None), None)
+            tip_link = terminal or ('attachment_site' if 'attachment_site' in links else base_link)
         if tip_link not in links:
             raise SceneAssemblyError(f"Robot tip link is absent from OLS URDF: {tip_link}")
         default_pairs = []
+        tool_links = set()
         if gripper:
             gripper_props = _component(gripper, "GripperModel")
             gripper_path = gripper_props.get("urdf")
@@ -208,13 +218,15 @@ class SceneAssembler:
                 _, tool_links, _ = self._urdf_links(self.asset_root / gripper_path)
                 if {"robotiq_2f85_base_mount", "wrist_2_link"}.issubset(links | tool_links):
                     default_pairs = [["robotiq_2f85_base_mount", "wrist_2_link"]]
+        current_pairs = current.get("allowed_collision_link_pairs", default_pairs)
+        valid_pair_names = links | tool_links
+        current_pairs = [pair for pair in current_pairs
+                         if len(pair) == 2 and all(name in valid_pair_names for name in pair)]
         result = {
             "urdf": robot_path,
             "base_link": base_link,
             "tip_link": tip_link,
-            "allowed_collision_link_pairs": current.get(
-                "allowed_collision_link_pairs", default_pairs,
-            ),
+            "allowed_collision_link_pairs": current_pairs,
             "allowed_arm_environment_names": deepcopy(current.get(
                 "allowed_arm_environment_names",
                 _component(robot, "RobotDriver").get("allowed_arm_environment_names", []),
@@ -223,8 +235,10 @@ class SceneAssembler:
         # The current OLS UR5e + Robotiq assembly has a calibrated grasp
         # center.  Keep this as an adapter default; a future OLS robot can
         # provide its own calibration metadata and override it in the scene.
-        if current.get("grasp_frame"):
-            result["grasp_frame"] = deepcopy(current["grasp_frame"])
+        configured_grasp = current.get("grasp_frame")
+        if (isinstance(configured_grasp, dict)
+                and configured_grasp.get('link') in (links | tool_links)):
+            result["grasp_frame"] = deepcopy(configured_grasp)
         elif gripper and _component(gripper, "MetadataRef").get("path") == "$LIBRARY_SERVER/2":
             result["grasp_frame"] = {
                 "link": "robotiq_2f85_base",
@@ -318,7 +332,13 @@ class SceneAssembler:
                 "_ols_asset_type": "robot",
             })
             return
-        if _component_entry(obj, "RobotDriver") is not None or _component_entry(obj, "RobotModelRef") is not None:
+        driver = _component(obj, "RobotDriver")
+        if driver and driver.get('role') != 'passive' and driver.get('joint_sequence'):
+            self._refresh_robot_driver(obj, asset_path)
+            return
+        if _component_entry(obj, "RobotModelRef") is not None:
+            return
+        if _component_entry(obj, "RobotDriver") is not None:
             return
         # Cameras and other visual accessories are excluded from the control
         # scene below, but still retain their OLS identity.
@@ -327,6 +347,45 @@ class SceneAssembler:
         if not _component(obj, "Collider"):
             _ensure_component(obj, "AssetRef", {"asset_path": asset_path})
             _ensure_component(obj, "Collider", {"enabled": True})
+
+    def _refresh_robot_driver(self, obj, asset_path):
+        """Keep a switched OLS arm's controller order and limits in sync with its URDF."""
+        root = ET.parse(self.asset_root / asset_path).getroot()
+        joints = [joint for joint in root.findall('joint')
+                  if joint.get('type') == 'revolute' and joint.find('mimic') is None]
+        names = [joint.get('name') for joint in joints]
+        if not names or any(not name for name in names) or len(set(names)) != len(names):
+            raise SceneAssemblyError(f"OLS robot {asset_path} has no valid actuated revolute joints")
+        driver = _component(obj, 'RobotDriver')
+        previous_order = driver.get('joint_sequence', [])
+        previous_initial = driver.get('initial_joint_positions_rad', {})
+        if not isinstance(previous_initial, dict):
+            previous_initial = {}
+        sequence = list(previous_order) if (len(previous_order) == len(names)
+            and set(previous_order) == set(names)) else names
+        limits = {}
+        initial = {}
+        joint_by_name = {joint.get('name'): joint for joint in joints}
+        for name in sequence:
+            joint = joint_by_name[name]
+            limit = joint.find('limit')
+            if limit is None or limit.get('lower') is None or limit.get('upper') is None:
+                raise SceneAssemblyError(f"OLS robot joint {name} requires finite position limits")
+            low, high = float(limit.get('lower')), float(limit.get('upper'))
+            if not np.isfinite([low, high]).all() or low >= high:
+                raise SceneAssemblyError(f"OLS robot joint {name} has invalid position limits")
+            limits[name] = [low, high]
+            try:
+                value = float(previous_initial.get(name, 0.0))
+            except (TypeError, ValueError):
+                value = 0.0
+            initial[name] = float(np.clip(value, low, high)) if np.isfinite(value) else float(np.clip(0., low, high))
+        driver['joint_sequence'] = sequence
+        driver['joint_limits'] = limits
+        driver['initial_joint_positions_rad'] = initial
+        available = driver.get('available_connect_joints', [])
+        if not available or any(name not in joint_by_name for name in available):
+            driver['available_connect_joints'] = [sequence[-1]]
 
     def assemble(self, scene, task=None):
         result = deepcopy(scene)

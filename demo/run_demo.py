@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from demo.error_messages import describe_error, error_category, error_from_exception
+from demo.error_messages import display_error, error_from_exception
 from collision.backends.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
@@ -110,63 +110,6 @@ SUCCESS_ACTIONS = {
     'grasp': '已抓取目标', 'release': '已释放目标',
     'push': '已推动目标', 'pull': '已拉动目标', 'pour': '已完成倒水动作',
 }
-ERROR_DESCRIPTIONS = {
-    'GRASP_FAILED': '未能维持稳定抓持',
-    'IK_FAILED': '逆运动学求解失败',
-    'TARGET_UNREACHABLE': '目标超出机械臂可达范围',
-    'PATH_NOT_FOUND': '未找到满足约束的运动路径',
-    'PLANNING_FAILED': '未能生成满足约束的轨迹',
-    'EXECUTION_TIMEOUT': '执行超时，未在规定时间内到达目标',
-    'EXECUTION_FAILED': '轨迹执行失败',
-    'TRAJECTORY_INVALID': '轨迹数据不满足执行要求',
-    'JOINT_LIMIT_VIOLATION': '关节位置超出允许范围',
-    'INVALID_REQUEST': '请求参数不符合要求',
-    'CONTROLLER_NOT_READY': '控制器尚未就绪',
-    'SCENE_CHANGED': '场景状态已变化，当前规划失效',
-    'STOPPED_BY_SAFETY': '运动被安全检查中止',
-    'COLLISION_DETECTED': '运动受到碰撞限制',
-    'ROBOT_JOINT_LIMIT': '机械臂达到关节限位',
-    'JOINT_LIMIT': '目标机构达到关节限位',
-    'TRAVEL_LIMIT': '请求行程超过允许范围',
-    'PATH_CONSTRAINT_INFEASIBLE': '无法满足连续路径约束',
-    'CONTACT_NOT_ESTABLISHED': '未建立有效接触',
-    'CONTACT_LOST': '目标接触或抓持丢失',
-    'FORCE_LIMIT': '接触力超过上限',
-    'PUSH_PULL_TIMEOUT': '推拉执行超时',
-    'TARGET_NOT_REACHED': '未达到请求的运动终点',
-    'DOOR_TARGET_NOT_REACHED': '柜门未达到目标角度',
-    'DRAWER_TARGET_NOT_REACHED': '抽屉未达到目标开度',
-    'ACTUATOR_TRACKING_FAILED': '机械臂未能跟踪到规划终点',
-    'TARGET_RESOLUTION_FAILED': '目标位姿解析失败',
-    'PUT_TARGET_IS_HELD_OBJECT': '放置目标就是当前持物，不能放到自身',
-    'PREPOINT_UNREACHABLE': '所有预接近位姿均无可用逆解',
-    'PREPOINT_COLLISION': '所有预接近位姿均发生碰撞',
-    'CONTACT_PATH_UNREACHABLE': '预接近点到目标的直线路径无可用逆解',
-    'CONTACT_PATH_COLLISION': '预接近点到目标的直线路径发生碰撞',
-    'CONTACT_PATH_PLANNING_FAILED': '预接近点到目标的直线路径规划失败',
-    'NO_VALID_APPROACH': '预接近点或接触路径均不可行',
-    'TARGET_POSE_UNREACHABLE': '目标交互位姿无可用逆解',
-    'TARGET_POSE_COLLISION': '目标交互位姿发生碰撞',
-    'NO_VALID_TARGET_POSE': '目标交互位姿候选均不可用',
-    'GRASP_CLOSURE_INFEASIBLE': '没有可完成夹爪闭合的抓取位姿',
-    'GRASP_PRECHECK_FAILED': '抓取候选几何或接触路径检查全部失败',
-    'JOINT_CONFIGURATION_SEARCH_FAILED': '关节构型搜索未找到可用路径',
-    'GRASP_DEPTH_SEARCH_FAILED': '0～30 mm 抓深搜索及桌面底限兜底均失败',
-    'GRASP_CLOSURE_COLLISION': '夹爪闭合时发生碰撞',
-    'GRASP_OPENING_COLLISION': '夹爪张开时发生碰撞',
-    'POSE_VERIFICATION_FAILED': '执行后的位姿超出允许误差',
-}
-STAGE_DESCRIPTIONS = {
-    'state_sync': '场景状态同步失败', 'conversion': '命令转换失败',
-    'target_resolution': '目标位姿解析失败', 'planning': '运动规划失败',
-    'planning_and_execution': '运动规划或执行失败',
-    'interaction_position_verification': '交互位姿校验失败',
-    'grasp': '抓取失败', 'release': '释放失败',
-    'push_pull': '机构操作失败',
-    'pull_push': '机构操作失败',
-}
-
-
 def command_target_name(command, scene):
     """Show the scene object's name while retaining named targets such as home."""
     parameters = command['parameters']
@@ -198,14 +141,11 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
                 target = f'{target} {direction}'
         return f"success: {SUCCESS_ACTIONS.get(command['skill_name'], '已完成目标')} {target}"
     error = error if isinstance(error, dict) else {}
-    description = ERROR_DESCRIPTIONS.get(error.get('error_code'))
-    if description is None:
-        description = STAGE_DESCRIPTIONS.get(error.get('failed_stage') or stage, '步骤执行失败')
-    description = describe_error(error, description)
+    category, description = display_error(error, stage=stage)
     description = description.replace('|', '｜')
     if status == 'suspend':
-        description = f'任务中止，{target} 未完成目标；{description}'
-    return f"error|{error_category(error, stage=stage)}|{description}"
+        description = f'任务已暂停；{description}'
+    return f"error|{category}|{description}"
 
 
 def _default_output_dir(command_file):
@@ -238,7 +178,7 @@ def _write_command_planning_timing(output_dir, index, row):
         }
         planner_details = {
             key: diagnostics[key] for key in
-            ('algorithm', 'planning_stages_s', 'planning_proxy_cache', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
+            ('algorithm', 'planning_stages_s', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
              'configuration_selection')
             if key in diagnostics
         }
@@ -383,7 +323,7 @@ def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
 def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
          output_dir=None, viewer=False, collision_probe=False,
          object_library_url=None, start_object_library=False, show_collision_geometry=False):
-    from libraries.eaik import load_urdf
+    from libraries.kinematic_chain.service import load_urdf
     from collision import SimPlatformFCLCollisionChecker
     from planning.trajectory.time_parameterization import prepare_continuous_trajectory
     from services.object_library import ObjectLibraryClient, LocalObjectLibraryService, ObjectLibraryError
@@ -564,16 +504,9 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         if isinstance(checker, GraspCollisionChecker):
             checker.bind_backend(backend)
             backend.gripper_controller = backend.create_gripper_controller()
-            proxy_config = resources.scene.get('planning_collision_proxy', {})
-            if not isinstance(proxy_config, dict) or not isinstance(proxy_config.get('enabled', False), bool):
-                raise ValueError('planning_collision_proxy requires an enabled boolean')
-            if proxy_config.get('enabled'):
-                checker.enable_planning_proxy({k:v for k,v in proxy_config.items() if k != 'enabled'})
             start_check = checker.check(resources.initial_joints, safety_distance=0.003)
             if start_check.in_collision:
                 raise ValueError(f'Initial assembled robot collides: {start_check.contacts}')
-            if getattr(checker, 'planning_proxy', None) is not None:
-                report['planning_collision_proxy'] = checker.planning_proxy.snapshot['planning_proxy']
         if demo_fallback_ignore_collisions:
             checker = DemoCollisionOverrideChecker(checker)
         if viewer or show_collision_geometry:
@@ -782,9 +715,9 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             active_step_logged = True
         elif active_command is None:
             initial_error = error_from_exception(exc, stage=stage)
-            cause = describe_error(initial_error, '初始化失败')
-            cause = cause.replace('|', '｜')
-            print(f"error|{error_category(initial_error, stage=stage)}|初始化失败：{cause}", flush=True)
+            category, message = display_error(initial_error, stage=stage)
+            message = message.replace('|', '｜')
+            print(f"error|{category}|{message}", flush=True)
         report['error'] = {'stage': stage, 'message': str(exc), 'type': type(exc).__name__}
         report['error'].update(error_from_exception(
             exc, stage=stage, existing=row.get('error') if row else None))

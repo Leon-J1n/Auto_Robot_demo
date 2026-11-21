@@ -155,6 +155,7 @@ class PullMotionExecutor:
         retreat_params = {
             'search': deepcopy(self.params.get('retreat_search') or {}),
             'pose_axis': self.params.get('pose_axis', '+z'),
+            'lift_distance': self.params.get('lift_distance', RetreatSkill.DEFAULT_LIFT_DISTANCE),
         }
         if target_pose is None:
             pos, rot = self._grasp_pose()

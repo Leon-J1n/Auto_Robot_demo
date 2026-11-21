@@ -8,23 +8,16 @@
 
 | 错误码 | 扫描结果 | 代表位置 |
 | --- | --- | --- |
-| `CAMERA_MODEL_UNAVAILABLE` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:16](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:16) |
-| `CAMERA_NOT_MOVABLE` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:17](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:17) |
-| `CLEARANCE_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:34](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:34) |
 | `COLLISION_DETECTED` | 代码中使用 | [planning/planners/direct_planner.py:48](C:/Users/21474/Desktop/robot-agent/planning/planners/direct_planner.py:48) |
 | `COMMAND_EXECUTION_FAILED` | 代码中使用 | [atomic_skill/pull.py:271](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:271) |
 | `CONTACT_PATH_COLLISION` | 代码中使用 | [atomic_skill/pick.py:23](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:23) |
 | `CONTACT_PATH_PLANNING_FAILED` | 代码中使用 | [atomic_skill/pick.py:24](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:24) |
 | `CONTACT_PATH_UNREACHABLE` | 代码中使用 | [atomic_skill/pick.py:22](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:22) |
 | `CONTROLLER_NOT_READY` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:24](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:24) |
-| `DEPTH_UNAVAILABLE` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:25](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:25) |
-| `DIRECTION_UNRESOLVED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:20](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:20) |
 | `DOOR_TARGET_NOT_REACHED` | 代码中使用 | [atomic_skill/pull.py:547](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:547) |
 | `DRAWER_TARGET_NOT_REACHED` | 枚举声明或显示映射 | [demo/run_demo.py:93](C:/Users/21474/Desktop/robot-agent/demo/run_demo.py:93) |
-| `DUPLICATE_VIEWPOINT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:27) |
 | `EXECUTION_FAILED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:25](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:25) |
 | `EXECUTION_TIMEOUT` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:26](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:26) |
-| `FIELD_OF_VIEW_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:24](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:24) |
 | `FRAME_TRANSFORM_FAILED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:13) |
 | `GOAL_TOLERANCE_EXCEEDED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:27) |
 | `GRASP_CLOSURE_COLLISION` | 代码中使用 | [demo/interaction/closure_validation.py:49](C:/Users/21474/Desktop/robot-agent/demo/interaction/closure_validation.py:49) |
@@ -32,32 +25,18 @@
 | `GRASP_FAILED` | 代码中使用 | [execution/runtime/convergence.py:33](C:/Users/21474/Desktop/robot-agent/execution/runtime/convergence.py:33) |
 | `GRASP_NOT_CONFIRMED` | 代码中使用 | [atomic_action/manipulation/grasp/action.py:52](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/grasp/action.py:52) |
 | `GRASP_OPENING_COLLISION` | 代码中使用 | [demo/interaction/closure_validation.py:49](C:/Users/21474/Desktop/robot-agent/demo/interaction/closure_validation.py:49) |
-| `GRASP_POSE_PREDICTION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:30) |
 | `IK_FAILED` | 代码中使用 | [atomic_action/motion/common/strategies/joint_move/joint_move.py:76](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/joint_move/joint_move.py:76) |
-| `INSTANCE_AMBIGUOUS` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:16](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:16) |
-| `INSUFFICIENT_POINTS` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:26](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:26) |
 | `INTERNAL_ERROR` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:30) |
 | `INVALID_APPROACH_REQUEST` | 代码中使用 | [atomic_skill/approach.py:157](C:/Users/21474/Desktop/robot-agent/atomic_skill/approach.py:157) |
 | `INVALID_ARC_DEFINITION` | 代码中使用 | [atomic_action/motion/common/strategies/circular_move/circular_move.py:50](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/circular_move/circular_move.py:50) |
-| `INVALID_OFFSET` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:22](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:22) |
 | `INVALID_REQUEST` | 代码中使用 | [atomic_skill/pull.py:481](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:481) |
 | `INVALID_RETREAT_REQUEST` | 代码中使用 | [atomic_skill/retreat.py:107](C:/Users/21474/Desktop/robot-agent/atomic_skill/retreat.py:107) |
 | `JOINT_LIMIT_VIOLATION` | 代码中使用 | [atomic_action/motion/common/strategies/joint_move/joint_move.py:91](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/joint_move/joint_move.py:91) |
-| `LOCALIZATION_TIMEOUT` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:37](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:37) |
-| `LOOK_AT_GENERATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:23) |
-| `MODEL_NOT_FOUND` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:15](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:15) |
 | `NOT_IMPLEMENTED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:12](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:12) |
-| `NO_QUALITY_GAIN` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:26](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:26) |
-| `NO_VISIBILITY_GAIN` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:25](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:25) |
 | `OBJECT_NOT_HELD` | 代码中使用 | [atomic_skill/pull.py:475](C:/Users/21474/Desktop/robot-agent/atomic_skill/pull.py:475) |
-| `OBSERVATION_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:14](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:14) |
-| `OCCLUSION_EVIDENCE_INSUFFICIENT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:19](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:19) |
-| `ORIENTATION_ESTIMATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:28) |
 | `PATH_CONSTRAINT_INFEASIBLE` | 代码中使用 | [planning/planners/collision_free_planner.py:45](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:45) |
 | `PATH_NOT_FOUND` | 代码中使用 | [planning/planners/collision_free_planner.py:187](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:187) |
 | `PLANNING_FAILED` | 代码中使用 | [planning/planners/collision_free_planner.py:67](C:/Users/21474/Desktop/robot-agent/planning/planners/collision_free_planner.py:67) |
-| `POSE_ESTIMATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:29](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:29) |
-| `POSE_VALIDATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:36](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:36) |
 | `POSE_VERIFICATION_FAILED` | 代码中使用 | [atomic_action/motion/common/interaction.py:62](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/interaction.py:62) |
 | `POUR_EXECUTION_FAILED` | 代码中使用 | [atomic_skill/runner.py:86](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:86) |
 | `POUR_MOTION_FAILED` | 代码中使用 | [atomic_skill/pour.py:57](C:/Users/21474/Desktop/robot-agent/atomic_skill/pour.py:57) |
@@ -65,34 +44,18 @@
 | `POUR_OUTLET_DRIFT` | 代码中使用 | [atomic_skill/pour.py:146](C:/Users/21474/Desktop/robot-agent/atomic_skill/pour.py:146) |
 | `PREPOINT_COLLISION` | 代码中使用 | [atomic_skill/pick.py:21](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:21) |
 | `PREPOINT_UNREACHABLE` | 代码中使用 | [atomic_skill/pick.py:20](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:20) |
-| `PROJECTION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:27) |
-| `REFERENCE_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:19](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:19) |
-| `REGISTRATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:23) |
 | `SCENE_CHANGED` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:28) |
-| `SEARCH_EXHAUSTED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:32](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:32) |
-| `SEARCH_NOT_REQUIRED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:13) |
-| `SEARCH_REGION_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:20](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:20) |
-| `SEARCH_TIMEOUT` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:33](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:33) |
-| `SEGMENTATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:24](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:24) |
-| `SEMANTIC_DIRECTION_AMBIGUOUS` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:21](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:21) |
-| `SENSOR_DATA_UNAVAILABLE` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:17](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:17) |
 | `SINGULARITY_RISK` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:18](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:18) |
 | `STOPPED_BY_SAFETY` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:29](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:29) |
-| `TARGET_DESCRIPTION_AMBIGUOUS` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:14](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:14) |
-| `TARGET_NOT_FOUND` | 枚举声明或显示映射 | [atomic_action/perception/location/utils/error_codes.py:13](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:13) |
 | `TARGET_POSE_COLLISION` | 代码中使用 | [demo/interaction/object_library.py:174](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:174) |
 | `TARGET_POSE_UNREACHABLE` | 代码中使用 | [demo/interaction/object_library.py:173](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:173) |
-| `TARGET_PRIOR_INVALID` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:18](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:18) |
 | `TARGET_RESOLUTION_FAILED` | 代码中使用 | [atomic_skill/runner.py:183](C:/Users/21474/Desktop/robot-agent/atomic_skill/runner.py:183) |
 | `TARGET_UNREACHABLE` | 代码中使用 | [atomic_action/motion/common/strategies/joint_move/joint_move.py:63](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/strategies/joint_move/joint_move.py:63) |
 | `TRAJECTORY_INVALID` | 代码中使用 | [planning/trajectory/time_parameterization.py:114](C:/Users/21474/Desktop/robot-agent/planning/trajectory/time_parameterization.py:114) |
 | `UNKNOWN_STRATEGY` | 枚举声明或显示映射 | [atomic_action/motion/common/utils/error_codes.py:11](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/error_codes.py:11) |
-| `VIEWPOINT_GENERATION_FAILED` | 枚举声明或显示映射 | [atomic_action/perception/search/utils/error_codes.py:22](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:22) |
 
 | `NO_VALID_APPROACH` | 代码中使用 | [atomic_skill/pick.py:27](C:/Users/21474/Desktop/robot-agent/atomic_skill/pick.py:27) |
 | `NO_VALID_TARGET_POSE` | 代码中使用 | [demo/interaction/object_library.py:175](C:/Users/21474/Desktop/robot-agent/demo/interaction/object_library.py:175) |
-| `NO_VALID_CANDIDATE` | 枚举声明 | [atomic_action/perception/location/utils/error_codes.py:37](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/error_codes.py:37) |
-| `NO_VALID_VIEWPOINT` | 枚举声明 | [atomic_action/perception/search/utils/error_codes.py:34](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/error_codes.py:34) |
 | `PUT_TARGET_IS_HELD_OBJECT` | 代码中使用 | [atomic_skill/put.py:26](C:/Users/21474/Desktop/robot-agent/atomic_skill/put.py:26) |
 
 ## 直接抛出的异常与原始原因
@@ -101,8 +64,8 @@
 | --- | --- |
 | [atomic_action/manipulation/grasp/action.py:17](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/grasp/action.py:17) | A robot runtime is required. |
 | [atomic_action/manipulation/release/action.py:11](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/release/action.py:11) | A robot runtime is required. |
-| [atomic_action/manipulation/rotate_end/action.py:17](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/rotate_end/action.py:17) | A robot runtime is required. |
-| [atomic_action/manipulation/rotate_end/action.py:20](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/rotate_end/action.py:20) | degree must be a finite number. |
+| [atomic_action/manipulation/rotate/action.py](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/rotate/action.py) | A robot runtime is required. |
+| [atomic_action/manipulation/rotate/action.py](C:/Users/21474/Desktop/robot-agent/atomic_action/manipulation/rotate/action.py) | degree must be a finite number. |
 | [atomic_action/motion/common/action.py:294](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/action.py:294) | No feasible joint configuration found. |
 | [atomic_action/motion/common/action.py:309](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/action.py:309) | MuJoCo controller is not ready. |
 | [atomic_action/motion/common/action.py:322](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/action.py:322) | f"Final joint tracking error {result['joint_error']:.6f} exceeds tolerance." |
@@ -155,71 +118,6 @@
 | [atomic_action/motion/common/utils/validation.py:167](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/validation.py:167) | Quaternion must have non-zero norm. |
 | [atomic_action/motion/common/utils/validation.py:172](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/validation.py:172) | orientation.representation must be quaternion or rpy. |
 | [atomic_action/motion/common/utils/validation.py:121](C:/Users/21474/Desktop/robot-agent/atomic_action/motion/common/utils/validation.py:121) | Only base/world pose frames are currently supported. |
-| [atomic_action/perception/location/selector.py:90](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:90) | Cannot select locate strategy: provide model_id, category, target description, or a relative/approach target definition. |
-| [atomic_action/perception/location/selector.py:102](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:102) | f"Unsupported locate strategy: {strategy}" |
-| [atomic_action/perception/location/selector.py:111](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:111) | Known Model Locate requires model_id. |
-| [atomic_action/perception/location/selector.py:116](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:116) | Known Category Locate requires category. |
-| [atomic_action/perception/location/selector.py:123](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:123) | Unknown Object Locate requires a target description. |
-| [atomic_action/perception/location/selector.py:143](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:143) | Approach Point Locate requires a final target pose. |
-| [atomic_action/perception/location/selector.py:151](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:151) | Relative Point Locate requires reference and offset. |
-| [atomic_action/perception/location/selector.py:166](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:166) | Grasp Pose Prediction requires target evidence (object/instruction/category/instance_id/model_id) or strategy_params.allow_scene_level=true. |
-| [atomic_action/perception/location/selector.py:129](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:129) | Grasp Pose Prediction requires target.type=grasp. |
-| [atomic_action/perception/location/selector.py:136](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:136) | VLM Estimate requires target.type=grasp or place. |
-| [atomic_action/perception/location/selector.py:138](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/selector.py:138) | VLM Estimate requires a target description. |
-| [atomic_action/perception/location/skill.py:123](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/skill.py:123) | A robot runtime is required for Locate Skill. |
-| [atomic_action/perception/location/strategies/approach_point_locate/approach_point_locate.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/approach_point_locate/approach_point_locate.py:30) | Implement ApproachPointLocate.locate(). |
-| [atomic_action/perception/location/strategies/grasp_pose_prediction/grasp_pose_prediction.py:60](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/grasp_pose_prediction/grasp_pose_prediction.py:60) | Implement GraspPosePrediction.locate(). |
-| [atomic_action/perception/location/strategies/known_category_locate/known_category_locate.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/known_category_locate/known_category_locate.py:30) | Implement KnownCategoryLocate.locate(). |
-| [atomic_action/perception/location/strategies/known_model_locate/known_model_locate.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/known_model_locate/known_model_locate.py:30) | Implement KnownModelLocate.locate(). |
-| [atomic_action/perception/location/strategies/relative_point_locate/relative_point_locate.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/relative_point_locate/relative_point_locate.py:30) | Implement RelativePointLocate.locate(). |
-| [atomic_action/perception/location/strategies/unknown_object_locate/unknown_object_locate.py:31](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/unknown_object_locate/unknown_object_locate.py:31) | Unknown Object Locate requires a camera runtime. |
-| [atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:20](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:20) | VLM Estimate requires a camera runtime. |
-| [atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:24](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:24) | VLM Estimate supports grasp and place targets only. |
-| [atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/strategies/vlm_estimate/vlm_estimate.py:28) | VLM Estimate requires target.object, target.category or strategy_params.target_description. |
-| [atomic_action/perception/location/utils/frame_transform.py:27](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/frame_transform.py:27) | Connect transform_pose() to TF/runtime backend. |
-| [atomic_action/perception/location/utils/frame_transform.py:38](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/frame_transform.py:38) | Connect transform_point() to TF/runtime backend. |
-| [atomic_action/perception/location/utils/frame_transform.py:49](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/frame_transform.py:49) | Connect transform_vector() to TF/runtime backend. |
-| [atomic_action/perception/location/utils/validation.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:23) | Locate request must be a mapping/object. |
-| [atomic_action/perception/location/utils/validation.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:28) | target is required and must be an object. |
-| [atomic_action/perception/location/utils/validation.py:42](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:42) | target.type must be grasp, place, press, insert, extract, approach, relative, or object_pose. |
-| [atomic_action/perception/location/utils/validation.py:55](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:55) | VLM Estimate currently returns world-frame points only. |
-| [atomic_action/perception/location/utils/validation.py:87](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:87) | Approach target requires reference.pose or strategy_params.target_pose. |
-| [atomic_action/perception/location/utils/validation.py:93](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:93) | constraints.confidence_threshold must be between 0 and 1. |
-| [atomic_action/perception/location/utils/validation.py:99](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:99) | constraints.timeout must be positive. |
-| [atomic_action/perception/location/utils/validation.py:75](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:75) | Relative target requires reference.type. |
-| [atomic_action/perception/location/utils/validation.py:79](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/utils/validation.py:79) | Relative target requires offset.mode semantic or cartesian. |
-| [atomic_action/perception/location/validators/pose_validator.py:35](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/location/validators/pose_validator.py:35) | Implement PoseValidator.validate(). |
-| [atomic_action/perception/search/selector.py:76](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:76) | Cannot select search strategy: provide occlusion evidence, a target prior/direction hint, or a valid search region. |
-| [atomic_action/perception/search/selector.py:88](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:88) | f"Unsupported search strategy: {strategy}" |
-| [atomic_action/perception/search/selector.py:91](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:91) | Systematic Scan requires search_region or a runtime viewpoint set. |
-| [atomic_action/perception/search/selector.py:96](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:96) | Prior-Guided Search requires a position, region, direction, edge, or tracking prior. |
-| [atomic_action/perception/search/selector.py:102](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:102) | Occlusion-Aware View requires partial visibility or occlusion evidence. |
-| [atomic_action/perception/search/selector.py:113](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:113) | Occlusion-Aware View requires a coarse target pose, target ray, or target prior pose. |
-| [atomic_action/perception/search/selector.py:120](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/selector.py:120) | Local View Refinement requires a currently visible or partially visible target. |
-| [atomic_action/perception/search/skill.py:131](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/skill.py:131) | Connect _get_runtime_context() to the robot runtime/context manager. |
-| [atomic_action/perception/search/strategies/local_view_refinement/local_view_refinement.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/strategies/local_view_refinement/local_view_refinement.py:30) | Implement LocalViewRefinement.generate(). |
-| [atomic_action/perception/search/strategies/occlusion_aware_view/occlusion_aware_view.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/strategies/occlusion_aware_view/occlusion_aware_view.py:30) | Implement OcclusionAwareView.generate(). |
-| [atomic_action/perception/search/strategies/prior_guided_search/prior_guided_search.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/strategies/prior_guided_search/prior_guided_search.py:30) | Implement PriorGuidedSearch.generate(). |
-| [atomic_action/perception/search/strategies/systematic_scan/systematic_scan.py:30](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/strategies/systematic_scan/systematic_scan.py:30) | Implement SystematicScan.generate(). |
-| [atomic_action/perception/search/utils/frame_transform.py:25](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/frame_transform.py:25) | Connect to the project's transform service. |
-| [atomic_action/perception/search/utils/frame_transform.py:34](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/frame_transform.py:34) | Implement hand-eye, pan-tilt, or mobile-camera target conversion. |
-| [atomic_action/perception/search/utils/history.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/history.py:23) | Implement SearchHistory.is_duplicate(). |
-| [atomic_action/perception/search/utils/history.py:33](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/history.py:33) | Implement SearchHistory.next_state(). |
-| [atomic_action/perception/search/utils/validation.py:23](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:23) | Search request must be a mapping/object. |
-| [atomic_action/perception/search/utils/validation.py:28](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:28) | target is required and must be an object. |
-| [atomic_action/perception/search/utils/validation.py:41](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:41) | target requires a description, identifier, category, model, pose, or region prior. |
-| [atomic_action/perception/search/utils/validation.py:47](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:47) | observation is required and must be an object. |
-| [atomic_action/perception/search/utils/validation.py:56](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:56) | observation.visibility must be visible, partial, not_visible, or unknown. |
-| [atomic_action/perception/search/utils/validation.py:62](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:62) | camera is required and must be an object. |
-| [atomic_action/perception/search/utils/validation.py:64](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:64) | camera.id and camera.optical_frame are required. |
-| [atomic_action/perception/search/utils/validation.py:74](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:74) | camera.mount_type must identify a supported camera mount. |
-| [atomic_action/perception/search/utils/validation.py:78](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:78) | A fixed external camera cannot update viewpoint without another movable observation device. |
-| [atomic_action/perception/search/utils/validation.py:116](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:116) | observation.confidence must be between 0 and 1. |
-| [atomic_action/perception/search/utils/validation.py:128](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:128) | constraints.min_view_distance cannot exceed max_view_distance. |
-| [atomic_action/perception/search/utils/validation.py:133](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:133) | Search history has reached search.max_steps; return SEARCH_EXHAUSTED. |
-| [atomic_action/perception/search/utils/validation.py:139](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:139) | constraints.timeout must be positive. |
-| [atomic_action/perception/search/utils/validation.py:123](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/utils/validation.py:123) | f"constraints.{key} must be between 0 and 1." |
-| [atomic_action/perception/search/validators/viewpoint_validator.py:39](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/search/validators/viewpoint_validator.py:39) | Implement ViewpointValidator.validate(). |
 | [atomic_action/perception/vlm_estimate/estimator.py:59](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/vlm_estimate/estimator.py:59) | point_type must be 'grasp' or 'place'. |
 | [atomic_action/perception/vlm_estimate/estimator.py:61](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/vlm_estimate/estimator.py:61) | A nonempty target description is required. |
 | [atomic_action/perception/vlm_estimate/estimator.py:65](C:/Users/21474/Desktop/robot-agent/atomic_action/perception/vlm_estimate/estimator.py:65) | rgb must be an HxWx3 uint8 RGB image. |

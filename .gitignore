@@ -22,5 +22,8 @@ collision/**/__pycache__/
 
 # Local extracted SDK/build and runtime output
 ._simplatform_source/
+/libraries/ssik/source/
 execution/output/
 libraries/simplatform_native/build_rebuild/
+/tmp/
+**/.output.lock

@@ -20,16 +20,10 @@
       }
     },
     {
-      "command_id": "3",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
       "command_id": "4",
       "skill_name": "retreat",
       "parameters": {
+        "lift_distance": 0.02,
         "target": 11
       }
     },

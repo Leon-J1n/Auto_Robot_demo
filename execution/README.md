@@ -101,6 +101,8 @@ MuJoCo 使用位置执行器、偏置力补偿和 `mj_step`，步长 0.002 s。�
 
 运动学和 FCL 使用原始六轴机械臂模型；MuJoCo 通过内存模型和夹爪适配器恢复活动关节，负责活动夹爪及被抓物体几何的补充碰撞检查。控制 TCP 仍为 `attachment_site`，抓取中心由安装关系和 `grasp_frame` 换算。物理模式支持真实开合与接触携物，绑定模式支持闭合确认后启用 weld。后端仍可输出 MJCF 缓存。
 
+MuJoCo 编译时按当前组合 URDF 自动排除直接相连连杆之间的结构接触，并应用 `RobotModelRef.allowed_collision_link_pairs` 与 `allowed_arm_environment_names` 中声明的碰撞豁免。该规则随场景所选 URDF 和夹具关系生成，不依赖 UR3/UR5/UR10 型号；非相邻自碰撞、夹爪与环境及机械臂与其他环境物体的接触仍保留。
+
 基础布局回归任务仅两步：IK 求解并移动到 `test_move`（世界位置约 `[0.314, 0.278, 1.118]` m）→ 返回 `home`。初始状态及 home 均取原 XML 前六个关节值 `[0, -2.094395, 1.570796, -1.5707963, -1.5707963, 0]`。当前 `demo/skill_command/unified_scene.commands.json` 已切换为苹果场景的 `move 101 → move home`，与 `ols_grasp.commands.json` 一样需要服务，运行时可加 `--start-object-library`。
 
 此前包含定位、直线上抬、碰撞探针和动态方块的五步场景保留在 `tests/fixtures/unified_scene_v2/`，用于更广的回归测试。
@@ -145,7 +147,7 @@ $env:SIM_PLATFORM_LIBRARY = "libraries\simplatform\bin\sim_platform_c.dll"
 
 测试覆盖任务与资源匹配、禁止 MuJoCo 导入时加载独立运动学和 _MoveExecutor、插件注册、真实 FCL 碰撞反例、初始环境碰撞拒绝、五步任务执行、实际采样轨迹检查、关节和 TCP 到达误差，以及动态方块落地。FCL 仅忽略 URDF 同一连杆及相邻连杆之间的结构接触，不把初始化时的环境碰撞加入允许名单。
 
-本轮场景使用六轴 UR5e 固定基座机械臂和固定张开的夹爪。支持世界坐标下的单位缩放物体、箱体、圆柱及静态 URDF / OBJ / STL 环境资产。箱体 `size` 为完整三维尺寸，圆柱 `size` 为 `[半径, 半径, 完整高度]`。有铰链的环境 URDF、移动基座、可驱动夹爪和抓取附着关系需要后续适配。尚未实现暂停、恢复、取消和完整 TaskOrchestrator。
+机械臂从场景的 OLS `MetadataRef` 解析 URDF，控制关节顺序、限位和初始姿态由该 URDF 与 `RobotDriver` 装配；规划向量支持任意数量的单自由度 revolute 关节。当前执行后端仍要求固定基座串联单臂，并使用已配置的夹爪附件及其安装变换；移动基座、多臂机构、非转动控制关节及不同夹爪执行器需要专用适配。环境支持世界坐标下的单位缩放物体、箱体、圆柱及静态 URDF / OBJ / STL 资产。尚未实现暂停、恢复、取消和完整 TaskOrchestrator。
 
 运动测试走现有直接规划分支，未覆盖 RRT 绕障成功场景。执行期间按约 60 Hz 对实际关节及当前物体位姿做 FCL 检查，额外检查实际采样关节路径；这不是连续碰撞检测，也不预测运动障碍物。MuJoCo 与 FCL 读取相同几何源，但各自的 Mesh 接触算法可能不同（如 MuJoCo 的凸包处理），本测试不声称任意 Mesh 接触结果完全一致。
 

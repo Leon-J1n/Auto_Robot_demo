@@ -16,13 +16,24 @@ def component(obj, name):
                  if c['component_type'] == name), {})
 
 
+def allow_arm_pedestal_collisions(scene, robot):
+    """Apply the mounting-fixture rule independently of the selected arm model."""
+    ref = component(robot, 'RobotModelRef')
+    names = list(ref.get('allowed_arm_environment_names', []))
+    for obj in scene['objects']:
+        semantic = component(obj, 'Semantic')
+        is_pedestal = (semantic.get('semantic_name') == 'robot_pedestal'
+                       or semantic.get('category') == 'pedestal'
+                       or obj.get('object_name_in_scene') == 'RobotPedestal')
+        if obj is robot or not is_pedestal:
+            continue
+        name = obj['object_name_in_scene']
+        if name not in names:
+            names.append(name)
+    ref['allowed_arm_environment_names'] = names
+
+
 DEFAULT_SCENE_SETTINGS = {
-    'planning_collision_proxy': {
-        'enabled': True,
-        'sphere_cell_size': 0.035,
-        'container_names': ['Tray', 'Basket'],
-        'batch_size': 32,
-    },
     'named_targets': {},
     'move_defaults': {
         'constraints': {
@@ -75,7 +86,7 @@ def apply_runtime_config(scene, config):
         raise ValueError('Runtime configuration scene identity mismatch')
     result = deepcopy(scene)
     settings = config.get('scene_settings', {})
-    if set(settings) - {'named_targets', 'move_defaults', 'object_library', 'trajectory', 'planning_collision_proxy'}:
+    if set(settings) - {'named_targets', 'move_defaults', 'object_library', 'trajectory'}:
         raise ValueError('Unsupported runtime scene settings')
     result.update(deepcopy(settings))
     objects = {str(o['object_id_in_scene']): o for o in result['objects']}
@@ -227,6 +238,7 @@ class SceneResourceCoordinator:
         if len(robots) != 1:
             raise ValueError('Exactly one robot is supported by this runner')
         ref = component(robots[0], 'RobotModelRef')
+        allow_arm_pedestal_collisions(scene, robots[0])
         if not ref.get('urdf'):
             raise ValueError('Scene RobotModelRef must define urdf')
         root = self.asset_root or (self.catalog_path.parent / self.catalog['asset_root']).resolve()
@@ -268,14 +280,15 @@ class SceneResourceCoordinator:
         from planning.constraints.motion_limits import read_urdf_motion_limits
         timing = scene.setdefault('move_defaults', {}).setdefault('planning', {}).setdefault('time_parameterization', {})
         timing.update(read_urdf_motion_limits(urdf, names))
-        active = {j.get('name') for j in ET.parse(urdf).getroot().findall('joint') if j.get('type') == 'revolute'}
-        if len(names) != 6 or len(set(names)) != 6 or set(names) != active:
-            raise ValueError('RobotDriver joint_sequence must match URDF revolute joints')
+        active = {j.get('name') for j in ET.parse(urdf).getroot().findall('joint')
+                  if j.get('type') == 'revolute' and j.find('mimic') is None}
+        if not names or len(set(names)) != len(names) or set(names) != active:
+            raise ValueError('RobotDriver joint_sequence must match the URDF actuated revolute joints')
         initial = component(robots[0], 'RobotDriver').get('initial_joint_positions_rad')
         if initial is None:
             raise ValueError('Scene RobotDriver must define initial_joint_positions_rad')
         q = np.asarray([initial[name] for name in names], dtype=float)
-        if q.shape != (6,) or not np.all(np.isfinite(q)):
+        if q.shape != (len(names),) or not np.all(np.isfinite(q)):
             raise ValueError('Invalid initial_joints')
         ids, obj_names = set(), set()
         digest = hashlib.sha256(path.read_bytes() + runtime_bytes + urdf.read_bytes())

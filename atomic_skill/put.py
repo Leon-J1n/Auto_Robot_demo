@@ -1,5 +1,6 @@
 """Demo put: approach from world +Z, descend, release, and retreat."""
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 from atomic_skill.pick import DemoInteractionPick
 from demo.interaction.command_converter import _deep_merge
@@ -53,8 +54,37 @@ class DemoInteractionPut(DemoInteractionPick):
         base, resolved, goal, _, requested_path = self._resolve_request(
             request, state, prefer_direct=False, allow_fixed_orientation=True)
         # The shared search subtracts direction * distance from the goal.
-        return self._prepare_approach(base, resolved, goal, requested_path, state,
-                                      np.array([0., 0., -1.]), skill='put')
+        parts, resolved = self._prepare_approach(base, resolved, goal, requested_path, state,
+                                               np.array([0., 0., -1.]), skill='put')
+        prepend_place_reapproach(parts, resolved)
+        return parts, resolved
+
+
+def prepend_place_reapproach(parts, resolved):
+    """A changed placement XY needs a fresh approach before contact/release."""
+    recovery = resolved.get('placement_revalidation') or {}
+    previous = recovery.get('previous_world_from_control')
+    if previous is None:
+        return
+    goal = np.asarray(resolved['selected']['world_from_control'], dtype=float)
+    old = np.asarray(previous, dtype=float)
+    if np.linalg.norm(goal[:2, 3] - old[:2, 3]) <= 1.e-6:
+        return
+    parts.insert(0, {
+        'phase': 'placement_reapproach',
+        'request': {},
+        'parameters': {
+            'target_pose': {'position': goal[:3, 3].tolist(),
+                            'quaternion_xyzw': Rotation.from_matrix(goal[:3, :3]).as_quat().tolist()},
+            'grasp_offset_local': np.asarray(resolved['control_from_grasp'])[:3, 3].tolist(),
+        },
+    })
+    resolved['placement_reapproach'] = {
+        'reason': 'placement_xy_changed',
+        'previous_world_from_control': old.tolist(),
+        'world_from_control': goal.tolist(),
+        'xy_shift_m': float(np.linalg.norm(goal[:2, 3] - old[:2, 3])),
+    }
 
 
 

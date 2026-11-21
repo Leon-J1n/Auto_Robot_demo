@@ -24,8 +24,13 @@ def assemble_robot(arm_path, asset_root, attachments):
         parent_links = {e.get('name') for e in arm.findall('link')}
         child_links = {e.get('name') for e in tool.findall('link')}
         roots = child_links - {j.find('child').get('link') for j in tool.findall('joint')}
-        if mount['parent_link'] not in parent_links or roots != {mount['child_link']}:
-            raise ValueError('Attachment must connect an existing parent link to the child URDF root')
+        if mount['parent_link'] not in parent_links:
+            raise ValueError(
+                f"RobotAttachment parent_link {mount['parent_link']!r} is absent from the selected robot URDF; "
+                "configure the tool mount for this arm"
+            )
+        if roots != {mount['child_link']}:
+            raise ValueError('RobotAttachment child_link must be the child URDF root')
         if parent_links & child_links:
             raise ValueError('Attachment link names must be unique')
         transform = mount['transform']

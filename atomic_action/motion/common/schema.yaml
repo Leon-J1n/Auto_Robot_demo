@@ -178,7 +178,7 @@ input:
         type: array
         item_type: float
         unit: radian
-        description: Optional six-joint seed used to select a continuous IK branch.
+        description: Optional joint seed in RobotDriver.joint_sequence order.
       cartesian_step:
         type: float
         unit: meter

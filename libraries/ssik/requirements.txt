@@ -1,0 +1,2 @@
+# Pinned upstream source, including Python 3.10 support (v9.0.0).
+ssik @ git+https://github.com/personalrobotics/ssik.git@9562488fe2ce7c11c37e3e113f51e9b9fb97ae2e

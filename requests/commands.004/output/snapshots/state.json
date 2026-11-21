@@ -1,0 +1,242 @@
+{
+  "joint_names": [
+    "shoulder_pan_joint",
+    "shoulder_lift_joint",
+    "elbow_joint",
+    "wrist_1_joint",
+    "wrist_2_joint",
+    "wrist_3_joint"
+  ],
+  "joints": [
+    1.097127856583486e-05,
+    -1.9999258371769701,
+    1.0000072670051765,
+    -1.0000033899675267,
+    -1.5699607799962834,
+    6.020690070383047e-06
+  ],
+  "gripper": {
+    "known": true,
+    "initialized": true,
+    "width": 0.0815552718976315,
+    "force": 0.0,
+    "contact_detected": false,
+    "object_present": false,
+    "holding": false,
+    "mode": "physical",
+    "slip_detected": false,
+    "bilateral_contact": false,
+    "contact_lost": false,
+    "left_force_n": 0.0,
+    "right_force_n": 0.0,
+    "hold_force_target_n": null,
+    "filtered_hold_force_n": null,
+    "hold_force_torque_saturated": false,
+    "relative_position_error_m": 0.0,
+    "relative_orientation_error_rad": 0.0,
+    "confirmation": {
+      "left_force_n": 9.176055796864732,
+      "right_force_n": 9.182209126122132,
+      "measured_left_force_n": 9.176055796864732,
+      "measured_right_force_n": 9.182209126122132,
+      "closure_completed": false,
+      "no_contact_time_s": 0.0,
+      "command_reached": false,
+      "driver_reached": false,
+      "width_reached": false,
+      "measured_width_m": 0.07427344493444266,
+      "requested_width_m": 0.0,
+      "no_contact_threshold_n": 0.1,
+      "stable_time_s": 0.1000000000000334,
+      "width_range_m": 0.00020771696403422413,
+      "position_range_m": 0.00017020878666527901,
+      "orientation_range_rad": 0.000605474066400201,
+      "bilateral_contact": true,
+      "confirmed": true,
+      "reason": "stable_bilateral_grasp",
+      "mode": "physical"
+    },
+    "object_id": null
+  },
+  "mechanisms": {},
+  "arm_control": {
+    "joint_error_rad": [
+      -1.0971278565833946e-05,
+      -7.416282302985522e-05,
+      -7.2670051768364274e-06,
+      3.3899675268012075e-06,
+      -3.922000371647805e-05,
+      -6.020690070383133e-06
+    ],
+    "servo_torque_nm": [
+      0.004866156078460946,
+      0.007600621938308905,
+      0.00047959162452571036,
+      -0.0003977935616603645,
+      -0.0001521212789157289,
+      -8.932549867613865e-05
+    ],
+    "servo_force_limited": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "payload_gravity_torque_nm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "base_transform": [
+    [
+      3.3306690738754696e-16,
+      -1.0000000000000002,
+      0.0,
+      0.0
+    ],
+    [
+      1.0000000000000002,
+      3.3306690738754696e-16,
+      0.0,
+      -0.5499999999999999
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "simulation_time": 23.30599999999796,
+  "objects": {
+    "WorkTable": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "RobotPedestal": {
+      "position": [
+        0.0,
+        -0.5499999999999999,
+        0.25
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "Apple": {
+      "position": [
+        -0.22409809676698747,
+        0.1158047997840994,
+        0.6536773169694222
+      ],
+      "quaternion_xyzw": [
+        0.24623158981214066,
+        -0.5929586263085654,
+        -0.6394994636435981,
+        -0.4228599149415724
+      ]
+    },
+    "Banana": {
+      "position": [
+        0.44482698531948967,
+        -0.18619871259393225,
+        0.6149084137655432
+      ],
+      "quaternion_xyzw": [
+        0.009766168597688469,
+        -0.009146821681572244,
+        0.7091344689497414,
+        0.7049462834510277
+      ]
+    },
+    "Marker": {
+      "position": [
+        -0.008023138445078092,
+        -0.2852690953796801,
+        0.6071431478213111
+      ],
+      "quaternion_xyzw": [
+        9.720249300113283e-05,
+        -0.0004933245448718909,
+        0.7049253578170467,
+        0.7092813173128683
+      ]
+    },
+    "Screwdriver": {
+      "position": [
+        -0.17954124923800746,
+        -0.18364111399706262,
+        0.6144843533361056
+      ],
+      "quaternion_xyzw": [
+        -0.05565172781247593,
+        0.017589293203336936,
+        0.7289819221446262,
+        0.6820402181267747
+      ]
+    },
+    "RubiksCube": {
+      "position": [
+        -0.47992429846756673,
+        -0.18505618720138617,
+        0.6267666351899113
+      ],
+      "quaternion_xyzw": [
+        0.0019951352089546165,
+        0.0011461357799807134,
+        0.7080689905422792,
+        0.7061395120234454
+      ]
+    },
+    "Basket": {
+      "position": [
+        -0.2,
+        0.15499999999999994,
+        0.600036
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    },
+    "Tray": {
+      "position": [
+        0.28,
+        0.16500000000000006,
+        0.6
+      ],
+      "quaternion_xyzw": [
+        0.0,
+        0.0,
+        0.7071067811865475,
+        0.7071067811865477
+      ]
+    }
+  }
+}

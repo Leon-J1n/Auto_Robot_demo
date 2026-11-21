@@ -35,19 +35,5 @@ class GlobalCollisionResolutionTests(unittest.TestCase):
         self.assertEqual(resolution, load_global_config()['planning']['collision_validation']['resolution_rad'])
         self.assertEqual(planner.rrt_resolution_rad, resolution)
 
-    def test_proxy_is_enabled_by_default_and_scene_overrides_are_preserved(self):
-        default = apply_default_scene_settings({})['planning_collision_proxy']
-        self.assertTrue(default['enabled'])
-        self.assertEqual(default['sphere_cell_size'], .035)
-        scene = {'planning_collision_proxy': {'enabled': False, 'batch_size': 16}}
-        resolved = apply_default_scene_settings(scene)['planning_collision_proxy']
-        self.assertFalse(resolved['enabled'])
-        self.assertEqual(resolved['batch_size'], 16)
-        self.assertEqual(resolved['sphere_cell_size'], .035)
-        resolved['container_names'].append('AnotherContainer')
-        self.assertEqual(apply_default_scene_settings({})['planning_collision_proxy']['container_names'],
-                         ['Tray', 'Basket'])
-
-
 if __name__ == '__main__':
     unittest.main()

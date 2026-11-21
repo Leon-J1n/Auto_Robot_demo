@@ -49,10 +49,11 @@ class CollisionFreePlanner:
         started = time.perf_counter()
         start = np.asarray(path_request["start"], dtype=float)
         goal = np.asarray(path_request["goal"], dtype=float)
-        if (start.shape != (6,) or goal.shape != (6,)
+        expected_dof = self.joint_limits.shape[0]
+        if (start.shape != (expected_dof,) or goal.shape != (expected_dof,)
                 or not np.all(np.isfinite(start)) or not np.all(np.isfinite(goal))):
             raise PlanningError("Path strategy returned invalid joint endpoints.", code="TRAJECTORY_INVALID")
-        if (self.joint_limits.shape != (6, 2)
+        if (self.joint_limits.shape != (expected_dof, 2)
                 or np.any(start < self.joint_limits[:, 0]) or np.any(start > self.joint_limits[:, 1])
                 or np.any(goal < self.joint_limits[:, 0]) or np.any(goal > self.joint_limits[:, 1])):
             raise PlanningError("Joint endpoints violate limits.", code="JOINT_LIMIT_VIOLATION")
@@ -104,7 +105,7 @@ class CollisionFreePlanner:
 
         trajectory = deepcopy(result["trajectory"])
         points = np.asarray(trajectory.get("waypoints"), dtype=float)
-        if (points.ndim != 2 or points.shape[1] != 6 or len(points) < 2
+        if (points.ndim != 2 or points.shape[1] != expected_dof or len(points) < 2
                 or not np.all(np.isfinite(points))
                 or np.any(points < self.joint_limits[:, 0] - 1e-5)
                 or np.any(points > self.joint_limits[:, 1] + 1e-5)

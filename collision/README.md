@@ -25,7 +25,8 @@ collision/
 │   └── robot_model.py
 ├── assets/                    # 资产解析和网格处理
 │   ├── asset_resolver.py
-│   └── mesh.py
+│   ├── mesh.py
+│   └── robot_urdf.py          # FCL URDF 的视觉几何碰撞回退
 ├── common/                    # 后端共享校验和缓存
 │   ├── validation.py
 │   └── cache.py
@@ -81,6 +82,7 @@ result = checker.check(joints)
 
 - `asset_resolver.py`：从 OLS `data` 目录解析机器人和模型文件。
 - `mesh.py`：校验 OBJ/STL 网格，执行凸分解和内容寻址缓存。
+- `robot_urdf.py`：为 FCL 保留已有 `<collision>`；仅对没有碰撞定义的 link 从 `<visual>` 生成碰撞体。基础几何直接复用，网格经 `mesh.py` 凸分解并缓存，生成的 FCL 专用 URDF 不覆盖 OLS 资产。有惯性或活动关节、但缺少 collision 和 visual 的 link 会报错；无惯性的空固定坐标框架 link 允许保持无几何。
 
 ### `common/`
 
@@ -99,71 +101,19 @@ result = checker.check(joints)
 
 安全距离、采样分辨率、允许碰撞对和缓存容量由调用方配置。缓存键和失效策略由具体后端实现，但不能改变统一接口语义。
 
+FCL 加载机器人 URDF 时应用视觉几何回退；该回退只作用于 FCL 模型。MuJoCo 仍按源 URDF 编译碰撞几何，资产没有 `<collision>` 的 link 不会因 FCL 回退而自动获得物理接触几何。
+
+场景资源解析时，自动允许机械臂主体与安装基底的碰撞，适用于所有选定的机械臂型号。基底由 `Semantic.semantic_name=robot_pedestal` 或 `Semantic.category=pedestal` 标识；兼容旧场景对象名 `RobotPedestal`。规则合并到 `RobotModelRef.allowed_arm_environment_names`，由 FCL、MuJoCo 几何复核和 cuRobo 共用；不改变场景位姿，不豁免夹爪、持物或其他环境对象。
+
 离散采样可能漏掉采样点之间的短暂碰撞；需要更高可靠性时，应缩小采样间隔或使用后端的连续碰撞检测能力。
 
 ## 6. 验证与限制
 
 当前实现以 SimPlatform FCL 为主，MuJoCo 和 Bullet 属于可替换后端。不同后端的网格预处理、凸分解和接触算法可能产生差异，因此跨后端只保证接口和坐标约定一致，不保证每个网格接触结果逐点相同。
 
-## 7. 统一简化规划代理（sorting 场景试用）
+## 7. 场景碰撞检查
 
-`collision/proxy.py` 维护独立于视觉／物理网格的规划碰撞模型。
-所有场景解析时默认启用；场景可通过 `planning_collision_proxy` 覆盖参数，
-显式指定 `enabled: false` 可恢复原检查链路。默认值位于
-`execution/resources/resolver.py` 的 `DEFAULT_SCENE_SETTINGS`，已有场景无需逐个修改。
-
-```json
-"planning_collision_proxy": {
-  "enabled": true,
-  "sphere_cell_size": 0.035,
-  "container_names": ["Tray", "Basket"],
-  "batch_size": 32
-}
-```
-
-`GraspCollisionChecker` 绑定实时后端后启用代理。Direct、IK 候选的普通
-`check/check_path`、cuRobo 导出和最终路径复核均读取它；不在每次规划后再强制
-运行原精细 FCL。原检查器仍用于启动一致性检查、部分专用抓取探针和离线对照。
-仿真接触／动力学几何保持不变。`--show-collision-geometry` 仍显示物理几何，不是代理。
-
-代理规则：
-
-- 仅合并同一实际 body、且对所有计划几何具有完全相同豁免／距离规则的碎片；
-  source IDs 保留在 `source_geoms`，不按旧编号直接复制规则。
-- 机械臂圆柱用轴向覆盖球；普通持物用包络盒的网格覆盖球。环境使用有向盒体；
-  指定的开口容器按底面及四侧分组，每个源凸块完整归入一个包络板，保留内部空间。
-- Robotiq 的细小机构空隙不能直接用大盒填充。`proxies/robotiq_2f85.json` 保留了
-  上一版已验证的 VOXEL 球拟合，并按形状／网格内容 SHA256 匹配。更换资产后不匹配
-  会报错，需要重新制作和验证模板；不依赖本机 `.cache` 才能读取现有模板。
-- 新增盒／球为外包络，但**保留的夹爪球拟合仍是近似**，不能声称完整覆盖精细网格。
-  `sphere_cell_size` 是覆盖网格尺寸，不是允许误差；包络额外占据空间与请求间距分开。
-  3 mm 请求阈值保持，不能据此承诺相对原网格恰好 3 mm。过窄通道可能被代理拒绝。
-- CPU 路径检查先计算独立 MuJoCo FK，再按几何组包围球保守筛选，批量计算球—球、
-  球—盒距离；GPU 直接使用同一批球心、半径和盒体，不重新拟合。
-- 有限圆柱的轴向覆盖球会突出平端面。CPU 对圆柱—环境的代理碰撞候选，使用当前
-  候选关节姿态下的原始 MuJoCo 凸几何距离复核，并应用源几何的冻结阈值／豁免规则。
-  阈值比较容差为 1 nm，恰好达到安全距离视为通过。其他代理对仍沿用球／盒检查；
-  cuRobo GPU 仍使用外包络，可能比 CPU 更保守。
-- Direct 一次规划内共享场景快照，进入和退出时各做一次完整状态校验。路径缓存有界，
-  场景、策略、夹爪构型、抓取／释放或代理设置变化即失效，校验期间状态漂移会拒绝结果。
-- 代理的几何／碰撞对编译与逐帧状态分开缓存。仅 `qpos`、mocap 或场景同步序号变化时，
-  重新计算当前机械臂、夹爪、持物、世界盒体及导出运动链变换，清空旧路径结果，
-  不重复简化网格或冻结相同规则。最多保留四份模型／策略编译结果；临时豁免恢复时，
-  只有完整模型、抓取、阈值及规则签名匹配才复用编译，碰撞结果仍按当前状态重新计算。
-  新规则／新形状未命中缓存时仍完整构建。`planning_proxy_cache` 诊断记录本次 direct
-  的 `builds`、`structure_hits`、`state_refreshes`，方便区分首次构建与状态刷新。
-- 支撑／lift 规则保留。lift 开始时在代理上重新测量已有接触距离，之后不随运动重置，
-  不把精细网格的初始间距直接当作代理间距。释放后持物恢复为世界障碍物。
-
-`planning_proxy` 诊断记录代理来源、源／代理几何数量、球数、盒数和包络说明。
-关闭场景中的 `enabled` 并重新加载，即恢复原检查链路。
-
-离线模板导出工具：
-
-```powershell
-python collision/proxies/export_templates.py --snapshot raw_runtime.json --robot-yaml validated_robot.yml --output reviewed_templates.json
-```
-
-输出只供审核和验证后替换；工具不会执行运动。CPU 测试为
-`python -B -m unittest planning.tests.test_collision_proxy -v`。
+规划、执行前验证和运行时碰撞检查均使用场景及机器人资产解析出的原始碰撞几何。
+机械臂、夹爪和环境物体保留各自精细碰撞模型；MuJoCo 的实时夹爪、动态物体和持物检查
+读取当前构型。`--show-collision-geometry` 可查看仿真中的物理碰撞几何。
 

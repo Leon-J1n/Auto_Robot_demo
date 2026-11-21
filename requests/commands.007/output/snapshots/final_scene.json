@@ -231,23 +231,23 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "shoulder_pan_joint": -4.2632232809637014e-05,
-              "shoulder_lift_joint": -2.0943652979733107,
-              "elbow_joint": 0.9999386218517026,
-              "wrist_1_joint": -1.0000314116476272,
-              "wrist_2_joint": -1.570786622402593,
-              "wrist_3_joint": -3.270677051155949e-05
+              "shoulder_pan_joint": -8.324853231099223e-05,
+              "shoulder_lift_joint": -2.09434552985584,
+              "elbow_joint": 0.99987705674925,
+              "wrist_1_joint": -1.0000687925618845,
+              "wrist_2_joint": -1.570767569063269,
+              "wrist_3_joint": -7.768236328065638e-05
             },
             "available_connect_joints": [
               "wrist_3_joint"
             ],
             "now_joint_positions_rad": {
-              "shoulder_pan_joint": -4.2632232809637014e-05,
-              "shoulder_lift_joint": -2.0943652979733107,
-              "elbow_joint": 0.9999386218517026,
-              "wrist_1_joint": -1.0000314116476272,
-              "wrist_2_joint": -1.570786622402593,
-              "wrist_3_joint": -3.270677051155949e-05
+              "shoulder_pan_joint": -8.324853231099223e-05,
+              "shoulder_lift_joint": -2.09434552985584,
+              "elbow_joint": 0.99987705674925,
+              "wrist_1_joint": -1.0000687925618845,
+              "wrist_2_joint": -1.570767569063269,
+              "wrist_3_joint": -7.768236328065638e-05
             }
           }
         },
@@ -322,10 +322,10 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.04931075084746156
+              "robotiq_2f85_right_driver_joint": 0.0493130652256843
             },
             "now_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.04931075084746156
+              "robotiq_2f85_right_driver_joint": 0.0493130652256843
             }
           }
         },
@@ -652,10 +652,10 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "door_joint": -1.9591433424566536e-16
+              "door_joint": -1.962231871780055e-16
             },
             "now_joint_positions_rad": {
-              "door_joint": -1.9591433424566536e-16
+              "door_joint": -1.962231871780055e-16
             }
           }
         },
@@ -742,11 +742,11 @@
             },
             "initial_joint_positions_rad": {
               "Nightstand0017_drawer01": 0.00030456644793755135,
-              "Nightstand0017_drawer02": 0.0014196399196261791
+              "Nightstand0017_drawer02": 0.0014014397371011178
             },
             "now_joint_positions_rad": {
               "Nightstand0017_drawer01": 0.00030456644793755135,
-              "Nightstand0017_drawer02": 0.0014196399196261791
+              "Nightstand0017_drawer02": 0.0014014397371011178
             }
           }
         },
@@ -784,15 +784,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.2000070397125129,
-              -0.1982933920296164,
-              0.6346111220594723
+              0.22878468085462395,
+              -0.06562092722123515,
+              0.6348942218540731
             ],
             "quaternion_xyzw": [
-              0.0072704801604661674,
-              -0.03375715959376417,
-              -0.09689428916533072,
-              0.9946954765261289
+              -0.540874968161092,
+              0.46012066399989904,
+              0.554067652366791,
+              -0.4344563038762153
             ],
             "scale": [
               1,
@@ -847,15 +847,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.19706587189664107,
-              -0.28445600282090616,
-              0.5983999980065171
+              0.257874440037162,
+              -0.18867710986785827,
+              0.6540078533020356
             ],
             "quaternion_xyzw": [
-              0.00012328094618013256,
-              -0.0001226919245823839,
-              0.7024152274743599,
-              0.7117673903464834
+              0.11502967569647601,
+              -0.8618502744074932,
+              0.06534351863788958,
+              0.4896044350135238
             ],
             "scale": [
               1,

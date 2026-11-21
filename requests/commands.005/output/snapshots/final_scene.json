@@ -1,18 +1,9 @@
 {
   "scene_schema_version": 1,
-  "scene_version": 3,
+  "scene_version": 8,
   "scene_id": 3,
-  "scene_name": "ur5_table_sorting",
-  "scene_name_Chinese": "\u6536\u7eb3\u7269\u54c1",
-  "planning_collision_proxy": {
-    "enabled": true,
-    "sphere_cell_size": 0.035,
-    "container_names": [
-      "Tray",
-      "Basket"
-    ],
-    "batch_size": 32
-  },
+  "scene_name": "piper_table_sorting",
+  "scene_name_Chinese": "PiPER\u673a\u68b0\u81c2\u6d4b\u8bd5\uff08UR3\u573a\u666f\u539f\u5e03\u5c40\uff09",
   "objects": [
     {
       "object_id_in_scene": 0,
@@ -171,21 +162,21 @@
     },
     {
       "object_id_in_scene": 2,
-      "object_name_in_scene": "ur5",
+      "object_name_in_scene": "piper",
       "components": [
         {
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.0,
-              -0.5499999999999999,
-              0.5
+              0,
+              -0.5,
+              0.65
             ],
             "quaternion_xyzw": [
-              0.0,
-              0.0,
-              0.7071067811865476,
-              0.7071067811865476
+              0,
+              0,
+              0.6755902076156602,
+              0.7372773368101241
             ],
             "scale": [
               1,
@@ -198,75 +189,99 @@
         {
           "component_type": "MetadataRef",
           "properties": {
-            "path": "$LIBRARY_SERVER/1",
+            "path": "$LIBRARY_SERVER/8",
             "type": "robot"
           }
         },
         {
           "component_type": "RobotDriver",
           "properties": {
+            "role": "arm",
             "joint_sequence": [
-              "shoulder_pan_joint",
-              "shoulder_lift_joint",
-              "elbow_joint",
-              "wrist_1_joint",
-              "wrist_2_joint",
-              "wrist_3_joint"
+              "joint1",
+              "joint2",
+              "joint3",
+              "joint4",
+              "joint5",
+              "joint6"
             ],
             "joint_limits": {
-              "shoulder_pan_joint": [
-                -6.28319,
-                6.28319
+              "joint1": [
+                -2.6179938,
+                2.6179938
               ],
-              "shoulder_lift_joint": [
-                -6.28319,
-                6.28319
+              "joint2": [
+                0.0,
+                3.1415926
               ],
-              "elbow_joint": [
-                -3.1415,
-                3.1415
+              "joint3": [
+                -2.9670597,
+                0.0
               ],
-              "wrist_1_joint": [
-                -6.28319,
-                6.28319
+              "joint4": [
+                -1.7453292,
+                1.7453292
               ],
-              "wrist_2_joint": [
-                -6.28319,
-                6.28319
+              "joint5": [
+                -1.2217304,
+                1.2217304
               ],
-              "wrist_3_joint": [
-                -6.28319,
-                6.28319
+              "joint6": [
+                -2.0943951,
+                2.0943951
               ]
             },
             "initial_joint_positions_rad": {
-              "shoulder_pan_joint": -9.103478939463712e-05,
-              "shoulder_lift_joint": -2.0943169020290706,
-              "elbow_joint": 1.0000839392068055,
-              "wrist_1_joint": -1.0001291796291238,
-              "wrist_2_joint": -1.5707949193527058,
-              "wrist_3_joint": -0.00012276508442435205
+              "joint1": -7.406104162752736e-05,
+              "joint2": 0.5571812341736676,
+              "joint3": -1.0456629920863416,
+              "joint4": 9.248494269516394e-07,
+              "joint5": 1.2177188385526547,
+              "joint6": -1.5698079257331932
+            },
+            "available_connect_joints": [
+              "joint6"
+            ],
+            "available_connect_link": [
+              "link6"
+            ],
+            "position": [
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "quaternion_xyzw": [
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "robot_attachment": {
+              "properties": {
+                "child_link": []
+              }
             },
             "allowed_arm_environment_names": [
               "RobotPedestal"
             ],
-            "available_connect_joints": [
-              "wrist_3_joint"
-            ],
             "now_joint_positions_rad": {
-              "shoulder_pan_joint": -9.103478939463712e-05,
-              "shoulder_lift_joint": -2.0943169020290706,
-              "elbow_joint": 1.0000839392068055,
-              "wrist_1_joint": -1.0001291796291238,
-              "wrist_2_joint": -1.5707949193527058,
-              "wrist_3_joint": -0.00012276508442435205
+              "joint1": -7.406104162752736e-05,
+              "joint2": 0.5571812341736676,
+              "joint3": -1.0456629920863416,
+              "joint4": 9.248494269516394e-07,
+              "joint5": 1.2177188385526547,
+              "joint6": -1.5698079257331932
             }
           }
         },
         {
           "component_type": "Semantic",
           "properties": {
-            "semantic_name": "ur5",
+            "semantic_name": "piper",
             "category": "robot",
             "support": null
           }
@@ -282,7 +297,7 @@
           "component_type": "PhysicalProperties",
           "properties": {
             "is_static": false,
-            "mass_kg": 20.9949,
+            "mass_kg": 4.2,
             "friction": {
               "format": "[sliding, torsional, rolling]",
               "values": [
@@ -291,7 +306,11 @@
                 0.0001
               ]
             },
-            "restitution": 0.05
+            "restitution": 0.05,
+            "scale": [
+              1.0,
+              1.0
+            ]
           }
         }
       ]
@@ -334,10 +353,10 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.049318193854560606
+              "robotiq_2f85_right_driver_joint": 0.13895104050735152
             },
             "now_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.049318193854560606
+              "robotiq_2f85_right_driver_joint": 0.13895104050735152
             }
           }
         },
@@ -345,21 +364,21 @@
           "component_type": "RobotAttachment",
           "properties": {
             "parent_object_id": 2,
-            "parent_joint": "wrist_3_joint",
-            "parent_link": "wrist_3_link",
+            "parent_joint": "joint6",
+            "parent_link": "link6",
             "child_link": "robotiq_2f85_mount",
             "connection_type": "fixed",
             "transform": {
               "position": [
-                2.679489213841535e-09,
-                0.0999999837652335,
-                9.719897775539721e-09
+                0,
+                0,
+                0
               ],
               "quaternion_xyzw": [
-                -0.7071067556514947,
-                9.473426349705847e-09,
-                -9.47342713345485e-09,
-                0.7071068067215996
+                0,
+                0,
+                -0.7071067811865476,
+                0.7071067811865476
               ],
               "reference_frame": "parent_link"
             }
@@ -559,8 +578,8 @@
           "properties": {
             "position": [
               0.0,
-              -0.5499999999999999,
-              0.25
+              -0.5,
+              0.4
             ],
             "quaternion_xyzw": [
               0.0,
@@ -621,15 +640,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              -0.228348285452016,
-              0.11538780616340137,
-              0.6546531547875283
+              0.013302563531569563,
+              -0.3249042222837153,
+              0.9628329419035612
             ],
             "quaternion_xyzw": [
-              0.07581846173496155,
-              -0.012641456546352837,
-              0.7578848147575312,
-              0.6478443964382755
+              0.02113569619165758,
+              -0.4224738269428577,
+              0.9057576596747158,
+              0.025927009764571688
             ],
             "scale": [
               1,
@@ -684,15 +703,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.44478470673013276,
-              -0.18635839421804398,
-              0.6149084137844821
+              0.44497948306050933,
+              -0.18562610548239827,
+              0.614908413697932
             ],
             "quaternion_xyzw": [
-              0.009771573753835383,
-              -0.009141069228072937,
-              0.7095501181766645,
-              0.7045279178252785
+              0.009746784435418147,
+              -0.009167395968815778,
+              0.7076439498511521,
+              0.7064424953832978
             ],
             "scale": [
               1,
@@ -747,15 +766,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              -0.008029474595289767,
-              -0.285335984087978,
-              0.6071426869818005
+              -0.008001339548272136,
+              -0.28502546714237037,
+              0.6071424906653076
             ],
             "quaternion_xyzw": [
-              6.060139185987483e-05,
-              -0.00046291293521660154,
-              0.7045566831192723,
-              0.7096475620412255
+              4.795593799729548e-05,
+              -0.000451585591431244,
+              0.7062449237437832,
+              0.70796744378313
             ],
             "scale": [
               1,
@@ -810,15 +829,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              -0.17923077812882543,
-              -0.18400494609560222,
-              0.6144536406983844
+              -0.1805244584715574,
+              -0.18271672388753432,
+              0.6144907855920166
             ],
             "quaternion_xyzw": [
-              -0.05420767789779886,
-              0.016209517362290374,
-              0.7335827427069541,
-              0.6772408277757277
+              -0.053067570976925445,
+              0.01667652559886778,
+              0.712525774898737,
+              0.6994374500336066
             ],
             "scale": [
               1,
@@ -873,15 +892,15 @@
           "component_type": "Transform",
           "properties": {
             "position": [
-              0.2790784523584848,
-              -0.0395070231579087,
-              0.6267666351948925
+              -0.47987777027090917,
+              -0.18504300032027335,
+              0.6267666351903053
             ],
             "quaternion_xyzw": [
-              0.002008441320096319,
-              0.0011226570682940165,
-              0.6997379702786479,
-              0.7143958837751577
+              0.0019962017845389294,
+              0.0011442772995033498,
+              0.7074110501822973,
+              0.7067986360257612
             ],
             "scale": [
               1,

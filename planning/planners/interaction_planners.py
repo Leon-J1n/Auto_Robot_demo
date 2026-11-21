@@ -62,6 +62,25 @@ def run_candidate_search(distances, attempt: Callable[[float], Any]):
     return False
 
 
+class _RoutedKinematics:
+    """Restrict one planning pass without mutating the shared service/registry."""
+
+    def __init__(self, kinematics, backends):
+        self._kinematics = kinematics
+        self._backends = backends
+
+    def __getattr__(self, name):
+        return getattr(self._kinematics, name)
+
+    def solve_all(self, *args, **kwargs):
+        kwargs.pop('backend', None)
+        return self._kinematics.solve_all(*args, **kwargs, backends=self._backends)
+
+    def solve_one(self, *args, **kwargs):
+        kwargs.pop('backend', None)
+        return self._kinematics.solve_one(*args, **kwargs, backends=self._backends)
+
+
 class PickContactPlanner:
     """Validate a pick approach and its constrained contact path.
 
@@ -77,13 +96,49 @@ class PickContactPlanner:
 
     def plan(self, base_request: Mapping[str, Any], state: Mapping[str, Any], *, goal,
               direction, requested_path, distances, pose_request):
-        """Return ``(selected, rejected)`` with rejected candidate diagnostics."""
+        """Try every distance with analytic IK before any numerical fallback.
+
+        Both pre-contact IK and the entire contact segment use the pass's
+        route. Collision, limits, FK and path continuity stay fully checked.
+        """
+        distances = tuple(distances)
+        route = getattr(self.kinematics, 'automatic_backends', None)
+        if callable(route) and base_request.get('strategy_params', {}).get('ik_method', 'auto') == 'auto':
+            names = route()
+            analytic = [name for name in names if name in {'eaik', 'ssik'}]
+            numerical = [name for name in names if name not in {'eaik', 'ssik'}]
+            passes = []
+            if analytic:
+                passes.append(('analytic', _RoutedKinematics(self.kinematics, analytic)))
+            if numerical:
+                # Restore the full chain in the fallback pass: successive
+                # points may need different backends on one continuous path.
+                passes.append(('numerical_fallback', _RoutedKinematics(self.kinematics, names)))
+        else:
+            # Legacy/custom models without route introspection retain their
+            # own solver policy rather than assuming named optional plugins.
+            passes = [('configured', self.kinematics)]
+        rejected = []
+        for label, kinematics in passes:
+            selected, failures = self._plan_pass(
+                base_request, state, goal=goal, direction=direction,
+                requested_path=requested_path, distances=distances,
+                pose_request=pose_request, kinematics=kinematics)
+            rejected.extend({**entry, 'ik_search_pass': label} for entry in failures)
+            if selected is not None:
+                selected.update(rejected=rejected, ik_search_pass=label)
+                return selected, rejected
+        return None, rejected
+
+    def _plan_pass(self, base_request, state, *, goal, direction, requested_path,
+                   distances, pose_request, kinematics):
         from scipy.spatial.transform import Rotation
+        linear = LinearMove(kinematics=kinematics, collision_checker=self.collision_checker)
         rejected = []
         for distance in distances:
             approach = candidate_pose(goal, direction, distance)
             try:
-                solutions = self.kinematics.solve_all(
+                solutions = kinematics.solve_all(
                     {"position": approach[:3, 3], "rotation_matrix": approach[:3, :3]},
                     seed=state["joints"], max_solutions=8)
             except IKError as exc:
@@ -102,7 +157,7 @@ class PickContactPlanner:
                     "position": approach[:3, 3], "rotation_matrix": approach[:3, :3],
                     "quaternion_wxyz": Rotation.from_matrix(approach[:3, :3]).as_quat()[[3, 0, 1, 2]]}}
                 try:
-                    path = self.linear.build_path_request(contact, context)
+                    path = linear.build_path_request(contact, context)
                     self.direct.plan(path, contact, context)
                 except (PlanningError, IKError, ValueError) as exc:
                     category = ("contact_ik" if isinstance(exc, IKError) else

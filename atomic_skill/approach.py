@@ -92,8 +92,8 @@ class PoseSearchExecutor:
 
 class ApproachSkill:
     MIN_DISTANCE = 0.02
-    MAX_DISTANCE = 0.10
-    STEP = 0.005
+    MAX_DISTANCE = 0.08
+    STEP = 0.01
     DEFAULT_AXIS = "+z"
 
     @staticmethod

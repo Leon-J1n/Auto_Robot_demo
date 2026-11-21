@@ -2,7 +2,6 @@
   "official_commit": "78fd485fa82d9b9a063fb4985e371814587e666a",
   "warmup_iterations": 5,
   "runtime_cuda_graphs": false,
-  "runtime_proxy_cuda_graphs": true,
   "runtime_warmup_iterations": 0,
   "runtime_num_trajopt_seeds": 1,
   "sphere_density": 1.0,

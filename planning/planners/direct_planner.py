@@ -24,19 +24,7 @@ class DirectPlanner:
     def plan(
         self, path_request: Mapping[str, Any], move_request: Mapping[str, Any], context: Mapping[str, Any],
     ) -> Any:
-        proxy = getattr(self.collision_checker, 'planning_proxy', None)
-        if proxy is None or not move_request['constraints']['avoid_collision']:
-            return self._plan(path_request, move_request, context)
-        started = time.perf_counter()
-        cache_before = {name: proxy.stats[name] for name in ('builds', 'structure_hits', 'state_refreshes')}
-        with proxy.query_scope():
-            trajectory = self._plan(path_request, move_request, context)
-        elapsed = time.perf_counter() - started
-        trajectory['diagnostics']['planning_stages_s']['proxy_state_guards'] = max(0., elapsed-trajectory['planning_time'])
-        trajectory['planning_time'] = elapsed
-        trajectory['diagnostics']['planning_proxy_cache'] = {
-            name: proxy.stats[name] - value for name, value in cache_before.items()}
-        return trajectory
+        return self._plan(path_request, move_request, context)
 
     def _plan(
         self,
@@ -47,7 +35,8 @@ class DirectPlanner:
         started = time.perf_counter()
         collision_resolution, _ = collision_sampling_settings(move_request)
         source = np.asarray(path_request["joint_waypoints"], dtype=float)
-        if source.ndim != 2 or source.shape[1] != 6 or len(source) < 2:
+        expected_dof = len(self.joint_limits)
+        if source.ndim != 2 or source.shape[1] != expected_dof or len(source) < 2:
             raise PlanningError("Path strategy returned an invalid joint path.")
         if not np.all(np.isfinite(source)):
             raise PlanningError("Path contains non-finite joint values.")
@@ -109,9 +98,6 @@ class DirectPlanner:
                 },
             },
         }
-        proxy = getattr(self.collision_checker, 'planning_proxy', None)
-        if proxy is not None and hasattr(proxy, 'snapshot'):
-            trajectory['diagnostics']['planning_proxy'] = proxy.snapshot['planning_proxy']
         return trajectory
 
 

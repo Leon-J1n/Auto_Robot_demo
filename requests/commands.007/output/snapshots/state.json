@@ -8,17 +8,17 @@
     "wrist_3_joint"
   ],
   "joints": [
-    -4.2632232809637014e-05,
-    -2.0943652979733107,
-    0.9999386218517026,
-    -1.0000314116476272,
-    -1.570786622402593,
-    -3.270677051155949e-05
+    -8.324853231099223e-05,
+    -2.09434552985584,
+    0.99987705674925,
+    -1.0000687925618845,
+    -1.570767569063269,
+    -7.768236328065638e-05
   ],
   "gripper": {
     "known": true,
     "initialized": true,
-    "width": 0.08156445955882828,
+    "width": 0.08156427453153677,
     "force": 0.0,
     "contact_detected": false,
     "object_present": false,
@@ -35,22 +35,22 @@
     "relative_position_error_m": 0.0,
     "relative_orientation_error_rad": 0.0,
     "confirmation": {
-      "left_force_n": 6.241848496892298,
-      "right_force_n": 6.2030576226472,
-      "measured_left_force_n": 6.241848496892298,
-      "measured_right_force_n": 6.2030576226472,
+      "left_force_n": 6.097735451289863,
+      "right_force_n": 6.352444179068168,
+      "measured_left_force_n": 6.097735451289863,
+      "measured_right_force_n": 6.352444179068168,
       "closure_completed": false,
       "no_contact_time_s": 0.0,
       "command_reached": true,
       "driver_reached": false,
       "width_reached": false,
-      "measured_width_m": 0.010148348935834477,
+      "measured_width_m": 0.010206739111951885,
       "requested_width_m": 0.0,
       "no_contact_threshold_n": 0.1,
       "stable_time_s": 0.10000000000012221,
-      "width_range_m": 0.00029823215557191717,
-      "position_range_m": 3.6981077517497254e-05,
-      "orientation_range_rad": 4.524347503469456e-05,
+      "width_range_m": 0.00022685714614843581,
+      "position_range_m": 0.0001505090817721908,
+      "orientation_range_rad": 0.0004671266263845931,
       "bilateral_contact": true,
       "confirmed": true,
       "reason": "stable_bilateral_grasp",
@@ -59,47 +59,47 @@
     "object_id": null
   },
   "mechanisms": {
-    "Microwave__model_frame": {
-      "joint_position": 0.19706587189664107,
-      "joint_type": 0
+    "Microwave__door_link": {
+      "joint_position": -1.962231871780055e-16,
+      "joint_type": 3
     },
     "Drawer__Nightstand0017_drawer02": {
-      "joint_position": 0.0014196399196261791,
+      "joint_position": 0.0014014397371011178,
       "joint_type": 2
+    },
+    "Microwave__model_frame": {
+      "joint_position": 0.257874440037162,
+      "joint_type": 0
     },
     "Drawer__Nightstand0017_drawer01": {
       "joint_position": 0.00030456644793755135,
       "joint_type": 2
     },
-    "Drawer__Nightstand0017": {
-      "joint_position": 0.19706587189664107,
+    "Drawer__root": {
+      "joint_position": 0.257874440037162,
       "joint_type": 0
     },
-    "Microwave__door_link": {
-      "joint_position": -1.9591433424566536e-16,
-      "joint_type": 3
-    },
-    "Drawer__root": {
-      "joint_position": 0.19706587189664107,
+    "Drawer__Nightstand0017": {
+      "joint_position": 0.257874440037162,
       "joint_type": 0
     }
   },
   "arm_control": {
     "joint_error_rad": [
-      4.263223280963833e-05,
-      -2.9702026689282235e-05,
-      6.137814829731969e-05,
-      3.1411647627210826e-05,
-      -9.677597407220517e-06,
-      3.270677051155902e-05
+      8.324853231099147e-05,
+      -4.947014415979112e-05,
+      0.00012294325075001833,
+      6.879256188463412e-05,
+      -2.8730936731280465e-05,
+      7.76823632806558e-05
     ],
     "servo_torque_nm": [
-      -0.002538071688196718,
-      -0.001819765383061167,
-      -0.005688464704007856,
-      -0.0011273128934590204,
-      -0.00023116486795515812,
-      0.00041096498618478617
+      -0.00552609285984615,
+      -0.0008857757720761583,
+      -0.010097480219883437,
+      -0.002112758858856978,
+      -0.0005452092743780668,
+      0.0009713657603712733
     ],
     "servo_force_limited": [
       false,
@@ -144,7 +144,7 @@
       1.0
     ]
   ],
-  "simulation_time": 46.03200000001029,
+  "simulation_time": 53.52600000001945,
   "objects": {
     "WorkTable": {
       "position": [
@@ -200,28 +200,28 @@
     },
     "Apple": {
       "position": [
-        0.2000070397125129,
-        -0.1982933920296164,
-        0.6346111220594723
+        0.22878468085462395,
+        -0.06562092722123515,
+        0.6348942218540731
       ],
       "quaternion_xyzw": [
-        0.007270480160466169,
-        -0.03375715959376418,
-        -0.09689428916533074,
-        0.9946954765261291
+        -0.5408749681610922,
+        0.46012066399989915,
+        0.5540676523667911,
+        -0.4344563038762154
       ]
     },
     "ToyPanda": {
       "position": [
-        0.19706587189664107,
-        -0.28445600282090616,
-        0.5983999980065171
+        0.257874440037162,
+        -0.18867710986785827,
+        0.6540078533020356
       ],
       "quaternion_xyzw": [
-        0.00012328094618013256,
-        -0.0001226919245823839,
-        0.7024152274743599,
-        0.7117673903464834
+        0.11502967569647604,
+        -0.8618502744074934,
+        0.06534351863788959,
+        0.4896044350135239
       ]
     },
     "Microwave__model_frame": {
@@ -291,8 +291,8 @@
     },
     "Drawer__Nightstand0017_drawer02": {
       "position": [
-        -0.38307749639018757,
-        0.0037479783404134113,
+        -0.3830872676292046,
+        0.003763333128983022,
         0.736093944
       ],
       "quaternion_xyzw": [
