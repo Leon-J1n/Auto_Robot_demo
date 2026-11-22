@@ -8,7 +8,14 @@ def restore_dependent_joints(model, data, restored_joint_ids):
     for _ in range(model.neq + 1):
         changed = False
         for eq in range(model.neq):
-            if not data.eq_active[eq] or int(model.eq_type[eq]) != int(mujoco.mjtEq.mjEQ_JOINT):
+            # Equality activation is model metadata in current MuJoCo Python
+            # bindings (older builds exposed it on MjData).  Read the model
+            # first and retain the old fallback for compatibility.
+            eq_active = getattr(model, 'eq_active', None)
+            if eq_active is None:
+                eq_active = getattr(data, 'eq_active', None)
+            if ((eq_active is not None and not eq_active[eq])
+                    or int(model.eq_type[eq]) != int(mujoco.mjtEq.mjEQ_JOINT)):
                 continue
             child, parent = int(model.eq_obj1id[eq]), int(model.eq_obj2id[eq])
             if parent not in known or child in known or child < 0:
