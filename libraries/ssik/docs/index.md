@@ -1,0 +1,44 @@
+# ssik
+
+[![PyPI](https://img.shields.io/pypi/v/ssik.svg?v=1)](https://pypi.org/project/ssik/)
+[![Python](https://img.shields.io/pypi/pyversions/ssik.svg?v=1)](https://pypi.org/project/ssik/)
+[![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://github.com/personalrobotics/ssik/blob/main/LICENSE)
+
+Analytical inverse kinematics for 6R and 7R revolute robot arms. Each arm becomes a single self-contained Python module that returns **every IK branch** with FK closure well below typical robot repeatability — and tightenable to machine precision when needed.
+
+```bash
+pip install ssik
+```
+
+## Two-minute quickstart
+
+```python
+from ssik.prebuilt import franka_panda_ik
+import numpy as np
+
+T_target = np.eye(4)
+T_target[:3, 3] = [0.5, 0.1, 0.3]
+sols = franka_panda_ik.solve(T_target)        # every analytical IK branch
+```
+
+<!-- AUTOGEN:arm_count -->72<!-- /AUTOGEN --> prebuilt arms ship with the wheel: <!-- AUTOGEN:arm_roster -->UR5, UR3e, UR5e, UR10e, UR16e, UR20, UR30, Puma 560, JACO 2, iiwa14, Gen3, Franka Panda, xArm7, xArm6, Z1, PiPER, Rizon 4, Kassow KR810, Rizon 10, CRX-3iA, CRX-5iA, CRX-10iA, CRX-10iA/LP, CRX-20iA/L, CRX-30iA, CRX-10iA/L, YAM, big_yam, FR3, OpenArm L, OpenArm R, R1 Pro L, R1 Pro R, Thor, Core, Spark, Gen3 Lite, UR7E, UR12E, UR15, UR18, YuMi L, YuMi R, M-710iC, JACO j2s6s300, iiwa7, JACO j2s7s300, IRB 120, IRB 1600, IRB 6700, KR 6 R900, KR 210 R2700, GP8, RS007N, LR Mate 200iD, R-2000iC/210L, RX160, RM75, GEN72, CR5, Nova5, RV-4FR, HH020, VS-060, M1013, M0609, HC10, xMate Pro7, xMate CR7, xMate SR3, ViperX 300s, WidowX 250s<!-- /AUTOGEN -->. For other arms, run `ssik build <your.urdf>` once and import the emitted module.
+
+## Where to go next
+
+- **Just want to use it?** → [Quickstart](quickstart.md)
+- **Adapting to your robot?** → [Setting up your robot](setting_up_your_robot.md) — calibration, custom tools, link conventions
+- **Teleoperating an arm?** → [Teleoperation](teleop.md) — device to joints: calibration, clutch, `Tracker`, safety
+- **Need the API surface?** → [API reference](api.md) — `Manipulator`, `Solution`, `Diagnostic`, `TolerancePolicy`, postprocess helpers
+- **Working with a redundant arm?** → [Self-motion charts](api.md#self-motion-charts-ssikchart) — the one-parameter family of postures at a pose, as a curve you can evaluate, sample and track rather than a bag of samples
+- **Want to understand the dispatch?** → [Architecture](architecture.md) — solver tier catalog + algorithmic lineage
+- **Checking arm coverage?** → [Arm coverage](arm_coverage.md) — per-arm fixtures, speeds, FK floors
+
+## Why ssik exists
+
+Numerical-IK libraries take a seed, run damped least-squares to a **single** converged configuration, and stop. ssik returns **every analytical branch** at near-machine precision. Branch enumeration matters for motion planning (try every branch, pick the one with best clearance), for dexterity analysis (the manipulability ellipsoid is per-branch), and for trajectory continuation across kinematic singularities.
+
+ssik covers the kinematic classes that the subproblem-decomposition libraries (EAIK, IK-Geo) refuse: **non-Pieper 6R** (Kinova JACO 2's 55° twists, UFactory xArm6's joint-6 y-offset, AgileX PiPER's tilted wrist axes), **non-SRS 7R** (Flexiv Rizon 4, Kassow KR810), **approximate-SRS** (Kinova Gen3, 12 mm offset). See the [README comparison table](https://github.com/personalrobotics/ssik#measured-comparison-vs-eaik) for measured numbers.
+
+## License
+
+[BSD-3-Clause](https://github.com/personalrobotics/ssik/blob/main/LICENSE). Clean-room reimplementations of algorithms from BSD-3-licensed IK-Geo and the academic publications of Raghavan–Roth (1990), Manocha–Canny (1994), Singh–Kreutz (1989), and Husty–Pfurner (2007). Algorithmic lineage documented in module docstrings.

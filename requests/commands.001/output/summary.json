@@ -1,110 +1,17 @@
 {
   "request_id": "end-effector-relative-directions-001",
   "success": true,
-  "collision_policy": "planning_only",
-  "effective_defaults": {
-    "motion": {
-      "velocity_scale": 0.4,
-      "acceleration_scale": 0.8
-    },
-    "trajectory": {
-      "fps": 60,
-      "pause_seconds": 1.0
-    }
-  },
-  "consistency": {
-    "fk_position_error_m": 1.6990933635399134e-10,
-    "fk_rotation_matrix_error": 3.5524944097531375e-10,
-    "scene_id": 1,
-    "fingerprint": "bfd1e500cd4f7c82ecfaaa6d39cc7da0567b13bf2f28c67b28254cfda56f2459"
-  },
-  "planning_collision_proxy": {
-    "schema_version": 1,
-    "geometry_source": "shared_simplified_proxy",
-    "source_geometry_count": 95,
-    "proxy_geometry_count": 27,
-    "robot_spheres": 342,
-    "world_boxes": 6,
-    "options": {
-      "sphere_cell_size": 0.035,
-      "container_names": [
-        "Tray",
-        "Basket"
-      ],
-      "batch_size": 32
-    },
-    "coverage": "outer_envelope_except_retained_gripper_sphere_fit",
-    "gripper_fit": "retained_validated_cuRobo_voxel_templates",
-    "maximum_box_cover_extra_m": 0.030310889132455353
-  },
-  "active_command_id": "6",
-  "active_substep": "move",
   "status": "success",
-  "frame_count": 525,
-  "collision_cache_stats": {
-    "native_queries": 1,
-    "configuration_hits": 0,
-    "path_hits": 0,
-    "invalidations": 1
-  },
-  "path_validation_cache_stats": {},
-  "planning_cache_stats": {},
-  "physics_steps": 4338,
+  "frame_count": 864,
+  "physics_steps": 7164,
   "execution_backend": "mujoco",
-  "viewer_sync_count": 0,
-  "final_scene_file": "snapshots/final_scene.json",
   "trajectory_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.001\\output\\trajectories\\execution.traj",
   "blackboard_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.001\\output\\snapshots\\blackboard.json",
-  "allowed_carrying_contacts": [],
-  "steps": [
-    {
-      "command_id": "1",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/001_1.json",
-      "error": null
-    },
-    {
-      "command_id": "2",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/002_2.json",
-      "error": null
-    },
-    {
-      "command_id": "3",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/003_3.json",
-      "error": null
-    },
-    {
-      "command_id": "4",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/004_4.json",
-      "error": null
-    },
-    {
-      "command_id": "5",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/005_5.json",
-      "error": null
-    },
-    {
-      "command_id": "6",
-      "skill_name": "move_to",
-      "success": true,
-      "status": "completed",
-      "command_file": "commands/006_6.json",
-      "error": null
-    }
-  ],
+  "final_scene_file": "snapshots/final_scene.json",
+  "commands_file": "commands/results.jsonl",
+  "command_count": 6,
+  "successful_command_count": 6,
+  "failed_command_count": 0,
+  "failure": null,
   "final_state_file": "snapshots/state.json"
 }

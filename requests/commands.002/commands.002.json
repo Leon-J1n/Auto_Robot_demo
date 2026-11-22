@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "request_id": "approach-pick-apple-002",
+  "request_id": "pick-apple-return-home-002",
   "scene_id": 2,
   "scene_version": 3,
   "commands": [
@@ -8,42 +8,28 @@
       "command_id": "1",
       "skill_name": "move_to",
       "parameters": {
-        "target": 7,
-        "relation": "behind",
-        "distance_m": 0.15
+        "target": "end_effector",
+        "relation": "front",
+        "distance_m": 0.1
       }
     },
     {
       "command_id": "2",
       "skill_name": "move_to",
       "parameters": {
-        "target": 7,
-        "relation": "above",
-        "distance_m": 0.15
+        "target": "end_effector",
+        "relation": "below",
+        "distance_m": 0.1
       }
     },
     {
       "command_id": "3",
-      "skill_name": "pick",
-      "parameters": {
-        "target": 7,
-        "hold_force": 10.0
-      }
-    },
-    {
-      "command_id": "4",
-      "skill_name": "lift_up",
-      "parameters": {
-        "distance": 0.02
-      }
-    },
-    {
-      "command_id": "5",
       "skill_name": "move_to",
       "parameters": {
-        "target": "home"
+        "target": "home",
+        "planning_method": "joint"
       }
     }
   ],
-  "scene_file": "ur5_table_apple.json"
+  "scene_file": "piper_table_apple.json"
 }

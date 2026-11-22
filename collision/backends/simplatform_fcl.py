@@ -24,7 +24,7 @@ import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SIMPLATFORM_PYTHON = PROJECT_ROOT / "libraries" / "simplatform" / "source" / "SimPlatform-main" / "python"
-DEFAULT_SCENE = PROJECT_ROOT / "requests" / "commands.001" / "ur5_table_empty.json"
+DEFAULT_SCENE = PROJECT_ROOT / "requests" / "commands.001" / "ur3_table_empty.json"
 DEFAULT_ROBOT_URDF = PROJECT_ROOT / "services" / "object_library_server" / "data" / "robots" / "1" / "ur5e_arm.urdf"
 
 
@@ -194,18 +194,22 @@ class SimPlatformFCLCollisionChecker:
                 or any(not isinstance(name, str) or not name for name in fixture_names)):
             raise ValueError('allowed_arm_environment_names must be a list of scene object names')
         self._allowed_arm_environment_names = frozenset(fixture_names)
+        from collision.mounting import fixed_base_links, mounting_pedestals
+        self._mounting_pedestal_names = mounting_pedestals(self.scene, robot_object or {})
+        self._fixed_base_link_names = fixed_base_links(self.robot_urdf)
         self._sim = Simulator(physics="none", collision="fcl")
         self.world = self._sim.create_world()
         self.robot = self.world.load_robot(self.robot_urdf)
         # SimPlatform exposes all URDF joints (including fixed joints) and
-        # uses its own joint ordering.  The rest of this project uses the six
-        # UR5e actuated joints in ``UR5E_JOINT_NAMES`` order, so keep an
-        # explicit adapter map instead of leaking the SDK ordering upward.
+        # uses its own joint ordering. Keep the scene driver's joint order
+        # rather than assuming a particular arm's joint names.
         sdk_names = tuple(str(name) for name in self.robot.joint_names)
-        project_names = (
-            "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
-            "wrist_1_joint", "wrist_2_joint", "wrist_3_joint",
-        )
+        driver = _component(robot_object, 'RobotDriver') if robot_object is not None else {}
+        project_names = tuple((driver or {}).get('joint_sequence') or (
+            joint.get('name') for joint in ET.parse(self.robot_urdf).getroot().findall('joint')
+            if joint.get('type') in ('revolute', 'continuous', 'prismatic')))
+        if not project_names or len(set(project_names)) != len(project_names):
+            raise ValueError('RobotDriver requires a nonempty unique joint_sequence')
         missing = [name for name in project_names if name not in sdk_names]
         if missing:
             raise ValueError(f"FCL robot URDF is missing project joints: {missing}")
@@ -319,7 +323,10 @@ class SimPlatformFCLCollisionChecker:
             raise ValueError(f'Arm collision exemption references unloaded objects: {sorted(missing)}')
         arm = {h for h, link in self._collider_links.items() if link in self._arm_link_names}
         fixtures = {h for h, name in self._names.items() if name in names}
-        return {frozenset((a, b)) for a in arm for b in fixtures if a != b}
+        pairs = {frozenset((a, b)) for a in arm for b in fixtures if a != b}
+        base = {h for h, link in self._collider_links.items() if link in self._fixed_base_link_names}
+        mounts = {h for h, name in self._names.items() if name in self._mounting_pedestal_names}
+        return pairs | {frozenset((a, b)) for a in base for b in mounts if a != b}
 
     def _to_sdk_joints(self, joints: Sequence[float]) -> np.ndarray:
         values = np.asarray(joints, dtype=float)

@@ -11,6 +11,7 @@ from sensors.camera import CameraIntrinsics
 
 
 REGION_RADIUS_M = .02
+SURFACE_HEIGHT_TOLERANCE_M = .03
 _RELATIONS = {'front', 'behind', 'left', 'right', 'above', 'below'}
 _VERTICAL_RELATIONS = {'above', 'below'}
 
@@ -77,6 +78,11 @@ def region_points(frame, region):
     distance = (np.linalg.norm(offset, axis=-1) if region['relation'] in _VERTICAL_RELATIONS
                 else np.linalg.norm(offset[..., :2], axis=-1))
     valid &= (distance <= radius) & outside
+    if region['relation'] not in _VERTICAL_RELATIONS:
+        # Horizontal relative placement still has to land on the support
+        # surface. Depth pixels from the robot or a background surface can
+        # share the requested XY region while being far above the tray.
+        valid &= np.abs(world[..., 2] - center[2]) <= SURFACE_HEIGHT_TOLERANCE_M
     return world, np.argwhere(valid)
 
 
@@ -102,7 +108,9 @@ def validate_relative_point(estimate, region):
                 else np.linalg.norm(offset[:2]))
     if (not np.isfinite(point).all()
             or distance > region['region_radius_m'] + 1e-6
-            or np.dot(point - boundary, region['direction_world']) < -1e-6):
+            or np.dot(point - boundary, region['direction_world']) < -1e-6
+            or (region['relation'] not in _VERTICAL_RELATIONS
+                and abs(float(point[2] - center[2])) > SURFACE_HEIGHT_TOLERANCE_M)):
         raise region_error('感知放置点未落在指定相对放置区域内')
 
 

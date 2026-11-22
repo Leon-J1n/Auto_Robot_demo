@@ -2,8 +2,8 @@
   "scene_schema_version": 1,
   "scene_version": 3,
   "scene_id": 3,
-  "scene_name": "ur5_table_sorting",
-  "scene_name_Chinese": "\u6536\u7eb3\u7269\u54c1",
+  "scene_name": "nero_table_apple",
+  "scene_name_Chinese": "Nero \u684c\u9762\u82f9\u679c\u573a\u666f",
   "objects": [
     {
       "object_id_in_scene": 0,
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "object_id_in_scene": 14,
+      "object_id_in_scene": 7,
       "object_name_in_scene": "TopDirectionalLight",
       "components": [
         {
@@ -162,7 +162,7 @@
     },
     {
       "object_id_in_scene": 2,
-      "object_name_in_scene": "ur5",
+      "object_name_in_scene": "nero",
       "components": [
         {
           "component_type": "Transform",
@@ -189,7 +189,7 @@
         {
           "component_type": "MetadataRef",
           "properties": {
-            "path": "$LIBRARY_SERVER/1",
+            "path": "$LIBRARY_SERVER/9",
             "type": "robot"
           }
         },
@@ -197,64 +197,74 @@
           "component_type": "RobotDriver",
           "properties": {
             "joint_sequence": [
-              "shoulder_pan_joint",
-              "shoulder_lift_joint",
-              "elbow_joint",
-              "wrist_1_joint",
-              "wrist_2_joint",
-              "wrist_3_joint"
+              "joint1",
+              "joint2",
+              "joint3",
+              "joint4",
+              "joint5",
+              "joint6",
+              "joint7"
             ],
             "joint_limits": {
-              "shoulder_pan_joint": [
-                -6.28319,
-                6.28319
+              "joint1": [
+                -2.70526,
+                2.70526
               ],
-              "shoulder_lift_joint": [
-                -6.28319,
-                6.28319
+              "joint2": [
+                -1.74,
+                1.74
               ],
-              "elbow_joint": [
-                -3.1415,
-                3.1415
+              "joint3": [
+                -2.75,
+                2.75
               ],
-              "wrist_1_joint": [
-                -6.28319,
-                6.28319
+              "joint4": [
+                -1.01,
+                2.14
               ],
-              "wrist_2_joint": [
-                -6.28319,
-                6.28319
+              "joint5": [
+                -2.75,
+                2.75
               ],
-              "wrist_3_joint": [
-                -6.28319,
-                6.28319
+              "joint6": [
+                -0.73,
+                0.95
+              ],
+              "joint7": [
+                -1.5707963,
+                1.5707963
               ]
             },
             "initial_joint_positions_rad": {
-              "shoulder_pan_joint": -8.215017547436067e-05,
-              "shoulder_lift_joint": -2.094496496138139,
-              "elbow_joint": 0.9997953126610498,
-              "wrist_1_joint": -1.0001051907956837,
-              "wrist_2_joint": -1.5707943551405814,
-              "wrist_3_joint": -0.00019923165340700249
+              "joint1": -6.376024674395826e-05,
+              "joint2": -0.7998231689916238,
+              "joint3": -4.006613821220919e-05,
+              "joint4": 1.4998959948061326,
+              "joint5": -1.5699807073125545,
+              "joint6": -2.1834235211788284e-05,
+              "joint7": 1.569897650766901
             },
             "available_connect_joints": [
-              "wrist_3_joint"
+              "joint7"
+            ],
+            "allowed_arm_environment_names": [
+              "RobotPedestal"
             ],
             "now_joint_positions_rad": {
-              "shoulder_pan_joint": -8.215017547436067e-05,
-              "shoulder_lift_joint": -2.094496496138139,
-              "elbow_joint": 0.9997953126610498,
-              "wrist_1_joint": -1.0001051907956837,
-              "wrist_2_joint": -1.5707943551405814,
-              "wrist_3_joint": -0.00019923165340700249
+              "joint1": -6.376024674395826e-05,
+              "joint2": -0.7998231689916238,
+              "joint3": -4.006613821220919e-05,
+              "joint4": 1.4998959948061326,
+              "joint5": -1.5699807073125545,
+              "joint6": -2.1834235211788284e-05,
+              "joint7": 1.569897650766901
             }
           }
         },
         {
           "component_type": "Semantic",
           "properties": {
-            "semantic_name": "ur5",
+            "semantic_name": "nero",
             "category": "robot",
             "support": null
           }
@@ -270,7 +280,7 @@
           "component_type": "PhysicalProperties",
           "properties": {
             "is_static": false,
-            "mass_kg": 20.9949,
+            "mass_kg": 4.8,
             "friction": {
               "format": "[sliding, torsional, rolling]",
               "values": [
@@ -280,6 +290,21 @@
               ]
             },
             "restitution": 0.05
+          }
+        },
+        {
+          "component_type": "RobotModelRef",
+          "properties": {
+            "collision_geometry": {
+              "link_overrides": {
+                "link5": {
+                  "max_convex_hulls": 32,
+                  "max_vertices": 256,
+                  "max_input_faces": 6000,
+                  "threshold": 0.03
+                }
+              }
+            }
           }
         }
       ]
@@ -322,10 +347,10 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.04930590156171389
+              "robotiq_2f85_right_driver_joint": 0.14012927116555404
             },
             "now_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.04930590156171389
+              "robotiq_2f85_right_driver_joint": 0.14012927116555404
             }
           }
         },
@@ -333,21 +358,21 @@
           "component_type": "RobotAttachment",
           "properties": {
             "parent_object_id": 2,
-            "parent_joint": "wrist_3_joint",
-            "parent_link": "wrist_3_link",
+            "parent_joint": "joint7",
+            "parent_link": "link7",
             "child_link": "robotiq_2f85_mount",
             "connection_type": "fixed",
             "transform": {
               "position": [
-                2.679489213841535e-09,
-                0.0999999837652335,
-                9.719897775539721e-09
+                0.0,
+                0.0,
+                0.01
               ],
               "quaternion_xyzw": [
-                -0.7071067556514947,
-                9.473426349705847e-09,
-                -9.47342713345485e-09,
-                0.7071068067215996
+                0.0,
+                0.0,
+                0.0,
+                1.0
               ],
               "reference_frame": "parent_link"
             }
@@ -602,22 +627,22 @@
       ]
     },
     {
-      "object_id_in_scene": 7,
+      "object_id_in_scene": 8,
       "object_name_in_scene": "Apple",
       "components": [
         {
           "component_type": "Transform",
           "properties": {
             "position": [
-              -0.21379798088486363,
-              0.1350254259907709,
-              0.6546702067300755
+              -0.0001596717646440942,
+              -0.44986899650664797,
+              0.9445310740847946
             ],
             "quaternion_xyzw": [
-              0.027523401442412988,
-              -0.05712384254084238,
-              0.7316518537632339,
-              0.6787229875812607
+              0.32896565454011,
+              -0.3055194815445979,
+              0.6289479364650918,
+              0.6347156353407564
             ],
             "scale": [
               1,
@@ -660,384 +685,6 @@
               ]
             },
             "restitution": 0.05
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 8,
-      "object_name_in_scene": "Banana",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              -0.14357292182934953,
-              0.15698301558105388,
-              0.6794472660524526
-            ],
-            "quaternion_xyzw": [
-              -0.9223743122664296,
-              0.07107970384284268,
-              -0.3572330574590686,
-              0.12867729570942432
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/2",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "Banana",
-            "category": "graspable",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.066,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                1.8,
-                0.005,
-                0.0005
-              ]
-            },
-            "restitution": 0.05
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 9,
-      "object_name_in_scene": "Marker",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              0.3020469364565669,
-              0.17343202595197243,
-              0.627742955073489
-            ],
-            "quaternion_xyzw": [
-              0.009560677189153901,
-              -6.957520994609166e-05,
-              0.9999528814506613,
-              -0.0016803242230709972
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/10",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "Marker",
-            "category": "graspable",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.0158,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                0.5,
-                0.003,
-                0.0003
-              ]
-            },
-            "restitution": 0.15
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 10,
-      "object_name_in_scene": "Screwdriver",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              0.2657938875735915,
-              0.10808843032722155,
-              0.6351889142400184
-            ],
-            "quaternion_xyzw": [
-              -0.02760722491090378,
-              0.007745396108108563,
-              -0.020475841714046074,
-              0.999379102181924
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/13",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "Screwdriver",
-            "category": "graspable",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.097,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                0.65,
-                0.005,
-                0.0003
-              ]
-            },
-            "restitution": 0.12
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 11,
-      "object_name_in_scene": "RubiksCube",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              0.40142254344978684,
-              0.10093147168645784,
-              0.6473364149516374
-            ],
-            "quaternion_xyzw": [
-              0.002061982534680508,
-              0.0008191119857521128,
-              0.6972234409001035,
-              0.7168504381968398
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/15",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "RubiksCube",
-            "category": "graspable",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.1,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                0.7,
-                0.005,
-                0.0005
-              ]
-            },
-            "restitution": 0.05
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 12,
-      "object_name_in_scene": "Basket",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              -0.2,
-              0.15499999999999994,
-              0.600036
-            ],
-            "quaternion_xyzw": [
-              0.0,
-              0.0,
-              0.7071067811865475,
-              0.7071067811865477
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/12",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "Basket",
-            "category": "placement",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.12,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                0.7,
-                0.005,
-                0.001
-              ]
-            },
-            "restitution": 0.1
-          }
-        }
-      ]
-    },
-    {
-      "object_id_in_scene": 13,
-      "object_name_in_scene": "Tray",
-      "components": [
-        {
-          "component_type": "Transform",
-          "properties": {
-            "position": [
-              0.28,
-              0.16500000000000006,
-              0.6
-            ],
-            "quaternion_xyzw": [
-              0.0,
-              0.0,
-              0.7071067811865475,
-              0.7071067811865477
-            ],
-            "scale": [
-              1,
-              1,
-              1
-            ],
-            "parent": null
-          }
-        },
-        {
-          "component_type": "MetadataRef",
-          "properties": {
-            "path": "$LIBRARY_SERVER/17",
-            "type": "model"
-          }
-        },
-        {
-          "component_type": "MeshRenderer",
-          "properties": {}
-        },
-        {
-          "component_type": "Semantic",
-          "properties": {
-            "semantic_name": "Tray",
-            "category": "placement",
-            "support": 1
-          }
-        },
-        {
-          "component_type": "PhysicalProperties",
-          "properties": {
-            "is_static": false,
-            "mass_kg": 0.22,
-            "friction": {
-              "format": "[sliding, torsional, rolling]",
-              "values": [
-                0.45,
-                0.004,
-                0.0004
-              ]
-            },
-            "restitution": 0.1
           }
         }
       ]

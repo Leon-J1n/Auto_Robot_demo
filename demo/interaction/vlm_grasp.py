@@ -132,7 +132,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         super().__init__(client, blackboard)
         self.backend = backend
         targets = visual_targets or [{'target_id': target_id, 'point_type': 'grasp', 'camera_id': camera_id}]
-        self.visual_targets = {(str(item['target_id']), item['point_type']): item for item in targets}
+        self.visual_targets = {(str(item['target_id']), item['point_type'], item.get('place_cycle_id')): item for item in targets}
         self.command_point_types = command_point_types or {}
         self.command_place_cycles = command_place_cycles or {}
         self.command_place_parameters = command_place_parameters or {}
@@ -142,18 +142,66 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         self.estimator = estimator or VLMPointEstimator()
         self.placement_rng = np.random.default_rng()
         self._placement_contexts = {}
+        self.operation_ids = {}
+        self.operation_id = None
 
     def set_command_context(self, command_id):
+        self.operation_id = self.operation_ids.get(str(command_id))
         self.point_type = self.command_point_types.get(str(command_id), 'grasp')
         self.place_cycle_id = (self.command_place_cycles.get(str(command_id), str(command_id))
                                if self.point_type == 'place' else None)
         self.place_parameters = placement_parameters(self.command_place_parameters.get(str(command_id), {}))
 
+    def support_region(self, name, request, pose, metadata, resources):
+        lower, upper = _model_bounds(metadata)
+        region = relative_region(request, pose, lower, upper, resources)
+        if request['relation'] in {'above', 'below'} or not hasattr(self.backend, 'support_below'):
+            return region
+        transform = rigid_pose(pose['position'], pose['quaternion_xyzw'])
+        corners = np.array(list(product(*zip(lower, upper)))) @ transform[:3, :3].T + transform[:3, 3]
+        support = self.backend.support_below(name, corners.mean(axis=0), corners[:, 2].min())
+        if support is None:
+            from demo.interaction.relative_placement import region_error
+            raise region_error('无法确认参考物下方的支撑面')
+        region['region_center_world'][2] = support[1]
+        region.update(support_body_id=support[0], support_z=support[1])
+        return region
+
+    def _visual_target(self, target_id, point_type=None):
+        point_type = point_type or self.point_type
+        cycle = self.place_cycle_id if point_type == 'place' else None
+        return self.visual_targets.get((str(target_id), point_type, cycle))
+
+    def prime_task_targets(self, resources, state):
+        """Sense each task interaction once before motion starts.
+
+        The result is only placed in the blackboard cache. Candidate selection
+        and grasp/placement execution still happen at their normal command
+        boundary, where the current robot and gripper state is authoritative.
+        """
+        results = []
+        command_for = {}
+        for command_id, point_type in self.command_point_types.items():
+            command_for.setdefault(point_type, command_id)
+        for target in self.visual_targets.values():
+            command_id = next((cid for cid, cycle in self.command_place_cycles.items()
+                               if cycle == target.get('place_cycle_id')), None)
+            self.set_command_context(command_id or command_for.get(target['point_type'], ''))
+            try:
+                self.resolve(target['target_id'], resources, state, preflight=True)
+                results.append({'target_id': target['target_id'], 'point_type': target['point_type'], 'status': 'cached'})
+            except Exception as exc:
+                # A later command may have a better view or the required held
+                # object state. Keep startup perception best-effort.
+                results.append({'target_id': target['target_id'], 'point_type': target['point_type'],
+                                'status': 'deferred', 'reason': str(exc)})
+        return results
+
     def is_visual_place(self, target_id):
-        return (str(target_id), self.point_type) in self.visual_targets and self.point_type == 'place'
+        return self._visual_target(target_id) is not None and self.point_type == 'place'
 
     def is_visual_handle(self, target_id, resources):
-        target = self.visual_targets.get((str(target_id), self.point_type))
+        target = self._visual_target(target_id)
         if target is None or self.point_type != 'grasp':
             return False
         if 'grasp_type' in target:
@@ -162,7 +210,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         return component(obj, 'Semantic').get('semantic_name', '').lower() == 'drawer'
 
     def select(self, resolved, kin, checker, seed, **kwargs):
-        target = self.visual_targets.get((str(resolved['target_id']), self.point_type))
+        target = self._visual_target(resolved['target_id'])
         if target is not None and self.point_type == 'place' and resolved.get('placement_height_search_pending'):
             return self._select_place_height(resolved, kin, checker, seed, **kwargs)
         if (target is not None and self.point_type == 'place'
@@ -521,7 +569,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 and selected.get('pose_source') == 'vlm_rgbd_grasp'):
             # All depth/yaw variants represent the same logical grasp (index 0).
             # Cache the selection so approach and pick use the same pose.
-            evidence = dict(evidence, yaw_selected=True, depth_selected=True,
+            evidence = dict(evidence, preflight_only=False, yaw_selected=True, depth_selected=True,
                             grasp_depth_offset_m=selected.get(
                                 'grasp_depth_offset_m', evidence.get('grasp_depth_offset_m', 0.)),
                             grasp_depth_attempts=resolved.get(
@@ -540,7 +588,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 anchor_frame=evidence.get('anchor_frame'))
             resolved['visual_estimate'] = evidence
         elif isinstance(evidence, dict) and selected.get('pose_source') == 'vlm_rgbd_place':
-            evidence = dict(evidence, placement_height_selected=True,
+            evidence = dict(evidence, preflight_only=False, placement_height_selected=True,
                             placement_height_offset_m=selected['placement_height_offset_m'],
                             placement_height_attempts=resolved.get(
                                 'placement_height_attempts', evidence.get('placement_height_attempts', [])))
@@ -557,7 +605,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         name = resolved['target_name']
         evidence = resolved.get('visual_estimate', {})
         if (self.point_type != 'grasp' or not evidence
-                or (str(resolved['target_id']), 'grasp') not in self.visual_targets):
+                or self._visual_target(resolved['target_id'], 'grasp') is None):
             return resolved
         vertical = evidence.get('grasp_estimation_method') == 'vertical_aabb'
         self.blackboard.observe(state)
@@ -592,7 +640,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             progress('capture', 'Wrist camera / capturing RGB-D')
             frame = self.backend.get_camera_frame('wrist')
             framing = coarse_point_projection(frame, surface)
-            target = self.visual_targets[(str(resolved['target_id']), 'grasp')]
+            target = self._visual_target(resolved['target_id'], 'grasp')
             crop_origin = None
             if not vertical:
                 object_pose = self.blackboard.require_pose(name)
@@ -602,7 +650,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             estimate, diagnostics = refine_surface(self.estimator, frame, surface,
                 target.get('target_description', name.lower()), vertical=vertical)
             diagnostics['coarse_point_in_full_image'] = framing
-            estimate = self._restore_crop_pixel(estimate, crop_origin)
+            if estimate is not candidate_estimate:
+                estimate = self._restore_crop_pixel(estimate, crop_origin)
             if crop_origin is not None:
                 diagnostics.update(image_region='target_aabb_crop',
                                    crop_origin_pixel={'x': crop_origin[0], 'y': crop_origin[1]})
@@ -667,8 +716,8 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 set_status('Wrist refinement unavailable / using validated coarse grasp')
             return fallback
 
-    def resolve(self, target_id, resources, state):
-        target = self.visual_targets.get((str(target_id), self.point_type))
+    def resolve(self, target_id, resources, state, *, preflight=False):
+        target = self._visual_target(target_id)
         if target is None:
             return super().resolve(target_id, resources, state)
         obj = scene_object_by_id(resources.scene, target_id)
@@ -686,40 +735,60 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
         vlm_request_s = None
         if grasp is None:
             if point_type == 'grasp':
-                grasp = self.blackboard.visual_grasp(name)
+                evidence = self.blackboard.visual_grasp_evidence(name)
+                if not (evidence and evidence.get('preflight_only')):
+                    grasp = self.blackboard.visual_grasp(name)
             else:
                 previous = self.blackboard.visual_place_evidence(name)
                 # A placement cache is valid only within this put's interaction
                 # cycle. A new put must see the current contents of the container.
                 if (self.place_cycle_id is not None and previous is not None
+                        and not previous.get('preflight_only')
                         and previous.get('placement_cycle_id') == self.place_cycle_id
                         and previous.get('placement_request', placement_parameters({})) == self.place_parameters):
                     grasp = self.blackboard.visual_place(name)
+        if grasp is not None and self.operation_id:
+            entry = self.blackboard.operation_candidates.get(self.operation_id)
+            if entry and entry['status'] == 'available':
+                entry['status'] = 'superseded_by_tracked_pose'
         if grasp is None:
+            from demo.interaction.global_perception import current_candidate
+            candidate_estimate = current_candidate(self, state) if self.operation_id else None
             vertical_place = point_type == 'place' and self.place_parameters['relation'] in {'above', 'below'}
-            frame = None if vertical_place else self.backend.get_camera_frame(target.get('camera_id', 'global'))
+            frame = None
+            if not vertical_place and (point_type == 'place' or candidate_estimate is None):
+                frame = self.backend.get_camera_frame(target.get('camera_id', 'global'))
             place_metadata = self.blackboard.model(self.client, model_id) if point_type == 'place' else None
             crop_origin = None
             region = None
             if point_type == 'place':
                 if self.place_parameters['relation'] != 'at':
-                    lower, upper = _model_bounds(place_metadata)
-                    region = relative_region(self.place_parameters, object_pose, lower, upper, resources)
+                    region = self.support_region(name, self.place_parameters, object_pose, place_metadata, resources)
                     if not vertical_place:
-                        frame, crop_origin = crop_relative_region(frame, region)
+                        if 'support_body_id' in region:
+                            labels = self.backend.camera_body_labels(frame)
+                            frame = replace(frame, depth=np.where(labels == region['support_body_id'], frame.depth, np.nan))
+                        if candidate_estimate is None:
+                            frame, crop_origin = crop_relative_region(frame, region)
                 else:
+                    labels = self.backend.camera_body_labels(frame)
+                    frame = replace(frame, depth=np.where(labels == self.backend.object_ids[name], frame.depth, np.nan))
                     frame, crop_origin = _target_crop(frame, object_pose, place_metadata)
                 if not vertical_place:
                     self._placement_contexts[str(target_id)] = {
                         'cycle_id': self.place_cycle_id, 'frame': frame,
                         'metadata': place_metadata, 'object_pose': deepcopy(object_pose),
                         'crop_origin': crop_origin, 'relative_region': region}
-            elif not handle:
+            elif not handle and candidate_estimate is None:
                 metadata = self.blackboard.model(self.client, model_id)
                 frame, crop_origin = _target_crop(frame, object_pose, metadata)
             visual_started = perf_counter()
             try:
-                if vertical_place:
+                if candidate_estimate is not None:
+                    estimate = candidate_estimate
+                    if region is not None:
+                        validate_relative_point(estimate, region)
+                elif vertical_place:
                     estimate = {'point_type': 'place',
                         'world_point': dict(zip('xyz', region['region_center_world'])),
                         'frame': 'world', 'confidence': None, 'position_source': 'target_boundary'}
@@ -752,9 +821,12 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
                 estimate['placement_center_fallback'].update(trigger='vlm_error', vlm_error_type=type(exc).__name__)
             else:
                 estimate['visual_estimation_s'] = perf_counter() - visual_started
-            estimate = self._restore_crop_pixel(estimate, crop_origin)
+            if estimate is not candidate_estimate:
+                estimate = self._restore_crop_pixel(estimate, crop_origin)
             if point_type == 'place':
                 estimate['placement_request'] = dict(self.place_parameters)
+                if preflight:
+                    estimate['preflight_only'] = True
                 if region is not None:
                     estimate['relative_placement'] = deepcopy(region)
             grasp = np.eye(4)
@@ -784,7 +856,7 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             else:
                 gripper = state.get('gripper') or {}
                 held_name = gripper.get('object_id')
-                if not gripper.get('holding') or not held_name:
+                if not preflight and (not gripper.get('holding') or not held_name):
                     raise GraspResolutionError('VLM placement requires a confirmed held object')
                 heights = ([0.] if vertical_place else
                            _placement_heights(estimate))

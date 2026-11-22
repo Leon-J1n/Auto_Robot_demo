@@ -20,6 +20,19 @@ def collision_sampling_settings(request):
     return float(resolution), subdivisions
 
 
+def rrt_resolution(request):
+    """Resolve the RRT edge sampling resolution for the current request."""
+    config = request.get('planning', {}).get('collision_free', {})
+    if not isinstance(config, Mapping):
+        raise ValueError('planning.collision_free must be an object')
+    from execution.config import planning_settings
+    value = config.get('rrt_resolution_rad', planning_settings()['collision_free']['rrt_resolution_rad'])
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not np.isfinite(value) or value <= 0):
+        raise ValueError('collision_free.rrt_resolution_rad must be finite and positive')
+    return float(value)
+
+
 def spline_collision_samples(profile, resolution, subdivisions):
     """Keep knots and bound each progress interval by exact derivative bounds.
 

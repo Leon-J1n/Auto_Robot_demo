@@ -102,11 +102,6 @@ class VLMPointEstimator:
         if rotation.shape != (3, 3) or position.shape != (3,) or not np.isfinite(rotation).all() or not np.isfinite(position).all():
             raise ValueError("Camera pose must contain a finite 3x3 rotation and 3-D position.")
 
-        from PIL import Image
-
-        image = io.BytesIO()
-        Image.fromarray(rgb, mode="RGB").save(image, format="PNG")
-        image_url = "data:image/png;base64," + base64.b64encode(image.getvalue()).decode("ascii")
         task = self._load_prompt(point_type)
         target_name = target.strip()
         prompt = (f"目标物体：{task['target'].replace('{target}', target_name)}\n"
@@ -115,6 +110,94 @@ class VLMPointEstimator:
         if instruction:
             prompt += f"补充要求：{instruction.strip()}\n"
         prompt += "请严格按照输出结构返回结果，只返回 JSON，不要 Markdown 或其他说明。"
+        output_text, request_elapsed = self._request_image(rgb, prompt)
+        try:
+            point = self._parse_point(output_text)
+        except Exception as exc:
+            exc.details = {
+                'error_code': 'VLM_RESPONSE_FAILED',
+                'error_message': str(exc),
+                'failed_stage': 'vlm_response',
+            }
+            raise
+        return self._project(point, depth, intrinsics, position, rotation, point_type, request_elapsed)
+
+    @staticmethod
+    def _project(point, depth, intrinsics, position, rotation, point_type, request_elapsed):
+        height, width = depth.shape
+        u = round(point["x"] * (width - 1))
+        v = round(point["y"] * (height - 1))
+        z, depth_sampling = sample_depth(depth, u, v,
+                                        normalized={'x': point['x'], 'y': point['y']})
+
+        # MuJoCo cameras look along local -Z, with local +Y pointing upward.
+        camera_point = np.array([
+            (u - intrinsics.cx) * z / intrinsics.fx,
+            -(v - intrinsics.cy) * z / intrinsics.fy,
+            -z,
+        ])
+        world_point = position + rotation @ camera_point
+        result = {
+            "point_type": point_type,
+            "pixel": {"x": u, "y": v},
+            "normalized": {"x": point["x"], "y": point["y"]},
+            "depth_m": z,
+            "depth_sampling": depth_sampling,
+            "world_point": {"x": float(world_point[0]), "y": float(world_point[1]), "z": float(world_point[2])},
+            "frame": "world",
+            "confidence": point.get("confidence"),
+            "vlm_request_s": request_elapsed,
+        }
+        if point_type in {'grasp', 'handle'}:
+            from .axis import estimate_axis
+            if point_type == 'grasp':
+                result.update(estimate_axis(point, depth, intrinsics, position, rotation))
+            if point_type == 'handle':
+                from .handle import estimate_handle
+                try:
+                    result.update(estimate_handle(point, depth, intrinsics, position, rotation, result))
+                except ValueError as exc:
+                    exc.details = {'error_code': 'HANDLE_POSE_ESTIMATION_FAILED',
+                        'error_message': str(exc), 'failed_stage': 'perception',
+                        'details': {'estimate': result, 'references': point}}
+                    raise
+        return result
+
+    def estimate_operations(self, frame, operations):
+        """Locate independently visible operations in a single full-frame request."""
+        prompt = (
+            "Identify visible interaction points in this overhead image. For pick choose the "
+            "visible grasp surface. For put choose an empty support surface in the requested region. "
+            "hint_xy is a normalized approximate location. Return one JSON object keyed by command ID. "
+            "Use null when unavailable or occluded. Otherwise return normalized x,y (origin top left), "
+            "and for picks is_elongated and axis_points as two normalized {x,y} points when elongated. "
+            + json.dumps(operations, ensure_ascii=False))
+        output, elapsed = self._request_image(frame.rgb, prompt)
+        items = json.loads(output)
+        if not isinstance(items, dict):
+            raise ValueError("Expected an object keyed by command ID")
+        estimates = {}
+        for op in operations:
+            key = op['command_id']
+            if not isinstance(items.get(key), dict):
+                continue
+            try:
+                point = self._parse_point(json.dumps(items[key]))
+                estimate = self._project(point, frame.depth, frame.intrinsics, frame.camera_pose.position,
+                    frame.camera_pose.rotation_matrix, op['point_type'], elapsed)
+            except (ValueError, TypeError):
+                continue
+            estimate.update(camera_id=frame.camera_id, sequence=frame.sequence,
+                            timestamp=frame.timestamp, observation_source='global_preobservation')
+            estimates[key] = estimate
+        return estimates
+
+    def _request_image(self, rgb, prompt):
+        from PIL import Image
+
+        image = io.BytesIO()
+        Image.fromarray(rgb, mode="RGB").save(image, format="PNG")
+        image_url = "data:image/png;base64," + base64.b64encode(image.getvalue()).decode("ascii")
         client = self._get_client()
         try:
             with request_timer() as measurement:
@@ -147,51 +230,9 @@ class VLMPointEstimator:
                 part.text for item in response.output if item.type == "message"
                 for part in item.content if getattr(part, "text", None)
             )
-            point = self._parse_point(output_text)
-        except Exception as exc:
-            exc.details = {
-                'error_code': 'VLM_RESPONSE_FAILED',
-                'error_message': str(exc),
-                'failed_stage': 'vlm_response',
-            }
-            raise
-        u = round(point["x"] * (width - 1))
-        v = round(point["y"] * (height - 1))
-        z, depth_sampling = sample_depth(depth, u, v,
-                                        normalized={'x': point['x'], 'y': point['y']})
-
-        # MuJoCo cameras look along local -Z, with local +Y pointing upward.
-        camera_point = np.array([
-            (u - intrinsics.cx) * z / intrinsics.fx,
-            -(v - intrinsics.cy) * z / intrinsics.fy,
-            -z,
-        ])
-        world_point = position + rotation @ camera_point
-        result = {
-            "point_type": point_type,
-            "pixel": {"x": u, "y": v},
-            "normalized": {"x": point["x"], "y": point["y"]},
-            "depth_m": z,
-            "depth_sampling": depth_sampling,
-            "world_point": {"x": float(world_point[0]), "y": float(world_point[1]), "z": float(world_point[2])},
-            "frame": "world",
-            "confidence": point.get("confidence"),
-            "vlm_request_s": measurement['elapsed_s'],
-        }
-        if point_type in {'grasp', 'handle'}:
-            from .axis import estimate_axis
-            if point_type == 'grasp':
-                result.update(estimate_axis(point, depth, intrinsics, position, rotation))
-            if point_type == 'handle':
-                from .handle import estimate_handle
-                try:
-                    result.update(estimate_handle(point, depth, intrinsics, position, rotation, result))
-                except ValueError as exc:
-                    exc.details = {'error_code': 'HANDLE_POSE_ESTIMATION_FAILED',
-                        'error_message': str(exc), 'failed_stage': 'perception',
-                        'details': {'estimate': result, 'references': point}}
-                    raise
-        return result
+        except (TypeError, AttributeError) as exc:
+            raise ValueError("VLM returned no readable response") from exc
+        return output_text, measurement['elapsed_s']
 
     @staticmethod
     def _load_prompt(point_type: str) -> dict[str, Any]:

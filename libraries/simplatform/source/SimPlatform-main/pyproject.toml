@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sim-platform"
+version = "0.1.0"
+description = "Python SDK for the modular robot simulation platform"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "bqlog>=2.5.0"]
+
+[project.optional-dependencies]
+curobo-cu12 = ["nvidia-curobo[cu12-torch]>=0.8,<0.9"]
+curobo-cu13 = ["nvidia-curobo[cu13-torch]>=0.8,<0.9"]
+# The Web Gateway and the Agent Service are separate processes that ship with the repo rather
+# than parts of the SDK, so their requirements are an extra: installing the SDK alone must not
+# pull an HTTP stack in.
+web = ["aiohttp>=3.9", "pydantic>=2.7", "scipy>=1.10,<1.16", "ruckig>=0.19.4,<0.20"]
+
+[project.scripts]
+simulator-server = "sim_platform.server:main"
+simulator-python = "sim_platform.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+
+[tool.setuptools.packages.find]
+where = ["python"]

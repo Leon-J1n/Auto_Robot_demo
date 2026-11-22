@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "baseScene": "F:/jinliang-agent/demo2/tmp_state/ur5e_robotiq_2f85_pose.simstate",
+  "placementSeed": null,
+  "models": [
+    {
+      "id": "mesh:red_ball",
+      "name": "red_ball",
+      "path": "F:/jinliang-agent/demo2/objects/red_ball_body.obj",
+      "aliases": ["red ball", "red_ball", "红色球", "红色小球", "红球"],
+      "categories": ["object", "ball", "球"],
+      "dimensionsM": [0.05, 0.05, 0.05],
+      "boundsM": {
+        "min": [-0.025, -0.025, -0.025],
+        "max": [0.025, 0.025, 0.025]
+      },
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionShapes": [
+        {
+          "name": "ball",
+          "shape": "sphere",
+          "localPositionM": [0.0, 0.0, 0.025],
+          "radiusM": 0.025
+        }
+      ]
+    },
+    {
+      "id": "mesh:green_box",
+      "name": "green_box",
+      "path": "../objects/containers/green_box.obj",
+      "aliases": ["green box", "green_box", "绿色盒子", "绿盒", "盒子"],
+      "categories": ["container", "box", "盒子"],
+      "dimensionsM": [0.3, 0.3, 0.2],
+      "boundsM": {
+        "min": [-0.15, -0.15, 0.0],
+        "max": [0.15, 0.15, 0.2]
+      },
+      "movable": false,
+      "capabilities": ["container"],
+      "collisionShapes": [
+        {
+          "name": "floor",
+          "shape": "box",
+          "localPositionM": [0.0, 0.0, 0.02],
+          "sizeM": [0.3, 0.3, 0.04]
+        },
+        {
+          "name": "left_wall",
+          "shape": "box",
+          "localPositionM": [-0.135, 0.0, 0.1],
+          "sizeM": [0.03, 0.3, 0.2]
+        },
+        {
+          "name": "right_wall",
+          "shape": "box",
+          "localPositionM": [0.135, 0.0, 0.1],
+          "sizeM": [0.03, 0.3, 0.2]
+        },
+        {
+          "name": "front_wall",
+          "shape": "box",
+          "localPositionM": [0.0, -0.135, 0.1],
+          "sizeM": [0.24, 0.03, 0.2]
+        },
+        {
+          "name": "back_wall",
+          "shape": "box",
+          "localPositionM": [0.0, 0.135, 0.1],
+          "sizeM": [0.24, 0.03, 0.2]
+        }
+      ]
+    },
+    {
+      "id": "grasp:apple",
+      "name": "apple",
+      "path": "../objects/grasp_objects/apple/textured.obj",
+      "aliases": ["apple", "苹果"],
+      "categories": ["object", "fruit", "水果"],
+      "dimensionsM": [0.074655, 0.074732, 0.071247],
+      "boundsM": {"min": [-0.0373275, -0.037366, -0.0356235], "max": [0.0373275, 0.037366, 0.0356235]},
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionStls": ["../objects/grasp_objects/apple/textured_coacd_0.stl", "../objects/grasp_objects/apple/textured_coacd_1.stl", "../objects/grasp_objects/apple/textured_coacd_2.stl", "../objects/grasp_objects/apple/textured_coacd_3.stl", "../objects/grasp_objects/apple/textured_coacd_4.stl"],
+      "texture": "../objects/grasp_objects/apple/texture_map.png",
+      "graspPose": "../objects/grasp_objects/apple/grasp_pose.json",
+      "collisionShapes": [{"name": "body", "shape": "box", "localPositionM": [0, 0, 0], "sizeM": [0.074655, 0.074732, 0.071247]}]
+    },
+    {
+      "id": "grasp:banana",
+      "name": "banana",
+      "path": "../objects/grasp_objects/banana/textured.obj",
+      "aliases": ["banana", "香蕉"],
+      "categories": ["object", "fruit", "水果"],
+      "dimensionsM": [0.069152, 0.197617, 0.036253],
+      "boundsM": {"min": [-0.034576, -0.0988085, -0.0181265], "max": [0.034576, 0.0988085, 0.0181265]},
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionStls": ["../objects/grasp_objects/banana/textured_coacd_0.stl", "../objects/grasp_objects/banana/textured_coacd_1.stl", "../objects/grasp_objects/banana/textured_coacd_2.stl", "../objects/grasp_objects/banana/textured_coacd_3.stl"],
+      "texture": "../objects/grasp_objects/banana/texture_map.png",
+      "graspPose": "../objects/grasp_objects/banana/grasp_pose.json",
+      "collisionShapes": [{"name": "body", "shape": "box", "localPositionM": [0, 0, 0], "sizeM": [0.069152, 0.197617, 0.036253]}]
+    },
+    {
+      "id": "grasp:baseball",
+      "name": "baseball",
+      "aliases": ["baseball", "棒球"],
+      "categories": ["object", "ball", "球"],
+      "path": "../objects/grasp_objects/baseball/textured.obj",
+      "dimensionsM": [0.072024, 0.0725, 0.072533],
+      "boundsM": {"min": [-0.036012, -0.03625, -0.0362665], "max": [0.036012, 0.03625, 0.0362665]},
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionStls": ["../objects/grasp_objects/baseball/textured_coacd_0.stl"],
+      "texture": "../objects/grasp_objects/baseball/texture_map.png",
+      "graspPose": "../objects/grasp_objects/baseball/grasp_pose.json",
+      "collisionShapes": [{"name": "body", "shape": "sphere", "localPositionM": [0, 0, 0], "radiusM": 0.0363}]
+    },
+    {
+      "id": "grasp:rubiks_cube",
+      "name": "rubiks_cube",
+      "aliases": ["rubiks cube", "rubik cube", "魔方"],
+      "categories": ["object", "cube", "方块"],
+      "path": "../objects/grasp_objects/rubiks_cube/textured.obj",
+      "dimensionsM": [0.058131, 0.058782, 0.057925],
+      "boundsM": {"min": [-0.0290655, -0.029391, -0.0289625], "max": [0.0290655, 0.029391, 0.0289625]},
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionStls": ["../objects/grasp_objects/rubiks_cube/textured_coacd_0.stl", "../objects/grasp_objects/rubiks_cube/textured_coacd_1.stl", "../objects/grasp_objects/rubiks_cube/textured_coacd_2.stl", "../objects/grasp_objects/rubiks_cube/textured_coacd_3.stl", "../objects/grasp_objects/rubiks_cube/textured_coacd_4.stl"],
+      "texture": "../objects/grasp_objects/rubiks_cube/texture_map.png",
+      "graspPose": "../objects/grasp_objects/rubiks_cube/grasp_pose.json",
+      "collisionShapes": [{"name": "body", "shape": "box", "localPositionM": [0, 0, 0], "sizeM": [0.058131, 0.058782, 0.057925]}]
+    },
+    {
+      "id": "grasp:sugar_box",
+      "name": "sugar_box",
+      "aliases": ["sugar box", "糖盒"],
+      "categories": ["object", "box", "盒子"],
+      "path": "../objects/grasp_objects/sugar_box/textured.obj",
+      "dimensionsM": [0.045181, 0.092115, 0.176151],
+      "boundsM": {"min": [-0.0225905, -0.0460575, -0.0880755], "max": [0.0225905, 0.0460575, 0.0880755]},
+      "movable": true,
+      "capabilities": ["graspable"],
+      "collisionStls": ["../objects/grasp_objects/sugar_box/textured_coacd_0.stl", "../objects/grasp_objects/sugar_box/textured_coacd_1.stl"],
+      "texture": "../objects/grasp_objects/sugar_box/texture_map.png",
+      "graspPose": "../objects/grasp_objects/sugar_box/grasp_pose.json",
+      "collisionShapes": [{"name": "body", "shape": "box", "localPositionM": [0, 0, 0], "sizeM": [0.045181, 0.092115, 0.176151]}]
+    }
+  ]
+}

@@ -224,6 +224,19 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         fixtures = {g for g in self.geoms if int(model.geom_bodyid[g]) in fixture_bodies}
         self._arm_environment_geom_pairs = frozenset(
             frozenset((a, b)) for a in arm for b in fixtures)
+        mount_roots = {self.backend.object_ids[name] for name in self._mounting_pedestal_names}
+        mount_bodies = set(mount_roots)
+        for body in range(1, model.nbody):
+            ancestor = body
+            while ancestor:
+                if ancestor in mount_roots:
+                    mount_bodies.add(body)
+                    break
+                ancestor = int(model.body_parentid[ancestor])
+        base = {g for g in self.geoms if int(model.geom_bodyid[g]) in self.robot_bodies
+                and self.body_names[int(model.geom_bodyid[g])] in self._fixed_base_link_names}
+        mounts = {g for g in self.geoms if int(model.geom_bodyid[g]) in mount_bodies}
+        self._arm_environment_geom_pairs |= frozenset(frozenset((a, b)) for a in base for b in mounts)
 
     def set_entity_transform(self, name, **pose):
         dynamic = getattr(self, 'dynamic_names', set())

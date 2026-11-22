@@ -1,0 +1,75 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-full",
+      "displayName": "Windows full first-stage build",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/windows-full",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "${sourceDir}/third_party/vcpkg_installed/x64-windows;${sourceDir}/third_party/Bullet3/3.25;${sourceDir}/third_party/Coal/3.0.4;D:/Anaconda/Library",
+        "SIM_MUJOCO_ROOT": "${sourceDir}/third_party/MuJoCo/3.9.0",
+        "Vulkan_INCLUDE_DIR": "${sourceDir}/third_party/VulkanSDK/1.4.350.0/Include",
+        "Vulkan_LIBRARY": "${sourceDir}/third_party/VulkanSDK/1.4.350.0/Lib/vulkan-1.lib",
+        "Vulkan_GLSLC_EXECUTABLE": "${sourceDir}/third_party/VulkanSDK/1.4.350.0/Bin/glslc.exe",
+        "SIM_ENABLE_ASSIMP": "ON",
+        "SIM_ENABLE_URDFDOM": "ON",
+        "SIM_ENABLE_MUJOCO": "ON",
+        "SIM_ENABLE_BULLET3_PLUGIN": "ON",
+        "SIM_ENABLE_BULLET3_COLLISION_PLUGIN": "ON",
+        "SIM_ENABLE_COAL_COLLISION_PLUGIN": "ON",
+        "SIM_ENABLE_IFPS_CPU_PLUGIN": "ON",
+        "SIM_ENABLE_IFPS_GPU_PLUGIN": "ON",
+        "SIM_ENABLE_FCL": "ON",
+        "SIM_ENABLE_VULKAN": "ON",
+        "SIM_BUILD_TESTS": "ON",
+        "SIM_BUILD_CLI": "ON",
+        "SIM_BUILD_C_API": "ON"
+      }
+    },
+    {
+      "name": "windows-gui",
+      "displayName": "Windows full build with Qt editor",
+      "inherits": "windows-full",
+      "binaryDir": "${sourceDir}/build/windows-gui",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "${sourceDir}/third_party/vcpkg_installed/x64-windows;${sourceDir}/third_party/Bullet3/3.25;${sourceDir}/third_party/Coal/3.0.4;D:/Anaconda/Library",
+        "SIM_ENABLE_QT": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-full-release",
+      "configurePreset": "windows-full",
+      "configuration": "Release",
+      "jobs": 2
+    },
+    {
+      "name": "windows-gui-release",
+      "configurePreset": "windows-gui",
+      "configuration": "Release",
+      "jobs": 2
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "windows-full-release",
+      "configurePreset": "windows-full",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-gui-release",
+      "configurePreset": "windows-gui",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

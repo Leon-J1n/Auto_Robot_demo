@@ -1,0 +1,423 @@
+"""Curated fixtures whose complete branch set is known (#573).
+
+One definition of each fixture, shared by the golden generator
+(``scripts/regen_branch_goldens.py``) and the contract tests, so the two cannot
+drift. The expected branch sets live in ``tests/data/branch_goldens.json``,
+computed offline by the chart-free oracle: finding them takes thousands of LM
+solves, which is far too slow to repeat on every pull request.
+
+Each fixture carries a fingerprint of its own numbers. A committed golden
+records the fingerprint it was generated from, so editing a fixture without
+regenerating turns the tests red instead of silently checking against a stale
+expectation.
+
+Cost note, which shapes how to extend this set. A general-6R chain pays its
+Raghavan-Roth elimination derivation once, measured at 27 s, and the result is
+cached process-wide: every later solve on that chain is about 1 ms, including
+from a freshly built ``Manipulator``. So adding poses to an existing chain is
+free and adding a chain is not. Prefer several poses per chain, and add a chain
+only when its geometry probes something the existing ones cannot.
+
+Note also why these fixtures are solved live rather than through a committed
+artifact. An artifact bakes the solver's current behaviour, which is exactly
+what M7 is changing, so a baked fixture would keep passing its xfail after the
+fix landed. The derivation cost buys the property that these tests see the
+solver as it is now.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
+
+GOLDEN_PATH = Path(__file__).parent / "data" / "branch_goldens.json"
+
+PI = np.pi
+
+# FK closure at a pose that also carries singular branches: those are refined
+# only to the solver's closure gate (DEFAULT_TOLERANCE_POLICY.subproblem_numerical).
+_SINGULAR_FK_TOL = 1e-5
+
+
+@dataclass(frozen=True)
+class BranchFixture:
+    """A chain plus a pose whose full branch set we want pinned."""
+
+    name: str
+    description: str
+    dh_alpha: tuple[float, ...]
+    dh_a: tuple[float, ...]
+    dh_d: tuple[float, ...]
+    q_star: tuple[float, ...]
+    issue: str | None = None
+    """Issue this fixture exists for, when it encodes a known defect."""
+    prebuilt: str | None = None
+    """A shipped arm to use instead of the DH chain (whose fields are then empty)."""
+    linearity_choices: tuple[int, ...] = ()
+    """RR linearity-joint choices under which both backends must return the
+    complete branch set. Empty: only the production solve is checked. A choice
+    is left out where the elimination itself is degenerate for the geometry
+    (no representation fix can recover branches the pencil does not carry)."""
+    fk_tol: float = 1e-9
+    """FK closure every returned branch must meet. A pose near a singularity
+    fixes its near-double root only to about eps / (distance to it), so its
+    branches close FK to that conditioning, not to round-off."""
+    complete: bool = True
+    """Whether the fixture owes the pose's complete branch set. False at a pose
+    beside a singular continuum or with singular branches of its own, where no
+    complete set is owed (the oracle may not even stabilise, and its golden is
+    then a lower bound): the fixture owes only the recovery of the regular
+    branch ``q_star``, on the native core and the Python artifact alike (#673)."""
+
+    def build(self) -> Any:
+        import ssik
+
+        if self.prebuilt is not None:
+            return ssik.Manipulator.from_prebuilt(self.prebuilt)
+        return ssik.Manipulator.from_dh(
+            dh_alpha=list(self.dh_alpha), dh_a=list(self.dh_a), dh_d=list(self.dh_d)
+        )
+
+    def q_star_array(self) -> NDArray[np.float64]:
+        return np.array(self.q_star, dtype=np.float64)
+
+    def fingerprint(self) -> str:
+        """Hash of the numbers that define this fixture.
+
+        Changing any of them invalidates the committed branch set, and the
+        tests check this rather than trusting the file's name.
+        """
+        numbers: dict[str, Any] = {
+            "alpha": list(self.dh_alpha),
+            "a": list(self.dh_a),
+            "d": list(self.dh_d),
+            "q_star": list(self.q_star),
+        }
+        if self.prebuilt is not None:
+            numbers["prebuilt"] = self.prebuilt
+        payload = json.dumps(numbers, sort_keys=True)
+        return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+FIXTURES: tuple[BranchFixture, ...] = (
+    BranchFixture(
+        name="pi_at_left_bilinear_q2",
+        description=(
+            "The reproducer from #571, q2 at pi. This chain's auto-selected "
+            "leftvar is 0, so q2 is a LEFT-bilinear joint rather than the "
+            "polynomial variable: the back-substitution half of the defect. "
+            "The root is found; reading it was what failed, because v_12 is a "
+            "normalised monomial vector whose low-degree block falls to ~1e-16 "
+            "once the variable goes to infinity. Fixed by reading each pair as "
+            "a homogeneous coordinate via atan2 instead of dividing. Guards "
+            "that: here the old code's own chosen pair already yielded pi, and "
+            "the branch was then deleted by an absolute denominator guard."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(0.0, PI / 2, PI, PI / 2, PI / 2, 0.0),
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="pi_at_linearity_variable_q0",
+        description=(
+            "q0 at pi, which IS the polynomial variable under leftvar 0: the "
+            "root-finding half of the defect. cond(m_quad) is 1.1e16 here, so "
+            "the direct route is skipped and the Mobius search runs -- and it "
+            "succeeds, conditioning the pencil down to 34 and recovering the "
+            "root as an ordinary finite x_tilde. The inverse map then deleted "
+            "it, because mapping back to x_2 divides by a denominator that "
+            "vanishes exactly when the joint is at pi. The Mobius search is "
+            "gone (#658); QZ on the pencil returns this root as beta = 0. "
+            "Guards that the root is kept and named infinity, not dropped."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(PI, 0.62, 0.93, -0.44, 0.75, -0.26),
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="pi_at_left_bilinear_q1",
+        description=(
+            "q1 at pi, the other LEFT-bilinear joint, and the cleanest isolation "
+            "of the back-substitution half: the linearity joint stays at 0.31 and "
+            "its root is found correctly, yet q* was missed by 1.218 rad, so the "
+            "loss was provably in the read and not in root finding. Here the "
+            "surviving x0^3 block still carries q2 exactly (v[10]/v[11] = 0.50172 "
+            "-> 0.9300), while every x0 pair has its denominator in the noise "
+            "block -- which is why selecting on the largest denominator failed "
+            "and selecting on the largest entry works."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(0.31, PI, 0.93, -0.44, 0.75, -0.26),
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="pi_at_dropped_joint_q3",
+        description=(
+            "q3 at pi, the dropped joint, recovered via atan2 on a genuine "
+            "(sin, cos) pair. The control: pi already works here and must keep "
+            "working through the projective change. The right-bilinear pair "
+            "(q4, q5) works the same way and is the pattern to copy."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(0.31, 0.62, 0.93, PI, 0.75, -0.26),
+        issue=None,
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="regular_pose_control",
+        description=(
+            "Same chain, no joint at pi. The other control: whatever the fix does, "
+            "this pose must keep the branch set it already has."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(0.3, -0.7, 0.9, -0.4, 0.8, 0.2),
+        issue=None,
+        linearity_choices=(0, 1, 2),
+    ),
+    # Repeated roots (#595). Each q* shares its linearity-joint value with a
+    # second branch of the same pose, so M(x) has a two-dimensional null space
+    # at that root and any single null vector mixes the two branches. q* and
+    # its partner were constructed by Gauss-Newton on FK(q_a) = FK(q_b) with
+    # q_lin held equal (see the #595 comment for the construction and the
+    # chart-free oracle check); linearity 0 is this chain's auto choice.
+    BranchFixture(
+        name="repeated_root_finite_q0",
+        description=(
+            "q0 = 0.7 is shared with the branch (0.7, -2.4715, 2.8772, -0.7956, "
+            "-2.4356, -0.3428): a finite double root of the linearity variable "
+            "under leftvar 0. Both backends read one arbitrary vector of the "
+            "2-D null space and dropped one or both branches. Fixed by splitting "
+            "the null space with the x_lb0 shift of the monomial vector."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(
+            0.7,
+            0.896449747236101,
+            -2.6490492624428175,
+            -1.3012631260053205,
+            2.476895205304505,
+            -3.1067183864736414,
+        ),
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="repeated_root_at_pi_q0",
+        description=(
+            "q0 = pi is shared with the branch (-pi, -0.2269, -2.0328, -1.7930, "
+            "1.7203, -0.3324): the double root is the point at infinity, where "
+            "where both backends read A's null space (QZ's beta = 0 root). "
+            "The #571 infinite-root handling alone keeps the root but still "
+            "reads one mixed vector for two branches."
+        ),
+        dh_alpha=(PI / 2, PI / 2, PI / 2, PI / 2, PI / 2, 0.0),
+        dh_a=(1 / 5, 1 / 4, 1 / 3, 1 / 6, 1 / 7, 1 / 8),
+        dh_d=(1 / 10, 1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5),
+        q_star=(
+            PI,
+            2.8180583116169835,
+            -3.1285452622210848,
+            -1.433222632883318,
+            -1.8335345562224923,
+            1.6653420782413804,
+        ),
+        linearity_choices=(0, 1, 2),
+    ),
+    BranchFixture(
+        name="xarm6_repeated_root_finite",
+        description=(
+            "UFactory xArm 6, as shipped (auto linearity 0), q0 = 0.7 shared "
+            "with the branch (0.7, -1.7207, 0.6964, 2.0329, 0.9698, 2.1290). "
+            "A real arm's production solve lost one branch natively and two in "
+            "Python. Linearity 2 is degenerate on this arm (the pencil misses "
+            "most branches at every pose), so it is not a completeness claim."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            0.7,
+            1.186123607965735,
+            -0.2221316738437733,
+            -1.1086668248502818,
+            -2.171757479090648,
+            -2.7097702948263684,
+        ),
+        prebuilt="xarm6_ik",
+        linearity_choices=(0, 1),
+    ),
+    # SP1 near a wrist singularity (#623, #661): the textbook SP1 terms cancel
+    # there, and a wrong wrist angle leaves a candidate no polish recovers.
+    BranchFixture(
+        name="irb6700_wrist_near_singular",
+        description=(
+            "ABB IRB 6700 (spherical_two_parallel) with q5 = 9.3e-8: the wrist is "
+            "nearly singular, so the SP1 inputs for q4 and q6 lie within 1e-7 of "
+            "their axes. The cancelling SP1 cosine gave those angles an FK error "
+            "of 1.5e-3, and the native core and the live Python solver returned "
+            "6 of the 8 branches."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            -1.27227283075558,
+            -0.5890486995502233,
+            -0.9062763150679832,
+            4.081835091832326,
+            9.278590673389466e-08,
+            -0.22339510986003658,
+        ),
+        prebuilt="irb6700_ik",
+        # q5 = 9.3e-8 is a near-double root known to eps / q5 ~ 2e-9.
+        fk_tol=1e-7,
+    ),
+    # Regular branches at a root whose null space holds more than its branches
+    # (#673): beside a degenerate pose, M(x) at the branch's root has k = 3 or
+    # 5 null directions, some with no monomial structure, and some branches
+    # share x_lb0. The split used to give up unless one shift produced k
+    # distinct real values, so these well-conditioned, in-limits branches were
+    # left to a near-miss refinement that the accurate QZ roots of #663 no
+    # longer offered. Each shift now keeps every vector it determines. The
+    # chart-free oracle finds each q*, but these poses also carry singular
+    # branches or a continuum, so only q* is owed (complete=False).
+    BranchFixture(
+        name="hc10_pencil_singular_a",
+        description=(
+            "Yaskawa HC10 at #648's near_singular/9, sigma_min/sigma_max(J) = 0.054 "
+            "at q*. M(x) has a 3-dimensional null space at q*'s root; the x_lb0 "
+            "shift returns two equal values there, so only x_lb1 reads q*. "
+            "Python lost it after #663; native returned it."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            -2.864072569552927,
+            -2.7582261466053692,
+            3.688695266638469,
+            -1.9030869458411246,
+            -0.6809884056146306,
+            -0.8860850549453904,
+        ),
+        prebuilt="hc10_ik",
+        complete=False,
+        fk_tol=_SINGULAR_FK_TOL,
+    ),
+    BranchFixture(
+        name="hc10_pencil_singular_b",
+        description=(
+            "The second branch of the same HC10 pose, at the other root with a "
+            "3-dimensional null space. Neither backend returned it after #663."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            2.408397724405382,
+            2.758226161082482,
+            2.594490036696848,
+            1.9030870005020777,
+            0.6809883885036729,
+            2.7125853858955304,
+        ),
+        prebuilt="hc10_ik",
+        complete=False,
+        fk_tol=_SINGULAR_FK_TOL,
+    ),
+    BranchFixture(
+        name="crx10ial_q2_at_pi_near_singular",
+        description=(
+            "FANUC CRX-10iA/L at #648's near_singular/42, q2 = pi, sigma ratio "
+            "0.030. M(x) at the root x = -1 has a 5-dimensional null space; the "
+            "x_lb0 shift gives two simple real values and a triple, so the old "
+            "all-or-nothing split emitted nothing. Lost on both backends."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            -2.902329660869271,
+            3.141592653589793,
+            1.0614672740156639,
+            1.927251991675175,
+            2.5006634943062647,
+            0.8689742235456543,
+        ),
+        prebuilt="fanuc_crx10ial_ik",
+        complete=False,
+        fk_tol=_SINGULAR_FK_TOL,
+    ),
+    BranchFixture(
+        name="crx10ial_q2_at_pi_sing_at_limit",
+        description=(
+            "FANUC CRX-10iA/L at #648's sing_at_limit/8, q2 = pi, sigma ratio "
+            "0.016: the same 5-dimensional null space at x = -1, with complex "
+            "x_lb1 values beside the real ones. Lost on both backends."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            -0.6713613611924283,
+            3.1415926535897922,
+            -1.189774379278396,
+            -2.374202621389286,
+            -2.8797932657906435,
+            -0.0014787539194081214,
+        ),
+        prebuilt="fanuc_crx10ial_ik",
+        complete=False,
+        fk_tol=_SINGULAR_FK_TOL,
+    ),
+    BranchFixture(
+        name="crx30ia_q2_at_zero_sing_at_limit",
+        description=(
+            "FANUC CRX-30iA at #648's sing_at_limit/9, q2 = 0, sigma ratio 9e-4: "
+            "a 5-dimensional null space at x = 1. Python lost it after #663; "
+            "native returned only an LM point 1.3e-4 away."
+        ),
+        dh_alpha=(),
+        dh_a=(),
+        dh_d=(),
+        q_star=(
+            -1.911823911328105,
+            6.508471570661114e-15,
+            1.524358829611817,
+            -3.2358792733248336,
+            -0.023322301746825567,
+            3.297623286294995,
+        ),
+        prebuilt="fanuc_crx30ia_ik",
+        complete=False,
+        fk_tol=_SINGULAR_FK_TOL,
+    ),
+)
+
+BY_NAME = {f.name: f for f in FIXTURES}
+
+
+def load_goldens() -> dict[str, Any]:
+    if not GOLDEN_PATH.exists():
+        raise FileNotFoundError(
+            f"{GOLDEN_PATH} is missing. Generate it with: python scripts/regen_branch_goldens.py"
+        )
+    data: dict[str, Any] = json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))
+    return data

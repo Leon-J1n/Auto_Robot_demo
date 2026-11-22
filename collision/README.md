@@ -1,5 +1,58 @@
 # Collision 模块
 
+机械臂默认从 URDF 的各 link `<visual>` 自动生成碰撞几何。资源加载时合并同一
+link 的视觉部件并应用 `origin` / `scale`，简化输入面数，再生成 CoACD 凸分解；
+不会跨关节合并，不修改源 URDF、视觉网格、关节或惯性。没有 visual 的 link
+保留原有 collision；独立夹爪仍沿用自己的碰撞资产。
+
+默认预算：每个 link 输入最多 3000 个三角面，输出最多 8 个凸块，每块最多
+64 个顶点。开放表面会经过 CoACD 预处理，结果是近似几何；预算较紧时不能
+保证凹陷、薄壁或细节与视觉网格完全一致。球代理保守覆盖的是生成的凸块，
+不是原始视觉网格。
+
+凸块预算由生成器统一收敛：CoACD 先按凹形阈值分解，超出块数预算时合并
+最近的凸块；合并后的顶点数仍超预算时使用该块的外包盒。合并结果覆盖
+合并前的凸块，但可能填充空隙，因此较紧的预算会增加保守程度。
+
+派生 URDF 缓存于 `.cache/collision/robots/<hash>/robot.urdf`，凸块存于
+`.cache/collision/<hash>/`。缓存包含内容校验和，网格、变换、缩放、参数或
+生成库版本改变后重新生成。`manifest.json` 记录各 link 的来源和凸块数量。
+FCL 和 MuJoCo 使用同一份派生 URDF；显示仍使用原视觉资产。
+
+可在场景机械臂的 `RobotModelRef.collision_geometry` 中设置：
+
+```json
+{
+  "mode": "visual",
+  "max_input_faces": 3000,
+  "max_convex_hulls": 8,
+  "max_vertices": 64,
+  "threshold": 0.05,
+  "exclude_links": [],
+  "package_paths": {}
+}
+```
+
+`mode: "authored"` 使用原 URDF collision。`exclude_links` 为明确不参与碰撞的
+link 名单（例如专用装饰 link），名称拼错会报错。`package_paths` 将
+`package://` 的包名映射到本地绝对目录；普通相对路径按源 URDF 目录解析。
+
+可通过 `link_overrides` 仅提高局部复杂关节的预算，例如
+`"link_overrides": {"link5": {"max_convex_hulls": 32, "max_vertices": 256,
+"max_input_faces": 6000, "threshold": 0.03}}`。其余 link 保持默认值。
+尚未装配 OLS 资产的场景也可声明只含 `collision_geometry` 的 `RobotModelRef`；
+资源解析会补齐 URDF 和安装配置。
+
+规划时先使用球代理/包围盒批量粗筛，仅对重叠候选调用源凸几何距离精检，
+覆盖机械臂自碰撞、环境及携带物体。沿用原来的允许碰撞对和安全距离；
+同一刚体内部、直接相邻 link 的过滤不会因切换碰撞资产而取消。
+
+安装接触由运行时识别，无需给场景增加字段：已有语义或对象库引用表明是
+静态机械臂安装底座、且在机械臂基座下方水平对齐时，仅豁免 URDF 根节点
+经 fixed 关节连接的固定基座几何与该底座的接触。活动连杆、夹爪、携带物体
+及普通桌面障碍物不享有此豁免；多个候选底座时不自动推断。相同规则应用
+于 FCL、规划代理的源几何策略和 MuJoCo 物理接触过滤。
+
 ## 1. 职责与边界
 
 `collision` 为规划阶段提供统一的碰撞检测能力。它接收规范化场景、机器人模型和关节轨迹，返回统一的碰撞结果；不负责任务解析、运动规划、轨迹执行或仿真运行时控制。
@@ -56,7 +109,7 @@ check(configuration) / check_path(trajectory)
 ```python
 from collision import CollisionChecker, load_scene
 
-scene = load_scene("requests/commands.001/ur5_table_empty.json")
+scene = load_scene("requests/commands.001/ur3_table_empty.json")
 checker = CollisionChecker.create("simplatform_fcl", scene=scene)
 result = checker.check(joints)
 ```

@@ -112,8 +112,8 @@ def validate_move_request(
 
     if target_type == "joint":
         joints = target["joint_positions"]
-        if not isinstance(joints, (list, tuple)) or len(joints) != 6:
-            raise MoveValidationError("target.joint_positions must contain 6 values.")
+        if not isinstance(joints, (list, tuple)) or not joints:
+            raise MoveValidationError("target.joint_positions must contain finite joint values.")
         normalized["target"]["joint_positions"] = [_finite(value, "target.joint_positions") for value in joints]
     elif target_type == "pose":
         normalized["target"]["position"] = _position(target["position"], "target.position")
@@ -139,8 +139,8 @@ def validate_move_request(
         _number_range(normalized["strategy_params"], "max_joint_step", 0.001, 1.0)
     if "ik_seed" in normalized["strategy_params"]:
         seed = normalized["strategy_params"]["ik_seed"]
-        if not isinstance(seed, (list, tuple)) or len(seed) != 6:
-            raise MoveValidationError("strategy_params.ik_seed must contain 6 values.")
+        if not isinstance(seed, (list, tuple)) or not seed:
+            raise MoveValidationError("strategy_params.ik_seed must contain finite joint values.")
         normalized["strategy_params"]["ik_seed"] = [_finite(value, "strategy_params.ik_seed") for value in seed]
     return normalized
 

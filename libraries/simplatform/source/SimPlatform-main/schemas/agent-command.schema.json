@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sim-platform.local/schemas/agent-command.schema.json",
+  "title": "Simulation Agent RPC command",
+  "type": "object",
+  "required": ["id", "method"],
+  "properties": {
+    "id": {"type": ["string", "integer", "null"]},
+    "method": {
+      "enum": [
+        "scene.query", "scene.create_entity", "scene.set_transform",
+        "scene.load_asset", "scene.load_robot", "simulation.step",
+        "simulation.reset", "robot.command_joint_positions", "state.save",
+        "state.restore", "shared_memory.allocate", "shared_memory.describe",
+        "shared_memory.release", "capabilities.query"
+      ]
+    },
+    "params": {"type": "object", "default": {}}
+  },
+  "additionalProperties": false
+}

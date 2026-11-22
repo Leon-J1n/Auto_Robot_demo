@@ -40,8 +40,8 @@ class LinearMove:
         collision_resolution, _ = collision_sampling_settings(request)
         seed_value = params.get("ik_seed")
         seed = np.asarray(start_q if seed_value is None else seed_value, dtype=float)
-        if seed.shape != (6,) or not np.all(np.isfinite(seed)):
-            raise ValueError("strategy_params.ik_seed must contain six finite joint values.")
+        if seed.shape != start_q.shape or not np.all(np.isfinite(seed)):
+            raise ValueError("strategy_params.ik_seed must contain one finite value per robot joint.")
         method = params.get("ik_method", "auto")
         alphas = np.linspace(0.0, 1.0, count)[1:]
         waypoint_orientations = _waypoint_orientations(
@@ -120,10 +120,21 @@ class LinearMove:
                 # collision result can trigger the configured RRT fallback.
                 _, points, ik_diagnostics, selected_branch = min(colliding_candidates, key=lambda item: item[0])
             else:
+                limit_rejections = [item for item in rejected if item.get('error_code') == 'JOINT_LIMIT_VIOLATION']
+                if limit_rejections:
+                    raise PlanningError('Joint state violates joint limits.', code='JOINT_LIMIT_VIOLATION',
+                        recoverable=True, details=limit_rejections[0]['details'])
+                diagnostic = None
+                if hasattr(self.kinematics, 'ik_validation') and all(
+                        str(item.get('reason', '')).startswith('ik_failed:') for item in rejected):
+                    from kinematics.core.limit_diagnosis import diagnose_joint_limits
+                    diagnostic = diagnose_joint_limits(self.kinematics, poses[-1], start_q)
+                limit_failure = diagnostic and diagnostic['status'] == 'limit_violating_candidate'
                 raise PlanningError(
                     f"No continuous IK branch reaches the target ({len(rejected)} branches rejected).",
-                    code="PATH_CONSTRAINT_INFEASIBLE", recoverable=True,
+                    code="JOINT_LIMIT_VIOLATION" if limit_failure else "PATH_CONSTRAINT_INFEASIBLE", recoverable=True,
                     details={
+                        **({'limit_diagnosis': diagnostic, 'joints': diagnostic['joints']} if diagnostic else {}),
                         "candidate_count": len(branch_seeds),
                         "rejected_count": len(rejected),
                         "reason_counts": {
@@ -201,7 +212,10 @@ class LinearMove:
                     if collision.in_collision:
                         first_collision = collision
         except Exception as exc:
-            return branch_index, None, {"branch": branch_index, "reason": f"ik_failed: {exc}"}, None
+            rejection = {"branch": branch_index, "reason": f"ik_failed: {exc}"}
+            if isinstance(exc, PlanningError):
+                rejection.update(error_code=exc.code, details=exc.details)
+            return branch_index, None, rejection, None
         if len(joints) != len(poses) + 1:
             return branch_index, None, {"branch": branch_index, "reason": "ik_failed: incomplete path"}, None
         points = np.asarray(joints)

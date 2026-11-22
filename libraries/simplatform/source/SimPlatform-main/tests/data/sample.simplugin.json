@@ -1,0 +1,14 @@
+{
+  "name": "sim.collision.sample",
+  "version": "0.1.0",
+  "plugin_api_version": 2,
+  "type": "collision_backend",
+  "library": "sim_collision_sample.dll",
+  "platforms": ["windows-x64", "linux-x64"],
+  "required_dependencies": [],
+  "capabilities": {
+    "collision_query": true,
+    "distance_query": true,
+    "state_serialization": false
+  }
+}

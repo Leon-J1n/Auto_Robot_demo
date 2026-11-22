@@ -1,17 +1,30 @@
 {
   "request_id": "open-close-drawer-007",
-  "success": true,
-  "status": "success",
-  "frame_count": 3009,
-  "physics_steps": 23016,
-  "execution_backend": "mujoco",
+  "success": false,
+  "status": "error",
+  "frame_count": 1670,
+  "physics_steps": 13065,
   "trajectory_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.007\\output\\trajectories\\execution.traj",
   "blackboard_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.007\\output\\snapshots\\blackboard.json",
   "final_scene_file": "snapshots/final_scene.json",
+  "global_perception": {
+    "status": "deferred",
+    "reason": "Request timed out.",
+    "elapsed_s": 46.3406519999844,
+    "vlm_request_s": 45.29726329998812,
+    "vlm_request_count": 1
+  },
   "commands_file": "commands/results.jsonl",
-  "command_count": 18,
-  "successful_command_count": 18,
-  "failed_command_count": 0,
-  "failure": null,
+  "command_count": 11,
+  "successful_command_count": 10,
+  "failed_command_count": 1,
+  "failure": {
+    "step_index": 11,
+    "command_id": "11",
+    "skill_name": "pull",
+    "error_code": "EXECUTION_TIMEOUT",
+    "failed_stage": "execution",
+    "error_message": "Trajectory execution timed out (goal_not_converged); joint_error=0.004352 rad"
+  },
   "final_state_file": "snapshots/state.json"
 }

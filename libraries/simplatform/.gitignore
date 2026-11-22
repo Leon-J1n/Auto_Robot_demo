@@ -1,0 +1,5 @@
+deps/
+build/
+build-legacy/
+build_rebuild/
+source/SimPlatform-main/bqlog_mmap/

@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<robot name="wsg50_test_gripper">
+  <material name="wsg_blue">
+    <color rgba="0.12 0.28 0.52 1.0"/>
+  </material>
+  <material name="finger_gray">
+    <color rgba="0.20 0.22 0.24 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.2"/>
+      <inertia ixx="0.0016" ixy="0" ixz="0" iyy="0.0016" iyz="0" izz="0.0024"/>
+    </inertial>
+    <visual name="housing">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/WSG50_110.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="wsg_blue"/>
+    </visual>
+    <collision name="housing_collision">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.11 0.05 0.06"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="left_finger">
+    <inertial>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <mass value="0.2"/>
+      <inertia ixx="0.00038" ixy="0" ixz="0" iyy="0.00038" iyz="0" izz="0.00002"/>
+    </inertial>
+    <visual name="left_guide">
+      <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/GUIDE_WSG50_110.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wsg_blue"/>
+    </visual>
+    <visual name="left_mount">
+      <origin xyz="0 0 -0.037" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/WSG-FMF.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="finger_gray"/>
+    </visual>
+    <visual name="left_tip">
+      <origin xyz="-0.007 0 0.085" rpy="0 0 4.71239"/>
+      <geometry>
+        <mesh filename="meshes/l_gripper_tip_scaled.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="finger_gray"/>
+    </visual>
+    <collision name="left_carriage_collision">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.045 0.070"/>
+      </geometry>
+    </collision>
+    <collision name="left_tip_collision">
+      <origin xyz="-0.007 0 0.127" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.020 0.020 0.150"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_finger_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="left_finger"/>
+    <origin xyz="-0.055 0 0.060" rpy="0 0 0"/>
+    <axis xyz="-1 0 0"/>
+    <limit lower="-0.050" upper="0" effort="100" velocity="0.2"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="right_finger">
+    <inertial>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <mass value="0.2"/>
+      <inertia ixx="0.00038" ixy="0" ixz="0" iyy="0.00038" iyz="0" izz="0.00002"/>
+    </inertial>
+    <visual name="right_guide">
+      <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/GUIDE_WSG50_110.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="wsg_blue"/>
+    </visual>
+    <visual name="right_mount">
+      <origin xyz="0 0 -0.037" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="meshes/WSG-FMF.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="finger_gray"/>
+    </visual>
+    <visual name="right_tip">
+      <origin xyz="-0.007 0 0.085" rpy="0 0 -1.57079"/>
+      <geometry>
+        <mesh filename="meshes/l_gripper_tip_scaled.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="finger_gray"/>
+    </visual>
+    <collision name="right_carriage_collision">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.045 0.070"/>
+      </geometry>
+    </collision>
+    <collision name="right_tip_collision">
+      <origin xyz="-0.007 0 0.127" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.020 0.020 0.150"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_finger_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="right_finger"/>
+    <origin xyz="0.055 0 0.060" rpy="0 0 3.14159"/>
+    <axis xyz="-1 0 0"/>
+    <limit lower="-0.050" upper="0" effort="100" velocity="0.2"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+</robot>

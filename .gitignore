@@ -2,7 +2,6 @@
 .venv/
 .idea/
 .pnpm-store/
-MUJOCO_LOG.TXT
 *.before_*
 /demo/**/__pycache__/
 /demo/**/*.py[cod]
@@ -11,16 +10,21 @@ backups/
 bqlog_mmap/
 logs/
 tests/output/
-demo/task_commands/**/output/
-demo/task_commands/**/blackboard_check/
-demo/task_commands/**/push_check/
 tests/generated_config_*.json
 config/vlm.json
 *.pyc
 __pycache__/
 collision/**/__pycache__/
 
-# Local extracted SDK/build and runtime output
+# Local extracted SDK and build output
 ._simplatform_source/
-execution/output/
-libraries/simplatform_native/build_rebuild/
+libraries/simplatform/build_rebuild/
+
+# Keep complete request bundles and execution code/output, including files
+# that otherwise match the generic cache, log or backup exclusions above.
+!/requests/
+!/requests/**/
+!/requests/**
+!/execution/
+!/execution/**/
+!/execution/**

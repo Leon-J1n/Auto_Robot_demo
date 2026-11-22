@@ -1,0 +1,31 @@
+/build*/
+/.sim-cache/
+**/.sim-cache/
+.idea/
+.codex/
+.test-tmp/
+distribute/
+logs/
+openspec/
+*.jsonl
+*.log
+*.simcache
+*.pyc
+__pycache__/
+.pytest_cache/
+# The system temp dir is not writable on some Windows hosts, so tests are run with
+# --basetemp=.pytest-tmp there.
+/.pytest-tmp/
+*.egg-info/
+/third_party/
+/tools/vcpkg-partial/
+/MUJOCO_LOG.TXT
+*.tmp
+/web-design/
+/web/node_modules/
+/web/dist/
+/web/playwright-report/
+/web/test-results/
+/web/data/uploads/
+/web-gateway.*.log
+/web-node_modules-partial-*/
