@@ -1,0 +1,6 @@
+[simulation]
+fixed_time_step = 0.002
+headless = true
+
+[backends]
+physics = "mujoco"

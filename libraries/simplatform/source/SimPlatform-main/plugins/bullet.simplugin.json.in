@@ -1,0 +1,15 @@
+{
+  "name": "sim.physics.bullet3",
+  "version": "3.25",
+  "plugin_api_version": 2,
+  "type": "physics_backend",
+  "library": "sim_physics_bullet@CMAKE_SHARED_LIBRARY_SUFFIX@",
+  "platforms": ["windows-x64", "linux-x64", "linux-arm64"],
+  "required_dependencies": [],
+  "capabilities": {
+    "rigid_body_dynamics": true,
+    "articulated_body": false,
+    "state_serialization": true,
+    "body_wrench": true
+  }
+}

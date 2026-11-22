@@ -159,6 +159,27 @@ class MuJoCoExecutionBackend:
             self._cameras = CameraManager(cameras)
         return self._cameras.get_current_frame(name)
 
+    def camera_body_labels(self, frame):
+        """Render body IDs with exactly the camera and state used for RGB-D."""
+        renderer = self._camera_renderers[(frame.intrinsics.width, frame.intrinsics.height)]
+        renderer.enable_segmentation_rendering()
+        try:
+            renderer.update_scene(self.data, camera=frame.camera_id)
+            labels = renderer.render()
+        finally:
+            renderer.disable_segmentation_rendering()
+        ids, types = labels[..., 0], labels[..., 1]
+        return np.where(types == int(mujoco.mjtObj.mjOBJ_GEOM), self.model.geom_bodyid[ids], -1)
+
+    def support_below(self, name, center, lower_z):
+        geom = np.array([-1], dtype=np.int32)
+        origin = np.array([center[0], center[1], lower_z + .01])
+        distance = mujoco.mj_ray(self.model, self.data, origin, np.array([0., 0., -1.]),
+                                 None, 1, self.object_ids[name], geom)
+        if distance < 0 or distance > .04:
+            return None
+        return int(self.model.geom_bodyid[geom[0]]), float(origin[2] - distance)
+
     def set_frame_callback(self, callback):
         self.frame_callback = callback
 

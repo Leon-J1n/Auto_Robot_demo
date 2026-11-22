@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot name="intel_realsense_d435_approximation">
+  <material name="d435_gray"><color rgba="0.18 0.19 0.20 1"/></material>
+  <material name="d435_black"><color rgba="0.02 0.02 0.025 1"/></material>
+  <material name="lens_blue"><color rgba="0.04 0.12 0.20 1"/></material>
+  <link name="d435_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.072"/>
+      <inertia ixx="0.000014" ixy="0" ixz="0" iyy="0.000075" iyz="0" izz="0.000080"/>
+    </inertial>
+    <visual name="body">
+      <geometry><box size="0.025 0.090 0.025"/></geometry>
+      <material name="d435_gray"/>
+    </visual>
+    <collision name="body_collision">
+      <geometry><box size="0.025 0.090 0.025"/></geometry>
+    </collision>
+    <visual name="front_panel">
+      <origin xyz="0.0127 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.002 0.084 0.020"/></geometry>
+      <material name="d435_black"/>
+    </visual>
+    <visual name="left_ir_lens">
+      <origin xyz="0.014 -0.025 0" rpy="0 1.5707963 0"/>
+      <geometry><cylinder radius="0.006" length="0.003"/></geometry>
+      <material name="lens_blue"/>
+    </visual>
+    <visual name="rgb_lens">
+      <origin xyz="0.014 0.010 0" rpy="0 1.5707963 0"/>
+      <geometry><cylinder radius="0.005" length="0.003"/></geometry>
+      <material name="lens_blue"/>
+    </visual>
+    <visual name="right_ir_lens">
+      <origin xyz="0.014 0.025 0" rpy="0 1.5707963 0"/>
+      <geometry><cylinder radius="0.006" length="0.003"/></geometry>
+      <material name="lens_blue"/>
+    </visual>
+  </link>
+</robot>

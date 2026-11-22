@@ -186,6 +186,45 @@ class ProxyQueryTests(unittest.TestCase):
             self.assertEqual(actual.in_collision,expected.in_collision)
         self.proxy.broadphase=True
 
+    def test_world_proxy_overlap_is_cleared_by_source_geometry(self):
+        xml = self.xml.replace('type="box" size=".05 .05 .1"', 'type="sphere" size=".05"')
+        model = mujoco.MjModel.from_xml_string(xml)
+        self.runtime.model = model
+        self.runtime.data = mujoco.MjData(model)
+        model.body_pos[-1] = [1.08, .08, 0]
+        original = self.raw
+        def spheres(*args, **kwargs):
+            result = original(*args, **kwargs)
+            result['geometries'][1]['kind'] = 'sphere'
+            return result
+        self.raw = spheres
+        result = self.proxy.check(np.zeros(6), safety_distance=.003)
+        self.assertFalse(result.in_collision)
+        self.assertGreater(self.proxy.stats['narrowphase_pairs'], 0)
+        model.body_pos[-1] = [1.06, .06, 0]
+        self.assertTrue(self.proxy.check(np.zeros(6), safety_distance=.003).in_collision)
+
+    def test_self_proxy_overlap_is_cleared_by_source_geometry(self):
+        model = self.runtime.model
+        model.geom_type[0] = mujoco.mjtGeom.mjGEOM_BOX
+        model.geom_size[:] = [.01, .01, .01]
+        model.body_pos[-1] = [1.03, 0, 0]
+        original = self.raw
+        def boxes(*args, **kwargs):
+            result = original(*args, **kwargs)
+            result['geometries'][0]['kind'] = 'box'
+            result['geometries'][0]['size'] = [.01, .01, .01]
+            result['geometries'][1]['robot'] = True
+            result['geometries'][1]['matrix'] = np.eye(4).tolist()
+            return result
+        self.raw = boxes
+        self.assertFalse(self.proxy.check(np.zeros(6), safety_distance=.003).in_collision)
+        self.assertGreater(self.proxy.stats['narrowphase_pairs'], 0)
+        model.body_pos[-1] = [1.015, 0, 0]
+        result = self.proxy.check(np.zeros(6), safety_distance=.003)
+        self.assertTrue(result.in_collision)
+        self.assertTrue(result.contacts[0]['self_collision'])
+
     def test_path_cache_is_invalidated_by_world_and_policy(self):
         points=np.zeros((3,6))
         self.assertFalse(self.proxy.check_path(points).in_collision)
@@ -198,9 +237,14 @@ class ProxyQueryTests(unittest.TestCase):
         self.assertFalse(self.proxy.check_path(points).in_collision)
 
     def test_validation_rejects_bad_input(self):
-        for points in ([],[[np.nan]*6],[[10]*6],[[0]*5]):
+        for points in ([],[[np.nan]*6],[[0]*5]):
             with self.assertRaises(ValueError):
                 self.proxy.check_path(points)
+        from planning.common.errors import PlanningError
+        with self.assertRaises(PlanningError) as raised:
+            self.proxy.check_path([[10]*6])
+        self.assertEqual(raised.exception.code, 'JOINT_LIMIT_VIOLATION')
+        self.assertEqual(raised.exception.details['joints'][0]['joint'], 'j0')
         with self.assertRaises(ValueError):
             self.proxy.check_path([[0]*6],resolution=0)
 
@@ -234,10 +278,19 @@ class ProxyQueryTests(unittest.TestCase):
         self.assertFalse(self.proxy.check(np.zeros(6),safety_distance=.003).in_collision)
 
     def test_broad_phase_matches_dense_with_multiple_robot_groups(self):
+        # Every exported source must refer to a real MuJoCo geom now that
+        # candidate proxy overlaps are confirmed against source geometry.
+        xml = self.xml.replace('</worldbody>',
+            '<body name="extra"><geom type="sphere" size=".12" pos=".9 0 0"/></body></worldbody>')
+        model = mujoco.MjModel.from_xml_string(xml)
+        self.runtime.model = model
+        self.runtime.data = mujoco.MjData(model)
         original=self.raw
         def multiple(*args,**kwargs):
             result=original(*args,**kwargs)
-            result['geometries'].append(geometry(2,1,robot=True,kind='sphere',size=(.12,0,0),center=(.9,0,0)))
+            body = int(model.geom_bodyid[2])
+            result['geometries'].append(geometry(2,body,robot=True,kind='sphere',size=(.12,0,0),center=(.9,0,0)))
+            result['body_world'][str(body)] = np.eye(4).tolist()
             return result
         self.raw=multiple
         self.test_broad_phase_matches_dense_collision_classification()

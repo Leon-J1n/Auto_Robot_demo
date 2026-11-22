@@ -202,7 +202,7 @@ class _MoveExecutor:
             return None
         trajectory = deepcopy(dict(prepared.trajectory))
         points = np.asarray(trajectory.get("waypoints", []), dtype=float)
-        if (points.ndim != 2 or points.shape[1] != 6 or len(points) < 2
+        if (points.ndim != 2 or points.shape[1] != len(self.robot_runtime.joint_limits) or len(points) < 2
                 or not np.all(np.isfinite(points))
                 or np.any(points < self.robot_runtime.joint_limits[:, 0])
                 or np.any(points > self.robot_runtime.joint_limits[:, 1])

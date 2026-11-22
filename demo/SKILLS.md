@@ -312,7 +312,7 @@
 
 ## 统一场景运行与报告
 
-`requests/commands.001/ur5_table_empty.json` 将夹爪作为独立对象声明，使用 `MetadataRef` 引用夹爪资产，使用 `RobotAttachment` 指定父对象、父 link、子 link 和相对安装变换。运行时从两份原始 URDF 在内存中建立安装关系，不生成也不读取组合 URDF 文件。FCL 负责机械臂和静态场景的候选、接近路径和最终位姿检查；夹爪、活动机构和携带物体使用 MuJoCo 的实时几何距离检查。MuJoCo 负责物理积分、接触力和窗口播放，并输出后端 MJCF 缓存。
+`requests/commands.001/ur3_table_empty.json` 将夹爪作为独立对象声明，使用 `MetadataRef` 引用夹爪资产，使用 `RobotAttachment` 指定父对象、父 link、子 link 和相对安装变换。运行时从两份原始 URDF 在内存中建立安装关系，不生成也不读取组合 URDF 文件。FCL 负责机械臂和静态场景的候选、接近路径和最终位姿检查；夹爪、活动机构和携带物体使用 MuJoCo 的实时几何距离检查。MuJoCo 负责物理积分、接触力和窗口播放，并输出后端 MJCF 缓存。
 
 完整文件见 `requests/commands.001/commands.001.json`，当前顺序为 `pick → put → pick → put → move home`。命令按数组顺序执行，`command_id` 不决定顺序。
 
@@ -351,7 +351,7 @@
 
 ### 场景与运行配置分离
 
-`requests/commands.001/ur5_table_empty.json` 使用与 `requests/<request>/` 一致的 schema 1 组件结构，仅保存场景身份、对象布局、资产引用、装配关系、显示颜色和 RobotDriver 初始关节角。`layout_reference` 和 `assembly_notes` 已删除。
+`requests/commands.001/ur3_table_empty.json` 使用与 `requests/<request>/` 一致的 schema 1 组件结构，仅保存场景身份、对象布局、资产引用、装配关系、显示颜色和 RobotDriver 初始关节角。`layout_reference` 和 `assembly_notes` 已删除。
 
 场景文件直接包含机器人、夹爪、碰撞器和物理组件。`requests/<request>/commands.<id>.json` 只负责登记场景文件和后端资源，通用运行默认值由执行器自动补充。
 

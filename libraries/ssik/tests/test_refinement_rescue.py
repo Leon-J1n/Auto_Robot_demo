@@ -1,0 +1,354 @@
+"""T-perturbation rescue (#319) — coverage on Group A reproducers.
+
+Five of the eight outstanding coverage gaps share the same root cause:
+``m_quad`` is structurally rank-deficient on a measure-zero ridge in
+q-space, the analytical RR path returns 0 sols at the exact ridge, but
+genuine analytical solutions exist arbitrarily close. The T-perturbation
+rescue (see :mod:`ssik.refinement.rescue`) recovers them by perturbing
+the target, re-solving, and LM-refining each candidate back to the
+original ``T_target``.
+
+These tests pin coverage on the falsifying examples that landed #298,
+#304, and #280 — at three levels: the analytical path still returns 0
+there (baseline), the standalone rescue recovers them, and bulletproof
+``solve()`` (allow_rescue=True, the default) recovers them with no
+explicit opt-in. If any layer regresses, this file fires.
+
+#309 OpenArm right is exercised via the uniform-fuzz sweep rather than
+here; #286 PiPER's stored q* no longer reproduces (the sweep moved on).
+"""
+
+from __future__ import annotations
+
+import importlib
+
+import numpy as np
+import pytest
+
+from ssik.refinement.rescue import rescue_via_T_perturbation
+
+# Group A reproducers from the issue tracker. Each entry: (arm_module,
+# q*, n_expected_min). n_expected_min is a conservative lower bound: the
+# escalating-scale schedule gives large cross-platform margin (measured
+# default-seed recovery: CRX 4 (structural), Kassow 24, Rizon 4 26), so
+# >=4 holds even under BLAS-backend numeric drift. A lower bound (not an
+# exact count) keeps the test stable across platforms and future numerics.
+GROUP_A = [
+    pytest.param(
+        "fanuc_crx10ial_ik",
+        np.array([0.0, -0.21484375, -1.57884726, 0.25, -0.21484375, 0.0]),
+        4,
+        id="298_crx",
+    ),
+    pytest.param(
+        "rizon4_ik",
+        np.array([0.0, 1.0, -2.0, 0.375, -2.0, 1.0, 0.0]),
+        4,
+        id="304_rizon4",
+    ),
+    pytest.param(
+        "kassow_kr810_ik",
+        np.array([0.0, 1.0, 2.5, 0.5, 1.0, 1.0, 0.0]),
+        4,
+        id="280_kassow",
+    ),
+]
+
+# #299 gen3 exercises the *thin-wrapper* rescue path (seven_r.srs_polished),
+# which #358 wired to match the orchestrator arms above. It is not a ridge: raw
+# srs_polished returned 0 sols here only because it extracted Gen3's seeds with
+# the canonical z-y-z formulas, which do not fit Gen3's axes. With the
+# extraction matched to the axes (#598) the direct path returns the full set,
+# so the pose stays only as a rescue-wiring check, not a direct-zero baseline.
+GEN3_299 = pytest.param(
+    "gen3_ik",
+    np.array([0.51171875, 0.51171875, 1.01953125, 0.625, -0.6484375, -2.75, 0.875]),
+    4,
+    id="299_gen3",
+)
+
+
+@pytest.mark.parametrize(("arm_name", "q_star", "n_expected_min"), GROUP_A)
+def test_direct_solve_at_ridge_returns_zero(
+    arm_name: str, q_star: np.ndarray, n_expected_min: int
+) -> None:
+    """Establishes baseline: the direct analytical path returns 0 sols
+    at the ridge point. If this ever starts returning non-zero,
+    something fixed the ridge upstream and the rescue test below would
+    need to be updated to a still-failing q*."""
+    if arm_name == "fanuc_crx10ial_ik":
+        pytest.xfail(
+            "#528/#531: force_refine now heals this ridge to 3 direct sols "
+            "(was 0); the reproducer + assertions settle with the #531 "
+            "structural rescue-union for the vanished complex-root branch."
+        )
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    T = mod.fk(q_star)
+    # allow_rescue=False isolates the purely-analytical path: bulletproof
+    # solve() now auto-recovers these ridges via the rescue (#319), so the
+    # "direct returns 0" baseline must opt out of that fallback.
+    # native=False: this pins the *Python analytical* path's ridge behaviour (the
+    # baseline for the rescue test below). The native path may extract the ridge
+    # differently (relative-completeness contract, #554); its coverage is gated in
+    # tests/test_native_dispatch.py.
+    sols = mod.solve(T, respect_limits=False, allow_rescue=False, native=False)
+    assert len(sols) == 0, (
+        f"{arm_name}: direct solve at the stored ridge q* now returns "
+        f"{len(sols)} sols; the ridge is healed and this reproducer is "
+        "stale. Update the test parametrise table or close the upstream issue."
+    )
+
+
+@pytest.mark.parametrize(("arm_name", "q_star", "n_expected_min"), [*GROUP_A, GEN3_299])
+def test_rescue_recovers_solutions_at_ridge(
+    arm_name: str, q_star: np.ndarray, n_expected_min: int
+) -> None:
+    """The T-perturbation rescue should recover ≥ ``n_expected_min``
+    unique analytical solutions at the ridge q*, each with FK closure
+    well below 1e-6."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    T = mod.fk(q_star)
+
+    rescued = rescue_via_T_perturbation(mod.fk, mod.solve, T)
+
+    assert len(rescued) >= n_expected_min, (
+        f"{arm_name}: T-rescue recovered {len(rescued)} sols at q*; "
+        f"expected at least {n_expected_min}"
+    )
+
+    # Each rescued solution must close the original T at the documented
+    # fk_atol; reverify independently here (defence against any
+    # rescue-internal bug that might emit wrongly-tagged sols).
+    for sol in rescued:
+        T_check = mod.fk(sol.q)
+        fk_err = float(np.linalg.norm(T_check - T))
+        assert fk_err < 1e-6, (
+            f"{arm_name}: rescued sol q={sol.q.tolist()} has independent "
+            f"FK error {fk_err:.2e}, above 1e-6 ceiling"
+        )
+        assert sol.refinement_used == "lm", (
+            f"{arm_name}: rescued sol should be tagged refinement_used='lm', "
+            f"got {sol.refinement_used!r}"
+        )
+
+
+@pytest.mark.parametrize(("arm_name", "q_star", "n_expected_min"), [*GROUP_A, GEN3_299])
+def test_bulletproof_solve_auto_recovers_ridge(
+    arm_name: str, q_star: np.ndarray, n_expected_min: int
+) -> None:
+    """Default ``solve()`` (allow_rescue=True) must itself recover the ridge.
+
+    This is the #319 bulletproof contract: callers don't invoke the rescue
+    explicitly -- ``solve()`` returns the IK at a reachable ridge directly,
+    tagged ``refinement_used="lm"`` and FK-closed to machine precision."""
+    if arm_name == "fanuc_crx10ial_ik":
+        pytest.xfail(
+            "#531: force_refine suppresses the T-perturbation rescue for the "
+            "vanished complex-root 4th branch at this exact ridge, so solve() "
+            "returns 3 of 4 until the structural rescue-union lands. Measure-"
+            "zero: every real pose + the fuzz + the C++ gate get the full set."
+        )
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    T = mod.fk(q_star)
+
+    # native=False: this asserts the #319 Python bulletproof-rescue contract at a
+    # pinned ridge, including the refinement_used=="lm" tag. Native runs the same
+    # rescue (#622, and on RR jointlock since #617) and is held to Python by
+    # tests/test_native_parity.py.
+    sols = mod.solve(T, respect_limits=False, native=False)
+
+    assert len(sols) >= n_expected_min, (
+        f"{arm_name}: bulletproof solve() recovered {len(sols)} sols at the "
+        f"ridge q*; expected at least {n_expected_min}"
+    )
+    for sol in sols:
+        assert sol.refinement_used == "lm", (
+            f"{arm_name}: ridge sol should be tagged 'lm', got {sol.refinement_used!r}"
+        )
+        fk_err = float(np.linalg.norm(mod.fk(sol.q) - T))
+        assert fk_err < 1e-6, f"{arm_name}: ridge sol FK error {fk_err:.2e} above 1e-6 ceiling"
+
+
+def test_bulletproof_solve_skips_rescue_when_unreachable() -> None:
+    """A pose just beyond the workspace must return ``[]`` without the rescue
+    firing -- the reachability verdict / reach-sphere gate it out so an
+    unreachable target stays cheap and honest (no fabricated near-misses)."""
+    from ssik.prebuilt import fanuc_crx10ial_ik as crx
+
+    # A genuine arm pose pushed radially out past the CRX's ~1.675 m reach.
+    T = crx.fk(np.array([0.3, 0.5, 0.2, 0.4, 0.6, -0.3]))
+    T[:3, 3] *= 1.0 + 0.5 / float(np.linalg.norm(T[:3, 3]))
+
+    assert crx.solve(T, respect_limits=False) == []
+    assert crx.solve(T, respect_limits=False, allow_rescue=False) == []
+
+
+def test_rescue_returns_empty_when_T_is_truly_unreachable() -> None:
+    """When ``T_target`` is genuinely unreachable (well outside the arm's
+    workspace), the rescue should return an empty list rather than
+    fabricating bogus near-misses. We use a target 10 m in front of the
+    CRX base, far beyond its ~1.5 m reach."""
+    from ssik.prebuilt import fanuc_crx10ial_ik
+
+    T_unreachable = np.eye(4)
+    T_unreachable[:3, 3] = [10.0, 0.0, 1.0]
+    rescued = rescue_via_T_perturbation(
+        fanuc_crx10ial_ik.fk,
+        fanuc_crx10ial_ik.solve,
+        T_unreachable,
+    )
+    assert rescued == [], (
+        f"rescue returned {len(rescued)} sols for an obviously-unreachable "
+        "target 10m from the CRX base; expected empty list"
+    )
+
+
+def test_rescue_idempotent_when_direct_solve_succeeds() -> None:
+    """When the direct solve already has solutions (no ridge), the
+    rescue should still work and not corrupt them — though typical use
+    only invokes rescue on empty direct-solve results."""
+    from ssik.prebuilt import fanuc_crx10ial_ik
+
+    q_healthy = np.array([0.3, 0.5, 0.2, 0.4, 0.6, -0.3])
+    T = fanuc_crx10ial_ik.fk(q_healthy)
+    direct = fanuc_crx10ial_ik.solve(T, respect_limits=False)
+    assert direct, "expected direct solve to succeed on the healthy seed"
+
+    rescued = rescue_via_T_perturbation(
+        fanuc_crx10ial_ik.fk,
+        fanuc_crx10ial_ik.solve,
+        T,
+    )
+    # The rescue may find some / all / more of the direct solutions
+    # depending on which perturbation regions happen to be reachable.
+    # The contract is just that whatever it returns is FK-correct.
+    for sol in rescued:
+        T_check = fanuc_crx10ial_ik.fk(sol.q)
+        fk_err = float(np.linalg.norm(T_check - T))
+        assert fk_err < 1e-6, (
+            f"rescue produced FK-incorrect sol on healthy pose: "
+            f"q={sol.q.tolist()}, fk_err={fk_err:.2e}"
+        )
+
+
+# #646: piper at a wrist singularity (q5 = 8e-6, sigma_min(J) = 3e-6) with q3
+# exactly at its upper limit 0. The configuration itself is an exact in-limits
+# solution, but the analytic set holds it only ~2e-6 across the limit, so the
+# rescue fires, and its fixed-damping polish stalled above fk_atol on every
+# candidate near it: native returned [] even when seeded with it. Also pinned in
+# the native-parity gate (tests/data/native_parity_poses.json, piper_ik
+# "pinned").
+PIPER_646 = np.array(
+    [
+        -2.3785873919285248,
+        1.7912596863653287,
+        0.0,
+        0.6008304627412366,
+        8.127217409783666e-06,
+        -1.5707963267948966,
+    ]
+)
+
+
+def _wrap_linf(a: np.ndarray, b: np.ndarray) -> float:
+    return float(np.max(np.abs((a - b + np.pi) % (2.0 * np.pi) - np.pi)))
+
+
+@pytest.mark.parametrize("native", [True, False], ids=["native", "python"])
+def test_seeded_solve_at_near_singular_limit_pose_646(native: bool) -> None:
+    """Seeded with an exact in-limits configuration, the default solve returns
+    an in-limits solution that closes FK, on both backends."""
+    from ssik import DEFAULT_TOLERANCE_POLICY
+    from ssik.prebuilt.agilex import piper_ik
+
+    t = piper_ik.fk(PIPER_646)
+    sols = piper_ik.solve(t, q_seed=PIPER_646, max_solutions=1, native=native)
+    assert len(sols) == 1, f"seeded solve returned {len(sols)} solutions at a reachable pose"
+    q = sols[0].q
+    for j, (x, joint) in enumerate(zip(q, piper_ik._KB.joints, strict=True)):
+        assert joint.limits is not None
+        lo, hi = joint.limits
+        assert lo <= x <= hi, f"q{j + 1} = {x!r} outside [{lo}, {hi}]"
+    fk_err = float(np.linalg.norm(piper_ik.fk(q) - t))
+    assert fk_err <= DEFAULT_TOLERANCE_POLICY.subproblem_numerical, f"FK error {fk_err:.1e}"
+
+
+def test_rescue_recovers_near_singular_configuration_646() -> None:
+    """The shared rescue (its Python definition; rescue.hpp is the same
+    algorithm) recovers the pose's own configuration to machine precision.
+    Whether a backend's solve() reaches its rescue here depends on the
+    platform's analytic set, so the solve-level contract is the seeded test
+    above and the native-parity gate's pin."""
+    from ssik.prebuilt.agilex import piper_ik
+
+    t = piper_ik.fk(PIPER_646)
+    rescued = rescue_via_T_perturbation(
+        piper_ik.fk,
+        lambda tp, **kw: piper_ik.solve(tp, allow_rescue=False, **kw),
+        t,
+        jacobian_fn=piper_ik._spatial_jacobian,
+    )
+    near = [s for s in rescued if _wrap_linf(s.q, PIPER_646) < 1e-6]
+    assert near, f"no rescued solution within 1e-6 of the configuration ({len(rescued)} returned)"
+    assert near[0].fk_residual < 1e-12, f"residual {near[0].fk_residual:.1e}"
+
+
+def test_rescue_polishes_well_conditioned_to_machine_precision_384() -> None:
+    """#384 regression: a rescue whose perturbation lands off-ridge is
+    well-conditioned and must be polished to machine precision, not merely to
+    the loose 1e-8 acceptability gate.
+
+    The gen3 pose below routes to ``srs_polished``, which returns [] (its
+    approximate pivots don't clear the strict polish filter here), so the
+    thin-wrapper rescue fires. Its solutions FK-close to <=~6e-9 under the old
+    early-stopping polish -- above gen3's 1e-9 fuzz ceiling -- even though one
+    more Newton step reaches ~5e-13. The tight-then-loose polish now delivers
+    that: every returned branch closes well under the ceiling.
+    """
+    from ssik.prebuilt import gen3_ik
+
+    q_star = np.array([0.125, 0.46875, 2.125, 0.4765625, 1.5, 1.0, 0.5])
+    T = gen3_ik.fk(q_star)
+    sols = gen3_ik.solve(T, respect_limits=False)
+    assert sols, "expected the rescue to recover solutions at this gen3 pose"
+    worst = max(s.fk_residual for s in sols)
+    assert worst < 1e-9, (
+        f"rescue left a branch under-polished at {worst:.2e} (> gen3 1e-9 ceiling); "
+        f"the tight polish should reach machine precision on this well-conditioned pose"
+    )
+
+
+def test_batched_rescue_recovers_full_set_piper_ridge() -> None:
+    """Regression: the batched rescue (#405) must recover the SAME solution set
+    as the per-candidate rescue it replaced.
+
+    lm_refine_batch defaults to a tight divergence tolerance (2.0 / 2, tuned for
+    srs_polished #203); the per-candidate lm_refine rescue used the loose 5.0 / 4.
+    Inheriting the tight default aborted rescuable perturbed candidates whose
+    trajectory dips before converging, dropping valid solutions -- this piper
+    ridge pose (normal solve returns 0) recovered 6 distinct machine-precision
+    IKs at v3.2.0 but only 3 after #405 until the rescue passed 5.0 / 4 through.
+    """
+    pytest.xfail(
+        "#528/#531: force_refine partially heals this piper ridge (the direct "
+        "solve is no longer empty), suppressing the rescue for the vanished "
+        "branch; final expectations settle with the #531 structural rescue-union."
+    )
+    piper = pytest.importorskip("ssik.prebuilt.piper_ik")
+    q = np.array(
+        [0.6062325102, 0.4261052819, -0.0456657578, 0.398668829, -0.6750285024, -0.5471984045]
+    )
+    t = piper.fk(q)
+    assert not piper.solve(t, respect_limits=False, allow_rescue=False), (
+        "expected an empty analytical solve (a genuine rescue pose)"
+    )
+    sols = piper.solve(t, respect_limits=False)
+    assert len(sols) >= 6, f"batched rescue recovered {len(sols)} sols, expected the full 6"
+    # Every recovered solution FK-closes and they are distinct.
+    for s in sols:
+        assert float(np.max(np.abs(piper.fk(s.q) - t))) < 1e-6
+    qs = [s.q for s in sols]
+    for i in range(len(qs)):
+        for j in range(i + 1, len(qs)):
+            gap = float(np.max(np.abs((qs[i] - qs[j] + np.pi) % (2.0 * np.pi) - np.pi)))
+            assert gap > 1e-3, "rescue returned duplicate solutions"

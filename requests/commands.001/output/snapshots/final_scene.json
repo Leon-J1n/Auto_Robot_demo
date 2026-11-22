@@ -2,8 +2,8 @@
   "scene_schema_version": 1,
   "scene_version": 3,
   "scene_id": 1,
-  "scene_name": "ur5_table_empty",
-  "scene_name_Chinese": "\u7a7a\u573a\u666f",
+  "scene_name": "ur3_table_empty",
+  "scene_name_Chinese": "UR3 \u7a7a\u573a\u666f",
   "objects": [
     {
       "object_id_in_scene": 0,
@@ -162,7 +162,7 @@
     },
     {
       "object_id_in_scene": 2,
-      "object_name_in_scene": "ur5",
+      "object_name_in_scene": "ur3",
       "components": [
         {
           "component_type": "Transform",
@@ -189,7 +189,7 @@
         {
           "component_type": "MetadataRef",
           "properties": {
-            "path": "$LIBRARY_SERVER/1",
+            "path": "$LIBRARY_SERVER/5",
             "type": "robot"
           }
         },
@@ -206,55 +206,55 @@
             ],
             "joint_limits": {
               "shoulder_pan_joint": [
-                -6.28319,
-                6.28319
+                -6.283185307179586,
+                6.283185307179586
               ],
               "shoulder_lift_joint": [
-                -6.28319,
-                6.28319
+                -6.283185307179586,
+                6.283185307179586
               ],
               "elbow_joint": [
-                -3.1415,
-                3.1415
+                -3.141592653589793,
+                3.141592653589793
               ],
               "wrist_1_joint": [
-                -6.28319,
-                6.28319
+                -6.283185307179586,
+                6.283185307179586
               ],
               "wrist_2_joint": [
-                -6.28319,
-                6.28319
+                -6.283185307179586,
+                6.283185307179586
               ],
               "wrist_3_joint": [
-                -6.28319,
-                6.28319
+                -6.283185307179586,
+                6.283185307179586
               ]
             },
             "initial_joint_positions_rad": {
-              "shoulder_pan_joint": -1.0259422200334655e-05,
-              "shoulder_lift_joint": -2.0944752595125444,
-              "elbow_joint": 1.0001721526105947,
-              "wrist_1_joint": -1.0001202339161355,
-              "wrist_2_joint": -1.5707962118196739,
-              "wrist_3_joint": -9.51750865774233e-08
+              "shoulder_pan_joint": -4.306803136307426e-06,
+              "shoulder_lift_joint": -2.300105315443392,
+              "elbow_joint": 1.0001983582217786,
+              "wrist_1_joint": -0.8000856658139924,
+              "wrist_2_joint": -1.5700000677663024,
+              "wrist_3_joint": 1.1879577824734326e-07
             },
             "available_connect_joints": [
               "wrist_3_joint"
             ],
             "now_joint_positions_rad": {
-              "shoulder_pan_joint": -1.0259422200334655e-05,
-              "shoulder_lift_joint": -2.0944752595125444,
-              "elbow_joint": 1.0001721526105947,
-              "wrist_1_joint": -1.0001202339161355,
-              "wrist_2_joint": -1.5707962118196739,
-              "wrist_3_joint": -9.51750865774233e-08
+              "shoulder_pan_joint": -4.306803136307426e-06,
+              "shoulder_lift_joint": -2.300105315443392,
+              "elbow_joint": 1.0001983582217786,
+              "wrist_1_joint": -0.8000856658139924,
+              "wrist_2_joint": -1.5700000677663024,
+              "wrist_3_joint": 1.1879577824734326e-07
             }
           }
         },
         {
           "component_type": "Semantic",
           "properties": {
-            "semantic_name": "ur5",
+            "semantic_name": "ur3",
             "category": "robot",
             "support": null
           }
@@ -270,7 +270,7 @@
           "component_type": "PhysicalProperties",
           "properties": {
             "is_static": false,
-            "mass_kg": 20.9949,
+            "mass_kg": 18.4,
             "friction": {
               "format": "[sliding, torsional, rolling]",
               "values": [
@@ -322,10 +322,10 @@
               ]
             },
             "initial_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.002290000220336397
+              "robotiq_2f85_right_driver_joint": 0.002286358573575163
             },
             "now_joint_positions_rad": {
-              "robotiq_2f85_right_driver_joint": 0.002290000220336397
+              "robotiq_2f85_right_driver_joint": 0.002286358573575163
             }
           }
         },
@@ -339,15 +339,15 @@
             "connection_type": "fixed",
             "transform": {
               "position": [
-                2.679489213841535e-09,
-                0.0999999837652335,
-                9.719897775539721e-09
+                0.0,
+                0.0,
+                -0.003
               ],
               "quaternion_xyzw": [
-                -0.7071067556514947,
-                9.473426349705847e-09,
-                -9.47342713345485e-09,
-                0.7071068067215996
+                0.0,
+                0.0,
+                0.0,
+                1.0
               ],
               "reference_frame": "parent_link"
             }

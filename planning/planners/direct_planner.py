@@ -47,7 +47,7 @@ class DirectPlanner:
         started = time.perf_counter()
         collision_resolution, _ = collision_sampling_settings(move_request)
         source = np.asarray(path_request["joint_waypoints"], dtype=float)
-        if source.ndim != 2 or source.shape[1] != 6 or len(source) < 2:
+        if source.ndim != 2 or source.shape[1] != len(self.joint_limits) or len(source) < 2:
             raise PlanningError("Path strategy returned an invalid joint path.")
         if not np.all(np.isfinite(source)):
             raise PlanningError("Path contains non-finite joint values.")

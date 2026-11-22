@@ -43,6 +43,66 @@ def _number(value):
     return isinstance(value, Real) and not isinstance(value, bool) and math.isfinite(value)
 
 
+def user_error(error, *, target_name=None, fallback='操作未能完成，请检查场景和操作指令。', stage=None):
+    """One actionable console message; raw evidence stays in the report."""
+    error = error if isinstance(error, dict) else {}
+    code = str(error.get('error_code') or '').upper()
+    details = error.get('details') if isinstance(error.get('details'), dict) else {}
+    evidence = error.get('evidence') or details.get('evidence') or {}
+    evidence = evidence if isinstance(evidence, dict) else {}
+    target = target_name if target_name not in (None, 'None', '') else '目标物体'
+    target = error.get('target_name') or details.get('target_name') or target
+    if code == 'GRIPPER_OPENING_TIMEOUT' or (
+            not code and error.get('error_message') == 'Gripper opening timed out'):
+        return '夹爪操作', '夹爪张开超时，请检查夹爪是否受阻或设备状态。'
+    if code == 'PLACEMENT_REGION_UNOBSERVED':
+        return '区域不可见', f'无法观察到 {target} 的指定放置区域，请调整视角或移开遮挡物。'
+    if code in {'GRASP_FAILED', 'GRASP_NOT_CONFIRMED', 'CONTACT_LOST'}:
+        lost = (code == 'CONTACT_LOST' or evidence.get('contact_lost')
+                or error.get('contact_loss_duration_s') is not None
+                or error.get('failed_stage') == 'post_command_verification')
+        if lost:
+            held = evidence.get('object_id') or target
+            return '夹爪操作', f'夹爪与 {held} 失去接触，请检查物体是否移动或掉落。'
+        return '抓取未成功', f'夹爪未能稳定抓住 {target}，请检查抓取位置或物体状态。'
+    if code in {'JOINT_LIMIT', 'ROBOT_JOINT_LIMIT', 'JOINT_LIMIT_VIOLATION'}:
+        joints = details.get('joints') or [details]
+        for item in joints:
+            if not isinstance(item, dict):
+                continue
+            joint = item.get('joint') or item.get('joint_name')
+            lower, upper = item.get('lower'), item.get('upper')
+            if joint and _number(lower) and _number(upper):
+                return '机械臂运动', f'机械臂的关节 {joint} 超出活动范围 [{lower:g}, {upper:g}] rad。'
+        return '机械臂运动', '机械臂关节超出活动范围，请调整目标位置或方向。'
+    if code in {'TARGET_POSE_COLLISION', 'PREPOINT_COLLISION', 'CLEARANCE_INSUFFICIENT'}:
+        return '目标位置', '目标位置与周围环境冲突，无法到达。'
+    if code in {'NO_VALID_TARGET_POSE', 'NO_VALID_CANDIDATE', 'PLACEMENT_HEIGHT_SEARCH_FAILED',
+                'TARGET_RESOLUTION_FAILED', 'GRASP_DEPTH_SEARCH_FAILED', 'GRASP_PRECHECK_FAILED',
+                'GRASP_CLOSURE_INFEASIBLE', 'NO_VALID_APPROACH'}:
+        return '目标位置', '未能找到可用的目标位置，请检查场景和操作指令。'
+    if code in {'IK_FAILED', 'TARGET_UNREACHABLE', 'TARGET_POSE_UNREACHABLE',
+                'PREPOINT_UNREACHABLE', 'CONTACT_PATH_UNREACHABLE', 'SINGULARITY_RISK',
+                'PATH_CONSTRAINT_INFEASIBLE'}:
+        if code == 'PATH_CONSTRAINT_INFEASIBLE' and list(_contacts(error)):
+            return '机械臂运动', '目标路径受阻，机械臂无法安全移动。'
+        return '机械臂运动', '无法规划出合适的机械臂姿态，请调整目标位置或方向。'
+    if code in {'COLLISION_DETECTED', 'PATH_NOT_FOUND', 'PLANNING_FAILED', 'PLANNING_TIMEOUT',
+                'CONTACT_PATH_COLLISION', 'CONTACT_PATH_PLANNING_FAILED', 'JOINT_CONFIGURATION_SEARCH_FAILED'}:
+        return '机械臂运动', '目标路径受阻，机械臂无法安全移动。'
+    if code in {'EXECUTION_FAILED', 'EXECUTION_TIMEOUT', 'ACTUATOR_TRACKING_FAILED',
+                'TARGET_NOT_REACHED', 'POSE_VERIFICATION_FAILED', 'TRAJECTORY_INVALID'}:
+        return '机械臂运动', '机械臂未能到达目标位置，请重试或检查设备状态。'
+    category = error_category(error, stage=stage)
+    if category in {'观测与感知', 'VLM 交互'}:
+        return '目标识别', f'未能识别目标物体 {target}，请确认物体在视野内且清晰可见。'
+    if code == 'RELEASE_FAILED':
+        return '夹爪操作', f'夹爪未能释放 {target}，请检查夹爪和物体状态。'
+    if code in {'GRASP_CLOSURE_COLLISION', 'GRASP_OPENING_COLLISION'}:
+        return '夹爪操作', '夹爪操作与周围环境冲突，请检查抓取位置。'
+    return category, fallback
+
+
 def error_from_exception(exc, *, stage=None, existing=None):
     """Retain both structured diagnostics and the original exception cause."""
     payload = getattr(exc, 'details', None)

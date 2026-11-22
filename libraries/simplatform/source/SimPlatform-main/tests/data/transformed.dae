@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset><created>2026-09-10T00:00:00</created><modified>2026-09-10T00:00:00</modified><unit name="meter" meter="1"/><up_axis>Z_UP</up_axis></asset>
+  <library_effects>
+    <effect id="blue"><profile_COMMON><technique sid="common"><lambert><diffuse><color>0.2 0.5 0.8 1</color></diffuse></lambert></technique></profile_COMMON></effect>
+    <effect id="gray"><profile_COMMON><technique sid="common"><lambert><diffuse><color>0.7 0.7 0.7 1</color></diffuse></lambert></technique></profile_COMMON></effect>
+  </library_effects>
+  <library_materials><material id="blueMat"><instance_effect url="#blue"/></material><material id="grayMat"><instance_effect url="#gray"/></material></library_materials>
+  <library_geometries><geometry id="triangle"><mesh>
+    <source id="positions"><float_array id="values" count="9">0 0 0 100 0 0 0 100 0</float_array><technique_common><accessor source="#values" count="3" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>
+    <vertices id="vertices"><input semantic="POSITION" source="#positions"/></vertices>
+    <triangles material="surface" count="1"><input semantic="VERTEX" source="#vertices" offset="0"/><p>0 1 2</p></triangles>
+  </mesh></geometry></library_geometries>
+  <library_visual_scenes><visual_scene id="scene">
+    <node id="parent"><translate>1 2 3</translate><rotate>0 0 1 90</rotate><scale>0.001 0.001 0.001</scale>
+      <node id="blueNode"><instance_geometry url="#triangle"><bind_material><technique_common><instance_material symbol="surface" target="#blueMat"/></technique_common></bind_material></instance_geometry></node>
+      <node id="grayNode"><translate>0 0 100</translate><instance_geometry url="#triangle"><bind_material><technique_common><instance_material symbol="surface" target="#grayMat"/></technique_common></bind_material></instance_geometry></node>
+    </node>
+  </visual_scene></library_visual_scenes>
+  <scene><instance_visual_scene url="#scene"/></scene>
+</COLLADA>

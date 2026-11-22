@@ -5,7 +5,7 @@ from typing import Any, Mapping
 import numpy as np
 from ..common.errors import PlanningError
 from execution.config import motion_settings
-from ..constraints.collision_sampling import collision_sampling_settings, spline_collision_samples
+from ..constraints.collision_sampling import collision_sampling_settings, rrt_resolution, spline_collision_samples
 
 
 def _scaled_joint_limit(config, key, scale_key, dof, *, multiplier_key=None, clip_to_base=False):
@@ -206,6 +206,7 @@ def prepare_interpolated_trajectory(trajectory: Mapping[str, Any], move_request:
     if points.ndim != 2 or len(points) < 2 or points.shape[1] == 0 or not np.all(np.isfinite(points)):
         raise ValueError('waypoints must be finite with shape (N, DOF), N >= 2')
     constraints = move_request.get('constraints', {})
+    collision_resolution = 0.5 * rrt_resolution(move_request)
     config = move_request.get('planning', {}).get('time_parameterization', {})
     scale = float(motion_settings(constraints)['velocity_scale'])
     limits = np.asarray(config.get('max_velocity', np.ones(points.shape[1])), dtype=float)
@@ -222,7 +223,7 @@ def prepare_interpolated_trajectory(trajectory: Mapping[str, Any], move_request:
         durations = np.max(np.abs(np.diff(points, axis=0)) / limits, axis=1)
         stamps = np.r_[0.0, np.cumsum(durations)]
     if collision_checker is not None:
-        checked = collision_checker.check_path(points, resolution=0.01,
+        checked = collision_checker.check_path(points, resolution=collision_resolution,
             safety_distance=float(constraints.get('safety_distance', 0.0)),
             allowed_geom_ids=getattr(collision_checker, 'allowed_target_geom_ids', None))
         if checked.in_collision:
@@ -250,6 +251,7 @@ def parameterize_trajectory(trajectory: Mapping[str, Any], move_request: Mapping
     result = dict(trajectory)
     points = np.asarray(result["waypoints"], dtype=float)
     constraints = move_request.get("constraints", {})
+    collision_resolution = 0.5 * rrt_resolution(move_request)
     config = move_request.get("planning", {}).get("time_parameterization", {})
     base_velocity = np.asarray(config.get("max_velocity", np.ones(points.shape[1])), dtype=float)
     base_acceleration = np.asarray(config.get("max_acceleration", np.ones(points.shape[1])), dtype=float)
@@ -273,7 +275,7 @@ def parameterize_trajectory(trajectory: Mapping[str, Any], move_request: Mapping
         max_acceleration=acceleration.tolist(), max_jerk=config.get("max_jerk"))
     if collision_checker is not None:
         check = collision_checker.check_path(
-            timed["positions"], resolution=0.01,
+            timed["positions"], resolution=collision_resolution,
             safety_distance=float(constraints.get("safety_distance", 0.0)),
             allowed_geom_ids=getattr(collision_checker, "allowed_target_geom_ids", None),
         )

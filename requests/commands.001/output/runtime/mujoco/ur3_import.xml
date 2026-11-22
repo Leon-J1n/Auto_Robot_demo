@@ -1,0 +1,331 @@
+<mujoco model="ur3">
+  <compiler angle="radian"/>
+
+  <asset>
+    <mesh name="d22b1fcfa7da6050_base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\d22b1fcfa7da6050_base.obj"/>
+    <mesh name="0c6573345776a3c8_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\0c6573345776a3c8_part_0000.obj"/>
+    <mesh name="f0c9fbd3c908c58a_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\f0c9fbd3c908c58a_part_0001.obj"/>
+    <mesh name="1ea89320f48201f2_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\1ea89320f48201f2_part_0002.obj"/>
+    <mesh name="547d4e97165e9a5a_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\547d4e97165e9a5a_part_0003.obj"/>
+    <mesh name="07de6f12bb656036_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\07de6f12bb656036_part_0004.obj"/>
+    <mesh name="dc6e70f1d0d18dee_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\dc6e70f1d0d18dee_part_0005.obj"/>
+    <mesh name="47111d727aad446f_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\47111d727aad446f_part_0006.obj"/>
+    <mesh name="cfdd468a593975f0_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\cfdd468a593975f0_part_0007.obj"/>
+    <mesh name="shoulder" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\shoulder.obj"/>
+    <mesh name="5b1307fe6bf0ed19_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\5b1307fe6bf0ed19_part_0000.obj"/>
+    <mesh name="efc74e95bcd89c53_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\efc74e95bcd89c53_part_0001.obj"/>
+    <mesh name="d6c0a394993a5b98_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\d6c0a394993a5b98_part_0002.obj"/>
+    <mesh name="cd88e3f22577a475_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\cd88e3f22577a475_part_0003.obj"/>
+    <mesh name="067cea846756abae_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\067cea846756abae_part_0004.obj"/>
+    <mesh name="94e784593efb4e37_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\94e784593efb4e37_part_0005.obj"/>
+    <mesh name="4a267cf35fa3c458_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\4a267cf35fa3c458_part_0006.obj"/>
+    <mesh name="2b2a81aea50225e3_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\2b2a81aea50225e3_part_0007.obj"/>
+    <mesh name="upperarm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\upperarm.obj"/>
+    <mesh name="47eb438a07967b25_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\47eb438a07967b25_part_0000.obj"/>
+    <mesh name="69c0f975611dd33b_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\69c0f975611dd33b_part_0001.obj"/>
+    <mesh name="0aed64471aaf1aab_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\0aed64471aaf1aab_part_0002.obj"/>
+    <mesh name="b37645f8afb1efa9_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\b37645f8afb1efa9_part_0003.obj"/>
+    <mesh name="16dcd0856f236649_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\16dcd0856f236649_part_0004.obj"/>
+    <mesh name="28ca764926ae3655_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\28ca764926ae3655_part_0005.obj"/>
+    <mesh name="147afb63318c1161_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\147afb63318c1161_part_0006.obj"/>
+    <mesh name="3dbfa779e6692a2d_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\3dbfa779e6692a2d_part_0007.obj"/>
+    <mesh name="forearm" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\forearm.obj"/>
+    <mesh name="2a0e3db3bd7107ae_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\2a0e3db3bd7107ae_part_0000.obj"/>
+    <mesh name="4ab971c9b166ead1_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\4ab971c9b166ead1_part_0001.obj"/>
+    <mesh name="fc2b1c8a4f66c537_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\fc2b1c8a4f66c537_part_0002.obj"/>
+    <mesh name="44e9d70f71dce126_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\44e9d70f71dce126_part_0003.obj"/>
+    <mesh name="4c20cd07c0db793b_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\4c20cd07c0db793b_part_0004.obj"/>
+    <mesh name="77f4f654628eb12c_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\77f4f654628eb12c_part_0005.obj"/>
+    <mesh name="025a790b54b3f690_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\025a790b54b3f690_part_0006.obj"/>
+    <mesh name="wrist1" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\wrist1.obj"/>
+    <mesh name="02d2f9372969b3d8_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\02d2f9372969b3d8_part_0000.obj"/>
+    <mesh name="1eafff907dfeb126_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\1eafff907dfeb126_part_0001.obj"/>
+    <mesh name="0e3d5892f6fce4a4_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\0e3d5892f6fce4a4_part_0002.obj"/>
+    <mesh name="e5173f62e512fc9b_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\e5173f62e512fc9b_part_0003.obj"/>
+    <mesh name="24a6ad52da42fdc8_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\24a6ad52da42fdc8_part_0004.obj"/>
+    <mesh name="afccef6bb846bd98_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\afccef6bb846bd98_part_0005.obj"/>
+    <mesh name="af880b043b2964f4_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\af880b043b2964f4_part_0006.obj"/>
+    <mesh name="51c603a1c266af34_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\51c603a1c266af34_part_0007.obj"/>
+    <mesh name="wrist2" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\wrist2.obj"/>
+    <mesh name="6148aa9fc4fa592c_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\6148aa9fc4fa592c_part_0000.obj"/>
+    <mesh name="ae527e34c0557091_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\ae527e34c0557091_part_0001.obj"/>
+    <mesh name="41a5f803c9be715d_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\41a5f803c9be715d_part_0002.obj"/>
+    <mesh name="f0769ab725be7d1d_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\f0769ab725be7d1d_part_0003.obj"/>
+    <mesh name="906aeb8bd0fb95dd_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\906aeb8bd0fb95dd_part_0004.obj"/>
+    <mesh name="c12d3103dc9737e7_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\c12d3103dc9737e7_part_0005.obj"/>
+    <mesh name="cd8d0c952eedc50b_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\cd8d0c952eedc50b_part_0006.obj"/>
+    <mesh name="f1202ad0f1ae0a50_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\f1202ad0f1ae0a50_part_0007.obj"/>
+    <mesh name="wrist3" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\5\ur3_meshes\visual\wrist3.obj"/>
+    <mesh name="3334af8869824251_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\3334af8869824251_part_0000.obj"/>
+    <mesh name="d8f6f39875211c97_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\d8f6f39875211c97_part_0001.obj"/>
+    <mesh name="9ed39b4673e2db67_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\9ed39b4673e2db67_part_0002.obj"/>
+    <mesh name="796f5c1319cf89ce_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\796f5c1319cf89ce_part_0003.obj"/>
+    <mesh name="183e55e21bcea987_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\183e55e21bcea987_part_0004.obj"/>
+    <mesh name="c788eade4a80c80b_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\c788eade4a80c80b_part_0005.obj"/>
+    <mesh name="02ad7128f1915c5d_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\02ad7128f1915c5d_part_0006.obj"/>
+    <mesh name="7f5097738352ba09_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\7f5097738352ba09_part_0007.obj"/>
+    <mesh name="base_mount" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\base_mount.obj"/>
+    <mesh name="17767d9c7c1579bc_base" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\17767d9c7c1579bc_base.obj"/>
+    <mesh name="driver" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\driver.obj"/>
+    <mesh name="coupler" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\coupler.obj"/>
+    <mesh name="spring_link" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\spring_link.obj"/>
+    <mesh name="b05320cef6f5e513_part_0000" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\b05320cef6f5e513_part_0000.obj"/>
+    <mesh name="415453479b9a68a7_part_0001" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\415453479b9a68a7_part_0001.obj"/>
+    <mesh name="c08b4adbbca7e763_part_0002" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\c08b4adbbca7e763_part_0002.obj"/>
+    <mesh name="9f62bcb1b9d37e0f_part_0003" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\9f62bcb1b9d37e0f_part_0003.obj"/>
+    <mesh name="069338f3b87e249b_part_0004" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\069338f3b87e249b_part_0004.obj"/>
+    <mesh name="8fd4d87c4a84a52b_part_0005" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\8fd4d87c4a84a52b_part_0005.obj"/>
+    <mesh name="1a39279e6da7bde2_part_0006" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\1a39279e6da7bde2_part_0006.obj"/>
+    <mesh name="6c82ffb098bb9825_part_0007" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\requests\commands.001\output\runtime\mujoco\urdf_meshes\6c82ffb098bb9825_part_0007.obj"/>
+    <mesh name="part_0008" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0008.obj"/>
+    <mesh name="part_0009" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0009.obj"/>
+    <mesh name="part_0010" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0010.obj"/>
+    <mesh name="part_0011" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0011.obj"/>
+    <mesh name="part_0012" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0012.obj"/>
+    <mesh name="part_0013" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0013.obj"/>
+    <mesh name="part_0014" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0014.obj"/>
+    <mesh name="part_0015" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0015.obj"/>
+    <mesh name="part_0016" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0016.obj"/>
+    <mesh name="part_0017" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0017.obj"/>
+    <mesh name="part_0018" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0018.obj"/>
+    <mesh name="part_0019" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0019.obj"/>
+    <mesh name="part_0020" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0020.obj"/>
+    <mesh name="part_0021" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0021.obj"/>
+    <mesh name="part_0022" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0022.obj"/>
+    <mesh name="part_0023" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0023.obj"/>
+    <mesh name="part_0024" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0024.obj"/>
+    <mesh name="part_0025" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0025.obj"/>
+    <mesh name="part_0026" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0026.obj"/>
+    <mesh name="part_0027" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\.cache\collision\64ff960a72d240b4167b6268e1736a96c23b7f679fff8b7f755c6769d387a274\part_0027.obj"/>
+    <mesh name="follower" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\follower.obj"/>
+    <mesh name="pad" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\pad.obj"/>
+    <mesh name="silicone_pad" content_type="model/obj" file="C:\Users\21474\Desktop\robot-agent\services\object_library_server\data\robots\2\robotiq_2f85_meshes\silicone_pad.obj"/>
+  </asset>
+
+  <worldbody>
+    <body name="base_link">
+      <body name="base_link_inertia" quat="0 0 0 1">
+        <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="2" diaginertia="0.005625 0.00305317 0.00305317"/>
+        <geom quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="d22b1fcfa7da6050_base"/>
+        <geom name="base_link_inertia_visual_collision_0" type="mesh" mesh="0c6573345776a3c8_part_0000"/>
+        <geom name="base_link_inertia_visual_collision_1" type="mesh" mesh="f0c9fbd3c908c58a_part_0001"/>
+        <geom name="base_link_inertia_visual_collision_2" type="mesh" mesh="1ea89320f48201f2_part_0002"/>
+        <geom name="base_link_inertia_visual_collision_3" type="mesh" mesh="547d4e97165e9a5a_part_0003"/>
+        <geom name="base_link_inertia_visual_collision_4" type="mesh" mesh="07de6f12bb656036_part_0004"/>
+        <geom name="base_link_inertia_visual_collision_5" type="mesh" mesh="dc6e70f1d0d18dee_part_0005"/>
+        <geom name="base_link_inertia_visual_collision_6" type="mesh" mesh="47111d727aad446f_part_0006"/>
+        <geom name="base_link_inertia_visual_collision_7" type="mesh" mesh="cfdd468a593975f0_part_0007"/>
+        <body name="shoulder_link" pos="0 0 0.1519">
+          <inertial pos="0 0 0" mass="2" diaginertia="0.00809316 0.00809316 0.005625"/>
+          <joint name="shoulder_pan_joint" range="-6.28319 6.28319" actuatorfrcrange="-56 56"/>
+          <geom quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="shoulder"/>
+          <geom name="shoulder_link_visual_collision_0" type="mesh" mesh="5b1307fe6bf0ed19_part_0000"/>
+          <geom name="shoulder_link_visual_collision_1" type="mesh" mesh="efc74e95bcd89c53_part_0001"/>
+          <geom name="shoulder_link_visual_collision_2" type="mesh" mesh="d6c0a394993a5b98_part_0002"/>
+          <geom name="shoulder_link_visual_collision_3" type="mesh" mesh="cd88e3f22577a475_part_0003"/>
+          <geom name="shoulder_link_visual_collision_4" type="mesh" mesh="067cea846756abae_part_0004"/>
+          <geom name="shoulder_link_visual_collision_5" type="mesh" mesh="94e784593efb4e37_part_0005"/>
+          <geom name="shoulder_link_visual_collision_6" type="mesh" mesh="4a267cf35fa3c458_part_0006"/>
+          <geom name="shoulder_link_visual_collision_7" type="mesh" mesh="2b2a81aea50225e3_part_0007"/>
+          <body name="upper_arm_link" quat="0.707107 0.707107 0 0">
+            <inertial pos="-0.121825 0 0.12" mass="3.42" diaginertia="0.0217285 0.0217285 0.00961875"/>
+            <joint name="shoulder_lift_joint" range="-6.28319 6.28319" actuatorfrcrange="-56 56"/>
+            <geom pos="0 0 0.1198" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="upperarm"/>
+            <geom name="upper_arm_link_visual_collision_0" type="mesh" mesh="47eb438a07967b25_part_0000"/>
+            <geom name="upper_arm_link_visual_collision_1" type="mesh" mesh="69c0f975611dd33b_part_0001"/>
+            <geom name="upper_arm_link_visual_collision_2" type="mesh" mesh="0aed64471aaf1aab_part_0002"/>
+            <geom name="upper_arm_link_visual_collision_3" type="mesh" mesh="b37645f8afb1efa9_part_0003"/>
+            <geom name="upper_arm_link_visual_collision_4" type="mesh" mesh="16dcd0856f236649_part_0004"/>
+            <geom name="upper_arm_link_visual_collision_5" type="mesh" mesh="28ca764926ae3655_part_0005"/>
+            <geom name="upper_arm_link_visual_collision_6" type="mesh" mesh="147afb63318c1161_part_0006"/>
+            <geom name="upper_arm_link_visual_collision_7" type="mesh" mesh="3dbfa779e6692a2d_part_0007"/>
+            <body name="forearm_link" pos="-0.24365 0 0">
+              <inertial pos="-0.106625 0 0.0275" mass="1.26" diaginertia="0.00654681 0.00654681 0.00354375"/>
+              <joint name="elbow_joint" range="-3.14159 3.14159" actuatorfrcrange="-28 28"/>
+              <geom pos="0 0 0.0275" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="forearm"/>
+              <geom name="forearm_link_visual_collision_0" type="mesh" mesh="2a0e3db3bd7107ae_part_0000"/>
+              <geom name="forearm_link_visual_collision_1" type="mesh" mesh="4ab971c9b166ead1_part_0001"/>
+              <geom name="forearm_link_visual_collision_2" type="mesh" mesh="fc2b1c8a4f66c537_part_0002"/>
+              <geom name="forearm_link_visual_collision_3" type="mesh" mesh="44e9d70f71dce126_part_0003"/>
+              <geom name="forearm_link_visual_collision_4" type="mesh" mesh="4c20cd07c0db793b_part_0004"/>
+              <geom name="forearm_link_visual_collision_5" type="mesh" mesh="77f4f654628eb12c_part_0005"/>
+              <geom name="forearm_link_visual_collision_6" type="mesh" mesh="025a790b54b3f690_part_0006"/>
+              <body name="wrist_1_link" pos="-0.21325 0 0.11235">
+                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.8" diaginertia="0.00225 0.00161064 0.00161064"/>
+                <joint name="wrist_1_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12"/>
+                <geom pos="0 0 -0.085" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="wrist1"/>
+                <geom name="wrist_1_link_visual_collision_0" type="mesh" mesh="02d2f9372969b3d8_part_0000"/>
+                <geom name="wrist_1_link_visual_collision_1" type="mesh" mesh="1eafff907dfeb126_part_0001"/>
+                <geom name="wrist_1_link_visual_collision_2" type="mesh" mesh="0e3d5892f6fce4a4_part_0002"/>
+                <geom name="wrist_1_link_visual_collision_3" type="mesh" mesh="e5173f62e512fc9b_part_0003"/>
+                <geom name="wrist_1_link_visual_collision_4" type="mesh" mesh="24a6ad52da42fdc8_part_0004"/>
+                <geom name="wrist_1_link_visual_collision_5" type="mesh" mesh="afccef6bb846bd98_part_0005"/>
+                <geom name="wrist_1_link_visual_collision_6" type="mesh" mesh="af880b043b2964f4_part_0006"/>
+                <geom name="wrist_1_link_visual_collision_7" type="mesh" mesh="51c603a1c266af34_part_0007"/>
+                <body name="wrist_2_link" pos="0 -0.08535 -1.75056e-11" quat="0.707107 0.707107 0 0">
+                  <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.8" diaginertia="0.00225 0.00157217 0.00157217"/>
+                  <joint name="wrist_2_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12"/>
+                  <geom pos="0 0 -0.085" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="wrist2"/>
+                  <geom name="wrist_2_link_visual_collision_0" type="mesh" mesh="6148aa9fc4fa592c_part_0000"/>
+                  <geom name="wrist_2_link_visual_collision_1" type="mesh" mesh="ae527e34c0557091_part_0001"/>
+                  <geom name="wrist_2_link_visual_collision_2" type="mesh" mesh="41a5f803c9be715d_part_0002"/>
+                  <geom name="wrist_2_link_visual_collision_3" type="mesh" mesh="f0769ab725be7d1d_part_0003"/>
+                  <geom name="wrist_2_link_visual_collision_4" type="mesh" mesh="906aeb8bd0fb95dd_part_0004"/>
+                  <geom name="wrist_2_link_visual_collision_5" type="mesh" mesh="c12d3103dc9737e7_part_0005"/>
+                  <geom name="wrist_2_link_visual_collision_6" type="mesh" mesh="cd8d0c952eedc50b_part_0006"/>
+                  <geom name="wrist_2_link_visual_collision_7" type="mesh" mesh="f1202ad0f1ae0a50_part_0007"/>
+                  <body name="wrist_3_link" pos="0 0.0819 -1.6798e-11" quat="0.707107 -0.707107 0 0">
+                    <inertial pos="0 0 -0.02" quat="0.5 0.5 -0.5 0.5" mass="0.35" diaginertia="0.0001792 0.000136267 0.000136267"/>
+                    <joint name="wrist_3_joint" range="-6.28319 6.28319" actuatorfrcrange="-12 12"/>
+                    <geom pos="0 0 -0.082" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="wrist3"/>
+                    <geom name="wrist_3_link_visual_collision_0" type="mesh" mesh="3334af8869824251_part_0000"/>
+                    <geom name="wrist_3_link_visual_collision_1" type="mesh" mesh="d8f6f39875211c97_part_0001"/>
+                    <geom name="wrist_3_link_visual_collision_2" type="mesh" mesh="9ed39b4673e2db67_part_0002"/>
+                    <geom name="wrist_3_link_visual_collision_3" type="mesh" mesh="796f5c1319cf89ce_part_0003"/>
+                    <geom name="wrist_3_link_visual_collision_4" type="mesh" mesh="183e55e21bcea987_part_0004"/>
+                    <geom name="wrist_3_link_visual_collision_5" type="mesh" mesh="c788eade4a80c80b_part_0005"/>
+                    <geom name="wrist_3_link_visual_collision_6" type="mesh" mesh="02ad7128f1915c5d_part_0006"/>
+                    <geom name="wrist_3_link_visual_collision_7" type="mesh" mesh="7f5097738352ba09_part_0007"/>
+                    <body name="flange" quat="0.5 -0.5 -0.5 -0.5">
+                      <body name="tool0" quat="0.5 0.5 0.5 0.5"/>
+                    </body>
+                    <body name="robotiq_2f85_mount" pos="0 0 -0.003">
+                      <body name="robotiq_2f85_base_mount" pos="0 0 0.007">
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="base_mount"/>
+                        <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="base_mount"/>
+                        <body name="robotiq_2f85_base" pos="0 0 0.0038" quat="0.707107 0 0 -0.707107">
+                          <inertial pos="0 0 0" mass="0.777441" diaginertia="0.000260285 0.000225381 0.000152708"/>
+                          <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="17767d9c7c1579bc_base"/>
+                          <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="17767d9c7c1579bc_base"/>
+                          <body name="robotiq_2f85_right_driver" pos="0 0.0306011 0.054904">
+                            <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver"/>
+                            <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver"/>
+                            <body name="robotiq_2f85_right_coupler" pos="0 0.0315 -0.0041">
+                              <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06"/>
+                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler"/>
+                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler"/>
+                            </body>
+                          </body>
+                          <body name="robotiq_2f85_right_spring_link" pos="0 0.0132 0.0609">
+                            <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="b05320cef6f5e513_part_0000"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="415453479b9a68a7_part_0001"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="c08b4adbbca7e763_part_0002"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="9f62bcb1b9d37e0f_part_0003"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="069338f3b87e249b_part_0004"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="8fd4d87c4a84a52b_part_0005"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="1a39279e6da7bde2_part_0006"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="6c82ffb098bb9825_part_0007"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026"/>
+                            <geom name="robotiq_2f85_right_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027"/>
+                            <body name="robotiq_2f85_right_follower" pos="0 0.055 0.0375">
+                              <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06"/>
+                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower"/>
+                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower"/>
+                              <body name="robotiq_2f85_right_pad" pos="0 -0.0189 0.01352">
+                                <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad"/>
+                                <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad"/>
+                                <geom size="0.011 0.004 0.009375" pos="0 -0.0026 0.028125" type="box" rgba="0.42 0.43 0.45 1"/>
+                                <geom size="0.011 0.004 0.009375" pos="0 -0.0026 0.009375" type="box" rgba="0.42 0.43 0.45 1"/>
+                                <body name="robotiq_2f85_right_silicone_pad">
+                                  <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06"/>
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad"/>
+                                  <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad"/>
+                                </body>
+                              </body>
+                            </body>
+                          </body>
+                          <body name="robotiq_2f85_left_driver" pos="0 -0.0306011 0.054904" quat="1.7949e-09 0 0 1">
+                            <inertial pos="0 0 0" mass="0.00899563" diaginertia="1e-06 1e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.5 0.52 0.55 1" density="0" mesh="driver"/>
+                            <geom type="mesh" rgba="0.5 0.52 0.55 1" mesh="driver"/>
+                            <body name="robotiq_2f85_left_coupler" pos="0 0.0315 -0.0041">
+                              <inertial pos="0 0 0" mass="0.0140974" diaginertia="1e-06 1e-06 1e-06"/>
+                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="coupler"/>
+                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="coupler"/>
+                            </body>
+                          </body>
+                          <body name="robotiq_2f85_left_spring_link" pos="0 -0.0132 0.0609" quat="1.7949e-09 0 0 1">
+                            <inertial pos="0 0 0" mass="0.0221642" diaginertia="1e-06 1e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="spring_link"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_0" type="mesh" rgba="0.1 0.1 0.11 1" mesh="b05320cef6f5e513_part_0000"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_1" type="mesh" rgba="0.1 0.1 0.11 1" mesh="415453479b9a68a7_part_0001"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_2" type="mesh" rgba="0.1 0.1 0.11 1" mesh="c08b4adbbca7e763_part_0002"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_3" type="mesh" rgba="0.1 0.1 0.11 1" mesh="9f62bcb1b9d37e0f_part_0003"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_4" type="mesh" rgba="0.1 0.1 0.11 1" mesh="069338f3b87e249b_part_0004"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_5" type="mesh" rgba="0.1 0.1 0.11 1" mesh="8fd4d87c4a84a52b_part_0005"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_6" type="mesh" rgba="0.1 0.1 0.11 1" mesh="1a39279e6da7bde2_part_0006"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_7" type="mesh" rgba="0.1 0.1 0.11 1" mesh="6c82ffb098bb9825_part_0007"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_8" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0008"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_9" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0009"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_10" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0010"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_11" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0011"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_12" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0012"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_13" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0013"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_14" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0014"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_15" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0015"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_16" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0016"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_17" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0017"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_18" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0018"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_19" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0019"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_20" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0020"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_21" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0021"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_22" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0022"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_23" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0023"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_24" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0024"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_25" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0025"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_26" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0026"/>
+                            <geom name="robotiq_2f85_left_spring_link_collision_27" type="mesh" rgba="0.1 0.1 0.11 1" mesh="part_0027"/>
+                            <body name="robotiq_2f85_left_follower" pos="0 0.055 0.0375">
+                              <inertial pos="0 0 0" mass="0.0125222" diaginertia="1e-06 1e-06 1e-06"/>
+                              <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.1 0.1 0.11 1" density="0" mesh="follower"/>
+                              <geom type="mesh" rgba="0.1 0.1 0.11 1" mesh="follower"/>
+                              <body name="robotiq_2f85_left_pad" pos="0 -0.0189 0.01352">
+                                <inertial pos="0 0 0" mass="0.0035" diaginertia="1e-06 1e-06 1e-06"/>
+                                <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.42 0.43 0.45 1" density="0" mesh="pad"/>
+                                <geom type="mesh" rgba="0.42 0.43 0.45 1" mesh="pad"/>
+                                <geom size="0.011 0.004 0.009375" pos="0 -0.0026 0.028125" type="box" rgba="0.42 0.43 0.45 1"/>
+                                <geom size="0.011 0.004 0.009375" pos="0 -0.0026 0.009375" type="box" rgba="0.42 0.43 0.45 1"/>
+                                <body name="robotiq_2f85_left_silicone_pad">
+                                  <inertial pos="0 0 0" mass="0.0005" diaginertia="1e-06 1e-06 1e-06"/>
+                                  <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="0.08 0.08 0.09 1" density="0" mesh="silicone_pad"/>
+                                  <geom type="mesh" rgba="0.08 0.08 0.09 1" mesh="silicone_pad"/>
+                                </body>
+                              </body>
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="base" quat="0 0 0 1"/>
+    </body>
+  </worldbody>
+</mujoco>

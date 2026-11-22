@@ -218,7 +218,7 @@ class SceneResourceCoordinator:
                                    for key in global_config['motion']}}, partial=True)
         scene['trajectory'] = trajectory_settings(scene)
         # Assemble new OLS MetadataRef authoring scenes into executable components.
-        if not any(component(o, 'RobotModelRef') for o in scene.get('objects', [])):
+        if not any(component(o, 'RobotModelRef').get('urdf') for o in scene.get('objects', [])):
             if any(component(o, 'MetadataRef').get('type') == 'robot' for o in scene.get('objects', [])):
                 from demo.scene.assembler import SceneAssembler
                 from services.object_library import ObjectLibraryClient, LocalObjectLibraryService
@@ -247,6 +247,11 @@ class SceneResourceCoordinator:
         urdf = (root / ref['urdf']).resolve()
         if not urdf.is_file():
             raise FileNotFoundError(f'Missing robot URDF: {urdf}')
+        from collision.assets.robot_visual import prepare_robot_visual_collisions
+        source_urdf = urdf
+        urdf = prepare_robot_visual_collisions(urdf, ref.get('collision_geometry'))
+        ref['source_urdf'] = str(source_urdf)
+        ref['urdf'] = str(urdf)
         tree = ET.parse(urdf).getroot()
         attachments = [o for o in scene['objects'] if component(o, 'RobotAttachment')]
         if len({o['object_id_in_scene'] for o in scene['objects']}) != len(scene['objects']) or len({o['object_name_in_scene'] for o in scene['objects']}) != len(scene['objects']):
@@ -283,7 +288,7 @@ class SceneResourceCoordinator:
         timing = scene.setdefault('move_defaults', {}).setdefault('planning', {}).setdefault('time_parameterization', {})
         timing.update(read_urdf_motion_limits(urdf, names))
         active = {j.get('name') for j in ET.parse(urdf).getroot().findall('joint') if j.get('type') == 'revolute'}
-        if len(names) != 6 or len(set(names)) != 6 or set(names) != active:
+        if not names or len(set(names)) != len(names) or set(names) != active:
             raise ValueError('RobotDriver joint_sequence must match URDF revolute joints')
         driver = component(robots[0], 'RobotDriver')
         initial = driver.get('now_joint_positions_rad')
@@ -294,7 +299,7 @@ class SceneResourceCoordinator:
         if set(initial) != set(names):
             raise ValueError('Scene current joint state must match joint_sequence')
         q = np.asarray([initial[name] for name in names], dtype=float)
-        if q.shape != (6,) or not np.all(np.isfinite(q)):
+        if q.shape != (len(names),) or not np.all(np.isfinite(q)):
             raise ValueError('Invalid initial_joints')
         ids, obj_names = set(), set()
         digest = hashlib.sha256(path.read_bytes() + runtime_bytes + urdf.read_bytes())

@@ -1,0 +1,24 @@
+{
+  "request_id": "place-apple-in-basket-004",
+  "success": true,
+  "status": "success",
+  "frame_count": 988,
+  "physics_steps": 7908,
+  "execution_backend": "mujoco",
+  "trajectory_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.004\\output\\trajectories\\execution.traj",
+  "blackboard_file": "C:\\Users\\21474\\Desktop\\robot-agent\\requests\\commands.004\\output\\snapshots\\blackboard.json",
+  "final_scene_file": "snapshots/final_scene.json",
+  "global_perception": {
+    "status": "deferred",
+    "reason": "Expecting value: line 1 column 1 (char 0)",
+    "elapsed_s": 10.32207669998752,
+    "vlm_request_s": 9.29275759999291,
+    "vlm_request_count": 1
+  },
+  "commands_file": "commands/results.jsonl",
+  "command_count": 7,
+  "successful_command_count": 7,
+  "failed_command_count": 0,
+  "failure": null,
+  "final_state_file": "snapshots/state.json"
+}

@@ -15,8 +15,8 @@
   },
   "planning": {
     "ik_validation": {
-      "position_tolerance_m": 0.003,
-      "orientation_tolerance_rad": 0.01
+      "position_tolerance_m": 0.01,
+      "orientation_tolerance_rad": 0.05
     },
     "collision_validation": {
       "resolution_rad": 0.02
@@ -46,8 +46,8 @@
 - `planning.collision_validation.resolution_rad`：普通路径和最终轨迹复核的默认关节采样分辨率。
 - `planning.collision_free.rrt_resolution_rad`：RRT-Connect 扩展边的碰撞采样分辨率。
 
-- `planning.ik_validation.position_tolerance_m`：IK 正运动学复核的位置误差上限，当前为 `0.003`m（3mm）。
-- `planning.ik_validation.orientation_tolerance_rad`：IK 旋转误差角上限，当前为 `0.01`rad（约 0.57°）。
+- `planning.ik_validation.position_tolerance_m`：IK 正运动学复核的位置误差上限，当前为 `0.01`m（10mm）。
+- `planning.ik_validation.orientation_tolerance_rad`：IK 旋转误差角上限，当前为 `0.05`rad（约 2.86°）。
 
 IK 两项由运动学服务创建时读取，统一传给 EAIK 候选复核和 Jacobian 收敛判断。
 修改后重新创建运动学服务或重启任务；不改变关节限位、关节连续性阈值、碰撞安全距离。

@@ -106,8 +106,14 @@ def _gripper_spheres(g, templates):
         shape['mesh_sha256'] = sha256(Path(g['file_path']).read_bytes()).hexdigest()
     template = templates.get(_digest(shape))
     if template is None or template['shape'] != shape:
-        raise ValueError(f'No validated gripper proxy template for {g["body_name"]}; '
-                         f'shape_key={_digest(shape)} shape={shape}; author a matching template')
+        # Source convex parts can change after importer/decomposition updates.
+        # A conservative cover remains valid for broadphase; all overlapping
+        # candidates are checked against source geometry in _evaluate.
+        points = _local_points(g, {})
+        spheres = _cover_box(points.min(axis=0), points.max(axis=0), DEFAULTS['sphere_cell_size'])
+        transform = np.asarray(g['matrix'])
+        return [dict(center=(transform[:3, :3] @ s['center'] + transform[:3, 3]).tolist(), radius=s['radius'])
+                for s in spheres]
     transform = np.asarray(g['matrix'])
     return [dict(center=(transform[:3,:3] @ s['center'] + transform[:3,3]).tolist(), radius=float(s['radius']))
             for s in template['spheres']]
@@ -141,9 +147,9 @@ def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=
     limits = _limits(raw['policy'], geoms)
     groups = {}
     for i, g in enumerate(geoms):
-        # Preserve authored cylinder/sphere geometry instead of enclosing two
-        # differently oriented arm cylinders in a large common rectangular box.
-        primitive = g['id'] if g['robot'] and g['kind'] in ('cylinder', 'capsule', 'sphere') else None
+        # Keep convex arm parts separate: a shared box around several pieces
+        # fills joints/cavities and creates excessive covering spheres.
+        primitive = g['id'] if g['robot'] and g['kind'] in ('cylinder', 'capsule', 'sphere', 'mesh') else None
         key = (g['body'], g['robot'], limits[i].tobytes(), primitive)
         groups.setdefault(key, []).append(i)
     output = []
@@ -229,7 +235,7 @@ def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=
                 policy['arm_environment_pairs'].append(pair)
     for item in output:
         item.pop('source_index')
-    report = dict(schema_version=1, geometry_source='shared_simplified_proxy',
+    report = dict(schema_version=1, geometry_source='source_convex_geometry',
                   source_geometry_count=len(geoms), proxy_geometry_count=len(output),
                   robot_spheres=sum(len(g.get('spheres', [])) for g in output),
                   world_boxes=sum(not g['robot'] for g in output), options=options,
@@ -307,7 +313,7 @@ class PlanningProxy:
             self.source_limits = {(a['id'], b['id']): source_limits[i, j]
                                   for i, a in enumerate(raw['geometries'])
                                   for j, b in enumerate(raw['geometries'])
-                                  if a['robot'] and not b['robot']}
+                                  if a['robot'] or b['robot']}
             self.snapshot = snapshot
             self.geometries = snapshot['geometries']
             self.robots = [g for g in self.geometries if g['robot']]
@@ -454,34 +460,35 @@ class PlanningProxy:
         distances = np.concatenate((distances, world), axis=1)
         thresholds = np.r_[limits, wlimits]
         violating = distances <= thresholds[None, :] + 1.e-9
-        # Axial covering balls extend past a finite cylinder's flat end caps.
-        # Confirm these world candidates against the original convex geometry;
-        # the enclosing proxy remains the inexpensive rejection broadphase.
-        for row in np.flatnonzero(np.any(violating[:, len(aa):], axis=1)):
+        # Proxies only reject distant pairs. Confirm every overlap against
+        # source convex geometry, including self-collision and payload pairs.
+        for row in np.flatnonzero(np.any(violating, axis=1)):
             candidates = {}
-            for j in np.flatnonzero(violating[row, len(aa):]):
-                robot = self.geometries[self.sphere_geoms[wa[j]]]
-                sources = robot['source_geoms']
-                if len(sources) == 1 and self.source_geometries[sources[0]]['kind'] == 'cylinder':
-                    candidates.setdefault((robot['id'], int(wb[j])), []).append(j)
-            if candidates:
-                import mujoco
-                self._centers([points[row]], gripper_width)
-                for (ident, world_index), indices in candidates.items():
-                    source = self.geometries[ident]['source_geoms'][0]
-                    gaps = []
-                    collision = False
-                    for other in self.world[world_index]['source_geoms']:
+            for j in np.flatnonzero(violating[row]):
+                if j < len(aa):
+                    a = int(self.sphere_geoms[aa[j]])
+                    b = int(self.sphere_geoms[bb[j]])
+                else:
+                    offset = j - len(aa)
+                    a = int(self.sphere_geoms[wa[offset]])
+                    b = int(self.world[wb[offset]]['id'])
+                candidates.setdefault((a, b), []).append(j)
+            import mujoco
+            self._centers([points[row]], gripper_width)
+            for (a, b), indices in candidates.items():
+                gaps, collision = [], False
+                for source in self.geometries[a]['source_geoms']:
+                    for other in self.geometries[b]['source_geoms']:
                         limit = self.source_limits[source, other]
                         if not np.isfinite(limit):
                             continue
                         distance = mujoco.mj_geomDistance(self.checker.backend.model, self._data,
                                                          source, other, max(1., limit + 1.), None)
+                        self.stats['narrowphase_pairs'] = self.stats.get('narrowphase_pairs', 0) + 1
                         gaps.append(distance)
                         collision |= distance < limit - 1.e-9
-                    indices = len(aa) + np.asarray(indices)
-                    violating[row, indices] = collision
-                    distances[row, indices] = min(gaps, default=np.inf)
+                violating[row, indices] = collision
+                distances[row, indices] = min(gaps, default=np.inf)
         hits = np.flatnonzero(np.any(violating, axis=1))
         if not len(hits):
             return CollisionResult(False, float(np.min(distances, initial=np.inf)), ())
@@ -496,7 +503,7 @@ class PlanningProxy:
                 a, b = self.sphere_geoms[wa[j]], self.world[wb[j]]['id']
                 own = False
             contacts.append(dict(geom1=self.geometries[a]['body_name'], geom2=self.geometries[b]['body_name'],
-                                 distance=float(distances[row, index]), self_collision=own, geometry_source='shared_simplified_proxy'))
+                                 distance=float(distances[row, index]), self_collision=own, geometry_source='source_convex_geometry'))
         return CollisionResult(True, float(np.min(distances[:row + 1], initial=np.inf)), tuple(contacts))
 
     def check(self, joints, *, safety_distance=0., allowed_geom_ids=None, gripper_width=None):
@@ -522,7 +529,16 @@ class PlanningProxy:
             raise ValueError('Proxy clearance and positive resolution must be finite')
         bounds = np.asarray(self.checker.backend.joint_limits)
         if np.any(points < bounds[:, 0] - 1.e-9) or np.any(points > bounds[:, 1] + 1.e-9):
-            raise ValueError('Proxy collision joints violate joint limits')
+            excess = np.maximum(bounds[:, 0] - points, points - bounds[:, 1])
+            row, joint = np.unravel_index(np.argmax(excess), excess.shape)
+            from planning.common.errors import PlanningError
+            names = getattr(self.checker.backend, 'joint_names', ())
+            name = names[joint] if joint < len(names) else f'joint{joint + 1}'
+            raise PlanningError('Collision query joint state violates joint limits.',
+                code='JOINT_LIMIT_VIOLATION', recoverable=True,
+                details={'joints': [{'joint': name, 'value': float(points[row, joint]),
+                    'lower': float(bounds[joint, 0]), 'upper': float(bounds[joint, 1])}],
+                    'waypoint_index': int(row)})
         return points
 
     def check_path(self, waypoints, *, resolution=.05, safety_distance=0., allowed_geom_ids=None):

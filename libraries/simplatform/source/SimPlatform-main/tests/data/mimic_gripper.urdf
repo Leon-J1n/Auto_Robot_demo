@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="mimic_gripper">
+  <link name="base"/>
+  <link name="driver">
+    <inertial><mass value="0.05"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+  </link>
+  <link name="follower">
+    <inertial><mass value="0.05"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+  </link>
+  <joint name="driver_joint" type="revolute">
+    <parent link="base"/><child link="driver"/><axis xyz="0 0 1"/>
+    <limit lower="-1" upper="1" effort="1" velocity="2"/>
+  </joint>
+  <joint name="follower_joint" type="revolute">
+    <parent link="base"/><child link="follower"/><axis xyz="0 0 1"/>
+    <limit lower="-1" upper="1" effort="1" velocity="2"/>
+    <mimic joint="driver_joint" multiplier="-1" offset="0"/>
+  </joint>
+</robot>

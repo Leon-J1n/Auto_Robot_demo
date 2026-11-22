@@ -21,10 +21,12 @@ class TargetBlackboard:
         self.revision = 0
         self._models = {}
         self._targets = {}
+        self._task_targets = {}
         self._pending = {}
         self._anchors = {}
         self._visual_grasps = {}
         self._visual_places = {}
+        self.operation_candidates = {}
         self.model_hits = 0
         self.model_misses = 0
 
@@ -56,6 +58,28 @@ class TargetBlackboard:
                         model_id = int(suffix)
             self.register(obj['object_id_in_scene'], obj['object_name_in_scene'], model_id)
 
+    def register_task_targets(self, commands, scene):
+        """Register all scene objects needed by the task before execution."""
+        objects_by_id = {str(obj['object_id_in_scene']): obj for obj in scene.get('objects', ())}
+        objects_by_name = {obj['object_name_in_scene']: obj for obj in scene.get('objects', ())}
+        for index, command in enumerate(commands or ()):
+            if not isinstance(command, dict):
+                continue
+            parameters = command.get('parameters') or {}
+            command_id = str(command.get('command_id', index))
+            for field in ('target', 'source'):
+                value = parameters.get(field)
+                obj = objects_by_id.get(str(value)) or objects_by_name.get(value)
+                if obj is None:
+                    continue
+                name = obj['object_name_in_scene']
+                entry = self._task_targets.setdefault(name, {
+                    'target_id': obj['object_id_in_scene'], 'name': name,
+                    'commands': [], 'pose': deepcopy(self.objects.get(name)),
+                })
+                if command_id not in entry['commands']:
+                    entry['commands'].append(command_id)
+
     def observe(self, state):
         timestamp = state.get('simulation_time')
         if timestamp is not None and self.simulation_time is not None and timestamp < self.simulation_time:
@@ -66,6 +90,9 @@ class TargetBlackboard:
             self.gripper = deepcopy(state.get('gripper') or {})
         if timestamp is not None:
             self.simulation_time = timestamp
+        for name, target in self._task_targets.items():
+            if name in self.objects:
+                target['pose'] = deepcopy(self.objects[name])
         self.revision += 1
         held = self.gripper.get('object_id')
         if self.gripper.get('holding') and held in self.objects:
@@ -157,6 +184,8 @@ class TargetBlackboard:
         return deepcopy({
             'revision': self.revision, 'simulation_time': self.simulation_time,
             'targets': self._targets, 'objects': self.objects,
+            'task_targets': self._task_targets,
+            'operation_candidates': self.operation_candidates,
             'mechanisms': self.mechanisms, 'gripper': self.gripper,
             'model_cache': {'entries': len(self._models), 'hits': self.model_hits, 'misses': self.model_misses},
             'interaction_anchors': [dict(target=name, grasp_index=index, **anchor)

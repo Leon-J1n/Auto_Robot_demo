@@ -8,6 +8,33 @@ from scipy.spatial.transform import Rotation
 
 from ...resources import component, pose_matrix
 
+def exclude_arm_neighbours(root, resources):
+    # MuJoCo does not automatically filter a moving link against its welded
+    # world/base parent. Visual-derived base geometry now makes that pair
+    # tangible. Match the planner's direct-neighbour and explicit exemptions.
+    arm = ET.parse(resources.robot_urdf).getroot()
+    pairs = [(j.find('parent').get('link'), j.find('child').get('link'))
+             for j in arm.findall('joint')]
+    pairs.extend(component(resources.robot_object, 'RobotModelRef').get('allowed_collision_link_pairs', []))
+    from collision.mounting import fixed_base_links, mounting_pedestals
+    base_links = fixed_base_links(resources.robot_urdf)
+    pedestal_names = mounting_pedestals(getattr(resources, 'scene', {}), resources.robot_object)
+    for name in pedestal_names:
+        wrapper = next((b for b in root.iter('body') if b.get('name') == name), None)
+        if wrapper is not None:
+            pairs.extend((link, body.get('name')) for link in base_links for body in wrapper.iter('body'))
+    contact = root.find('contact')
+    if contact is None:
+        contact = ET.SubElement(root, 'contact')
+    existing = {frozenset((e.get('body1'), e.get('body2'))) for e in contact.findall('exclude')}
+    bodies = {b.get('name') for b in root.iter('body')}
+    for a, b in pairs:
+        key = frozenset((a, b))
+        if a in bodies and b in bodies and key not in existing:
+            ET.SubElement(contact, 'exclude', body1=a, body2=b)
+            existing.add(key)
+
+
 def numbers(value):
     return ' '.join(format(float(x), '.17g') for x in value)
 
@@ -64,6 +91,24 @@ def urdf_mjcf(path, output_dir, prefix, tree=None):
         texture = obj_diffuse_texture(mesh.get('filename'))
         if texture:
             textured_visuals.append((mesh, texture))
+    # The articulated spring links have concave mesh colliders. Their whole
+    # convex hull intrudes into the closing workspace; preserve their cavities.
+    from copy import deepcopy
+    from collision.assets.mesh import prepare_mesh
+    for link in root.findall('link'):
+        if not link.get('name', '').startswith('robotiq_2f85_') or not link.get('name', '').endswith('_spring_link'):
+            continue
+        for collision in list(link.findall('collision')):
+            mesh = collision.find('geometry/mesh')
+            if mesh is None:
+                continue
+            parts = prepare_mesh(mesh.get('filename'), scale=[float(v) for v in mesh.get('scale', '1 1 1').split()])
+            link.remove(collision)
+            for index, part in enumerate(parts.parts):
+                item = deepcopy(collision)
+                item.set('name', f'{link.get("name")}_collision_{index}')
+                item.find('geometry/mesh').attrib.update(filename=str(part), scale='1 1 1')
+                link.append(item)
     # MuJoCo's URDF importer keys meshes by basename, even across directories.
     # Cabinet body/panel/handle commonly all use mesh.obj; give distinct sources
     # unique cache filenames without changing the original URDF or assets.
@@ -86,24 +131,6 @@ def urdf_mjcf(path, output_dir, prefix, tree=None):
             if not alias.exists() or alias.stat().st_size != source.stat().st_size or alias.stat().st_mtime_ns != source.stat().st_mtime_ns:
                 shutil.copy2(source, alias)
             mesh.set('filename', str(alias))
-    # The articulated spring links have concave mesh colliders. Their whole
-    # convex hull intrudes into the closing workspace; preserve their cavities.
-    from copy import deepcopy
-    from collision.assets.mesh import prepare_mesh
-    for link in root.findall('link'):
-        if not link.get('name', '').startswith('robotiq_2f85_') or not link.get('name', '').endswith('_spring_link'):
-            continue
-        for collision in list(link.findall('collision')):
-            mesh = collision.find('geometry/mesh')
-            if mesh is None:
-                continue
-            parts = prepare_mesh(mesh.get('filename'), scale=[float(v) for v in mesh.get('scale', '1 1 1').split()])
-            link.remove(collision)
-            for index, part in enumerate(parts.parts):
-                item = deepcopy(collision)
-                item.set('name', f'{link.get("name")}_collision_{index}')
-                item.find('geometry/mesh').attrib.update(filename=str(part), scale='1 1 1')
-                link.append(item)
     model = mujoco.MjModel.from_xml_string(ET.tostring(root, encoding='unicode'))
     intermediate = output_dir / f'{prefix}_import.xml'
     mujoco.mj_saveLastXML(str(intermediate), model)
@@ -257,6 +284,7 @@ def compile_scene(resources, output_dir):
         ET.SubElement(actuators, 'position', name=name + '_servo', joint=name, kp='1200', kv='90')
     from .gripper import add_gripper
     add_gripper(root, resources)
+    exclude_arm_neighbours(root, resources)
     path = output_dir / 'scene.mjcf.xml'
     ET.indent(root)
     ET.ElementTree(root).write(path, encoding='utf-8', xml_declaration=True)

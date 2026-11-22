@@ -4,6 +4,7 @@
 def infer_visual_targets(commands):
     """Return one RGB-D request per distinct target and semantic point type."""
     point_types = infer_command_point_types(commands)
+    place_cycles = infer_command_place_cycles(commands)
     targets = {}
     for index, command in enumerate(commands):
         command_id = str(command.get('command_id', index))
@@ -11,16 +12,18 @@ def infer_visual_targets(commands):
         if point_type is None:
             continue
         target = command.get('parameters', {}).get('target')
-        identity = (str(target), point_type)
+        cycle = place_cycles.get(command_id) if point_type == 'place' else None
+        identity = (str(target), point_type, cycle)
         targets.setdefault(identity, {
-            'target_id': target, 'point_type': point_type, 'camera_id': 'global'})
+            'target_id': target, 'point_type': point_type, 'camera_id': 'global',
+            **({'place_cycle_id': cycle} if cycle is not None else {})})
     # The pick owns perception settings; its bound approach must use them too.
     configured = {}
     for command in commands:
         if command.get('skill_name') != 'pick':
             continue
         parameters = command.get('parameters', {})
-        identity = (str(parameters.get('target')), 'grasp')
+        identity = (str(parameters.get('target')), 'grasp', None)
         settings = {key: parameters[key] for key in
                     ('grasp_type', 'target_description', 'camera_id', 'link') if key in parameters}
         if settings.get('grasp_type', 'handle') not in {'handle', 'top_down'}:
@@ -49,6 +52,23 @@ def infer_command_place_parameters(commands):
     requests = {str(command.get('command_id', index)): placement_parameters(command.get('parameters', {}))
                 for index, command in enumerate(commands) if command.get('skill_name') == 'put'}
     return {command_id: dict(requests[cycle]) for command_id, cycle in cycles.items()}
+
+
+def infer_operation_ids(commands):
+    """Bind each interaction cycle to the corresponding visual operation."""
+    interactions = []
+    for index, command in enumerate(commands):
+        point_type = {'pick': 'grasp', 'put': 'place'}.get(command.get('skill_name'))
+        if point_type is not None:
+            interactions.append((index, str(command.get('parameters', {}).get('target')), point_type))
+    result = {}
+    for bound, command in enumerate(commands):
+        target = str(command.get('parameters', {}).get('target'))
+        candidates = [(abs(bound - index), index, str(commands[index].get('command_id', index)))
+                      for index, other, _ in interactions if other == target]
+        if candidates:
+            result[str(command.get('command_id', bound))] = min(candidates)[2]
+    return result
 
 
 def _infer_command_bindings(commands):

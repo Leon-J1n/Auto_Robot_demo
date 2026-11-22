@@ -101,7 +101,14 @@ class BindingGripperController:
                 self.runtime.advance_gripper(.01)
                 if abs(self.data.qpos[self.driver_address] - goal) < .005 and abs(self.data.ctrl[self.actuator_id] - goal) < 1e-8:
                     return {'final_width': self.width, 'contact_detected': False}
-            raise TimeoutError('Gripper opening timed out')
+            error = TimeoutError('Gripper opening timed out')
+            error.details = {'error_code': 'GRIPPER_OPENING_TIMEOUT', 'failed_stage': 'grasp',
+                'error_message': str(error), 'details': {
+                    'requested_width_m': float(width), 'measured_width_m': float(self.width),
+                    'driver_target_rad': goal,
+                    'driver_actual_rad': float(self.data.qpos[self.driver_address]),
+                    'elapsed_s': float(self.data.time - start), 'timeout_s': float(timeout)}}
+            raise error
         finally:
             self.runtime.contact_target = None
 

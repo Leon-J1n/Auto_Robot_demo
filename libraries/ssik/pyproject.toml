@@ -1,0 +1,378 @@
+[build-system]
+requires = ["hatchling>=1.27", "hatch-vcs>=0.4", "cython>=3.1", "setuptools>=70", "pybind11>=2.12"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ssik"
+description = "Analytical inverse kinematics for 6R and 7R revolute arms. Returns every IK branch at machine precision."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Siddhartha Srinivasa" }]
+keywords = ["robotics", "inverse-kinematics", "ik-geo", "kinematics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.26",
+    # ``ssik.prebuilt._manifest`` parses the arm manifest with ``tomllib``,
+    # which is stdlib only on Python 3.11+. On the 3.10 support floor (#477,
+    # for ROS2 Humble) it falls back to the ``tomli`` backport, so pull it in there.
+    "tomli>=1.1.0; python_version < '3.11'",
+    # scipy.linalg / scipy.signal are imported at module top in
+    # ``ssik._pencil`` and ``ssik.solvers.husty_pfurner._eliminate``; HP backs
+    # every non-SRS 7R prebuilt (Franka, Rizon, Kassow). Without scipy a
+    # fresh ``pip install ssik`` followed by ``ssik --help`` (or importing
+    # any HP-backed prebuilt) crashes with ModuleNotFoundError. See #252.
+    "scipy>=1.13",
+    "sympy>=1.10",
+    # Required for ``import cython`` at module top in compiled-source modules
+    # (``ssik.kinematics._scalar3``, ``ssik.subproblems._rotation``,
+    # ``ssik.subproblems.sp5``, ``ssik.kinematics.poe_fk``,
+    # ``ssik.solvers.ikgeo.spherical``, ``ssik.refinement``). When ssik is
+    # installed from a wheel with pre-compiled .so files, the Python-source
+    # ``import cython`` lines never execute -- but a fresh ``pip install ssik``
+    # without the .so (sdist build, or platform without prebuilt wheel) does
+    # execute them. The Cython runtime is small and well-maintained, so making
+    # it a hard dep is the simplest fix vs. a try/except fallback shim.
+    # See #144 for the regression history.
+    "cython>=3.1",
+]
+dynamic = ["version"]
+
+# Optional feature extras. Users opt in per feature; the core wheel stays light.
+[project.optional-dependencies]
+urdf = [
+    "urchin>=0.0.27",
+]
+# ``pip install ssik[demo]`` installs what every script in examples/ needs.
+# The core wheel stays at ~1.3 MB; these only get pulled when someone opts in:
+# the interactive viewer (viser, yourdfpy, robot_descriptions, imageio), URDF
+# loading for ``Manipulator.from_urdf`` and ``ssik build`` (urchin), and xacro
+# expansion (xacrodoc), without which robot_descriptions cannot load the arms it
+# serves as xacro (UR5, FR3, xArm6/7, Rizon 4, Gen3) and the viewer draws them
+# as primitives. Arms not packaged in robot_descriptions (JACO 2, FANUC CRX,
+# Kassow, big_yam, Rizon 10, OpenArm) fall back to a primitive skeleton render
+# unless a local URDF is discoverable on disk.
+demo = [
+    "viser>=1.0",
+    "yourdfpy>=0.0.60",
+    "robot-descriptions>=2.0.0",
+    "imageio>=2.34",
+    "urchin>=0.0.27",
+    "xacrodoc>=2.0.1",
+]
+mjcf = [
+    "mujoco>=3.10.0",
+]
+# ``pip install ssik[xacro]`` to load xacro descriptions (multi-file / macros /
+# substitution args) directly, e.g. the Universal Robots family.
+xacro = [
+    "urchin>=0.0.27",
+    "xacrodoc>=2.0.1",
+]
+# ``pip install ssik[bench]`` for the EAIK comparison in scripts/regen_bench.py.
+# EAIK is a C++ wrapper -- kept out of the dev group so CI's
+# ``uv sync --dev`` never builds it (committed bench numbers flow to docs; CI
+# only runs the regen_docs drift-check, never EAIK). (#350)
+bench = [
+    "eaik>=1.2.2",
+]
+
+[project.urls]
+Repository = "https://github.com/personalrobotics/ssik"
+Issues = "https://github.com/personalrobotics/ssik/issues"
+
+[project.scripts]
+ssik = "ssik.cli:main"
+
+# PEP 735 dependency groups — for tooling that's not an "extra" of the package.
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-xdist>=3.6", # parallel test execution in CI (#348)
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "urchin>=0.0.27", # exercised by the URDF-adapter tests
+    "hypothesis>=6.112", # property-based fuzzing of the URDF loader
+    # cython itself is in runtime ``[project.dependencies]`` (#144); only the
+    # build-side ``setuptools`` extension stays here.
+    "setuptools>=70", # cythonize+setuptools build backend
+    "robot-descriptions>=2.0.0",
+    "yourdfpy>=0.0.60",
+    "xacrodoc>=2.0.1",
+    "mujoco>=3.0", # exercised by the MJCF-adapter tests (also the [mjcf] extra)
+    "viser>=1.0", # runs examples/05's headless smoke in tests/test_teleop.py (also the [demo] extra)
+    # Test-only: builds the native-C++ solver into a Python extension so the
+    # existing Python test suite validates the C++ backend directly (#499). Never
+    # a runtime/wheel dependency -- the shipped native artifact needs no Python.
+    "pybind11>=2.12",
+]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
+    "pymdown-extensions>=10.12",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ssik/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ssik"]
+# Ship the baked RR elimination-tensor sidecars (#555) next to the general_6r
+# prebuilt artifacts so the native (C++) backend covers those arms; the emitted
+# _rr_native_geometry() loads them lazily. Committed data, but declare explicitly
+# so a future .gitignore rule can't silently drop them from the wheel.
+artifacts = ["src/ssik/prebuilt/**/*_rr.npz", "src/ssik/prebuilt/**/*_jl.npz"]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.targets.sdist]
+# Ship the annotated Python sources + the build hook so users on platforms
+# without a prebuilt wheel can compile the extensions from source.
+include = [
+    "src/ssik",
+    "hatch_build.py",
+    # hatch_build loads it to fetch the pinned Eigen for the native ext (#606).
+    "scripts/fetch_eigen.py",
+    # The header-only C++ solvers + the CMake package template: a wheel built
+    # from the sdist ships them like every other wheel (#641).
+    "cpp/include/ssik_cpp",
+    "cpp/cmake",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+]
+
+# Cross-platform wheel build for PyPI (#132). Each entry of the cibuildwheel
+# matrix invokes the hatchling build with our Cython hook -- the same path
+# as a local ``uv build --wheel`` -- so we keep one source of truth.
+[tool.cibuildwheel]
+# cp310 is kept for ROS2 Humble (Ubuntu 22.04, Python 3.10, EOL May 2027) --
+# deliberately below the Scientific Python SPEC 0 window (#477).
+build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
+# Skip targets we don't ship in v1.0 (#132 "Deferred to v1.1+"): musllinux,
+# 32-bit Linux, 32-bit Windows, PyPy. Linux aarch64 is also deferred.
+skip = ["*-musllinux_*", "*-manylinux_i686", "*-win32", "pp*", "*linux_aarch64"]
+# x86_64 wheels are cross-compiled from the arm64 macos-latest runner
+# (see [tool.cibuildwheel.macos]); cibuildwheel can build them but can't
+# run them on arm64 hardware, so skip the test-command for x86_64 only.
+# The arm64 wheel is fully built + smoke-tested in the same job.
+test-skip = "*-macosx_x86_64"
+build-verbosity = 1
+test-requires = ["numpy>=2.0"]
+# Wheel smoke gate. Runs in the cibuildwheel test venv against the BUILT
+# wheel (not the dev checkout) so any missing runtime dep, malformed .so,
+# or broken import chain fires before publish. Three checks:
+#
+#  1. iiwa14_ik (strict SRS, no HP/scipy in the chain) -- baseline import
+#     + FK roundtrip + FK closure < 1e-9.
+#  2. franka_panda_ik (HP-backed via jointlock) -- catches transitive
+#     scipy / HP-stack import issues that the strict-SRS path skips. This
+#     check would have caught #252 had it existed earlier.
+#  3. ``ssik --help`` -- exercises the CLI's full import chain (codegen,
+#     dispatcher, every solver composer). The CLI uses the broadest
+#     import surface in the package; if anything is import-broken, this
+#     fires.
+test-command = [
+    # 0. Perf extensions actually compiled in the wheel. The annotated .py
+    #    sources import fine in pure-Python mode, so a wheel that silently
+    #    failed to cythonize them would still pass every functional check
+    #    below -- but run refinement-heavy arms (gen3, piper) far slower than
+    #    advertised. Assert each hatch_build.CYTHON_TARGETS module loaded from a
+    #    compiled .so, not the .py source. (Keep this list in sync with
+    #    CYTHON_TARGETS; tests/test_perf_extensions.py fails if it drifts.)
+    'python -c "import ssik.refinement, ssik.kinematics.poe_fk as _p; assert ssik.refinement.__file__.endswith((\".so\", \".pyd\")), \"ssik.refinement not compiled in wheel\"; assert _p.__file__.endswith((\".so\", \".pyd\")), \"ssik.kinematics.poe_fk not compiled in wheel\""',
+    # Native solver extension (#506) is bundled on Linux + macOS; Windows ships
+    # without it (Python fallback). Assert it imports and solves where it
+    # should, compiled against the pinned Eigen (#606) on every platform.
+    "python {project}/scripts/native_smoke.py",
+    'python -c "from ssik.prebuilt import iiwa14_ik; import numpy as np; q = np.array([0.3, 0.4, -0.5, 0.6, 0.2, -0.3, 0.4]); T = iiwa14_ik.fk(q); sols = iiwa14_ik.solve(T); assert sols and max(s.fk_residual for s in sols) < 1e-9, \"iiwa14_ik smoke failed\""',
+    'python -c "from ssik.prebuilt import franka_panda_ik; import numpy as np; T = franka_panda_ik.fk(np.array([0.2, 0.3, -0.4, -1.2, 0.3, 1.4, 0.5])); sols = franka_panda_ik.solve(T); assert sols, \"franka_panda_ik returned no IK\""',
+    # RR (general_6r) native backend (#555): the baked-tensor sidecar .npz must
+    # ship in the wheel so the shipped ext covers RR arms. On non-Windows assert
+    # the tensor loaded (npz present) and native=True solves; Windows has no ext.
+    'python -c "import sys, numpy as np; from ssik.prebuilt.kinova import jaco2_ik; T = jaco2_ik.fk(np.array([0.3, 0.4, -0.5, 0.6, 0.2, -0.3])); assert jaco2_ik.solve(T, native=(sys.platform != \"win32\")), \"jaco2 native solve failed\"; assert sys.platform == \"win32\" or jaco2_ik._rr_native_geometry() is not None, \"jaco2 RR tensor .npz missing from wheel\""',
+    # Jointlock native backend (#554): the sidecar _jl.npz (RR-tensor / HP sweep)
+    # must ship. rizon4 is RR-inner; assert the geometry loaded + native solves.
+    'python -c "import sys, numpy as np; from ssik.prebuilt.flexiv import rizon4_ik; T = rizon4_ik.fk(np.array([0.2, 0.3, -0.4, 0.9, 0.1, 0.7, -0.2])); assert rizon4_ik.solve(T, native=(sys.platform != \"win32\")), \"rizon4 native solve failed\"; assert sys.platform == \"win32\" or rizon4_ik._jointlock_native_geometry() is not None, \"rizon4 jointlock .npz missing from wheel\""',
+    # Vendor subpackages are in the wheel + the catalog works + the hierarchical
+    # import path resolves (#421); the flat aliases above cover backward-compat.
+    'python -c "import ssik; assert len(ssik.list_arms()) >= 36, \"catalog empty\"; from ssik.prebuilt.universal_robots import ur5_ik; import numpy as np; assert ur5_ik.solve(ur5_ik.fk(np.zeros(6))), \"hierarchical ur5 import/solve failed\""',
+    # The C++ headers + CMake package ship in every wheel, Windows included (#641),
+    # and ssik.get_include / get_cmake_dir find them inside the installed package.
+    'python -c "import ssik, pathlib; pkg = pathlib.Path(ssik.__file__).resolve().parent; inc = pathlib.Path(ssik.get_include()); cm = pathlib.Path(ssik.get_cmake_dir()); assert inc.is_relative_to(pkg) and (inc / \"ssik_cpp\" / \"solvers\" / \"three_parallel.hpp\").is_file(), inc; assert cm.is_relative_to(pkg) and all((cm / f).is_file() for f in (\"ssik_cppConfig.cmake\", \"ssik_cppConfigVersion.cmake\", \"ssik_cppTargets.cmake\")), cm"',
+    "ssik --help",
+]
+
+[tool.cibuildwheel.linux]
+# manylinux_2_28 ships GCC 14; sufficient for Cython 3.x + the C++20 native ext.
+manylinux-x86_64-image = "manylinux_2_28"
+# Eigen for the native extension: hatch_build fetches the pinned, sha256-checked
+# release itself (scripts/fetch_eigen.py, #606), the same one on every platform.
+
+[tool.cibuildwheel.macos]
+# Build both arm64 (native) and x86_64 (cross-compiled) on the macos-latest
+# (M-class) runner. Dropping macos-13 from the release matrix because the
+# Intel runner queue has multi-hour latency as GitHub deprecates Intel hosts;
+# cibuildwheel's cross-compile path is well-trodden and the resulting wheel
+# is the same as what an Intel runner would produce (same compiler invocation,
+# same flags, just hosted on a different CPU). Test-skip above prevents
+# cibuildwheel from trying to RUN the x86_64 wheel on arm64.
+archs = ["arm64", "x86_64"]
+# Eigen: see [tool.cibuildwheel.linux]. Header-only, so the arm64 host building
+# the x86_64 cross-wheel needs only the include path.
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = [
+    # Generated reference artifacts. Not subject to lint rules; their format
+    # is dictated by ssik.core.codegen and validated via byte-equal snapshot
+    # tests in test_artifact_snapshots.py.
+    "src/ssik/prebuilt",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "RUF",      # ruff-specific
+    "SIM",      # simplify
+    "PT",       # pytest style
+]
+
+[tool.mypy]
+# 3.11 (not the 3.10 support floor): the 3.10 target only adds spurious numpy
+# ndarray `.copy()` no-any-return noise, while real 3.10 compat is gated by ruff
+# (target py310) + the 3.10 CI test-run (#477). Type-correctness is version-agnostic.
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+exclude = ['^src/ssik/prebuilt/']
+
+# Test files: relax strict-mode rules that prevent local helpers and
+# fixture functions from being called without type annotations. Strict
+# typing in tests adds friction without catching user-facing bugs (the
+# product is ``src/ssik``; tests are checkpoints).
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+warn_unused_ignores = false
+
+# sympy ships no type stubs; used at module-import time for offline
+# per-arm symbolic preprocessing in ssik.solvers.ikgeo._raghavan_roth.
+[[tool.mypy.overrides]]
+module = "sympy.*"
+ignore_missing_imports = true
+
+# mpmath (sympy's numeric backend) ships no type stubs; its version keys the
+# on-disk derivation cache in the same module.
+[[tool.mypy.overrides]]
+module = "mpmath.*"
+ignore_missing_imports = true
+
+# urchin (URDF parser) ships no type stubs.
+[[tool.mypy.overrides]]
+module = "urchin.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mujoco.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "xacrodoc.*"
+ignore_missing_imports = true
+
+# cython runtime ships ``py.typed`` from 3.1+ but the marker is missing
+# from some 3.2.x Linux wheels (verified on cython 3.2.4 manylinux2014).
+# Locally on macOS arm64 the marker is present and mypy is happy without
+# this override; on Linux CI we need it. Same pattern as sympy / urchin.
+# Without the marker, ``@cython.ccall`` and ``@cython.locals`` decorators
+# become untyped, so we also suppress ``untyped-decorator`` on the six
+# files that use them (the only untyped decorators in the codebase).
+[[tool.mypy.overrides]]
+module = "cython"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "ssik.kinematics._scalar3",
+    "ssik.kinematics.poe_fk",
+    "ssik.subproblems._rotation",
+    "ssik.subproblems.sp5",
+    "ssik.solvers.ikgeo.spherical",
+    "ssik.refinement",
+]
+disable_error_code = ["untyped-decorator"]
+
+# tests/fixtures/jaco2.py is reachable via sys.path injection in tests; mypy
+# resolves it correctly when run inside pytest but not from a top-level pass.
+[[tool.mypy.overrides]]
+module = "jaco2"
+ignore_missing_imports = true
+
+# Same for tests/fixtures/franka_panda.py.
+[[tool.mypy.overrides]]
+module = "franka_panda"
+ignore_missing_imports = true
+
+# Same for tests/fixtures/kuka_iiwa14.py.
+[[tool.mypy.overrides]]
+module = "kuka_iiwa14"
+ignore_missing_imports = true
+
+# Same for tests/fixtures/xarm7.py.
+[[tool.mypy.overrides]]
+module = "xarm7"
+ignore_missing_imports = true
+
+# Same for tests/fixtures/ur5.py.
+[[tool.mypy.overrides]]
+module = "ur5"
+ignore_missing_imports = true
+
+# Same for tests/fixtures/_perf.py (shared perf-gate timing helper).
+[[tool.mypy.overrides]]
+module = "_perf"
+ignore_missing_imports = true
+
+# Generated per-arm artifacts under src/ssik/prebuilt/ are byte-stable
+# emitted code; their format is dictated by ``ssik.core.codegen`` and
+# validated via byte-equal snapshot tests. mypy excludes the directory
+# from checking, but tests that import from it (e.g. franka artifact
+# integration tests under #142) need this override so the imports
+# don't drag the strict-mode rules into the generated source.
+[[tool.mypy.overrides]]
+module = "ssik.prebuilt.*"
+ignore_errors = true
+follow_imports = "silent"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "-m", "not slow"]
+markers = [
+    "slow: symbolic IK generation tests that run on the order of seconds to minutes; opt in with `-m slow`",
+    "perf: wall-clock performance gates; run serially (CI runs them in a separate non-parallel step) since `-n auto` worker contention inflates timing (#348)",
+    "sweep: an exhaustive seeded sweep that most pull requests run as a fixed sample (tests/_sweeps.py); slow.yml runs it in full with `-m sweep`",
+]

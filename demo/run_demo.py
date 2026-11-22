@@ -6,10 +6,11 @@ import os
 import re
 import sys
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 
-from demo.error_messages import describe_error, error_category, error_from_exception
+from demo.error_messages import error_from_exception, user_error
 from collision.backends.simplatform_fcl import CollisionResult
 from execution import ExecutionBackendRegistry, SceneResourceCoordinator, SceneStateSynchronizer
 from execution.resources import component, pose_matrix
@@ -198,14 +199,12 @@ def step_message(command, *, success, error=None, stage=None, target_name=None, 
                 target = f'{target} {direction}'
         return f"success: {SUCCESS_ACTIONS.get(command['skill_name'], '已完成目标')} {target}"
     error = error if isinstance(error, dict) else {}
-    description = ERROR_DESCRIPTIONS.get(error.get('error_code'))
-    if description is None:
-        description = STAGE_DESCRIPTIONS.get(error.get('failed_stage') or stage, '步骤执行失败')
-    description = describe_error(error, description)
+    category, description = user_error(error, target_name=target, stage=stage,
+        fallback='操作未能完成，请检查场景和操作指令。')
     description = description.replace('|', '｜')
     if status == 'suspend':
         description = f'任务中止，{target} 未完成目标；{description}'
-    return f"error|{error_category(error, stage=stage)}|{description}"
+    return f"error|{category}|{description}"
 
 
 def _default_output_dir(command_file):
@@ -354,6 +353,25 @@ def _print_command_timing(row):
     if vlm_request_s is not None:
         parts.append(f'vlm_request={vlm_request_s:.3f}s')
     print('|'.join(parts), flush=True)
+
+
+def _run_global_perception(resolver, commands, resources):
+    from demo.interaction.global_perception import prepare
+
+    started = perf_counter()
+    with command_timing_scope():
+        start_command('global_perception')
+        try:
+            result = prepare(resolver, commands, resources)
+        except Exception as exc:
+            result = {'status': 'deferred', 'reason': str(exc)}
+        timing = {'command_id': 'global_perception'}
+        stamp_command(timing)
+    result['elapsed_s'] = perf_counter() - started
+    result['vlm_request_s'] = timing.get('vlm_request_s', 0.)
+    result['vlm_request_count'] = timing['vlm_request_count']
+    print(f"timing|global_perception={result['elapsed_s']:.3f}s", flush=True)
+    return result
 
 
 def _resolve_command_file(command_file):
@@ -627,6 +645,16 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             finally:
                 backend.set_frame_callback(None)
             sync.sync(backend, kin, checker)
+        else:
+            sync.sync(backend, kin, checker)
+        # Register the complete task's scene targets before the first command.
+        # Subsequent synchronizations keep their measured poses current.
+        blackboard.register_task_targets(commands, resources.scene)
+        prime_perception = getattr(resolver, 'prime_task_targets', None)
+        if callable(prime_perception):
+            from demo.interaction.visual_targets import infer_operation_ids
+            resolver.operation_ids = infer_operation_ids(commands)
+            report['global_perception'] = _run_global_perception(resolver, commands, resources)
 
         def prepare_trajectory(trajectory, request, selection):
             from demo.interaction.command_converter import _deep_merge
@@ -802,9 +830,10 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             active_step_logged = True
         elif active_command is None:
             initial_error = error_from_exception(exc, stage=stage)
-            cause = describe_error(initial_error, '初始化失败')
+            category, cause = user_error(initial_error, stage=stage,
+                fallback='初始化失败，请检查场景和设备配置。')
             cause = cause.replace('|', '｜')
-            print(f"error|{error_category(initial_error, stage=stage)}|初始化失败：{cause}", flush=True)
+            print(f"error|{category}|{cause}", flush=True)
         report['error'] = {'stage': stage, 'message': str(exc), 'type': type(exc).__name__}
         report['error'].update(error_from_exception(
             exc, stage=stage, existing=row.get('error') if row else None))

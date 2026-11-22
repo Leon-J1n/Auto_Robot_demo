@@ -1,0 +1,466 @@
+"""Regenerate per-arm benchmark numbers in ``MANIFEST.toml`` -- both ssik's own
+``solve()`` (the ``[bench]`` block) and the EAIK comparison (the ``[eaik]``
+block), which together drive the README tables.
+
+Benchmarking a prebuilt arm used to be hand work: measure ssik ``solve()``,
+separately run EAIK, then hand-edit the manifest / a lookup table in
+``regen_docs``. This automates both measurements and the manifest write, so
+adding an arm (or refreshing the whole set) is one command::
+
+    uv run python scripts/regen_bench.py                 # all arms (ssik + EAIK)
+    uv run python scripts/regen_bench.py --arm xarm7_ik  # just one
+    uv run python scripts/regen_bench.py --eaik-only     # leave ssik numbers alone
+    uv run python scripts/regen_bench.py --docs          # + regenerate docs
+
+Methodology: reachable poses sampled in the joint interior, a warm-up pass,
+then bootstrap mean ± 95% CI on solve time, plus worst FK residual and the
+branch-count range, over the **same poses** for ssik and EAIK.
+``respect_limits=False`` so the branch count reflects the analytical solver,
+not the limit postprocess. The EAIK side records its
+support verdict + numbers, or its verbatim refusal (its kinematic-family string
+or the first sentence of its error) -- EAIK is fed each manufacturer fixture
+as-is (no manual joint-locking), the same chain ssik is given.
+
+EAIK needs the ``[bench]`` extra (``pip install ssik[bench]``); without it the
+``[eaik]`` blocks are left untouched.
+
+Timing is **machine-dependent** -- run on the reference machine that produced
+the committed numbers (sanity-check: ``franka_panda`` should land within CI of
+its current value). FK and branch counts are machine-independent. The manifest
+is updated in place, preserving comments and hand-curated fields.
+"""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import importlib
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+from numpy.typing import NDArray
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+MANIFEST = REPO_ROOT / "src" / "ssik" / "prebuilt" / "MANIFEST.toml"
+
+sys.path.insert(0, str(REPO_ROOT))
+from ssik.prebuilt._manifest import load_manifest  # noqa: E402
+
+_N_TIMED = 200
+_N_WARMUP = 10
+# A comparison solver that returns a solution it marks *exact* (not least-squares)
+# must actually satisfy FK. Above this Frobenius residual the "solution" is wrong,
+# so we record the arm as not-solved with a correctness verdict rather than as a
+# fast solve -- otherwise the table advertises a µs timing for a garbage answer.
+# EAIK's genuinely-correct solves close to ~1e-15; 1e-6 flags real failures only.
+_EAIK_FK_CORRECT_ATOL = 1e-6
+
+
+def _gen_poses(mod: object, n: int, rng: np.random.Generator) -> list[NDArray[np.float64]]:
+    """Reachable poses sampled in the safe joint interior."""
+    dof = mod.DOF  # type: ignore[attr-defined]
+    poses: list[NDArray[np.float64]] = []
+    while len(poses) < n:
+        q = rng.uniform(-0.5, 0.5, size=dof)
+        if dof == 7:
+            q[3] = float(rng.uniform(0.3, 0.7))
+        try:
+            poses.append(mod.fk(q))  # type: ignore[attr-defined]
+        except Exception:
+            continue
+    return poses
+
+
+def _mean_ci95(samples: NDArray[np.float64], n_boot: int = 1000) -> tuple[float, float]:
+    """Bootstrap mean + 95% CI half-width."""
+    rng = np.random.default_rng(0)
+    n = len(samples)
+    means = np.empty(n_boot)
+    for i in range(n_boot):
+        means[i] = samples[rng.integers(0, n, size=n)].mean()
+    mu = float(samples.mean())
+    lo, hi = np.percentile(means, [2.5, 97.5])
+    return mu, float(max(mu - lo, hi - mu))
+
+
+def bench_arm(mod: object, poses: list[NDArray[np.float64]]) -> dict[str, float | int]:
+    """Measure one prebuilt module's ``solve()``; return the manifest bench dict."""
+    for T in poses[:_N_WARMUP]:
+        mod.solve(T, respect_limits=False)  # type: ignore[attr-defined]
+
+    times: list[float] = []
+    fk_residuals: list[float] = []
+    sol_counts: list[int] = []
+    for T in poses[_N_WARMUP:]:
+        t0 = time.perf_counter()
+        sols = mod.solve(T, respect_limits=False)  # type: ignore[attr-defined]
+        times.append((time.perf_counter() - t0) * 1e3)
+        if sols:
+            fk_residuals.append(max(s.fk_residual for s in sols))
+            sol_counts.append(len(sols))
+
+    mu, half = _mean_ci95(np.array(times))
+    return {
+        "ms_mean": round(mu, 2),
+        "ms_ci95": round(half, 2),
+        "max_fk": max(fk_residuals) if fk_residuals else float("nan"),
+        "sols_min": min(sol_counts) if sol_counts else 0,
+        "sols_max": max(sol_counts) if sol_counts else 0,
+    }
+
+
+FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures"
+
+
+def _eaik_dh(arm: object) -> object | None:
+    """The DH parameters EAIK's DH adapter gets for ``arm``, or ``None`` for a
+    URDF fixture (EAIK loads those itself).
+
+    This is ssik's side of the harness, so it runs outside the ``try`` that
+    records EAIK's own errors as refusals: a failure here is a harness defect
+    and must raise, not be published as "EAIK refuses" (#681).
+    """
+    from ssik.kinematics.poe_to_dh import poe_to_dh
+
+    if arm.fixture_kind == "urdf":  # type: ignore[attr-defined]
+        return None
+    if arm.fixture_kind == "specs":  # type: ignore[attr-defined]
+        # specs arm: rebuild the KinBody to extract DH for EAIK's DH adapter.
+        sys.path.insert(0, str(FIXTURES_DIR))
+        from ssik._kinbody import build_kinbody
+
+        mod = importlib.import_module(arm.fixture)  # type: ignore[attr-defined]
+        kb = build_kinbody(getattr(mod, arm.specs_fn)())  # type: ignore[attr-defined]
+    else:
+        # Any other registered source format (mjcf, ...): EAIK has no loader for
+        # it, so load the KinBody via its adapter and hand EAIK the DH form (same
+        # DH path as specs arms) -- a real comparison, not a refusal.
+        from ssik import _formats as formats
+
+        kb = formats.get(arm.fixture_kind).load(  # type: ignore[attr-defined]
+            FIXTURES_DIR / arm.fixture, arm.base_link, arm.ee_link, {}
+        )
+    return poe_to_dh(kb)
+
+
+def _load_eaik(arm: object, dh: object | None) -> object:
+    """Construct EAIK's robot for ``arm``: its URDF loader for a URDF fixture,
+    else its DH adapter on ``dh``. Raises EAIK's own error on refusal."""
+    import eaik.IK_DH  # type: ignore[import-untyped]
+    import eaik.IK_URDF  # type: ignore[import-untyped]
+
+    if dh is None:
+        return eaik.IK_URDF.UrdfRobot(str(FIXTURES_DIR / arm.fixture))  # type: ignore[attr-defined]
+    return eaik.IK_DH.DhRobot(dh.alpha, dh.a, dh.d)  # type: ignore[attr-defined]
+
+
+def _clean_refusal(msg: str) -> str:
+    """Condense an EAIK error into one concise table-friendly sentence (first
+    sentence, no trailing punctuation)."""
+    first = msg.strip().split(". ")[0].strip().rstrip(".!")
+    return first[:90]
+
+
+def bench_eaik(arm: object, poses: list[NDArray[np.float64]]) -> dict[str, object] | None:
+    """Measure EAIK on ``arm`` over the same ``poses`` as the ssik bench.
+
+    Returns the manifest ``[eaik]`` dict: ``{supported: True, ...}`` with
+    timing/FK/branch numbers, or ``{supported: False, refusal: <verbatim>}``.
+    Returns ``None`` if EAIK isn't installed (caller leaves the block untouched).
+    """
+    try:
+        import eaik  # noqa: F401  # type: ignore[import-untyped]
+    except ImportError:
+        return None
+
+    dh = _eaik_dh(arm)
+    try:
+        robot = _load_eaik(arm, dh)
+    except Exception as exc:
+        return {"supported": False, "refusal": _clean_refusal(str(exc))}
+
+    if not robot.hasKnownDecomposition():  # type: ignore[attr-defined]
+        return {"supported": False, "refusal": str(robot.getKinematicFamily())}  # type: ignore[attr-defined]
+
+    try:
+        robot.IK(poses[0])  # type: ignore[attr-defined]
+    except Exception as exc:
+        return {"supported": False, "refusal": _clean_refusal(str(exc))}
+
+    for T in poses[:_N_WARMUP]:
+        robot.IK(T)  # type: ignore[attr-defined]
+
+    times: list[float] = []
+    fk_residuals: list[float] = []
+    sol_counts: list[int] = []
+    for T in poses[_N_WARMUP:]:
+        t0 = time.perf_counter()
+        sol = robot.IK(T)  # type: ignore[attr-defined]
+        times.append((time.perf_counter() - t0) * 1e3)
+        is_ls = np.asarray(sol.is_LS, dtype=bool)
+        Q = np.asarray(sol.Q)
+        exact = Q[~is_ls] if Q.size else Q
+        if len(exact):
+            sol_counts.append(len(exact))
+            fk_residuals.append(
+                max(float(np.linalg.norm(robot.fwdKin(np.asarray(q)) - T)) for q in exact)  # type: ignore[attr-defined]
+            )
+
+    family = str(robot.getKinematicFamily())  # type: ignore[attr-defined]
+    max_fk = max(fk_residuals) if fk_residuals else float("nan")
+
+    # EAIK can classify an arm as decomposable, return non-LS ("exact")
+    # solutions, and yet have those solutions violate FK -- a silent-wrong
+    # result. Observed on anti-parallel-trio arms (Standard Bots thor/spark):
+    # EAIK collapses the parallel trio with a signed sum and mishandles a joint
+    # whose axis opposes the trio reference, the same bug class ssik's
+    # three_parallel guards against. Record it as not-solved with a correctness
+    # verdict, so the table doesn't advertise a µs timing for a garbage answer.
+    if fk_residuals and max_fk > _EAIK_FK_CORRECT_ATOL:
+        return {
+            "supported": False,
+            "refusal": (
+                f"classifies as {family} but returns FK-incorrect solutions (max FK {max_fk:.0e})"
+            ),
+        }
+
+    mu, half = _mean_ci95(np.array(times))
+    return {
+        "supported": True,
+        "family": family,
+        "ms_mean": mu,
+        "ms_ci95": half,
+        "max_fk": max_fk,
+        "sols_min": min(sol_counts) if sol_counts else 0,
+        "sols_max": max(sol_counts) if sol_counts else 0,
+    }
+
+
+def _fmt(key: str, value: float | int) -> str:
+    if key in ("sols_min", "sols_max"):
+        return str(int(value))
+    if key == "max_fk":
+        return f"{value:.1e}"
+    return f"{value:.2f}"
+
+
+def _is_table_header(line: str, header: str) -> bool:
+    """True if ``line`` is the TOML table header ``header``, tolerating a trailing
+    ``# comment``. ``ssik add-arm`` emits ``[arms.x.bench]  # filled by ...``, so a
+    strict ``line.strip() == header`` misses it and regen_bench can't fill an
+    add-arm-generated stanza (#425)."""
+    return line.split("#", 1)[0].strip() == header
+
+
+def update_manifest_bench(name: str, bench: dict[str, float | int]) -> None:
+    """Surgically rewrite the five values under ``[arms.<name>.bench]`` in place,
+    leaving every comment and hand-curated field untouched."""
+    lines = MANIFEST.read_text().splitlines(keepends=True)
+    header = f"[arms.{name}.bench]"
+    start = next((i for i, ln in enumerate(lines) if _is_table_header(ln, header)), None)
+    if start is None:
+        raise KeyError(f"{header} not found in {MANIFEST}")
+    for i in range(start + 1, len(lines)):
+        stripped = lines[i].strip()
+        if stripped.startswith("["):  # next section
+            break
+        if "=" in stripped:
+            key = stripped.split("=", 1)[0].strip()
+            if key in bench:
+                lines[i] = f"{key} = {_fmt(key, bench[key])}\n"
+    MANIFEST.write_text("".join(lines))
+
+
+def _toml_str(s: str) -> str:
+    """Quote a string as a TOML basic string (escape backslash + double-quote)."""
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def _eaik_block_lines(name: str, eaik: dict[str, object]) -> list[str]:
+    """Render the ``[arms.<name>.eaik]`` block (variable schema: supported vs
+    refused)."""
+    out = [f"[arms.{name}.eaik]\n"]
+    if not eaik["supported"]:
+        out.append("supported = false\n")
+        out.append(f"refusal = {_toml_str(str(eaik['refusal']))}\n")
+        return out
+    out.append("supported = true\n")
+    out.append(f"family = {_toml_str(str(eaik['family']))}\n")
+    out.append(f"ms_mean = {float(eaik['ms_mean']):.6g}\n")  # type: ignore[arg-type]
+    out.append(f"ms_ci95 = {float(eaik['ms_ci95']):.6g}\n")  # type: ignore[arg-type]
+    out.append(f"max_fk = {float(eaik['max_fk']):.1e}\n")  # type: ignore[arg-type]
+    out.append(f"sols_min = {int(eaik['sols_min'])}\n")  # type: ignore[call-overload]
+    out.append(f"sols_max = {int(eaik['sols_max'])}\n")  # type: ignore[call-overload]
+    return out
+
+
+def update_manifest_eaik(name: str, eaik: dict[str, object]) -> None:
+    """Insert or replace the whole ``[arms.<name>.eaik]`` block in place. The
+    block's keys depend on whether EAIK supports the arm, so (unlike the bench
+    block) the entire block is rewritten, and inserted after ``[<name>.bench]``
+    if absent."""
+    lines = MANIFEST.read_text().splitlines(keepends=True)
+    header = f"[arms.{name}.eaik]"
+    block = _eaik_block_lines(name, eaik)
+    start = next((i for i, ln in enumerate(lines) if _is_table_header(ln, header)), None)
+    if start is not None:
+        end = start + 1
+        while end < len(lines) and not lines[end].lstrip().startswith("["):
+            end += 1
+        lines[start:end] = block
+    else:
+        # Insert after the arm's bench block (which ends at the next section).
+        bench_hdr = f"[arms.{name}.bench]"
+        b = next((i for i, ln in enumerate(lines) if _is_table_header(ln, bench_hdr)), None)
+        if b is None:
+            raise KeyError(f"neither {header} nor {bench_hdr} found in {MANIFEST}")
+        end = b + 1
+        while end < len(lines) and not lines[end].lstrip().startswith("["):
+            end += 1
+        # Ensure a single blank line before the inserted block.
+        insert = [*([] if end > 0 and lines[end - 1].strip() == "" else ["\n"]), *block, "\n"]
+        lines[end:end] = insert
+    MANIFEST.write_text("".join(lines))
+
+
+def _uncompiled_perf_extensions() -> list[str]:
+    """Return the Cython perf-target modules that are loaded as pure Python.
+
+    The compile targets are single-sourced from ``hatch_build.CYTHON_TARGETS``
+    (the same list the wheel build cythonizes), so this can't drift from what
+    ships. We parse the tuple out of ``hatch_build.py`` via AST rather than
+    importing it, because that module pulls in the build-only ``hatchling``
+    dependency. A module is "compiled" iff its ``__file__`` is the ``.so`` shim
+    rather than the ``.py`` source.
+    """
+    tree = ast.parse((REPO_ROOT / "hatch_build.py").read_text())
+    targets: tuple[str, ...] | None = None
+    for node in ast.walk(tree):
+        # CYTHON_TARGETS is annotated (``CYTHON_TARGETS: tuple[str, ...] = ...``),
+        # so it's an AnnAssign; handle a plain Assign too for robustness.
+        if isinstance(node, ast.AnnAssign):
+            named = isinstance(node.target, ast.Name) and node.target.id == "CYTHON_TARGETS"
+            value = node.value
+        elif isinstance(node, ast.Assign):
+            named = any(isinstance(t, ast.Name) and t.id == "CYTHON_TARGETS" for t in node.targets)
+            value = node.value
+        else:
+            continue
+        if named and value is not None:
+            targets = tuple(ast.literal_eval(value))
+    if targets is None:
+        raise RuntimeError("CYTHON_TARGETS not found in hatch_build.py")
+
+    uncompiled: list[str] = []
+    for target in targets:
+        # "src/ssik/refinement/__init__.py" -> "ssik.refinement"
+        modname = (
+            target.removeprefix("src/").removesuffix(".py").removesuffix("/__init__")
+        ).replace("/", ".")
+        mod = importlib.import_module(modname)
+        if not (mod.__file__ or "").endswith((".so", ".pyd")):
+            uncompiled.append(modname)
+    return uncompiled
+
+
+def _require_compiled_perf_extensions(*, allow_uncompiled: bool) -> None:
+    """Refuse to measure ssik timing against uncompiled perf extensions.
+
+    Bench numbers taken in this dev checkout used to be committed as
+    authoritative; when ``refinement`` was loaded in pure-Python mode (this
+    checkout built ``poe_fk.so`` but not ``refinement.so``) that silently
+    over-reported every refinement-heavy arm (gen3 51 vs 37 ms, piper 2.5 vs
+    1.1 ms). Timing is only meaningful against the compiled extensions the wheel
+    ships, so gate on it.
+    """
+    uncompiled = _uncompiled_perf_extensions()
+    if not uncompiled:
+        return
+    joined = ", ".join(uncompiled)
+    if allow_uncompiled:
+        print(f"WARNING: benching UNCOMPILED {joined} -- numbers will NOT match shipped wheels")
+        return
+    raise SystemExit(
+        f"regen_bench: refusing to measure timing -- perf extensions are NOT compiled: {joined}.\n"
+        "These ship as compiled .so (hatch_build.CYTHON_TARGETS); measuring them in pure-Python "
+        "mode over-reports solve time for every refinement-heavy arm (gen3, piper, ...).\n"
+        "Fix: reinstall to rebuild the extensions --\n"
+        "  uv pip install -e . --force-reinstall --no-deps\n"
+        "then re-run. Pass --allow-uncompiled to bench anyway (FK/branch counts are still valid; "
+        "timing is not)."
+    )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--arm", help="benchmark only this arm (e.g. xarm7_ik); default all")
+    parser.add_argument("--docs", action="store_true", help="run regen_docs.py afterward")
+    parser.add_argument(
+        "--no-eaik", action="store_true", help="skip the EAIK comparison measurement"
+    )
+    parser.add_argument(
+        "--eaik-only",
+        action="store_true",
+        help="measure only EAIK (leave the ssik [bench] numbers untouched)",
+    )
+    parser.add_argument(
+        "--allow-uncompiled",
+        action="store_true",
+        help="bench even if the Cython perf extensions are not compiled (timing "
+        "will not match shipped wheels; for FK/branch-count refreshes only)",
+    )
+    args = parser.parse_args()
+
+    # ssik timing is only meaningful against the compiled perf extensions the
+    # wheel ships (see #248). EAIK-only refreshes don't touch ssik timing.
+    if not args.eaik_only:
+        _require_compiled_perf_extensions(allow_uncompiled=args.allow_uncompiled)
+
+    manifest = load_manifest()
+    names = [args.arm] if args.arm else list(manifest.keys())
+    if args.arm and args.arm not in manifest:
+        parser.error(f"unknown arm {args.arm!r}; choices: {', '.join(manifest)}")
+
+    print(f"benchmarking {len(names)} arm(s) -> {MANIFEST.relative_to(REPO_ROOT)}")
+    eaik_skipped = False
+    for name in names:
+        mod = importlib.import_module(f"ssik.prebuilt.{name}")
+        poses = _gen_poses(mod, _N_TIMED + _N_WARMUP, np.random.default_rng(0))
+        line = f"  {name}:"
+        if not args.eaik_only:
+            bench = bench_arm(mod, poses)
+            update_manifest_bench(name, bench)
+            fk = _fmt("max_fk", bench["max_fk"])
+            line += (
+                f" ssik {bench['ms_mean']} ± {bench['ms_ci95']} ms / "
+                f"FK {fk} / {bench['sols_min']}-{bench['sols_max']} sols"
+            )
+        if not args.no_eaik:
+            eaik = bench_eaik(manifest[name], poses)
+            if eaik is None:
+                eaik_skipped = True
+            else:
+                update_manifest_eaik(name, eaik)
+                line += (
+                    f" | EAIK {round(float(eaik['ms_mean']) * 1000)}µs"  # type: ignore[arg-type]
+                    if eaik["supported"]
+                    else f" | EAIK refuses ({eaik['refusal']})"
+                )
+        print(line)
+
+    if eaik_skipped:
+        print("note: EAIK not installed (pip install ssik[bench]); [eaik] blocks left untouched")
+
+    if args.docs:
+        print("running regen_docs.py")
+        subprocess.run([sys.executable, str(Path(__file__).parent / "regen_docs.py")], check=True)
+    else:
+        print("note: run scripts/regen_docs.py to refresh README/quickstart, or pass --docs")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

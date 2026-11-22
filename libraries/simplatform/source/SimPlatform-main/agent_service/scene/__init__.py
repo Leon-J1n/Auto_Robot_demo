@@ -1,0 +1,86 @@
+"""Route A scene composition and Route B scene loading, as plain data."""
+
+from .builder import (
+    LOCAL_TO_WORLD_OFFSET,
+    ROUTE_A_BASE_SCENE,
+    ROUTE_B_DEFAULT_SCENE,
+    GeometrySpec,
+    ScenePlacement,
+    ScenePlan,
+    TabletopSpec,
+    build_route_a_plan,
+    build_route_b_plan,
+    local_to_world,
+    route_a_base_scene,
+    route_b_default_scene,
+    world_to_local,
+)
+from .assets import (BUTTON, CONTAINER, CUBE, asset_for, model_for, resolve_entities,
+                     resolve_intent)
+from .composer import MIN_GAP_M, WORKSPACE_X, WORKSPACE_Y, SceneAsset, SceneComposer
+from .discovery import SceneEntityRecord, discover_scene_registry, discover_task_objects
+from .interaction_registry_builder import (
+    AUTHORED_FRONT,
+    GENERATED_FRONT,
+    bind_authored_registry,
+    build_generated_registry,
+)
+from .model_catalog import (
+    DEFAULT_ROUTE_A_MODEL_CATALOG,
+    ROUTE_A_MODEL_CATALOG_ENV,
+    ResolvedRouteAModels,
+    RouteAModel,
+    RouteAModelCatalog,
+    load_route_a_model_catalog,
+)
+from .registry import (
+    DiscoveredSceneObject,
+    DiscoveredSceneRegistry,
+    SceneObject,
+    SceneRegistry,
+)
+
+__all__ = [
+    "AUTHORED_FRONT",
+    "BUTTON",
+    "CONTAINER",
+    "CUBE",
+    "asset_for",
+    "model_for",
+    "resolve_entities",
+    "resolve_intent",
+    "DiscoveredSceneObject",
+    "DiscoveredSceneRegistry",
+    "GENERATED_FRONT",
+    "GeometrySpec",
+    "LOCAL_TO_WORLD_OFFSET",
+    "MIN_GAP_M",
+    "ROUTE_A_BASE_SCENE",
+    "ROUTE_A_MODEL_CATALOG_ENV",
+    "ROUTE_B_DEFAULT_SCENE",
+    "SceneAsset",
+    "SceneComposer",
+    "SceneEntityRecord",
+    "SceneObject",
+    "ScenePlacement",
+    "ScenePlan",
+    "SceneRegistry",
+    "TabletopSpec",
+    "WORKSPACE_X",
+    "WORKSPACE_Y",
+    "bind_authored_registry",
+    "build_generated_registry",
+    "build_route_a_plan",
+    "build_route_b_plan",
+    "discover_scene_registry",
+    "discover_task_objects",
+    "local_to_world",
+    "route_a_base_scene",
+    "route_b_default_scene",
+    "world_to_local",
+    "DEFAULT_ROUTE_A_MODEL_CATALOG",
+    "ResolvedRouteAModels",
+    "RouteAModel",
+    "RouteAModelCatalog",
+    "load_route_a_model_catalog",
+]

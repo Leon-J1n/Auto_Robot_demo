@@ -1,0 +1,420 @@
+"""Regenerate manifest-driven doc tables in README + docs/.
+
+Reads ``src/ssik/prebuilt/MANIFEST.toml`` and rewrites the named-anchor
+regions in:
+
+  README.md                     prebuilt table + EAIK comparison table
+  docs/quickstart.md            prebuilt table
+  docs/index.md                 arm count + roster (inline prose anchors)
+  docs/setting_up_your_robot.md arm count (inline prose anchors)
+  docs/arm_coverage.md          fixture-provenance table
+  src/ssik/prebuilt/README.md   build-time / artifact-size table
+  CITATION.cff                  abstract arm count + roster (regex, not anchors --
+                                YAML can't carry HTML-comment anchors)
+
+Markdown regions are delimited by HTML-comment anchors, in two forms:
+
+  block (tables):              inline (in-prose values):
+  <!-- AUTOGEN:region_name --> ... <!-- AUTOGEN:arm_count -->25<!-- /AUTOGEN --> ...
+  ... generated content ...
+  <!-- /AUTOGEN -->
+
+Outside the anchors the file is untouched. Adding new arms therefore
+only requires editing ``MANIFEST.toml`` and running this script -- every
+arm count, roster, and table across the docs refreshes from it.
+
+Usage::
+
+    uv run python scripts/regen_docs.py            # rewrite in place
+    uv run python scripts/regen_docs.py --check    # fail if any file would change
+
+The ``--check`` mode is the CI drift gate: it exits non-zero if the
+files on disk diverge from what the manifest implies, with a diff for
+the reviewer.
+
+Files this script does NOT yet handle (left for follow-up):
+
+  outreach/*.md                       prose name lists (no live counts today)
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from collections.abc import Callable
+from pathlib import Path
+
+from ssik.prebuilt._manifest import Arm, load_manifest
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+# ---------------------------------------------------------------------------
+# Cell renderers — turn an :class:`Arm` into one row of each known table.
+# ---------------------------------------------------------------------------
+
+
+def _fmt_time(ms_mean: float, ms_ci95: float) -> str:
+    """Format mean ± CI95 in either µs or ms, choosing the unit that
+    matches the legacy hand-written cells in the README.
+
+    Convention used historically: arms running under 1 ms display in µs
+    (``551 ± 12 µs``); arms at or above 1 ms display in ms with a
+    decimal (``1.06 ± 0.02 ms``); arms at or above 10 ms display in ms
+    with a decimal (``41.46 ± 1.25 ms``).
+    """
+    if ms_mean < 1.0:
+        # Sub-millisecond: show in microseconds, rounded to int.
+        return f"{round(ms_mean * 1000)} ± {round(ms_ci95 * 1000)} µs"
+    return f"{ms_mean:.2f} ± {ms_ci95:.2f} ms"
+
+
+def _fmt_fk(max_fk: float) -> str:
+    """Format FK residual like ``2e-9`` (one significant digit, lowercase
+    ``e``)."""
+    if max_fk == 0.0:
+        return "0"
+    # ``f"{x:.0e}"`` gives ``2e-09``; strip the leading 0 in the exponent
+    # to match the historical README style (``2e-9``).
+    s = f"{max_fk:.0e}"
+    mantissa, exp = s.split("e")
+    sign = "-" if exp.startswith("-") else ""
+    digits = exp.lstrip("+-").lstrip("0") or "0"
+    return f"{mantissa}e{sign}{digits}"
+
+
+def _fmt_sols(sols_min: int, sols_max: int) -> str:
+    """Format the branch-count cell as ``min-max`` or just ``N`` when
+    constant across poses (Puma 560 / iiwa14)."""
+    if sols_max == sols_min:
+        return str(sols_min)
+    return f"{sols_min}-{sols_max}"
+
+
+def _row_fixture_source(arm: Arm) -> str:
+    """One row of the README fixture-provenance table (#311).
+
+    Layout::
+
+      | `<name>` | <fixture_source> |
+
+    Surfaces the kinematic-chain provenance so a user picking up a
+    prebuilt can audit whether ssik solves the same chain their
+    manufacturer ships against their real hardware.
+    """
+    return f"| `{arm.module_basename}` | {arm.fixture_source} |"
+
+
+def _row_readme_prebuilt(arm: Arm) -> str:
+    """One row of the README prebuilt table.
+
+    Format::
+
+      | `<name>` | <display_name> | <kinematic_class> | `<base_link>` | `<ee_link>` |
+
+    The ``kinematic_class`` cell uses bold markdown for the EAIK-gap
+    classes per the legacy convention; we wrap the class in ``**...**``
+    when its ``class_tags`` include ``non-Pieper`` / ``non-SRS`` /
+    ``approximate-SRS`` (the "ssik exists for these" classes).
+    """
+    bold_tags = {"non-Pieper", "non-SRS", "approximate-SRS"}
+    cls = arm.kinematic_class
+    if any(t in bold_tags for t in arm.class_tags):
+        # The class string sometimes already contains a parenthesised
+        # detail (e.g. "non-Pieper 6R (joint 6 y-offset)"). Bold only
+        # the leading class-name portion so the parenthetical reads
+        # naturally.
+        if " (" in cls:
+            head, paren = cls.split(" (", 1)
+            cls = f"**{head}** ({paren}"
+        else:
+            cls = f"**{cls}**"
+    mod = arm.module_basename
+    return f"| `{mod}` | {arm.table_name} | {cls} | `{arm.base_link}` | `{arm.ee_link}` |"
+
+
+def _row_readme_eaik(arm: Arm) -> str:
+    """One row of the README EAIK comparison table.
+
+    Two cells per arm: the EAIK column (a refusal string when the arm
+    is outside EAIK's coverage; the measured numbers otherwise), and
+    the ssik column (always the measured bench numbers from the
+    manifest).
+    """
+    bench = arm.bench
+    if bench is None:
+        # Defensive: every shipped arm should have a bench block.
+        ssik_cell = "—"
+    else:
+        ssik_cell = (
+            f"{_fmt_time(bench.ms_mean, bench.ms_ci95)} / FK {_fmt_fk(bench.max_fk)} "
+            f"/ {_fmt_sols(bench.sols_min, bench.sols_max)} sols"
+        )
+
+    # EAIK column: hardcoded refusal strings per class. This is the one
+    # piece of doc-table metadata the manifest doesn't own (EAIK's
+    # behaviour on each arm is captured verbatim from its actual error
+    # messages). Maintained as a small lookup keyed on ``class_tags``.
+    eaik_cell = _eaik_cell_for(arm)
+
+    # Bold the EAIK-gap classes inside the row label (the "ssik exists
+    # for these" emphasis the legacy README used).
+    bold_tags = {"non-Pieper", "non-SRS", "approximate-SRS"}
+    label_class = arm.short_class
+    if any(t in bold_tags for t in arm.class_tags):
+        # The short_class string may carry a parenthesised suffix; bold
+        # only the leading class-name portion so the parenthetical reads
+        # naturally ("approximate-SRS 7R, 12 mm offset" -> "**approximate-SRS 7R**, 12 mm offset").
+        head, _, paren = label_class.partition(",")
+        label_class = f"**{head.strip()}**,{paren}" if paren else f"**{label_class}**"
+
+    return f"| {arm.short_name} ({label_class}) | {eaik_cell} | {ssik_cell} |"
+
+
+def _eaik_cell_for(arm: Arm) -> str:
+    """The EAIK comparison cell, read from the manifest's measured
+    ``[arms.X.eaik]`` block.
+
+    EAIK's behaviour per arm -- whether it has a known decomposition, and if so
+    its timing/FK/branch numbers, else its verbatim refusal string -- is
+    measured by ``scripts/regen_bench.py`` (against EAIK itself) and stored in
+    the manifest, exactly like ssik's own bench. No hand-maintained tables.
+    """
+    e = arm.eaik
+    if e is None:
+        return "_(no EAIK bench cell yet)_"
+    if not e.supported:
+        return f'**refuses** ("{e.refusal or "unsupported"}")'
+    return (
+        f"{_fmt_time(e.ms_mean, e.ms_ci95)} / FK {_fmt_fk(e.max_fk)} "
+        f"/ {_fmt_sols(e.sols_min, e.sols_max)} sols"
+    )
+
+
+def _row_quickstart_prebuilt(arm: Arm) -> str:
+    """One row of the docs/quickstart.md prebuilt table.
+
+    Compact form -- no bold markup -- because quickstart's table is a
+    skim-reference, not the marketing comparison.
+    """
+    cls = arm.kinematic_class.replace("**", "")
+    mod = arm.module_basename
+    return f"| `{mod}` | {arm.table_name} | {cls} | `{arm.base_link}` | `{arm.ee_link}` |"
+
+
+def _row_prebuilt_readme(arm: Arm) -> str:
+    """One row of the src/ssik/prebuilt/README.md build-time/size table."""
+    build_time = (
+        "<1 s"
+        if arm.build_time_sec <= 1
+        else f"~{arm.build_time_sec // 60} min"
+        if arm.build_time_sec >= 60
+        else f"~{arm.build_time_sec} s"
+    )
+    solver_label = arm.solver
+    # Embellish the solver label for cached-RR arms whose runtime path
+    # uses the cached-RR fast path.
+    if arm.slow_build and "jointlock" in solver_label:
+        solver_label = f"`{solver_label}` + cached-RR"
+    else:
+        solver_label = f"`{solver_label}`"
+    mod = arm.module_basename
+    return f"| `{mod}` | {solver_label} | {build_time} | ~{arm.artifact_size_kb} KB |"
+
+
+# ---------------------------------------------------------------------------
+# Anchor parser / writer.
+# ---------------------------------------------------------------------------
+
+_ANCHOR_RE = re.compile(
+    r"(?P<open><!-- AUTOGEN:(?P<name>[a-z0-9_]+) -->\n)"
+    r"(?P<body>.*?)"
+    r"(?P<close>\n<!-- /AUTOGEN -->)",
+    re.DOTALL,
+)
+
+# Inline variant: open + body + close on a single line, for in-prose values
+# like counts (``ships <!-- AUTOGEN:arm_count -->25<!-- /AUTOGEN --> arms``).
+# Body is newline-free so it never matches the block form above.
+_INLINE_ANCHOR_RE = re.compile(
+    r"(?P<open><!-- AUTOGEN:(?P<name>[a-z0-9_]+) -->)"
+    r"(?P<body>[^\n]*?)"
+    r"(?P<close><!-- /AUTOGEN -->)"
+)
+
+
+def _rewrite_anchors(text: str, renderer: Callable[[str], str | None]) -> str:
+    """Replace each anchored region's body with ``renderer(anchor_name)``.
+
+    Anchors not handled by the renderer (``renderer`` returns ``None``)
+    are left untouched.
+    """
+
+    def sub(m: re.Match[str]) -> str:
+        new_body = renderer(m.group("name"))
+        if new_body is None:
+            return m.group(0)
+        return m.group("open") + new_body + m.group("close")
+
+    return _INLINE_ANCHOR_RE.sub(sub, _ANCHOR_RE.sub(sub, text))
+
+
+# ---------------------------------------------------------------------------
+# Per-file orchestration.
+# ---------------------------------------------------------------------------
+
+
+# Human-facing vendor labels for the collapsible-table summaries. The slug
+# (subpackage name) is the source of truth; this only prettifies acronym /
+# multi-word brands that title-casing would mangle. Unlisted vendors fall
+# back to ``slug.replace("_", " ").title()`` -- correct for most brands, so a
+# newly-onboarded vendor renders reasonably even before it's added here.
+_VENDOR_LABELS: dict[str, str] = {
+    "universal_robots": "Universal Robots",
+    "fanuc": "FANUC",
+    "ufactory": "UFactory",
+    "i2rt": "I2RT",
+    "kuka": "KUKA",
+    "agilex": "AgileX",
+    "openarm": "Enactic OpenArm",
+    "standard_bots": "Standard Bots",
+    "misc": "Other",
+}
+
+
+def _vendor_label(slug: str) -> str:
+    return _VENDOR_LABELS.get(slug, slug.replace("_", " ").title())
+
+
+def _grouped_by_vendor(arms: dict[str, Arm], header: str, row_fn: Callable[[Arm], str]) -> str:
+    """Render one collapsible ``<details>`` block per vendor, each holding a
+    markdown table built with ``row_fn``. Keeps the prebuilt tables navigable
+    as the roster scales toward 100 arms instead of one 100-row wall.
+
+    Vendors appear in first-occurrence order; arms keep manifest order within
+    a vendor. The blank lines around the table are required for GitHub /
+    PyPI to render markdown inside the HTML block.
+    """
+    groups: dict[str, list[Arm]] = {}
+    for arm in arms.values():
+        groups.setdefault(arm.vendor, []).append(arm)
+    blocks = []
+    for vendor, group in groups.items():
+        rows = "\n".join(row_fn(arm) for arm in group)
+        n = len(group)
+        summary = (
+            f"<summary><b>{_vendor_label(vendor)}</b>: "
+            f"<code>ssik.prebuilt.{vendor}</code> "
+            f"({n} arm{'s' if n != 1 else ''})</summary>"
+        )
+        blocks.append(f"<details>\n{summary}\n\n{header}\n{rows}\n\n</details>")
+    return "\n\n".join(blocks)
+
+
+def _render(arms: dict[str, Arm], anchor: str) -> str | None:
+    """Return the body for one anchor, or ``None`` if unknown."""
+    module_table_header = "| Module | Arm | Class | base_link | ee_link |\n|---|---|---|---|---|"
+    if anchor == "readme_prebuilt_table":
+        return _grouped_by_vendor(arms, module_table_header, _row_readme_prebuilt)
+    if anchor == "readme_eaik_table":
+        header = "| Arm (class) | EAIK | ssik |\n|---|---|---|"
+        return _grouped_by_vendor(arms, header, _row_readme_eaik)
+    if anchor == "quickstart_prebuilt_table":
+        return _grouped_by_vendor(arms, module_table_header, _row_quickstart_prebuilt)
+    if anchor == "prebuilt_readme_table":
+        header = "| Arm | Solver | Build time | Artifact size |\n|---|---|:---:|:---:|"
+        return _grouped_by_vendor(arms, header, _row_prebuilt_readme)
+    if anchor == "fixture_source_table":
+        header = "| Module | Fixture provenance |\n|---|---|"
+        return _grouped_by_vendor(arms, header, _row_fixture_source)
+    if anchor == "arm_count":
+        return str(len(arms))
+    if anchor == "arm_roster":
+        return ", ".join(arm.short_name for arm in arms.values())
+    return None
+
+
+_FILES: list[Path] = [
+    REPO_ROOT / "README.md",
+    REPO_ROOT / "docs" / "quickstart.md",
+    REPO_ROOT / "docs" / "index.md",
+    REPO_ROOT / "docs" / "setting_up_your_robot.md",
+    REPO_ROOT / "docs" / "arm_coverage.md",
+    REPO_ROOT / "src" / "ssik" / "prebuilt" / "README.md",
+]
+
+# CITATION.cff is YAML (no HTML-comment anchors -- they'd render in the citation
+# abstract), so its arm count + roster are regenerated by targeted regex on the
+# stable surrounding prose instead.
+_CITATION = REPO_ROOT / "CITATION.cff"
+_CITATION_RE = re.compile(r"(It ships )\d+( prebuilt arms\s+\()[^)]*(\))")
+
+
+def _regen_citation(text: str, arms: dict[str, Arm]) -> str:
+    roster = ", ".join(arm.short_name for arm in arms.values())
+    return _CITATION_RE.sub(rf"\g<1>{len(arms)}\g<2>{roster}\g<3>", text)
+
+
+def regenerate(*, check: bool) -> int:
+    """Walk the known files and rewrite/check their anchored regions.
+
+    Returns a process exit code: 0 if everything is in sync, 1 if
+    ``--check`` mode and any file would change.
+    """
+    manifest = load_manifest()
+
+    def renderer(name: str) -> str | None:
+        return _render(manifest, name)
+
+    drift: list[tuple[Path, str, str]] = []
+    Transform = Callable[[str, Callable[[str], str | None]], str]
+    targets: list[tuple[Path, Transform]] = [(path, _rewrite_anchors) for path in _FILES]
+    targets.append((_CITATION, lambda text, _r: _regen_citation(text, manifest)))
+    for path, transform in targets:
+        original = path.read_text()
+        rewritten = transform(original, renderer)
+        if rewritten == original:
+            continue
+        if check:
+            drift.append((path, original, rewritten))
+        else:
+            path.write_text(rewritten)
+            print(f"rewrote {path.relative_to(REPO_ROOT)}")
+
+    if check and drift:
+        import difflib
+
+        for path, original, rewritten in drift:
+            diff = "".join(
+                difflib.unified_diff(
+                    original.splitlines(keepends=True),
+                    rewritten.splitlines(keepends=True),
+                    fromfile=f"committed/{path.name}",
+                    tofile=f"regenerated/{path.name}",
+                    n=2,
+                )
+            )
+            print(diff[:2000], file=sys.stderr)
+        print(
+            f"\n{len(drift)} file(s) out of sync with MANIFEST.toml. Run "
+            f"`uv run python scripts/regen_docs.py` to fix.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail (non-zero exit) if any file would change, with a diff.",
+    )
+    args = parser.parse_args()
+    return regenerate(check=args.check)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

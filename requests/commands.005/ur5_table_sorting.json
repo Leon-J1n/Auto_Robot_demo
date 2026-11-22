@@ -4,12 +4,6 @@
   "scene_id": 3,
   "scene_name": "ur5_table_sorting",
   "scene_name_Chinese": "收纳物品",
-  "planning_collision_proxy": {
-    "enabled": true,
-    "sphere_cell_size": 0.035,
-    "container_names": ["Tray", "Basket"],
-    "batch_size": 32
-  },
   "objects": [
     {
       "object_id_in_scene": 0,
@@ -244,9 +238,6 @@
               "wrist_2_joint": -1.5707963,
               "wrist_3_joint": 0.0
             },
-            "allowed_arm_environment_names": [
-              "RobotPedestal"
-            ],
             "available_connect_joints": [
               "wrist_3_joint"
             ]

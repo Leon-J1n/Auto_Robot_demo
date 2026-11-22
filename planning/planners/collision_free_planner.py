@@ -385,7 +385,7 @@ class CollisionFreePlanner:
                             or candidate_length > current_length + 1e-8
                             or candidate_travel > current_travel + 1e-8):
                         continue
-                    if self.collision_checker.check_path(local, resolution=0.01, safety_distance=safety_distance).in_collision:
+                    if self.collision_checker.check_path(local, resolution=0.5 * self.rrt_resolution_rad, safety_distance=safety_distance).in_collision:
                         continue
                     points, positions = candidate_points, candidate_positions
                     current_cost, current_length, current_travel = candidate_cost, candidate_length, candidate_travel
@@ -394,7 +394,7 @@ class CollisionFreePlanner:
                     break
             if not accepted or time.perf_counter() >= deadline:
                 break
-        final_collision = self.collision_checker.check_path(points, resolution=0.01, safety_distance=safety_distance)
+        final_collision = self.collision_checker.check_path(points, resolution=0.5 * self.rrt_resolution_rad, safety_distance=safety_distance)
         if final_collision.in_collision:
             diagnostics.update(fallback_to_simplified=True, reason="final_collision_check_failed")
             return seed, diagnostics
@@ -441,7 +441,7 @@ class CollisionFreePlanner:
             old_travel = float(np.sum(np.abs(np.diff(points[first:second + 1], axis=0))))
             if float(np.sum(np.abs(np.diff(edge, axis=0)))) > old_travel + 1e-8:
                 continue
-            if self.collision_checker.check_path(edge, resolution=0.01, safety_distance=safety_distance).in_collision:
+            if self.collision_checker.check_path(edge, resolution=0.5 * self.rrt_resolution_rad, safety_distance=safety_distance).in_collision:
                 continue
             edge_positions = np.asarray([self.kinematics.forward(q)["position"] for q in edge])
             points = np.vstack((points[:first], edge, points[second + 1:]))

@@ -1,13 +1,13 @@
 {
-  "revision": 960,
-  "simulation_time": 8.675999999999567,
+  "revision": 1638,
+  "simulation_time": 14.328000000001454,
   "targets": {
     "1": {
       "name": "WorkTable",
       "model_id": 29
     },
     "2": {
-      "name": "ur5",
+      "name": "ur3",
       "model_id": null
     },
     "6": {
@@ -43,11 +43,13 @@
       ]
     }
   },
+  "task_targets": {},
+  "operation_candidates": {},
   "mechanisms": {},
   "gripper": {
     "known": true,
     "initialized": true,
-    "width": 0.08522293596188299,
+    "width": 0.08522321450353851,
     "force": 0.0,
     "contact_detected": false,
     "object_present": false,

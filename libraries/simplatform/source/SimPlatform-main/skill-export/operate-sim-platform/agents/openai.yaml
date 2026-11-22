@@ -1,0 +1,4 @@
+interface:
+  display_name: "RobotSimPlatform Scene Control"
+  short_description: "Operate and validate robot simulation scenes"
+  default_prompt: "Use $operate-sim-platform to modify and validate this simulation scene."

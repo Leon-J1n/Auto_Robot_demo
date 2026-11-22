@@ -86,9 +86,11 @@ class JointMove:
             goal = candidate_goals[0]
             diagnostics["ik"] = {"candidate_count": len(candidate_goals)}
         limits = self.kinematics.limits
+        if goal.shape != start.shape or goal.shape != (len(limits),):
+            raise PlanningError('Target requires one value per robot joint.', code='INVALID_REQUEST')
         if np.any(goal < limits[:, 0]) or np.any(goal > limits[:, 1]):
             raise PlanningError(
-                "Target joint state violates UR5e joint limits.",
+                "Target joint state violates robot joint limits.",
                 code="JOINT_LIMIT_VIOLATION", recoverable=True,
                 details={"target": goal.tolist(), "limits": limits.tolist()},
             )

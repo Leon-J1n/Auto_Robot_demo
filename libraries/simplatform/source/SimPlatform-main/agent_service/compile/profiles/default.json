@@ -1,0 +1,9 @@
+{
+  "disable_end_effector": true,
+  "post_grasp_lift_m": 0.125,
+  "lift_relation": "above",
+  "lift_frame": "world",
+  "post_release_retreat_m": 0.23,
+  "retreat_relation": "behind",
+  "retreat_frame": "world"
+}

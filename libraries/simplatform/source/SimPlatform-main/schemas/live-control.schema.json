@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sim-platform.local/schemas/live-control.schema.json",
+  "title": "Simulation Live Control request",
+  "type": "object",
+  "required": ["id", "method"],
+  "properties": {
+    "id": {"type": ["string", "integer", "null"]},
+    "method": {
+      "enum": [
+        "session.hello", "session.ping", "session.shutdown",
+        "capabilities.query",
+        "scene.query", "scene.snapshot", "scene.create_entity", "scene.load_asset",
+        "scene.load_robot", "scene.ensure_robot", "scene.resolve_object",
+        "scene.get_transform", "scene.update_transform", "scene.set_transform",
+        "scene.set_parent", "scene.destroy_object",
+        "robot.get_link", "robot.command_joint_positions",
+        "simulation.start", "simulation.pause", "simulation.status",
+        "simulation.step", "simulation.reset",
+        "workspace.get", "workspace.resolve", "workspace.bind", "workspace.unbind",
+        "state.save", "state.restore"
+      ]
+    },
+    "params": {"type": "object", "default": {}}
+  },
+  "additionalProperties": false
+}

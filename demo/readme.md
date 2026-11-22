@@ -1,6 +1,6 @@
 # 统一场景演示
 
-唯一运行入口是 `demo.run_demo`。场景来自 `requests/<request>/commands.<id>.json` 和 `requests/commands.001/ur5_table_empty.json`，交互位姿通过 OLS 查询。
+唯一运行入口是 `demo.run_demo`。场景来自 `requests/<request>/commands.<id>.json` 和 `requests/commands.001/ur3_table_empty.json`，交互位姿通过 OLS 查询。
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
@@ -69,7 +69,7 @@
 
 - `task_commands/commands.001.json`：抓取苹果和糖盒并放入篮子，最后回 home；也是默认命令文件。
 - `../requests/commands.002/commands.002.json`：拉开上层抽屉、释放把手后直接抓取并放入苹果、关闭抽屉，最后回 home。
-- `../requests/commands.004/commands.004.json`：抓取瓶子，执行不模拟水流的干式倒水动作，抬高末端后释放瓶子。
+- `requests/commands.004/commands.004.json`：UR10 使用 `ur10_table_sorting.json` 场景，抓起苹果放入篮子。
 
 pick 先接近、闭合确认，再沿世界 Z 抬升，最后独立按 15、12、10、14、13、11 cm 尝试回撤。详细语义以 [atomic_action.md](atomic_action.md) 为准。
 
@@ -92,10 +92,12 @@ pick 先接近、闭合确认，再沿世界 Z 抬升，最后独立按 15、12�
 
 ## 场景与命令配对
 
-- `requests/commands.001/ur5_table_empty.json` ↔ `requests/commands.001/commands.001.json`：原 test 场景。
-- `../requests/commands.002/ur5_table_apple.json` ↔ `../requests/commands.002/commands.002.json`：抽屉场景。命令编排拉开并推动上层抽屉，成功后回 home。
+- `requests/commands.001/ur3_table_empty.json` ↔ `requests/commands.001/commands.001.json`：原 test 场景。
+- `requests/commands.002/piper_table_apple.json` ↔ `requests/commands.002/commands.002.json`：复用 001 布局的 Piper 场景，桌面添加苹果，抓取后携物回 home。
 
-该场景已接通活动抽屉与推拉技能。统一入口命令：
+- `requests/commands.003/nero_table_apple.json` ↔ `requests/commands.003/commands.003.json`：复用 001 环境布局的 Nero 七轴场景，在桌面添加苹果，任务为接近、抓取、抬升、撤退后携物回 home。
+
+Piper 场景统一入口命令：
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
@@ -104,21 +106,18 @@ pick 先接近、闭合确认，再沿世界 Z 抬升，最后独立按 15、12�
   --viewer
 ```
 
-## 002 抽屉开合
+## 002 Piper 抓取苹果
 
-`requests/commands.002/ur5_table_apple.json` 使用桌子、机械臂、夹爪及基底布局，演示抽屉交互。
+`requests/commands.002/piper_table_apple.json` 复用 001 的桌子、夹爪、相机及基底布局，机械臂使用对象库 Piper（ID 8）。任务依次执行接近苹果、抓取、抬升、撤退，最后携物返回 home。
 
 ```powershell
 .\.venv\Scripts\python.exe -B -m demo.run_demo `
   --commands requests\commands.002\commands.002.json `
   --library libraries\simplatform\bin\sim_platform_c.dll `
-  --output tests\output\scene002\interactive `
   --viewer
 ```
 
-流程：先为 pull 和 push 在交互位姿求解 IK 并静态规划完整推拉路径，再执行各自的接近与抓取编排；接近不可行时使用同目标的 _MoveExecutor 直接到交互位姿，然后执行已准备路径。pull 默认 `contact_mode: grasp`，push 使用 `contact_mode: contact` 时不闭合、不抓持、不建立绑定，因此不执行 release。contact 沿用原始把手抓取位姿，不额外旋转或按指垫尺寸偏移接触目标；实际接触仍须确认。
 
-两次运动都使用 `distance: 0.12`，不读取抽屉绝对开度来计算行程，也不以抽屉是否完全关闭判定运动成功。直线方向使用起始推拉坐标系：+Z 沿 tool 原点指向 grasp_center，+X 由抓取 X 的垂直投影确定，+Y = Z × X；默认 pull 沿 -Z、push 沿 +Z，运动中保持起始姿态。contact push 可以先向前运动再建立接触；distance 从首次真实接触时的实测 TCP 开始计量，空行程单独记录，不占用请求的 0.12 m 有效推进行程。完整路径依据几何接触预测规划并连续执行，最终完成量和目标位置按真实接触位姿验证。目标有两个活动抽屉，因此 target/link 用于选择接触对象，不参与行程计算。碰撞、力限制与接触丢失检查保留；未完成请求的推拉行程返回 suspend。
 
 
 抓取准备的直线接近不可行时，pick、pull、抓持式 push 可以降级为 atomic_skill/move 的避障位姿移动：保持原抓取目标，取消直线路径要求，达到并验证实测位姿后才闭合。只有规划失败且该次尝试没有实际运动时才重试；执行中的失败不自动切换。失败记录及降级结果都写入报告，详见 atomic_action.md 的“抓取前的避障降级”。

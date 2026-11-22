@@ -1,0 +1,424 @@
+openapi: 3.1.0
+info:
+  title: RobotSimPlatform Web Gateway
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      responses:
+        "200":
+          description: Gateway and Agent connection health
+  /api/bootstrap:
+    get:
+      operationId: getSceneSnapshot
+      responses:
+        "200":
+          description: Authoritative scene snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SceneSnapshot"
+  /api/commands:
+    post:
+      operationId: executeCommand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandRequest"
+      responses:
+        "200":
+          description: Command result and resulting revision
+        "400":
+          description: Stable command validation or simulation error
+        "409":
+          description: Revision conflict
+  /api/assets:
+    get:
+      operationId: listAssets
+      responses:
+        "200":
+          description: Built-in, project, and uploaded asset metadata
+  /api/assets/upload:
+    post:
+      operationId: uploadAsset
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Registered uploaded asset
+  /api/assets/{assetId}:
+    delete:
+      operationId: deleteUploadedAsset
+      parameters:
+        - in: path
+          name: assetId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Asset deleted }
+  /api/sensors/{entityId}/frame:
+    get:
+      operationId: getSensorFrame
+      parameters:
+        - in: path
+          name: entityId
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: mode
+          schema: { type: string, enum: [rgb, depth], default: rgb }
+      responses:
+        "200":
+          description: Real sensor frame
+          content:
+            image/png: {}
+        "503": { description: Sensor provider unavailable }
+  /api/agent/jobs:
+    get:
+      operationId: listAgentJobs
+      responses:
+        "200": { description: Bounded public Agent job history }
+    post:
+      operationId: createAgentJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                requestId: { type: string }
+                sceneId: { type: string }
+                text: { type: string, minLength: 1 }
+      responses:
+        "202": { description: Queued Agent job }
+  /api/agent/jobs/{jobId}:
+    get:
+      operationId: getAgentJob
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Agent job state }
+  /api/agent/jobs/{jobId}/cancel:
+    post:
+      operationId: cancelAgentJob
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema: { type: string }
+      responses:
+        "202": { description: Agent job cancellation accepted }
+  /api/agent/conversations:
+    get:
+      operationId: listAgentConversations
+      responses:
+        "200":
+          description: Platform conversation history and active conversation
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [activeConversationId, conversations]
+                properties:
+                  activeConversationId:
+                    oneOf:
+                      - { type: string }
+                      - { type: "null" }
+                  conversations:
+                    type: array
+                    items: { $ref: "#/components/schemas/AgentConversationSummary" }
+    post:
+      operationId: createAgentConversation
+      responses:
+        "201":
+          description: New conversation bound to the current scene checkpoint
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentConversation" }
+        "409": { description: An Agent turn is active }
+  /api/agent/conversations/{conversationId}:
+    get:
+      operationId: getAgentConversation
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Public persisted conversation messages
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentConversation" }
+    delete:
+      operationId: deleteAgentConversation
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Conversation deleted }
+        "409": { description: Active conversation or Agent turn cannot be deleted }
+  /api/agent/conversations/{conversationId}/activate:
+    post:
+      operationId: activateAgentConversation
+      parameters:
+        - in: path
+          name: conversationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Conversation bound to the current scene for subsequent turns
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentConversation" }
+        "409": { description: An Agent turn is active }
+  /api/diagnostics:
+    get:
+      operationId: getDiagnostics
+      responses:
+        "200": { description: Bounded operation log }
+  /api/metrics:
+    get:
+      operationId: getMetrics
+      responses:
+        "200":
+          description: In-process aggregate service metrics without Agent trace
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: integer, minimum: 0 }
+  /api/presentation:
+    get:
+      operationId: getPresentation
+      responses:
+        "200":
+          description: Current static projection or timeline manifest
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Presentation" }
+  /api/presentation/mode:
+    post:
+      operationId: setPresentationMode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode, basePresentationRevision]
+              properties:
+                mode: { type: string, enum: [real-sync, sync-and-animate] }
+                basePresentationRevision: { type: integer, minimum: 0 }
+      responses:
+        "200": { description: Updated presentation }
+        "409": { description: Presentation revision conflict or active Agent turn }
+  /api/agent-control/presentation/snapshot:
+    post:
+      operationId: publishAgentSnapshot
+      security: [{ AgentControl: [] }]
+      responses:
+        "200": { description: Static snapshot published atomically }
+        "403": { description: Invalid Agent control credentials }
+  /api/agent-control/assets/resolve:
+    post:
+      operationId: resolveAgentAsset
+      security: [{ AgentControl: [] }]
+      responses:
+        "200": { description: Resolved filesystem path for a bound Agent asset }
+        "403": { description: Invalid Agent control credentials }
+        "404": { description: Asset identifier is missing or ambiguous }
+  /api/agent-control/presentation/timeline:
+    post:
+      operationId: publishAgentTimeline
+      security: [{ AgentControl: [] }]
+      responses:
+        "200": { description: Complete timeline published atomically }
+        "403": { description: Invalid Agent control credentials }
+  /api/agent-control/captures:
+    post:
+      operationId: startAgentCapture
+      security: [{ AgentControl: [] }]
+      responses:
+        "201": { description: Bounded unpublished capture created }
+        "409": { description: Another capture is active }
+  /api/agent-control/captures/{captureId}/frames:
+    post:
+      operationId: appendAgentCaptureFrame
+      security: [{ AgentControl: [] }]
+      parameters:
+        - in: path
+          name: captureId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: SceneSnapshot frame accepted }
+        "409": { description: Capture resource limit reached }
+  /api/agent-control/captures/{captureId}/finish:
+    post:
+      operationId: finishAgentCapture
+      security: [{ AgentControl: [] }]
+      parameters:
+        - in: path
+          name: captureId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Capture published or discarded }
+  /api/agent-control/captures/{captureId}/abort:
+    post:
+      operationId: abortAgentCapture
+      security: [{ AgentControl: [] }]
+      parameters:
+        - in: path
+          name: captureId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Unpublished capture discarded }
+  /api/timelines/{timelineId}/frames/{index}:
+    get:
+      operationId: getTimelineFrame
+      parameters:
+        - in: path
+          name: timelineId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: index
+          required: true
+          schema: { type: integer, minimum: 0 }
+      responses:
+        "200":
+          description: Compressed SceneSnapshot frame
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SceneSnapshot" }
+        "404": { description: Timeline or frame not found }
+  /events:
+    get:
+      operationId: sceneEvents
+      responses:
+        "101": { description: Scene event WebSocket }
+components:
+  securitySchemes:
+    AgentControl:
+      type: apiKey
+      in: header
+      name: X-Agent-Control-Token
+      description: Also requires the turn-bound X-Agent-Job-Id header.
+  schemas:
+    AgentConversationSummary:
+      type: object
+      required: [conversationId, target, presentationMode, createdAt, updatedAt, title]
+      properties:
+        conversationId: { type: string }
+        target: { type: string, enum: [platform] }
+        sceneBinding: { type: object, additionalProperties: true }
+        presentationMode: { type: string, enum: [real-sync, sync-and-animate] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        title: { type: string }
+    AgentConversation:
+      type: object
+      required: [conversationId, target, presentationMode, createdAt, updatedAt, messages]
+      properties:
+        conversationId: { type: string }
+        target: { type: string, enum: [platform] }
+        sceneBinding: { type: object, additionalProperties: true }
+        presentationMode: { type: string, enum: [real-sync, sync-and-animate] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        active: { type: boolean }
+        snapshot: { $ref: "#/components/schemas/SceneSnapshot" }
+        messages:
+          type: array
+          items:
+            type: object
+            required: [role, content, turnId, createdAt]
+            properties:
+              role: { type: string, enum: [user, assistant] }
+              content: { type: string }
+              turnId: { type: string }
+              createdAt: { type: string, format: date-time }
+    CommandRequest:
+      type: object
+      required: [requestId, sceneId, baseRevision, method]
+      properties:
+        requestId: { type: string }
+        sceneId: { type: string }
+        baseRevision: { type: integer, minimum: 0 }
+        method: { type: string }
+        params: { type: object, additionalProperties: true }
+    SceneSnapshot:
+      type: object
+      required: [sceneId, revision, status, simulationTime, entities, settings, features]
+      properties:
+        sceneId: { type: string }
+        revision: { type: integer, minimum: 0 }
+        status: { type: string, enum: [stopped, paused, running, error] }
+        simulationTime: { type: number }
+        entities:
+          type: array
+          items: { type: object, additionalProperties: true }
+        settings: { type: object, additionalProperties: true }
+        features:
+          type: object
+          additionalProperties: { type: boolean }
+    TimelineManifest:
+      type: object
+      required: [timelineId, sceneId, simSessionId, sceneGeneration, presentationRevision, sourceTurnId, frameCount, durationSeconds, defaultFps, frames]
+      properties:
+        timelineId: { type: string }
+        sceneId: { type: string }
+        simSessionId: { type: string }
+        sceneGeneration: { type: integer, minimum: 0 }
+        presentationRevision: { type: integer, minimum: 0 }
+        sourceTurnId: { type: string }
+        frameCount: { type: integer, minimum: 2 }
+        durationSeconds: { type: number, minimum: 0 }
+        defaultFps: { type: number, exclusiveMinimum: 0 }
+        frames:
+          type: array
+          items:
+            type: object
+            required: [index, simulationTime, sceneRevision, snapshotUrl]
+            properties:
+              index: { type: integer, minimum: 0 }
+              simulationTime: { type: number }
+              sceneRevision: { type: integer, minimum: 0 }
+              snapshotUrl: { type: string }
+    Presentation:
+      type: object
+      required: [mode, presentationRevision, snapshot, timeline, detached]
+      properties:
+        mode: { type: string, enum: [real-sync, sync-and-animate] }
+        presentationRevision: { type: integer, minimum: 0 }
+        snapshot: { $ref: "#/components/schemas/SceneSnapshot" }
+        timeline:
+          oneOf:
+            - { $ref: "#/components/schemas/TimelineManifest" }
+            - { type: "null" }
+        detached: { type: boolean }

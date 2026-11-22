@@ -1,0 +1,6 @@
+{
+  "api_version": 1,
+  "name": "ssik",
+  "factory": "libraries.ssik.adapter:create_backend",
+  "auto_priority": 15
+}

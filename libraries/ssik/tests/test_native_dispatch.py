@@ -1,0 +1,474 @@
+"""Opt-in native dispatch on the artifact solve() (#507).
+
+Two things:
+
+1. **Fallback** (runs everywhere): with the native extension unavailable,
+   ``solve(native=True)`` returns exactly the Python result. Forced by
+   monkeypatching the loader, so it holds even where the ext *is* built.
+2. **Native-active parity** (runs where ``ssik._ssik_native`` is importable --
+   the cpp CI job builds it into ``src/ssik``): ``solve(native=True)`` reproduces
+   ``solve()`` across the three_parallel family and its feature matrix. The
+   extension's own correctness is covered by ``test_three_parallel_artifact``;
+   this validates the wiring (dispatch + constant marshalling in ssik._native).
+"""
+
+from __future__ import annotations
+
+import importlib
+from typing import Any
+
+import numpy as np
+import pytest
+
+from ssik import TolerancePolicy, _native
+from ssik.kinematics.poe_fk import poe_forward_kinematics
+from ssik.prebuilt._manifest import load_manifest
+from tests import _native_parity as npar
+
+# Redundant / approximate 7R families: native samples the self-motion manifold via
+# a different (sound) enumeration than Python, so exact set-match is not the runtime
+# contract -- oracle-coverage completeness is validated by the standalone artifact
+# gate (#550/#487), and the runtime path is the SAME C++ function. The runtime gate
+# here is soundness + non-emptiness (test_native_relative_completeness).
+_RELATIVE_NATIVE_SOLVERS = frozenset(
+    {
+        "seven_r.srs_polished",
+        "seven_r.spherical_shoulder",
+        "seven_r.spherical_shoulder_polished",
+        "jointlock.seven_r",
+    }
+)
+
+_ARMS = [
+    arm.name
+    for arm in load_manifest().values()
+    if arm.solver in _native._NATIVE_SOLVERS and arm.solver not in _RELATIVE_NATIVE_SOLVERS
+]
+_RELATIVE_ARMS = [
+    arm.name for arm in load_manifest().values() if arm.solver in _RELATIVE_NATIVE_SOLVERS
+]
+
+
+# Poses a few tenths of a milliradian from a fold, where two exact roots sit
+# closer than ``subproblem_dedup``. Both backends must return both twins
+# (#597, #566, #600), which uniform sampling almost never reaches.
+_NEAR_FOLD_Q = {
+    "puma560_ik": (
+        np.array([0.0, 1.0, -1.5234375, 2.0, 2.0, 0.0]),
+        np.array([0.0, -0.6112615544956004, 2.841592653589793, -1.0, 1.0, 0.0]),
+    ),
+}
+
+
+def _wrap(a: float) -> float:
+    return float(((a + np.pi) % (2 * np.pi)) - np.pi)
+
+
+def _close(a: Any, b: Any, tol: float = 1e-3) -> bool:
+    return all(abs(_wrap(float(x - y))) < tol for x, y in zip(a, b, strict=True))
+
+
+def _set_match(A: list[Any], B: list[Any], tol: float = 1e-3) -> bool:
+    return len(A) == len(B) and all(any(_close(a.q, b.q, tol) for b in B) for a in A)
+
+
+def _same_config(kb: Any, a: Any, b: Any, tol: float = 1e-3) -> bool:
+    """Continuous joints on the circle (the coordinate is only a representative),
+    every other joint by coordinate: a finite joint's representative is the
+    point of the comparison, since its +-pi are 2*pi apart."""
+    for i, joint in enumerate(kb.joints):
+        d = float(a[i] - b[i])
+        if joint.joint_type == "revolute" and joint.limits is None:
+            d = _wrap(d)
+        if abs(d) >= tol:
+            return False
+    return True
+
+
+def _subset(A: list[Any], B: list[Any], tol: float = 1e-3) -> bool:
+    return all(any(_close(a.q, b.q, tol) for b in B) for a in A)
+
+
+def _limit_violation(kb: Any, q: Any) -> float:
+    """How far q lies outside the joint limits, 0.0 when within them. Exact
+    bounds: no slack for boundary round-off yet (#624)."""
+    worst = 0.0
+    for joint, x in zip(kb.joints, q, strict=True):
+        if joint.limits is None:
+            continue
+        lo, hi = joint.limits
+        worst = max(worst, float(lo - x), float(x - hi))
+    return worst
+
+
+def test_native_true_falls_back_when_unavailable(monkeypatch: Any) -> None:
+    """native=True silently returns the Python result when the ext is absent."""
+    monkeypatch.setattr(_native, "_ext", None)
+    monkeypatch.setattr(_native, "_ext_tried", True)
+    assert not _native.native_available()
+
+    mod = importlib.import_module("ssik.prebuilt.ur5_ik")
+    t = mod.fk(np.array([0.3, -0.7, 0.9, 1.1, -0.5, 0.2]))
+    py = mod.solve(t)
+    nat = mod.solve(t, native=True)
+    assert len(py) == len(nat)
+    assert all(_close(a.q, b.q) for a, b in zip(py, nat, strict=True)), "fallback must be identical"
+
+
+def test_native_kwarg_accepted() -> None:
+    """The native kwarg exists on three_parallel artifacts (accepts True/False)."""
+    mod = importlib.import_module("ssik.prebuilt.ur5_ik")
+    t = mod.fk(np.zeros(6))
+    assert mod.solve(t, native=False) is not None
+    assert mod.solve(t, native=True) is not None  # True is safe even without the ext
+
+
+# Options native does not implement, at a pose where honouring them changes the
+# answer. Each hook family is covered: 6R, thin-wrapper 7R and jointlock 7R.
+_Q_OPTIONS = [0.3, 0.5, -0.4, 0.2, 0.9, -0.1, 0.4]
+_TIGHT = TolerancePolicy(subproblem_numerical=1e-15)
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.parametrize(
+    ("arm_name", "options"),
+    [
+        pytest.param("puma560_ik", {"policy": _TIGHT}, id="puma560-policy"),
+        pytest.param("iiwa14_ik", {"policy": _TIGHT}, id="iiwa14-policy"),
+        pytest.param("rizon4_ik", {"policy": _TIGHT, "allow_rescue": False}, id="rizon4-policy"),
+        pytest.param("rizon4_ik", {"allow_refinement": True}, id="rizon4-refinement"),
+    ],
+)
+def test_non_default_options_run_the_python_path(arm_name: str, options: dict[str, Any]) -> None:
+    """The default solve (native) honours a non-default ``policy`` or
+    ``allow_refinement`` by running the Python path, and returns exactly what
+    ``native=False`` returns (#625)."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    t = mod.fk(np.asarray(_Q_OPTIONS[: len(mod._KB.joints)]))
+    py = mod.solve(t, native=False, **options)
+    # Premise: the option changes the answer here, so ignoring it is visible.
+    assert not _set_match(py, mod.solve(t, native=False)), f"{arm_name}: option has no effect"
+    got = mod.solve(t, **options)
+    assert len(got) == len(py)
+    for a, b in zip(got, py, strict=True):
+        assert np.array_equal(a.q, b.q)
+        assert a.refinement_used == b.refinement_used
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.parametrize("arm_name", _ARMS)
+def test_native_matches_python(arm_name: str) -> None:
+    """solve(native=True) reproduces solve() across the feature matrix."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    kb = mod._KB
+    ranges = [
+        (float(j.limits[0]), float(j.limits[1])) if j.limits else (-np.pi, np.pi) for j in kb.joints
+    ]
+    rng = np.random.default_rng(2)
+    near_fold = _NEAR_FOLD_Q.get(arm_name, ())
+    for i in range(25 + len(near_fold)):
+        q = np.array([rng.uniform(lo, hi) for lo, hi in ranges]) if i < 25 else near_fold[i - 25]
+        t = np.asarray(poe_forward_kinematics(kb, q), dtype=np.float64)
+        seed = q + rng.uniform(-0.2, 0.2, len(q))
+
+        assert _set_match(mod.solve(t), mod.solve(t, native=True)), f"{arm_name}: full-set"
+        assert _set_match(
+            mod.solve(t, respect_limits=False), mod.solve(t, native=True, respect_limits=False)
+        ), f"{arm_name}: respect_limits=False"
+
+        # respect_limits="wrap": the raw set, nothing dropped, each joint in its
+        # range where a +-2pi representative is -- a limited joint compared WITHOUT
+        # wrapping, since the representative is the point of the mode; a continuous
+        # joint has no range, so it is compared on the circle. One representative
+        # per branch (enumerate_windings=False) is what matches the raw set 1:1;
+        # with enumeration (the default, #562) wrap also lifts wide-limit joints,
+        # and the two backends must still agree on that set.
+        raw_n = len(mod.solve(t, respect_limits=False))
+        for enumerate_windings in (False, True):
+            py_w = mod.solve(t, respect_limits="wrap", enumerate_windings=enumerate_windings)
+            nat_w = mod.solve(
+                t, native=True, respect_limits="wrap", enumerate_windings=enumerate_windings
+            )
+            assert len(py_w) == len(nat_w), f"{arm_name}: wrap parity ({enumerate_windings})"
+            if not enumerate_windings:
+                assert len(py_w) == raw_n, f"{arm_name}: wrap drops nothing"
+            else:
+                assert len(py_w) >= raw_n, f"{arm_name}: wrap lifts, never drops"
+            assert all(any(_same_config(kb, a.q, b.q) for b in py_w) for a in nat_w), (
+                f"{arm_name}: wrap representatives ({enumerate_windings})"
+            )
+
+        py_full = mod.solve(t)
+        cpp_m = mod.solve(t, native=True, max_solutions=3)
+        assert len(cpp_m) == min(3, len(py_full)), f"{arm_name}: max count"
+        assert _subset(cpp_m, py_full), f"{arm_name}: max subset"
+
+        py_s = mod.solve(t, q_seed=seed)
+        nat_s = mod.solve(t, q_seed=seed, native=True)
+        assert len(py_s) == len(nat_s), f"{arm_name}: seed count"
+        if nat_s:
+            assert _close(py_s[0].q, nat_s[0].q), f"{arm_name}: nearest-to-seed"
+
+        # seed + max: same count and the nearest (top-1, the tracking guarantee)
+        # matches. Deeper ordering is not asserted -- at a near-singular pose two
+        # solutions can be near-equidistant to the seed, so which lands k-th flips
+        # by BLAS backend (the #56 representative ambiguity).
+        py_sm = mod.solve(t, q_seed=seed, max_solutions=2)
+        nat_sm = mod.solve(t, q_seed=seed, max_solutions=2, native=True)
+        assert len(py_sm) == len(nat_sm), f"{arm_name}: seed+max count"
+        if nat_sm:
+            assert _close(py_sm[0].q, nat_sm[0].q), f"{arm_name}: seed+max nearest"
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.parametrize("arm_name", _RELATIVE_ARMS)
+def test_native_relative_completeness(arm_name: str) -> None:
+    """Redundant/approximate 7R runtime contract (#554): native=True returns SOUND
+    solutions (every returned q is a real IK) and is non-empty exactly when the
+    Python path is, on stable (non-continuum) poses. It may sample the self-motion
+    manifold differently from native=False -- oracle-coverage is the standalone
+    artifact gate's job (#550), and the runtime calls the same C++ solve."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    kb = mod._KB
+    ranges = [
+        (float(j.limits[0]), float(j.limits[1])) if j.limits else (-np.pi, np.pi) for j in kb.joints
+    ]
+    rng = np.random.default_rng(2)
+    kept = 0
+    attempts = 0
+    while kept < 15 and attempts < 800:
+        attempts += 1
+        q = np.array([rng.uniform(lo, hi) for lo, hi in ranges])
+        t = np.asarray(poe_forward_kinematics(kb, q), dtype=np.float64)
+        py = mod.solve(t)
+        # Drop near-continuum / near-singular poses (mirror the standalone golden:
+        # count <= 130 and stable under a 1e-6 perturbation), where native and
+        # Python legitimately return different sound subsets of the manifold.
+        #
+        # Measured on the geometric branches, with winding enumeration off: the
+        # threshold is about how densely the solver sampled the self-motion
+        # manifold, and lifting each branch to its in-limit 2*pi coordinates
+        # (#562, x16 on xarm7) multiplies the count without making the pose any
+        # closer to a continuum. Against the lifted count nearly every pose
+        # tripped the filter and the test ran out of samples.
+        geometric = mod.solve(t, enumerate_windings=False)
+        if len(geometric) > 130:
+            continue
+        stable = all(
+            len(
+                mod.solve(
+                    np.asarray(poe_forward_kinematics(kb, q + dq), dtype=np.float64),
+                    enumerate_windings=False,
+                )
+            )
+            == len(geometric)
+            for dq in (rng.uniform(-1e-6, 1e-6, len(q)), rng.uniform(-1e-6, 1e-6, len(q)))
+        )
+        if not stable:
+            continue
+        kept += 1
+        nat = mod.solve(t, native=True)
+        for s in nat:  # soundness: every native solution is a real, in-limits IK
+            assert np.linalg.norm(poe_forward_kinematics(kb, s.q) - t) <= 1e-6, (
+                f"{arm_name}: native returned an unsound solution"
+            )
+            assert _limit_violation(kb, s.q) == 0.0, (
+                f"{arm_name}: native returned q={s.q.tolist()} outside the joint limits"
+            )
+        # non-emptiness parity: native finds solutions exactly when Python does.
+        assert bool(nat) == bool(py), f"{arm_name}: native/python emptiness disagree"
+    assert kept >= 10, f"{arm_name}: too few stable poses sampled ({kept})"
+
+
+# Poses where every in-limits configuration sits on a short arc of the swivel
+# circle, so the default solve reaches the in-limits resolver. Native polished
+# the resolver's output without holding it to the limits and returned
+# configurations outside them: 0.105 rad for the yumi_left pose (#621).
+_SRS_POLISHED_LIMIT_Q = [
+    pytest.param(
+        "yumi_left_ik",
+        [
+            -1.9451154001868338,
+            -0.18549152986334183,
+            -2.841459643980648,
+            -1.9480498381501008,
+            2.069309562439483,
+            1.6282648038822964,
+            -1.1423062671879276,
+        ],
+        id="yumi_left",
+    ),
+    pytest.param(
+        "yumi_right_ik",
+        [
+            -2.938220369378702,
+            -2.5033956871033363,
+            2.938692891752213,
+            -0.10508555149089675,
+            -0.7516448924411382,
+            0.1790573476332662,
+            1.7790886217577082,
+        ],
+        id="yumi_right",
+        # Native's in-limits resolver misses the in-limits arc here. The native
+        # rescue used to land on it by chance; the shared rescue (#622) finds
+        # nothing in limits on either backend, as Python's own rescue would.
+        marks=pytest.mark.xfail(
+            strict=True,
+            reason="#462: native srs_polished in-limits resolver under-samples the swivel arc",
+        ),
+    ),
+    pytest.param(
+        "gen3_ik",
+        [
+            3.1403201643032714,
+            2.2394833145946627,
+            0.1722556723182658,
+            -1.3466040349229238,
+            -3.1372139785758324,
+            2.0894567430243076,
+            3.1410378989985057,
+        ],
+        id="gen3",
+    ),
+    pytest.param(
+        "j2s7s300_ik",
+        [
+            -3.1399681260977976,
+            0.8221045098769837,
+            2.299456665494478,
+            1.7375783909708418,
+            -3.139296028447983,
+            1.1347011394328865,
+            -3.1384327390987354,
+        ],
+        id="j2s7s300",
+    ),
+]
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.parametrize(("arm_name", "q"), _SRS_POLISHED_LIMIT_Q)
+def test_native_srs_polished_respects_limits(arm_name: str, q: list[float]) -> None:
+    """The default solve (respect_limits=True) returns only in-limits
+    configurations on native, as on Python, at poses that reach the in-limits
+    resolver. Each pose is its own in-limits solution, so both backends must
+    find at least one (#621)."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    kb = mod._KB
+    t = np.asarray(poe_forward_kinematics(kb, np.asarray(q)), dtype=np.float64)
+    nat = mod.solve(t, native=True)
+    assert nat, f"{arm_name}: native returned nothing for an in-limits pose"
+    for s in nat:
+        assert np.linalg.norm(poe_forward_kinematics(kb, s.q) - t) <= 1e-6
+        assert _limit_violation(kb, s.q) == 0.0, (
+            f"{arm_name}: native returned q={s.q.tolist()} outside the joint limits"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Arms built at runtime (#707): Manipulator.solve's backend per family.
+# ---------------------------------------------------------------------------
+
+# One runtime-built copy per family with runtime native routing, plus a
+# jointlock arm, which has none.
+_RUNTIME_ARMS = (*npar.RUNTIME_ARMS, "rizon4_ik")
+
+
+def _runtime(arm: str) -> Any:
+    if arm in npar.RUNTIME_ARMS:
+        return npar.runtime_arm(arm).arm
+    return npar.RuntimeArm(arm).arm
+
+
+def _bits(sols: list[Any]) -> list[tuple[bytes, float, str]]:
+    return [(s.q.tobytes(), s.fk_residual, s.refinement_used) for s in sols]
+
+
+def _runtime_poses(arm: str) -> list[tuple[str, Any]]:
+    """The parity gate's fast-tier uniform, near-singular and near-limit poses."""
+    keep = ("uniform/", "near_singular/", "near_limit/")
+    return [(pid, q) for pid, q in npar.poses(arm, "fast") if pid.startswith(keep)]
+
+
+@pytest.mark.parametrize("arm_name", ["ur5_ik", "iiwa14_ik"])
+def test_runtime_native_falls_back_when_unavailable(monkeypatch: Any, arm_name: str) -> None:
+    """Without the extension a runtime-built arm's solve, by default and with
+    native=True, returns exactly the Python result."""
+    monkeypatch.setattr(_native, "_ext", None)
+    monkeypatch.setattr(_native, "_ext_tried", True)
+    arm = _runtime(arm_name)
+    for _, q in _runtime_poses(arm_name)[:3]:
+        t = arm.fk(q)
+        py = _bits(arm.solve(t, native=False))
+        assert _bits(arm.solve(t)) == py
+        assert _bits(arm.solve(t, native=True)) == py
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.filterwarnings("ignore:jointlock.seven_r. solving this 7R arm")
+@pytest.mark.parametrize("arm_name", _RUNTIME_ARMS)
+def test_runtime_arm_matches_prebuilt(arm_name: str) -> None:
+    """A runtime-built arm with a prebuilt arm's geometry returns, bit for bit,
+    what the prebuilt arm returns (natively, its default), by default and with
+    native=True, on every family with a native core (since 9.0.0). A jointlock
+    arm built at runtime has no native data and solves in Python whatever
+    ``native`` says. Unseeded, and seeded with ``max_solutions=1`` (the
+    tracking call)."""
+    mod = importlib.import_module(f"ssik.prebuilt.{arm_name}")
+    arm = _runtime(arm_name)
+    jointlock = mod.SOLVER_NAME == "jointlock.seven_r"
+    rng = np.random.default_rng(707)
+    for pid, q in _runtime_poses(arm_name)[: 2 if jointlock else None]:
+        t = arm.fk(q)
+        seed = q + rng.normal(0.0, 0.05, size=len(q))
+        for kw in ({}, {"q_seed": seed, "max_solutions": 1}):
+            if jointlock:
+                py = _bits(arm.solve(t, native=False, allow_rescue=False, **kw))
+                for native in (None, True):
+                    got = _bits(arm.solve(t, native=native, allow_rescue=False, **kw))
+                    assert got == py, f"{arm_name} {pid}: native={native} is not the Python result"
+                continue
+            want = _bits(mod.solve(t, **kw))
+            assert _bits(arm.solve(t, **kw)) == want, f"{arm_name} {pid}: default"
+            assert _bits(arm.solve(t, native=True, **kw)) == want, f"{arm_name} {pid}: native"
+
+
+@pytest.mark.skipif(
+    not _native.native_available(),
+    reason="ssik._ssik_native not built (see scripts/build_cpp_ext.py --out-dir src/ssik)",
+)
+@pytest.mark.parametrize(
+    ("arm_name", "options"),
+    [
+        pytest.param("puma560_ik", {"policy": _TIGHT}, id="puma560-policy"),
+        pytest.param("ur5_ik", {"allow_refinement": True}, id="ur5-refinement"),
+        pytest.param("iiwa14_ik", {"swivel_samples": 7}, id="iiwa14-solver_kwargs"),
+    ],
+)
+def test_runtime_options_native_lacks_run_python(arm_name: str, options: dict[str, Any]) -> None:
+    """On a runtime-built arm, native=True with an option native does not
+    implement returns the Python result, as on a prebuilt arm; so does
+    explain=True, which keeps its (solutions, Diagnostic) return."""
+    arm = _runtime(arm_name)
+    t = arm.fk(np.array(_Q_OPTIONS[: arm.dof]))
+    py = _bits(arm.solve(t, native=False, **options))
+    assert _bits(arm.solve(t, native=True, **options)) == py
+    sols, diag = arm.solve(t, native=True, explain=True)
+    assert _bits(sols) == _bits(arm.solve(t, native=False))
+    assert diag.final_count == len(sols)
