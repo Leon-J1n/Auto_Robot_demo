@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "profiles": {
+    "nero+robotiq_2f85": {
+      "profile_id": "nero+robotiq_2f85:v1",
+      "revision": "control-2026-11-23",
+      "apply_when_identity": true,
+      "transform": {
+        "position": [0.0, 0.0, 0.01],
+        "quaternion_xyzw": [0.0, 0.0, 0.0, 1.0],
+        "reference_frame": "parent_link"
+      }
+    }
+  }
+}

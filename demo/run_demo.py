@@ -752,7 +752,16 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                 home_row.update({'success': True, 'status': 'already_home',
                                  'skipped': True, 'reason': 'robot_already_at_home'})
             else:
-                home_row.update(execute_motion(home_request))
+                # Global perception's home move is a real motion and must be
+                # part of the replay stream.  Previously the normal command
+                # recorder was installed only inside the task loop, so this
+                # move changed the backend state without emitting intermediate
+                # frames; WebEditor then appeared to teleport the arm to home.
+                backend.set_frame_callback(startup_frames.append)
+                try:
+                    home_row.update(execute_motion(home_request))
+                finally:
+                    backend.set_frame_callback(None)
                 home_row['success'] = bool(home_row.get('success'))
             home_row['elapsed_s'] = perf_counter() - home_started
             stamp_command(home_row)

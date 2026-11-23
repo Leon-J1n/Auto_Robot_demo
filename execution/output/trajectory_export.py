@@ -40,7 +40,14 @@ def _component(obj: Mapping[str, Any], kind: str) -> Mapping[str, Any]:
 def _pose_default(obj: Mapping[str, Any], robot_id: int, gripper_id: int | None,
                   initial_joints: Iterable[float]) -> list[float]:
     if int(obj["object_id_in_scene"]) == robot_id:
-        return [*map(float, initial_joints), 0.0]
+        joints = [*map(float, initial_joints)]
+        # TRAJ v2 has a fixed seven-value pose.  Historically a six-axis arm
+        # used the spare seventh value for the gripper channel.  A seven-axis
+        # arm must use all seven values for joints; its gripper is represented
+        # by the attached gripper object's own RobotDriver pose below.
+        if len(joints) > 7:
+            raise ValueError("TRAJ v2 supports at most seven robot joints")
+        return joints + ([0.0] if len(joints) < 7 else [])
     if gripper_id is not None and int(obj["object_id_in_scene"]) == gripper_id:
         driver = _component(obj, "RobotDriver")
         initial = driver.get("initial_joint_positions_rad", {})
@@ -81,7 +88,10 @@ def _frame_pose(state: Mapping[str, Any], name: str, robot_id: int, gripper_id: 
                     0.0, 0.72))
             else:
                 value = 0.0
-        return [*map(float, joints), float(value)]
+        joints = [*map(float, joints)]
+        if len(joints) > 7:
+            return None
+        return joints + ([float(value)] if len(joints) < 7 else [])
     if gripper_id is not None and object_ids.get(name) == gripper_id:
         measured = (state.get("scene_driver_joints") or {}).get(str(gripper_id))
         sequence = driver.get("joint_sequence", ())
@@ -175,8 +185,31 @@ def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapp
     # Quantize to the nearest complete playback frame, with halves rounded up.
     pause_frames = int(np.floor(fps * settings['pause_seconds'] + 0.5))
     objects = list(scene.get("objects", ()))
-    robots = [obj for obj in objects if _component(obj, "RobotModelRef") or
-              len(_component(obj, "RobotDriver").get("joint_sequence", ())) == 6]
+    def is_arm(obj: Mapping[str, Any]) -> bool:
+        driver = _component(obj, "RobotDriver")
+        if not driver.get("joint_sequence") or driver.get("role") == "passive":
+            return False
+        if _component(obj, "RobotAttachment"):
+            return False
+        metadata = _component(obj, "MetadataRef")
+        # Existing Scene v1 robot objects do not carry RobotModelRef or an
+        # explicit arm role.  Their MetadataRef.type=robot plus a driven
+        # joint sequence is the stable arm identity; passive scene mechanisms
+        # are excluded by role above.
+        return bool(_component(obj, "RobotModelRef") or metadata.get("type") == "robot")
+
+    robots = [obj for obj in objects if is_arm(obj)]
+    # Runtime scenes may contain a fused gripper driver without the source
+    # Scene's RobotAttachment component.  For the single-arm TRAJ contract,
+    # the arm is the active driver with the largest joint sequence (and a
+    # RobotModelRef wins ties).  Never let a one-joint tool driver make the
+    # exporter report multiple robots.
+    if len(robots) > 1:
+        robots.sort(key=lambda obj: (
+            bool(_component(obj, "RobotModelRef")),
+            len(_component(obj, "RobotDriver").get("joint_sequence", ()))),
+                    reverse=True)
+        robots = robots[:1]
     if len(robots) != 1:
         raise ValueError("TRAJ export requires exactly one robot object")
     robot_id = int(robots[0]["object_id_in_scene"])
@@ -216,6 +249,12 @@ def write_traj(path: str | Path, scene: Mapping[str, Any], frames: Iterable[Mapp
             if pose is not None:
                 pose_rows[oid][frame] = pose
     for oid, values in pose_rows.items():
+        expected_width = len(defaults[oid])
+        if expected_width != 7 or any(len(value) != expected_width for value in values):
+            raise ValueError(
+                f"TRAJ pose width mismatch for object {oid}: "
+                f"default={expected_width}, samples="
+                f"{sorted({len(value) for value in values})}")
         for frame in range(1, len(values)):
             if values[frame] == defaults[oid] and values[frame - 1] != defaults[oid]:
                 values[frame] = values[frame - 1]

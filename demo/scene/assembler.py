@@ -135,6 +135,68 @@ class SceneAssembler:
         self.object_library = object_library
         self.metadata_cache: dict[tuple[str, int], dict] = {}
         self.file_cache: dict[tuple[str, int], str] = {}
+        self.assembly_profiles = self._load_assembly_profiles()
+
+    @staticmethod
+    def _load_assembly_profiles():
+        """Load validated robot/tool mounting calibrations.
+
+        Mounting offsets are physical control-side calibration, not Brain or
+        scene-edit semantics.  Keeping them in a versioned control config
+        prevents a browser's identity transform from silently placing a tool
+        inside the final arm link.
+        """
+        path = Path(__file__).resolve().parents[1] / "config" / "assembly_profiles.json"
+        if not path.is_file():
+            return {}
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise SceneAssemblyError(f"Invalid assembly profile config: {path}") from exc
+        profiles = payload.get("profiles", {}) if isinstance(payload, dict) else {}
+        if not isinstance(profiles, dict):
+            raise SceneAssemblyError("assembly_profiles must be an object")
+        return profiles
+
+    @staticmethod
+    def _is_identity_mount(transform):
+        if not isinstance(transform, dict):
+            return True
+        position = transform.get("position", [0.0, 0.0, 0.0])
+        quaternion = transform.get("quaternion_xyzw", [0.0, 0.0, 0.0, 1.0])
+        try:
+            return (len(position) == 3 and np.linalg.norm(np.asarray(position, dtype=float)) < 1e-9
+                    and len(quaternion) == 4
+                    and np.linalg.norm(np.asarray(quaternion, dtype=float) - np.array([0, 0, 0, 1])) < 1e-9)
+        except (TypeError, ValueError):
+            return False
+
+    def _apply_assembly_profile(self, robot, gripper, attachments, robot_meta):
+        if not gripper or not attachments:
+            return None
+        robot_name = _metadata_name(robot_meta).casefold()
+        gripper_ref = _ols_ref(gripper)
+        if gripper_ref is None or gripper_ref[0] != "robot":
+            return None
+        gripper_meta = self._metadata(*gripper_ref)
+        gripper_name = _metadata_name(gripper_meta).casefold()
+        key = f"{robot_name}+{gripper_name}"
+        profile = self.assembly_profiles.get(key)
+        if not isinstance(profile, dict):
+            return None
+        transform = profile.get("transform")
+        if not isinstance(transform, dict):
+            raise SceneAssemblyError(f"assembly_profile_transform_missing:{key}")
+        attachment = _component_entry(gripper, "RobotAttachment")
+        props = attachment.setdefault("properties", {})
+        current = props.get("transform")
+        if profile.get("apply_when_identity", True) and self._is_identity_mount(current):
+            props["transform"] = deepcopy(transform)
+        return {
+            "profile_id": profile.get("profile_id", key),
+            "revision": profile.get("revision", "unknown"),
+            "resolved_attachment": deepcopy(props.get("transform")),
+        }
 
     def _metadata(self, asset_type, object_id):
         key = (asset_type, object_id)
@@ -380,6 +442,7 @@ class SceneAssembler:
             robot_meta = self._metadata(*ref)
         robot_path = self._asset_path("robot", _ols_ref(robot)[1], robot_meta)
         gripper = attachments[0] if attachments else None
+        assembly_profile = self._apply_assembly_profile(robot, gripper, attachments, robot_meta)
         self._robot_model_ref(robot, robot_path, attachments, gripper)
         for attachment in attachments:
             mount = _component(attachment, "RobotAttachment")
@@ -406,7 +469,8 @@ class SceneAssembler:
             settings["home"] = {"request": {"target": {"type": "joint",
                 "joint_positions": [initial[name] for name in sequence]}}}
         result.setdefault("_assembly", {})["source"] = "ols"
+        if assembly_profile is not None:
+            result["_assembly"]["profile"] = assembly_profile
         result["_assembly"]["excluded_nonphysical_objects"] = excluded
         result["_assembly"]["resolved_assets"] = len(self.metadata_cache)
         return result
-
