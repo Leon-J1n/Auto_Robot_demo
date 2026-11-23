@@ -48,13 +48,24 @@ def bound_convex_parts(hulls, max_parts, max_vertices=None):
 
 def prepare_mesh(source, *, scale=(1, 1, 1), cache_root=None, settings=None):
     """Build once, validate cached bytes, and fail explicitly on invalid geometry."""
-    import coacd
     settings = {**SETTINGS, **(settings or {})}
     max_input_faces = settings.pop('max_input_faces', None)
     source = Path(source).resolve()
     scale = np.asarray(scale, dtype=float)
     if scale.shape != (3,) or not np.all(np.isfinite(scale)) or np.any(scale <= 0):
         raise ValueError('Collision mesh scale must contain three positive finite values')
+    # An explicitly configured bundle is authoritative.  It is deliberately
+    # checked before the local cache so a stale cache cannot silently win.
+    from .bundle import configured_bundle, CollisionBundleError
+    bundle = configured_bundle()
+    if bundle is not None:
+        bundled = bundle.mesh(source, scale=scale)
+        if bundled is not None:
+            return CollisionMesh(bundled.parts, bundled.volumes, bundled.key)
+        raise CollisionBundleError('collision_bundle_asset_missing')
+    # The generation dependency is only needed when no audited bundle is
+    # selected.  Runtime bundle loading must not depend on CoACD being installed.
+    import coacd
     identity = dict(schema=2, source=sha256(source.read_bytes()).hexdigest(),
                     scale=scale.tolist(), settings=settings, coacd=version('coacd'),
                     trimesh=version('trimesh'))

@@ -23,7 +23,7 @@ FCL 和 MuJoCo 使用同一份派生 URDF；显示仍使用原视觉资产。
 
 ```json
 {
-  "mode": "visual",
+  "mode": "auto",
   "max_input_faces": 3000,
   "max_convex_hulls": 8,
   "max_vertices": 64,
@@ -33,7 +33,9 @@ FCL 和 MuJoCo 使用同一份派生 URDF；显示仍使用原视觉资产。
 }
 ```
 
-`mode: "authored"` 使用原 URDF collision。`exclude_links` 为明确不参与碰撞的
+`mode: "auto"`（默认）在 URDF 为所有视觉链提供 authored collision 时直接使用原始
+collision；只有碰撞几何不完整时才生成 visual-derived collision。`mode: "authored"`
+强制使用原 URDF collision，`mode: "visual"` 强制使用视觉网格生成碰撞。`exclude_links` 为明确不参与碰撞的
 link 名单（例如专用装饰 link），名称拼错会报错。`package_paths` 将
 `package://` 的包名映射到本地绝对目录；普通相对路径按源 URDF 目录解析。
 
@@ -220,3 +222,28 @@ python collision/proxies/export_templates.py --snapshot raw_runtime.json --robot
 输出只供审核和验证后替换；工具不会执行运动。CPU 测试为
 `python -B -m unittest planning.tests.test_collision_proxy -v`。
 
+## 8. 可复现碰撞资产交付包
+
+生产环境可以选择一个经过审核的、内容寻址的碰撞交付包。包由独立的生成环境产生，必须同时固定生成代码版本、依赖版本、生成参数、输入资产 SHA256 和审核状态。运行时只读取包内已经审核的 OBJ/URDF，不在本机重新做 CoACD/网格简化，也不会在包缺失资产时回退到 `.cache` 或现场生成。
+
+设置：
+
+```bash
+export COLLISION_BUNDLE_ROOT=/绝对路径/collision_generation_delivery_20261122_v1
+```
+
+该目录应包含 `reference_bundle/bundle.json`、`reference_bundle/blobs/`、`reference/cache_evidence/` 和 `reference/local_fingerprint.json`。上线前先运行：
+
+```bash
+python tools/verify_collision_bundle.py "$COLLISION_BUNDLE_ROOT"
+```
+
+只有 `review_status=verified` 的包会被默认加载。交付包若仍标记为 `local_success_reference_unreviewed`，只能在隔离复现时显式使用：
+
+```bash
+export COLLISION_BUNDLE_ALLOW_UNREVIEWED=1
+```
+
+这个开关不会把候选包变成生产资产；审核完成后应移除该环境变量并重新运行校验。包的每个凸块和缓存证据都按 SHA256 校验，任何缺失或篡改都会 fail closed。
+
+新资产的标准流程是：固定 Docker/依赖和生成器 commit，收集 OLS 源文件及哈希，生成 manifest 和凸分解结果，运行独立验证器，再由控制端审核几何、碰撞对和回归场景，最后把 `review_status` 改为 `verified`。不要直接覆盖已有 `.cache`。

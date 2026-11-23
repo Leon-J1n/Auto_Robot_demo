@@ -821,21 +821,64 @@ ImportResult UrdfImporter::import(const std::filesystem::path& path) const {
         }
     }
 
-    const std::regex joint_expression(R"(<joint\b([^>]*)>([\s\S]*?)</joint>)", std::regex::icase);
-    for (auto it = std::sregex_iterator(text.begin(), text.end(), joint_expression);
-         it != std::sregex_iterator(); ++it) {
-        JointData joint;
-        const std::string attributes = (*it)[1].str();
-        const std::string block = (*it)[2].str();
-        joint.name = Attribute(attributes, "name").value_or("");
-        joint.type = ParseJointType(Attribute(attributes, "type").value_or("fixed"));
-        joint.parent_link = ChildAttribute(block, "parent", "link").value_or("");
-        joint.child_link = ChildAttribute(block, "child", "link").value_or("");
-        joint.axis = ParseVec3(ChildAttribute(block, "axis", "xyz").value_or("1 0 0"), {1.0, 0.0, 0.0});
-        joint.origin = ParseOrigin(block);
-        if (const auto lower = ChildAttribute(block, "limit", "lower")) joint.lower_limit = std::stod(*lower);
-        if (const auto upper = ChildAttribute(block, "limit", "upper")) joint.upper_limit = std::stod(*upper);
-        result.asset.joints.push_back(std::move(joint));
+    // A URDF transmission contains a nested <joint> element which describes
+    // the actuator mapping, not a kinematic joint in the robot tree.  The
+    // fallback importer used on builds without urdfdom used to scan the whole
+    // document and consequently imported those transmission joints as if they
+    // were links in the kinematic graph.  Keep the fallback parser aligned
+    // with urdfdom: only direct children of <robot> are motion joints.
+    const std::regex robot_body_expression(
+        R"(<robot\b[^>]*>([\s\S]*?)</robot\s*>)", std::regex::icase);
+    std::smatch robot_body_match;
+    if (!std::regex_search(text, robot_body_match, robot_body_expression)) {
+        throw Error(ErrorCode::ValidationFailed, "URDF has no complete robot element");
+    }
+    const std::string robot_body = robot_body_match[1].str();
+    const std::regex top_level_tag_expression(
+        R"(<(/?)([A-Za-z_][A-Za-z0-9_.:-]*)(?:\s[^<>]*?)?(/?)>)", std::regex::icase);
+    const std::regex joint_expression(
+        R"(<joint\b([^>]*)>([\s\S]*?)</joint\s*>)", std::regex::icase);
+    std::size_t depth = 0;
+    std::size_t joint_start = std::string::npos;
+    for (auto tag = std::sregex_iterator(robot_body.begin(), robot_body.end(), top_level_tag_expression);
+         tag != std::sregex_iterator(); ++tag) {
+        const auto match = *tag;
+        const bool closing = !match[1].str().empty();
+        const bool self_closing = !match[3].str().empty();
+        const std::string name = Lowercase(match[2].str());
+        if (!closing) {
+            // A motion joint is a direct child of the robot element.  Record
+            // its complete block and parse it with the existing field logic.
+            if (depth == 0 && name == "joint" && !self_closing)
+                joint_start = static_cast<std::size_t>(match.position());
+            if (!self_closing) ++depth;
+        } else {
+            if (depth > 0) --depth;
+            if (name == "joint" && depth == 0 && joint_start != std::string::npos) {
+                const auto end = static_cast<std::size_t>(match.position() + match.length());
+                const std::string block = robot_body.substr(joint_start, end - joint_start);
+                std::smatch parsed;
+                if (std::regex_search(block, parsed, joint_expression)) {
+                    // Reuse the same parser below by handling this one block.
+                    const std::string attributes = parsed[1].str();
+                    const std::string contents = parsed[2].str();
+                    JointData joint;
+                    joint.name = Attribute(attributes, "name").value_or("");
+                    joint.type = ParseJointType(Attribute(attributes, "type").value_or("fixed"));
+                    joint.parent_link = ChildAttribute(contents, "parent", "link").value_or("");
+                    joint.child_link = ChildAttribute(contents, "child", "link").value_or("");
+                    joint.axis = ParseVec3(ChildAttribute(contents, "axis", "xyz").value_or("1 0 0"),
+                                           {1.0, 0.0, 0.0});
+                    joint.origin = ParseOrigin(contents);
+                    if (const auto lower = ChildAttribute(contents, "limit", "lower"))
+                        joint.lower_limit = std::stod(*lower);
+                    if (const auto upper = ChildAttribute(contents, "limit", "upper"))
+                        joint.upper_limit = std::stod(*upper);
+                    result.asset.joints.push_back(std::move(joint));
+                }
+                joint_start = std::string::npos;
+            }
+        }
     }
     result.diagnostics = AssetValidator::validate(result.asset);
     return result;

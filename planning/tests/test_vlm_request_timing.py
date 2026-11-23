@@ -13,6 +13,26 @@ from demo.run_demo import _print_command_timing
 
 
 class RequestTimingTests(unittest.TestCase):
+    def test_injected_responses_only_client_does_not_fall_through_to_chat(self):
+        """Bridge-injected LocalVlmClient exposes responses, not chat."""
+        calls = []
+
+        def create(**kwargs):
+            calls.append(kwargs)
+            return SimpleNamespace(output_text='{"x":0.5,"y":0.5}')
+
+        estimator = VLMPointEstimator.__new__(VLMPointEstimator)
+        estimator._client = None
+        estimator._get_client = lambda: SimpleNamespace(
+            responses=SimpleNamespace(create=create))
+        estimator.model = 'test'
+        intrinsics = SimpleNamespace(width=3, height=3, fx=1., fy=1., cx=1., cy=1.)
+        pose = SimpleNamespace(position=np.zeros(3), rotation_matrix=np.eye(3))
+        result = estimator.estimate(np.zeros((3, 3, 3), dtype=np.uint8), np.ones((3, 3)),
+            intrinsics, pose, point_type='place', target='Tray')
+        self.assertEqual(result['pixel'], {'x': 1, 'y': 1})
+        self.assertEqual(calls[0]['model'], 'test')
+
     def test_client_success_failure_parse_failure_and_command_reset(self):
         clock = [0.]
         calls = [0]

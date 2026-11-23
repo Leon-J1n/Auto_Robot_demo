@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import numpy as np
 
@@ -201,13 +202,35 @@ class VLMPointEstimator:
         client = self._get_client()
         try:
             with request_timer() as measurement:
-                response = client.responses.create(
-                    model=self.model,
-                    input=[{"role": "user", "content": [
-                        {"type": "input_text", "text": prompt},
-                        {"type": "input_image", "image_url": image_url},
-                    ]}],
-                )
+                # The deployed VLM is the local llama.cpp OpenAI-compatible
+                # server.  It implements Chat Completions (not the hosted
+                # Responses API), and expects ``image_url`` in the chat
+                # content schema.  Keep the old injected ``responses`` mock
+                # path for unit tests and historical replay clients only.
+                # Injected local clients (the bridge's ``LocalVlmClient`` in
+                # particular) are returned by a patched ``_get_client`` and
+                # therefore do not necessarily occupy ``self._client``.  The
+                # transport must be selected from the client interface itself;
+                # consulting ``self._client`` made an injected Responses-only
+                # client fall through to ``client.chat`` and fail with
+                # ``LocalVlmClient has no attribute chat``.
+                if hasattr(client, "responses") and not hasattr(client, "chat"):
+                    response = client.responses.create(
+                        model=self.model,
+                        input=[{"role": "user", "content": [
+                            {"type": "input_text", "text": prompt},
+                            {"type": "input_image", "image_url": image_url},
+                        ]}],
+                    )
+                else:
+                    response = client.chat.completions.create(
+                        model=self.model,
+                        messages=[{"role": "user", "content": [
+                            {"type": "text", "text": prompt},
+                            {"type": "image_url", "image_url": {"url": image_url}},
+                        ]}],
+                        temperature=0,
+                    )
         except Exception as exc:
             request_elapsed = measurement['elapsed_s']
             exception_name = type(exc).__name__.lower()
@@ -226,10 +249,24 @@ class VLMPointEstimator:
             exc.details = payload
             raise
         try:
-            output_text = getattr(response, "output_text", None) or "".join(
-                part.text for item in response.output if item.type == "message"
-                for part in item.content if getattr(part, "text", None)
-            )
+            output_text = getattr(response, "output_text", None)
+            if not output_text:
+                choices = getattr(response, "choices", None) or []
+                message = getattr(choices[0], "message", None) if choices else None
+                content = getattr(message, "content", None)
+                if isinstance(content, str):
+                    output_text = content
+                elif isinstance(content, list):
+                    output_text = "".join(
+                        (getattr(part, "text", None) or
+                         (part.get("text", "") if isinstance(part, dict) else ""))
+                        for part in content
+                    )
+            if not output_text:
+                output_text = "".join(
+                    part.text for item in response.output if item.type == "message"
+                    for part in item.content if getattr(part, "text", None)
+                )
         except (TypeError, AttributeError) as exc:
             raise ValueError("VLM returned no readable response") from exc
         return output_text, measurement['elapsed_s']
@@ -252,16 +289,22 @@ class VLMPointEstimator:
 
     def _get_client(self) -> Any:
         if self._client is None:
-            api_key = os.getenv("DASHSCOPE_API_KEY") or self._settings["api_key"]
-            if not api_key.strip():
-                raise ValueError("VLM api_key is missing; set config/vlm.json or DASHSCOPE_API_KEY")
+            # The production VLM is local.  Do not let inherited HTTP(S)/SOCKS
+            # proxy variables redirect loopback image requests to a proxy.
+            api_key = self._settings["api_key"]
             from openai import OpenAI
-
+            http_client = None
+            host = urlsplit(self._settings["base_url"]).hostname
+            if host in {"127.0.0.1", "localhost", "::1"}:
+                import httpx
+                http_client = httpx.Client(
+                    timeout=self._settings["timeout_seconds"], trust_env=False)
             self._client = OpenAI(
                 api_key=api_key,
                 base_url=self._settings["base_url"],
                 timeout=self._settings["timeout_seconds"],
                 max_retries=self._settings["max_retries"],
+                **({"http_client": http_client} if http_client is not None else {}),
             )
         return self._client
 

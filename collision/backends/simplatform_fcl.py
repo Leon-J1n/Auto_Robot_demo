@@ -28,6 +28,61 @@ DEFAULT_SCENE = PROJECT_ROOT / "requests" / "commands.001" / "ur3_table_empty.js
 DEFAULT_ROBOT_URDF = PROJECT_ROOT / "services" / "object_library_server" / "data" / "robots" / "1" / "ur5e_arm.urdf"
 
 
+def _install_noop_bq() -> None:
+    """Provide the optional source-checkout logger before importing SimPlatform.
+
+    The SDK imports ``bq`` before it reaches its native loader.  Installing the
+    tiny logger shim first avoids a partially imported ``sim_platform`` module
+    and lets the real C API error surface unchanged.
+    """
+    if "bq" in sys.modules:
+        return
+    class _NoopLogger:
+        def is_valid(self): return True
+        def verbose(self, *args): pass
+        def debug(self, *args): pass
+        def info(self, *args): pass
+        def warning(self, *args): pass
+        def error(self, *args): pass
+        def fatal(self, *args): pass
+    class _NoopLog:
+        def create_log(self, *args): return _NoopLogger()
+        def force_flush_all_logs(self): pass
+    bq = types.ModuleType("bq")
+    bq_log = types.ModuleType("bq.log")
+    bq_log.log = _NoopLog()
+    bq_defs = types.ModuleType("bq.defs")
+    bq_level = types.ModuleType("bq.defs.log_level")
+    bq_level.log_level = types.SimpleNamespace(verbose=0, debug=1, info=2, warning=3, error=4, fatal=5)
+    sys.modules.update({"bq": bq, "bq.log": bq_log, "bq.defs": bq_defs,
+                        "bq.defs.log_level": bq_level})
+
+
+def _configure_native_library() -> Path | None:
+    """Select the platform's SimPlatform C API without altering the process ABI.
+
+    The Conda execution environment may provide a compatible C++ runtime that
+    the SDK expects.  Preloading the system ``libstdc++`` globally is unsafe:
+    it can mix two C++ ABIs and crash while the native SDK loads a URDF.  The
+    native library's normal dependency resolution is therefore left intact.
+    """
+    configured = os.environ.get("SIM_PLATFORM_LIBRARY")
+    candidates = [Path(configured).expanduser()] if configured else []
+    candidates += [
+        PROJECT_ROOT / "_thirdparty" / "SimPlatform-main" / "build" / "linux" / "sim_platform_c.so",
+        PROJECT_ROOT.parent / "_thirdparty" / "SimPlatform-main" / "build" / "linux" / "sim_platform_c.so",
+        PROJECT_ROOT / "libraries" / "simplatform" / "source" / "SimPlatform-main" / "build" / "linux" / "sim_platform_c.so",
+    ]
+    selected = next((p.resolve() for p in candidates if p.is_file()), None)
+    if configured and selected is None:
+        raise RuntimeError(
+            f"sim_platform_fcl_library_missing: SIM_PLATFORM_LIBRARY does not point to a file: {configured}"
+        )
+    if selected is not None:
+        os.environ.setdefault("SIM_PLATFORM_LIBRARY", str(selected))
+    return selected
+
+
 @dataclass(frozen=True)
 class CollisionResult:
     in_collision: bool
@@ -47,49 +102,20 @@ def _load_sdk():
     value = str(root.resolve())
     if value not in sys.path:
         sys.path.insert(0, value)
+    _configure_native_library()
+    _install_noop_bq()
     try:
         from sim_platform.sdk import Simulator, Transform
     except ModuleNotFoundError as exc:
-        if exc.name != "bq":
-            raise RuntimeError(
-                "Unable to load the SimPlatform FCL SDK. Build its C API with "
-                "SIM_ENABLE_FCL=ON and set SIM_PLATFORM_LIBRARY to sim_platform_c.dll."
-            ) from exc
-        # The archive declares bqlog as a packaging dependency, but source-only
-        # checkouts do not contain the wheel. The SDK uses it for diagnostics;
-        # keep the collision adapter usable with a no-op logger until the native
-        # SimPlatform library is loaded.
-        class _NoopLogger:
-            def is_valid(self): return True
-            def verbose(self, *args): pass
-            def debug(self, *args): pass
-            def info(self, *args): pass
-            def warning(self, *args): pass
-            def error(self, *args): pass
-            def fatal(self, *args): pass
-        class _NoopLog:
-            def create_log(self, *args): return _NoopLogger()
-            def force_flush_all_logs(self): pass
-        bq = types.ModuleType("bq")
-        bq_log = types.ModuleType("bq.log")
-        _noop = _NoopLog()
-        bq_log.log = _noop
-        bq_defs = types.ModuleType("bq.defs")
-        bq_level = types.ModuleType("bq.defs.log_level")
-        bq_level.log_level = types.SimpleNamespace(verbose=0, debug=1, info=2, warning=3, error=4, fatal=5)
-        sys.modules.update({"bq": bq, "bq.log": bq_log, "bq.defs": bq_defs,
-                            "bq.defs.log_level": bq_level})
-        try:
-            from sim_platform.sdk import Simulator, Transform
-        except Exception as retry_exc:
-            raise RuntimeError(
-                "Unable to load the SimPlatform FCL SDK. Build its C API with "
-                "SIM_ENABLE_FCL=ON and set SIM_PLATFORM_LIBRARY to sim_platform_c.dll."
-            ) from retry_exc
-    except Exception as exc:  # the SDK also validates its native library at import time
         raise RuntimeError(
-            "Unable to load the SimPlatform FCL SDK. Build its C API with "
-            "SIM_ENABLE_FCL=ON and set SIM_PLATFORM_LIBRARY to sim_platform_c.dll."
+            "sim_platform_fcl_import_failed: optional SDK dependency is missing"
+        ) from exc
+    except Exception as exc:  # the SDK also validates its native library at import time
+        library = os.environ.get("SIM_PLATFORM_LIBRARY", "<auto>")
+        raise RuntimeError(
+            "sim_platform_fcl_load_failed: native FCL C API could not be loaded "
+            f"(SIM_PLATFORM_LIBRARY={library}). Build SimPlatform with SIM_ENABLE_FCL=ON "
+            "and verify the Linux shared-library dependencies."
         ) from exc
     return Simulator, Transform
 
@@ -197,9 +223,20 @@ class SimPlatformFCLCollisionChecker:
         from collision.mounting import fixed_base_links, mounting_pedestals
         self._mounting_pedestal_names = mounting_pedestals(self.scene, robot_object or {})
         self._fixed_base_link_names = fixed_base_links(self.robot_urdf)
-        self._sim = Simulator(physics="none", collision="fcl")
-        self.world = self._sim.create_world()
-        self.robot = self.world.load_robot(self.robot_urdf)
+        try:
+            self._sim = Simulator(physics="none", collision="fcl")
+            self.world = self._sim.create_world()
+        except Exception as exc:
+            raise RuntimeError(
+                "fcl_runtime_init_failed: SimPlatform was loaded but could not create "
+                "an FCL world; verify the native library was built with SIM_ENABLE_FCL=ON"
+            ) from exc
+        try:
+            self.robot = self.world.load_robot(self.robot_urdf)
+        except Exception as exc:
+            raise RuntimeError(
+                f"fcl_urdf_load_failed: native FCL rejected robot URDF {self.robot_urdf}: {exc}"
+            ) from exc
         # SimPlatform exposes all URDF joints (including fixed joints) and
         # uses its own joint ordering. Keep the scene driver's joint order
         # rather than assuming a particular arm's joint names.
@@ -555,4 +592,3 @@ class SimPlatformFCLCollisionChecker:
 def _identity_or_transform(entity: Any, Transform: Any):
     # Keep the robot at the origin unless the scene contains an explicit robot transform.
     return Transform()
-

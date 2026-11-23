@@ -71,6 +71,10 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
     probe = copy(checker)
     probe.probe = mujoco.MjData(checker.backend.model)
     probe._query_cache = OrderedDict()
+    # The live checker may already have a PlanningProxy.  A policy-only probe
+    # must build the articulated pair list itself; delegating to the copied
+    # proxy would skip that list and leave ``_pairs`` unset.
+    probe.planning_proxy = None
     probe._pair_key = None
     probe._policy_only = True
     extra = {}
@@ -80,9 +84,36 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
         extra['allowed_geom_ids'] = allowed_geom_ids
     probe.check(joints, safety_distance=safety_distance, **extra)
     model = checker.backend.model
-    articulated = {frozenset((int(a), int(b))): bool(support) for a, b, support in probe._pairs}
+    # Some lightweight backends do not expose an articulated pair array during
+    # initialization.  The frozen policy still remains safe (all unlisted
+    # pairs retain the requested distance limit); do not fail the whole control
+    # request merely while collecting optional pair metadata.
+    articulated = {frozenset((int(a), int(b))): bool(support)
+                   for a, b, support in getattr(probe, '_pairs', ())}
     allowed, thresholds, base_thresholds = [], [], []
     allowed_names = set(getattr(checker, 'allowed_target_names', ())) | set(map(str, allowed_geom_ids or ()))
+    # The runtime target is sometimes carried only as an object id (the web
+    # bridge deliberately does not expose an internal body name).  Resolve it
+    # against the scene before freezing the policy so the planning proxy gets
+    # the same narrow gripper->target allowance as the articulated checker.
+    runtime = checker.backend
+    target_object_id = (getattr(runtime, 'contact_target_object_id', None)
+                        or getattr(checker, '_physical_closure_target', None))
+    if target_object_id is not None:
+        for obj in getattr(getattr(runtime, 'resources', None), 'scene', {}).get('objects', ()):
+            if str(obj.get('object_id_in_scene')) != str(target_object_id):
+                continue
+            for key in ('object_name_in_scene',):
+                if obj.get(key):
+                    allowed_names.add(str(obj[key]))
+            for component in obj.get('components', ()):
+                if component.get('component_type') == 'Semantic':
+                    semantic = component.get('properties', {}) or {}
+                    if semantic.get('semantic_name'):
+                        allowed_names.add(str(semantic['semantic_name']))
+            break
+    if getattr(runtime, 'contact_target', None):
+        allowed_names.add(str(runtime.contact_target))
     held = getattr(checker.backend.gripper_controller, 'held_name', None)
     held_body = getattr(checker.backend, 'object_ids', {}).get(held)
     attached_bodies = set()
@@ -108,6 +139,19 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
                 return True
             body = int(model.body_parentid[body])
         return False
+    def internal_gripper_body_pair(first, second):
+        """Return true only for contacts inside the Robotiq mechanism.
+
+        The reviewed Robotiq templates contain several links whose MuJoCo
+        parent is not their immediate mechanical neighbour (notably the
+        coupler/spring links).  Relying only on parent-child ancestry therefore
+        misses valid structural contacts and makes the planning proxy reject
+        every endpoint.  Both bodies must belong to the named gripper; arm or
+        environment contacts never qualify.
+        """
+        names = (checker.body_names[int(first)], checker.body_names[int(second)])
+        return (int(first) in checker.robot_bodies and int(second) in checker.robot_bodies
+                and all(name.startswith('robotiq_2f85') for name in names))
     for index, a in enumerate(checker.geoms):
         ba = int(model.geom_bodyid[a])
         for b in checker.geoms[index + 1:]:
@@ -115,7 +159,8 @@ def freeze_policy(checker, joints, safety_distance: float, *, avoid_collision: b
             if not ({ba, bb} & planned_bodies):
                 continue  # Environment/environment pairs never enter the planning model.
             pair = frozenset((a, b))
-            if (not avoid_collision or a in lift_ignored or b in lift_ignored
+            if (internal_gripper_body_pair(ba, bb)
+                    or not avoid_collision or a in lift_ignored or b in lift_ignored
                     or pair in getattr(checker, '_arm_environment_geom_pairs', ())):
                 ignore = True
             elif a in moving or b in moving:

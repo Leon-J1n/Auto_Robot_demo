@@ -8,10 +8,15 @@ from libraries.kinematic_chain.urdf import UrdfRobotModel
 def load_urdf(path: str | Path, *, tip_link: str, base_link: str | None = None,
               tcp_transform=None, world_from_base=None, initial_joints=None,
               continuous_limits=None, current_joints_provider=None,
-              base_transform_provider=None) -> KinematicsService:
+              base_transform_provider=None, validation_backend: str = "auto") -> KinematicsService:
     """Load and validate a selected URDF chain; return the uniform IK service.
 
-    This standalone service defaults to EAIK. It calculates kinematics only and
+    ``validation_backend`` selects the registry backend used for the initial
+    chain validation (``auto`` uses the configured fallback chain).  Keeping
+    this option at the loader boundary lets callers select the same validation
+    policy as the planner without silently dropping it during integration.
+
+    This standalone service defaults to the configured automatic chain. It calculates kinematics only and
     does not assemble a simulator, collision checker or robot motion executor.
     """
     robot = UrdfRobotModel(path, tip_link=tip_link, base_link=base_link,
@@ -26,5 +31,7 @@ def load_urdf(path: str | Path, *, tip_link: str, base_link: str | None = None,
     # Initialize and verify through the same public API used by callers.
     # Some valid chains (including Piper) have no EAIK decomposition. Verify
     # initialization through the same fallback chain used for task planning.
-    service.solve_one(robot.forward(robot.current_joints()), backend="auto", timeout=10.)
+    if not isinstance(validation_backend, str) or not validation_backend:
+        raise ValueError("validation_backend must be a non-empty backend name")
+    service.solve_one(robot.forward(robot.current_joints()), backend=validation_backend, timeout=10.)
     return service

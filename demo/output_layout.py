@@ -100,10 +100,22 @@ def command_view(row, output, stem, write_json):
 
 def summary_view(report):
     result = {key: report[key] for key in (
-        'request_id', 'success', 'status', 'frame_count', 'physics_steps', 'execution_backend', 'collision_model',
+        'request_id', 'success', 'status', 'frame_count', 'physics_steps', 'execution_backend',
+        'collision_model', 'collision_backend', 'collision_engine', 'planning_collision_proxy',
         'trajectory_file', 'blackboard_file', 'final_scene_file', 'final_scene_export_error',
         'trajectory_export_error', 'execution_started', 'no_effect_verified',
-        'state_capture_error') if key in report}
+        'state_capture_error', 'global_perception') if key in report}
+    # Global perception is preceded by an internal, collision-checked home
+    # move. Keep its compact audit fields in summary.json without duplicating
+    # the full planned trajectory in the top-level report.
+    home = report.get('global_perception_home')
+    if isinstance(home, dict):
+        result['global_perception_home'] = {
+            key: home[key] for key in (
+                'command_id', 'skill_name', 'success', 'status', 'skipped',
+                'reason', 'elapsed_s', 'error', 'selection', 'planning_time',
+                'planned_duration') if key in home
+        }
     steps = report.get('steps', [])
     result['commands_file'] = 'commands/results.jsonl'
     result['command_count'] = len(steps)

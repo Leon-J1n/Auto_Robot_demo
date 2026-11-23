@@ -182,6 +182,19 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         self.tcp_site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, 'tcp')
         self.geoms = [i for i in range(model.ngeom) if model.geom_contype[i] or model.geom_conaffinity[i]]
         self.tool_geoms = {i for i in self.geoms if self.body_names[model.geom_bodyid[i]].startswith('robotiq_2f85')}
+        # These are intentional contacts inside the articulated Robotiq model.
+        # The parent tree is not sufficient for coupler/spring links, so the
+        # complete same-mechanism rule is applied again during pair checks;
+        # arm-to-tool and tool-to-scene contacts remain collision checked.
+        tool_bodies = {int(model.geom_bodyid[g]) for g in self.tool_geoms}
+        self._gripper_internal_body_pairs = set()
+        for a in tool_bodies:
+            for z in tool_bodies:
+                if a > z:
+                    continue
+                if (a == z or int(model.body_parentid[a]) == z or
+                        int(model.body_parentid[z]) == a):
+                    self._gripper_internal_body_pairs.add(frozenset((a, z)))
         self.robot_bodies = set()
         for i in range(model.nbody):
             parent = i
@@ -536,8 +549,39 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                 return False
             names = (str(contact.get('geom1', '')), str(contact.get('geom2', '')))
             return all(n.startswith(target_prefix) for n in names)
+        target_object_id = ((getattr(b, 'contact_target_object_id', None) or closure_target
+                             or (target if str(target).isdigit() else None))
+                            if not held else None)
+        target_names = {str(target)} if target else set()
+        if target_object_id is not None:
+            for obj in b.resources.scene.get('objects', ()):
+                if str(obj.get('object_id_in_scene')) == str(target_object_id):
+                    target_names.add(str(obj.get('object_name_in_scene')))
+                    semantic = next((c.get('properties', {}) for c in obj.get('components', ())
+                                     if c.get('component_type') == 'Semantic'), {})
+                    if semantic.get('semantic_name'):
+                        target_names.add(str(semantic['semantic_name']))
+                    break
+
+        def is_gripper_internal_contact(contact):
+            names = (str(contact.get('geom1', '')), str(contact.get('geom2', '')))
+            try:
+                pair = frozenset((self.body_names.index(names[0]), self.body_names.index(names[1])))
+            except ValueError:
+                return False
+            if pair in getattr(self, '_gripper_internal_body_pairs', set()):
+                return True
+            # Robotiq coupler/spring links are structural parts of one
+            # mechanism but are not always direct parent/child bodies in the
+            # imported MuJoCo tree.  Treat only two Robotiq bodies as internal;
+            # never exempt a gripper-to-arm or gripper-to-scene contact.
+            a_name, z_name = names
+            return (a_name.startswith('robotiq_2f85') and
+                    z_name.startswith('robotiq_2f85'))
+
         ignored_names = getattr(self, '_lift_ignored_payload_names', frozenset())
         base_contacts = tuple(c for c in base.contacts if not target_internal_contact(c)
+                              and not is_gripper_internal_contact(c)
                               and not ignored_names.intersection((c.get('geom1'), c.get('geom2'))))
         # Explicit contact targets (including pick's selected object) permit
         # all gripper/target contacts throughout planning and live execution.
@@ -548,11 +592,10 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             # from the MuJoCo articulated probe; suppress only that exact
             # contact for the selected target.
             base_contacts = tuple(c for c in base_contacts
-                                  if not (str(target) in {str(c.get('geom1', '')), str(c.get('geom2', ''))}
-                                          and any(str(name).startswith('robotiq_2f85')
-                                                  for name in (c.get('geom1', ''), c.get('geom2', '')))))
-        target_object_id = ((getattr(b, 'contact_target_object_id', None) or closure_target)
-                            if not held else None)
+                                  if not (any(str(name) in target_names
+                                              for name in (c.get('geom1', ''), c.get('geom2', '')))
+                                            and any(str(name).startswith('robotiq_2f85')
+                                                    for name in (c.get('geom1', ''), c.get('geom2', '')))))
         target_bodies = set()
         if target_object_id is not None:
             for obj in b.resources.scene['objects']:
@@ -590,6 +633,10 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
                     if gripper_width is not None and a in self.tool_geoms and z in self.tool_geoms:
                         continue
                     ba, bz = int(m.geom_bodyid[a]), int(m.geom_bodyid[z])
+                    if (frozenset((ba, bz)) in getattr(self, '_gripper_internal_body_pairs', set())
+                            or (self.body_names[ba].startswith('robotiq_2f85')
+                                and self.body_names[bz].startswith('robotiq_2f85'))):
+                        continue
                     if ba not in self.robot_bodies and bz not in self.robot_bodies and not ({ba, bz} & payload_bodies):
                         continue
                     if self.allow_gripper_environment_contact and (
@@ -663,7 +710,3 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         while len(self._query_cache) > 2048:
             self._query_cache.popitem(last=False)
         return deepcopy(result)
-
-
-
-

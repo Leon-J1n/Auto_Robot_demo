@@ -19,7 +19,7 @@ import trimesh
 from .mesh import CACHE_ROOT, prepare_mesh
 
 
-DEFAULTS = dict(mode='visual', max_convex_hulls=8, max_vertices=64,
+DEFAULTS = dict(mode='auto', max_convex_hulls=8, max_vertices=64,
                 max_input_faces=3000, threshold=.05, exclude_links=[], package_paths={}, link_overrides={})
 DECOMPOSITION_SETTINGS = dict(preprocess_mode='on', preprocess_resolution=30,
                               resolution=300, mcts_iterations=5)
@@ -49,7 +49,19 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
     """Return a derived URDF path, with bounded convex geometry per link."""
     source = Path(source).resolve()
     options = {**deepcopy(DEFAULTS), **deepcopy(options or {})}
-    if set(options) - set(DEFAULTS) or options['mode'] not in ('visual', 'authored'):
+    # A configured bundle is an explicit, read-only source of collision
+    # geometry.  Do not regenerate it on this host (different native mesh
+    # libraries can produce different convex parts).  The bundle validates the
+    # source URDF hash and returns a portable URDF whose mesh paths stay inside
+    # the bundle directory.
+    from .bundle import configured_bundle
+    bundle = configured_bundle()
+    if bundle is not None:
+        bundled = bundle.robot_urdf(source)
+        if bundled is None:
+            raise ValueError('collision_bundle_asset_missing')
+        return bundled
+    if set(options) - set(DEFAULTS) or options['mode'] not in ('auto', 'visual', 'authored'):
         raise ValueError('Invalid robot collision_geometry options')
     if options['mode'] == 'authored':
         return source
@@ -64,6 +76,18 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
             or not isinstance(options['package_paths'], dict)):
         raise ValueError('Invalid collision_geometry link exclusions or package paths')
     root = ET.parse(source).getroot()
+    # In auto mode, prefer authored collision geometry when every link that
+    # carries visual geometry also has at least one collision element.  This
+    # preserves the asset author's robot-specific collision design and avoids
+    # replacing it with a visual approximation merely because the generic
+    # decomposition pipeline is available.  Visual-derived geometry remains
+    # the deterministic fallback for incomplete URDFs.
+    if options['mode'] == 'auto':
+        visual_links = [link for link in root.findall('link') if link.findall('visual')]
+        if (visual_links and all(link.findall('collision') for link in visual_links)
+                and not options['exclude_links'] and not options['link_overrides']):
+            return source
+        options['mode'] = 'visual'
     overrides = options['link_overrides']
     allowed_overrides = {'max_convex_hulls', 'max_vertices', 'max_input_faces', 'threshold'}
     links = {link.get('name') for link in root.findall('link')}

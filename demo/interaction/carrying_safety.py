@@ -4,7 +4,10 @@
 import math
 from copy import deepcopy
 
-DEFAULT_CARRYING_SAFETY_DISTANCE = -0.003
+# Match the ordinary 3 mm planning clearance while a payload is attached.
+# Negative values remain available only when explicitly requested for a
+# reviewed asset-specific case.
+DEFAULT_CARRYING_SAFETY_DISTANCE = 0.003
 
 
 def split_carrying_safety(request):

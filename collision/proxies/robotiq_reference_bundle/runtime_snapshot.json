@@ -1,0 +1,950 @@
+{
+  "_runtime_collision": {
+    "geometries": [
+      {
+        "id": 45,
+        "robot": true,
+        "body_name": "robotiq_2f85_base_mount",
+        "kind": "mesh",
+        "size": [
+          0.007064858157515142,
+          0.03758588578173268,
+          0.037880067782558854
+        ],
+        "file_path": "reference_meshes/5d4455f273cf79c96b4da6e7b1dde4e515431694543531de20928c0a1cb9dbae.obj"
+      },
+      {
+        "id": 47,
+        "robot": true,
+        "body_name": "robotiq_2f85_base",
+        "kind": "mesh",
+        "size": [
+          0.0375000934474047,
+          0.04242561501361209,
+          0.05457973327128885
+        ],
+        "file_path": "reference_meshes/4ff7fd8c21f30db7ff2c5880dd88495b8ddc8da9a4ecdeadfd0b5425705c7a29.obj"
+      },
+      {
+        "id": 49,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_driver",
+        "kind": "mesh",
+        "size": [
+          0.012000000106008026,
+          0.01212711606954411,
+          0.025285233254064055
+        ],
+        "file_path": "reference_meshes/3de65b8510100a1b7d3da85d0678f76e67653d4e063d3fbeedbe5e575dfa1700.obj"
+      },
+      {
+        "id": 51,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_coupler",
+        "kind": "mesh",
+        "size": [
+          0.006000612054152979,
+          0.013500000353993695,
+          0.030107895325028715
+        ],
+        "file_path": "reference_meshes/89d93cc44d3b50a2d308670ae2fab3500bfa3aa0ebfc845e1319dbd92046c7ce.obj"
+      },
+      {
+        "id": 53,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010117513956976153,
+          0.009425150173134195,
+          0.005387430123078074
+        ],
+        "file_path": "reference_meshes/823531ed5cca950d6995857d0f5879924bfd28a715f9a1876af813ea7d1f1d18.obj"
+      },
+      {
+        "id": 54,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.000945135155142615,
+          0.006450581111933303,
+          0.03652372951713445
+        ],
+        "file_path": "reference_meshes/2304389eb35406b50d60879eabeec9b3e1c67bf73418bb361cbcc723340b3e07.obj"
+      },
+      {
+        "id": 55,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010473979108924225,
+          0.006000996495882862,
+          0.008824356646565515
+        ],
+        "file_path": "reference_meshes/9724b5fdc5fa5d76ed4df6575b92245ad92bb0ef131ee7f4db0231a943e1af68.obj"
+      },
+      {
+        "id": 56,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010445731381497798,
+          0.009417072772775328,
+          0.005367245289840852
+        ],
+        "file_path": "reference_meshes/a10409cb12cef3d524f71c6eb51ce64e0f3ef08ba858484bdcd4d5a799037074.obj"
+      },
+      {
+        "id": 57,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0009730225405568325,
+          0.006459452948268661,
+          0.036280223121917095
+        ],
+        "file_path": "reference_meshes/6647a50e64db8de8674ae863506b37208f9ac38ae52072f75b1e65fc36734f56.obj"
+      },
+      {
+        "id": 58,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00029595749897403165,
+          0.007434621572170889,
+          0.017043509573592117
+        ],
+        "file_path": "reference_meshes/b8e7c974f5a1e88c643f978c665e43359d282bd1826d627a57b23b107622c7e3.obj"
+      },
+      {
+        "id": 59,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.003015580450515393,
+          0.006463269449776346,
+          0.012249227955556642
+        ],
+        "file_path": "reference_meshes/fcea56b6ac398496208fa1722f1380fba6c9ae9f058187988467b2880cf95650.obj"
+      },
+      {
+        "id": 60,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.002009192688673102,
+          0.007177748424561893,
+          0.01720613347188649
+        ],
+        "file_path": "reference_meshes/c3eb622e05217e831f572c913aeddc6b1e3d9ca167e6d8d3d5c1e45a09dd1650.obj"
+      },
+      {
+        "id": 61,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0028363972716749478,
+          0.005037659854850239,
+          0.009284614610240256
+        ],
+        "file_path": "reference_meshes/f4254cca4a3d4509ef60b4c77bb40b304756ae8616bb6749d094bc40c9c1bd06.obj"
+      },
+      {
+        "id": 62,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.002497170206079861,
+          0.002499174492294885,
+          0.005214836105445033
+        ],
+        "file_path": "reference_meshes/dab9f31f7b71ad3cd3922cf0d2920ae2aa6c0a7a50558d2aa35dad0f1dd1e156.obj"
+      },
+      {
+        "id": 63,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0039054515789877634,
+          0.0035757265600415435,
+          0.005999858775589355
+        ],
+        "file_path": "reference_meshes/322188033fb8f3513292da6557c68090d678888404c7931239f31aa53955566f.obj"
+      },
+      {
+        "id": 64,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0008337405971786595,
+          0.004964246333329134,
+          0.00924335084155784
+        ],
+        "file_path": "reference_meshes/2e9261933ac38b4d2cfec6f56680c3b4070420e600506e1efd18b8dc76aa3a8e.obj"
+      },
+      {
+        "id": 65,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0018268122148762985,
+          0.005335984943868446,
+          0.005999926717483069
+        ],
+        "file_path": "reference_meshes/5b972d76f456e1b4123d921045cb9ca9816bf4a1e9d36556718781cc81bd47cd.obj"
+      },
+      {
+        "id": 66,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0023100325632391264,
+          0.007224175402107138,
+          0.017275478282928157
+        ],
+        "file_path": "reference_meshes/6a8c14df17c7704657224d66980e619d0503868f1ac179c83065b2fc237248af.obj"
+      },
+      {
+        "id": 67,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0012249899127692206,
+          0.00765037396767681,
+          0.016523446220747584
+        ],
+        "file_path": "reference_meshes/4fb228d096e88085d47e0710fc69ea248c4cf5ee911d500131337f2c48a3b7c4.obj"
+      },
+      {
+        "id": 68,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00024995936106939065,
+          0.00992449754084996,
+          0.01439566324657364
+        ],
+        "file_path": "reference_meshes/9413b27344aa4bd00c6a04ca1da266f580c2ffa6d82ae218e9f0a80f5ca7e999.obj"
+      },
+      {
+        "id": 69,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0011747949571376572,
+          0.00817877025808465,
+          0.0048717426669276555
+        ],
+        "file_path": "reference_meshes/1d053a46635c7d5fec5fe4ef18eb711fa60f78ef0e0c982add1d2892c42f42a0.obj"
+      },
+      {
+        "id": 70,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0005432640064030732,
+          0.007247705591544111,
+          0.016126139333439114
+        ],
+        "file_path": "reference_meshes/237ac06a6876e133a72c9f99053ec80d3b9da145fcfe54a839496ec6b81ced13.obj"
+      },
+      {
+        "id": 71,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0022190754392833584,
+          0.007225440441985395,
+          0.017156395887400908
+        ],
+        "file_path": "reference_meshes/678d3f53bfbd2a67cb120307e81999253d73c901046b5d832758da6f0110129e.obj"
+      },
+      {
+        "id": 72,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0015635832538895122,
+          0.0024971798196650047,
+          0.002499160641068192
+        ],
+        "file_path": "reference_meshes/de5a153ba8246264c76b4a1f0feefd5f50eadff1da56f4ae56b51b4d1a27dde7.obj"
+      },
+      {
+        "id": 73,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.001676685609053654,
+          0.005007671281068202,
+          0.00926015280033182
+        ],
+        "file_path": "reference_meshes/a9ead96641f5f1096bd8664647ee9a10c24568cec2a5726eaee0243bdf3cea32.obj"
+      },
+      {
+        "id": 74,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0019874364262736964,
+          0.0016435429679435482,
+          0.008587898031652375
+        ],
+        "file_path": "reference_meshes/5b113636a35101897ac14618f0fedcd245199f3992a32899270d4697513c858e.obj"
+      },
+      {
+        "id": 75,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0012357007036008177,
+          0.007523168799589945,
+          0.015434618710410145
+        ],
+        "file_path": "reference_meshes/150c051ca14783be156191db2bb0e83895a56657af3dfe7ba2a901f14ea36d04.obj"
+      },
+      {
+        "id": 76,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0003047999925911444,
+          0.0023418101482093334,
+          0.0032417899928987026
+        ],
+        "file_path": "reference_meshes/ba5da26d93ce4a431dd013a75d7f3b2b511a352f21686c84331276d7ecb5ac2c.obj"
+      },
+      {
+        "id": 77,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.001531254019874596,
+          0.0023495753579864526,
+          0.00325253944642186
+        ],
+        "file_path": "reference_meshes/5ffc82287eeb8c277b8c9abf73014611f87840865494f8a7886d5e0bff062abf.obj"
+      },
+      {
+        "id": 78,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00202003051082166,
+          0.005700050457628455,
+          0.006794288125113774
+        ],
+        "file_path": "reference_meshes/82d7181e142e7f48dab35864381031cbc4103388f603a65d8b07988b95e3ca05.obj"
+      },
+      {
+        "id": 79,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0017395950853824615,
+          0.002678432108877995,
+          0.005723388657756387
+        ],
+        "file_path": "reference_meshes/03ea96950a9fd8823c2bc9e079871c1d5a9ed4c64a02ac136528a6272deead58.obj"
+      },
+      {
+        "id": 80,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0018952285422291484,
+          0.008363029314519124,
+          0.008345201177967575
+        ],
+        "file_path": "reference_meshes/5d2416cac65327f044fadf606261f1773ec9a57624f6ba5012f95b458cf2ed43.obj"
+      },
+      {
+        "id": 82,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_follower",
+        "kind": "mesh",
+        "size": [
+          0.007500082041643154,
+          0.014429849238818564,
+          0.03284031937968031
+        ],
+        "file_path": "reference_meshes/746b3da126962d38067babd19b09f69aa7323ccfbe256b9af0048b30a3b0914a.obj"
+      },
+      {
+        "id": 85,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 86,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 87,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 88,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 89,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 90,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 91,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 92,
+        "robot": true,
+        "body_name": "robotiq_2f85_right_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 96,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_driver",
+        "kind": "mesh",
+        "size": [
+          0.012000000106008026,
+          0.01212711606954411,
+          0.025285233254064055
+        ],
+        "file_path": "reference_meshes/3de65b8510100a1b7d3da85d0678f76e67653d4e063d3fbeedbe5e575dfa1700.obj"
+      },
+      {
+        "id": 98,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_coupler",
+        "kind": "mesh",
+        "size": [
+          0.006000612054152979,
+          0.013500000353993695,
+          0.030107895325028715
+        ],
+        "file_path": "reference_meshes/89d93cc44d3b50a2d308670ae2fab3500bfa3aa0ebfc845e1319dbd92046c7ce.obj"
+      },
+      {
+        "id": 100,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010117513956976153,
+          0.009425150173134195,
+          0.005387430123078074
+        ],
+        "file_path": "reference_meshes/823531ed5cca950d6995857d0f5879924bfd28a715f9a1876af813ea7d1f1d18.obj"
+      },
+      {
+        "id": 101,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.000945135155142615,
+          0.006450581111933303,
+          0.03652372951713445
+        ],
+        "file_path": "reference_meshes/2304389eb35406b50d60879eabeec9b3e1c67bf73418bb361cbcc723340b3e07.obj"
+      },
+      {
+        "id": 102,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010473979108924225,
+          0.006000996495882862,
+          0.008824356646565515
+        ],
+        "file_path": "reference_meshes/9724b5fdc5fa5d76ed4df6575b92245ad92bb0ef131ee7f4db0231a943e1af68.obj"
+      },
+      {
+        "id": 103,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0010445731381497798,
+          0.009417072772775328,
+          0.005367245289840852
+        ],
+        "file_path": "reference_meshes/a10409cb12cef3d524f71c6eb51ce64e0f3ef08ba858484bdcd4d5a799037074.obj"
+      },
+      {
+        "id": 104,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0009730225405568325,
+          0.006459452948268661,
+          0.036280223121917095
+        ],
+        "file_path": "reference_meshes/6647a50e64db8de8674ae863506b37208f9ac38ae52072f75b1e65fc36734f56.obj"
+      },
+      {
+        "id": 105,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00029595749897403165,
+          0.007434621572170889,
+          0.017043509573592117
+        ],
+        "file_path": "reference_meshes/b8e7c974f5a1e88c643f978c665e43359d282bd1826d627a57b23b107622c7e3.obj"
+      },
+      {
+        "id": 106,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.003015580450515393,
+          0.006463269449776346,
+          0.012249227955556642
+        ],
+        "file_path": "reference_meshes/fcea56b6ac398496208fa1722f1380fba6c9ae9f058187988467b2880cf95650.obj"
+      },
+      {
+        "id": 107,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.002009192688673102,
+          0.007177748424561893,
+          0.01720613347188649
+        ],
+        "file_path": "reference_meshes/c3eb622e05217e831f572c913aeddc6b1e3d9ca167e6d8d3d5c1e45a09dd1650.obj"
+      },
+      {
+        "id": 108,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0028363972716749478,
+          0.005037659854850239,
+          0.009284614610240256
+        ],
+        "file_path": "reference_meshes/f4254cca4a3d4509ef60b4c77bb40b304756ae8616bb6749d094bc40c9c1bd06.obj"
+      },
+      {
+        "id": 109,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.002497170206079861,
+          0.002499174492294885,
+          0.005214836105445033
+        ],
+        "file_path": "reference_meshes/dab9f31f7b71ad3cd3922cf0d2920ae2aa6c0a7a50558d2aa35dad0f1dd1e156.obj"
+      },
+      {
+        "id": 110,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0039054515789877634,
+          0.0035757265600415435,
+          0.005999858775589355
+        ],
+        "file_path": "reference_meshes/322188033fb8f3513292da6557c68090d678888404c7931239f31aa53955566f.obj"
+      },
+      {
+        "id": 111,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0008337405971786595,
+          0.004964246333329134,
+          0.00924335084155784
+        ],
+        "file_path": "reference_meshes/2e9261933ac38b4d2cfec6f56680c3b4070420e600506e1efd18b8dc76aa3a8e.obj"
+      },
+      {
+        "id": 112,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0018268122148762985,
+          0.005335984943868446,
+          0.005999926717483069
+        ],
+        "file_path": "reference_meshes/5b972d76f456e1b4123d921045cb9ca9816bf4a1e9d36556718781cc81bd47cd.obj"
+      },
+      {
+        "id": 113,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0023100325632391264,
+          0.007224175402107138,
+          0.017275478282928157
+        ],
+        "file_path": "reference_meshes/6a8c14df17c7704657224d66980e619d0503868f1ac179c83065b2fc237248af.obj"
+      },
+      {
+        "id": 114,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0012249899127692206,
+          0.00765037396767681,
+          0.016523446220747584
+        ],
+        "file_path": "reference_meshes/4fb228d096e88085d47e0710fc69ea248c4cf5ee911d500131337f2c48a3b7c4.obj"
+      },
+      {
+        "id": 115,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00024995936106939065,
+          0.00992449754084996,
+          0.01439566324657364
+        ],
+        "file_path": "reference_meshes/9413b27344aa4bd00c6a04ca1da266f580c2ffa6d82ae218e9f0a80f5ca7e999.obj"
+      },
+      {
+        "id": 116,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0011747949571376572,
+          0.00817877025808465,
+          0.0048717426669276555
+        ],
+        "file_path": "reference_meshes/1d053a46635c7d5fec5fe4ef18eb711fa60f78ef0e0c982add1d2892c42f42a0.obj"
+      },
+      {
+        "id": 117,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0005432640064030732,
+          0.007247705591544111,
+          0.016126139333439114
+        ],
+        "file_path": "reference_meshes/237ac06a6876e133a72c9f99053ec80d3b9da145fcfe54a839496ec6b81ced13.obj"
+      },
+      {
+        "id": 118,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0022190754392833584,
+          0.007225440441985395,
+          0.017156395887400908
+        ],
+        "file_path": "reference_meshes/678d3f53bfbd2a67cb120307e81999253d73c901046b5d832758da6f0110129e.obj"
+      },
+      {
+        "id": 119,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0015635832538895122,
+          0.0024971798196650047,
+          0.002499160641068192
+        ],
+        "file_path": "reference_meshes/de5a153ba8246264c76b4a1f0feefd5f50eadff1da56f4ae56b51b4d1a27dde7.obj"
+      },
+      {
+        "id": 120,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.001676685609053654,
+          0.005007671281068202,
+          0.00926015280033182
+        ],
+        "file_path": "reference_meshes/a9ead96641f5f1096bd8664647ee9a10c24568cec2a5726eaee0243bdf3cea32.obj"
+      },
+      {
+        "id": 121,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0019874364262736964,
+          0.0016435429679435482,
+          0.008587898031652375
+        ],
+        "file_path": "reference_meshes/5b113636a35101897ac14618f0fedcd245199f3992a32899270d4697513c858e.obj"
+      },
+      {
+        "id": 122,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0012357007036008177,
+          0.007523168799589945,
+          0.015434618710410145
+        ],
+        "file_path": "reference_meshes/150c051ca14783be156191db2bb0e83895a56657af3dfe7ba2a901f14ea36d04.obj"
+      },
+      {
+        "id": 123,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0003047999925911444,
+          0.0023418101482093334,
+          0.0032417899928987026
+        ],
+        "file_path": "reference_meshes/ba5da26d93ce4a431dd013a75d7f3b2b511a352f21686c84331276d7ecb5ac2c.obj"
+      },
+      {
+        "id": 124,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.001531254019874596,
+          0.0023495753579864526,
+          0.00325253944642186
+        ],
+        "file_path": "reference_meshes/5ffc82287eeb8c277b8c9abf73014611f87840865494f8a7886d5e0bff062abf.obj"
+      },
+      {
+        "id": 125,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.00202003051082166,
+          0.005700050457628455,
+          0.006794288125113774
+        ],
+        "file_path": "reference_meshes/82d7181e142e7f48dab35864381031cbc4103388f603a65d8b07988b95e3ca05.obj"
+      },
+      {
+        "id": 126,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0017395950853824615,
+          0.002678432108877995,
+          0.005723388657756387
+        ],
+        "file_path": "reference_meshes/03ea96950a9fd8823c2bc9e079871c1d5a9ed4c64a02ac136528a6272deead58.obj"
+      },
+      {
+        "id": 127,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_spring_link",
+        "kind": "mesh",
+        "size": [
+          0.0018952285422291484,
+          0.008363029314519124,
+          0.008345201177967575
+        ],
+        "file_path": "reference_meshes/5d2416cac65327f044fadf606261f1773ec9a57624f6ba5012f95b458cf2ed43.obj"
+      },
+      {
+        "id": 129,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_follower",
+        "kind": "mesh",
+        "size": [
+          0.007500082041643154,
+          0.014429849238818564,
+          0.03284031937968031
+        ],
+        "file_path": "reference_meshes/746b3da126962d38067babd19b09f69aa7323ccfbe256b9af0048b30a3b0914a.obj"
+      },
+      {
+        "id": 132,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 133,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 134,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 135,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 136,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 137,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 138,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      },
+      {
+        "id": 139,
+        "robot": true,
+        "body_name": "robotiq_2f85_left_pad",
+        "kind": "box",
+        "size": [
+          0.0055,
+          0.004,
+          0.0046875
+        ]
+      }
+    ]
+  }
+}

@@ -210,10 +210,13 @@ Blackboard estimate evidence records `depth_selected`, `grasp_depth_offset_m`,
 `grasp_depth_candidates_m`, and `grasp_depth_attempts`.
 
 VLM connection settings live in the project-root `config/vlm.json` (ignored by
-Git). Copy `config/vlm.example.json` to that path and set `api_key`, `base_url`,
-`model`, `timeout_seconds`, and `max_retries`. The example supplies non-secret
-defaults when the local file is absent; a real request still requires a key.
-`DASHSCOPE_API_KEY` and `QWEN_MODEL` override the corresponding file values.
+Git). The default configuration targets the local OpenAI-compatible
+llama.cpp VLM at `http://127.0.0.1:8080/v1` and uses the `chat.completions`
+multimodal request format; it does not require a DashScope key. Copy
+`config/vlm.example.json` to that path only when overriding `model`, timeout or
+retry settings. `QWEN_MODEL` can override the local model name. A remote
+endpoint is not selected implicitly and must be an explicit local config
+change.
 Settings are loaded when the estimator is created, independently of the current
 working directory. Restart the task after changing the config file.
 

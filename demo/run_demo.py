@@ -18,7 +18,15 @@ from demo.output_layout import prepare_output, command_view, summary_view, write
 from atomic_action.perception.vlm_estimate.timing import command_timing_scope, start_command, stamp_command
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SIMPLATFORM_LIBRARY = ROOT / 'libraries' / 'simplatform' / 'bin' / 'sim_platform_c.dll'
+if os.name == 'nt':
+    DEFAULT_SIMPLATFORM_LIBRARY = ROOT / 'libraries' / 'simplatform' / 'bin' / 'sim_platform_c.dll'
+else:
+    _linux_fcl_candidates = (
+        ROOT.parent / '_thirdparty' / 'SimPlatform-main' / 'build' / 'linux' / 'sim_platform_c.so',
+        ROOT / 'libraries' / 'simplatform' / 'source' / 'SimPlatform-main' / 'build' / 'linux' / 'sim_platform_c.so',
+    )
+    DEFAULT_SIMPLATFORM_LIBRARY = next(
+        (path for path in _linux_fcl_candidates if path.is_file()), _linux_fcl_candidates[0])
 
 
 class DemoCollisionOverrideChecker:
@@ -374,6 +382,25 @@ def _run_global_perception(resolver, commands, resources):
     return result
 
 
+def _global_perception_home_request(resources):
+    """Return the authored home target, falling back to the named-state API.
+
+    The authored scene may provide a robot-specific home posture.  Using it
+    when present avoids silently replacing a non-UR5e home with the generic
+    six-joint default in :class:`JointMove`.
+    """
+    named_targets = resources.scene.get('named_targets', {})
+    home = named_targets.get('home', {}) if isinstance(named_targets, dict) else {}
+    request = home.get('request') if isinstance(home, dict) else None
+    if isinstance(request, dict) and isinstance(request.get('target'), dict):
+        return json.loads(json.dumps(request))
+    return {
+        'target': {'type': 'named_state', 'state_name': 'home'},
+        'motion': {'path_type': 'joint', 'phase': 'transit'},
+        'planning': {'planner_type': 'auto'},
+    }
+
+
 def _resolve_command_file(command_file):
     """Resolve a command path, including a bare commands.xxx.json filename."""
     command_path = Path(command_file).expanduser()
@@ -467,6 +494,8 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             # representations. Never change the authored Scene or safety policy.
             resources.scene['planning_collision_proxy']['enabled'] = collision_model == 'proxy'
         report['collision_model'] = ('proxy' if resources.scene['planning_collision_proxy']['enabled'] else 'precise')
+        report['collision_backend'] = 'simplatform_fcl'
+        report['collision_engine'] = 'fcl'
         for item in visual_estimates:
             scene_object_by_id(resources.scene, item['target_id'])
         report['effective_defaults'] = {
@@ -651,10 +680,6 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         # Subsequent synchronizations keep their measured poses current.
         blackboard.register_task_targets(commands, resources.scene)
         prime_perception = getattr(resolver, 'prime_task_targets', None)
-        if callable(prime_perception):
-            from demo.interaction.visual_targets import infer_operation_ids
-            resolver.operation_ids = infer_operation_ids(commands)
-            report['global_perception'] = _run_global_perception(resolver, commands, resources)
 
         def prepare_trajectory(trajectory, request, selection):
             from demo.interaction.command_converter import _deep_merge
@@ -689,7 +714,8 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             sync.sync(backend, kin, checker)
             # Validation applies the same default later, but planner selection
             # happens before action validation. Treat omitted values as auto.
-            # Auto uses the host planner's direct -> cuRobo fallback chain.
+            # Auto uses the configured direct -> collision-free (RRT) fallback
+            # chain.  cuRobo is selected only when explicitly requested.
             requested_planner = request.get('planning', {}).get('planner_type', 'auto')
             if requested_planner == 'curobo':
                 curobo_result = curobo_action.execute(request)
@@ -697,6 +723,54 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             path_type = request.get("motion", {}).get("path_type", "joint")
             action = motion_actions.get(path_type, motion_actions["joint"])
             return action.execute(request)
+
+        if callable(prime_perception):
+            # A global camera observation is deliberately taken from the
+            # configured home posture.  This is a real, collision-checked
+            # motion, not a state mutation: if it cannot be planned or
+            # executed we must not run perception through an occluded view.
+            from demo.interaction.visual_targets import infer_operation_ids
+            home_request = _global_perception_home_request(resources)
+            current_joints = np.asarray(backend.get_joint_positions(), dtype=float)
+            target = home_request.get('target', {})
+            if target.get('type') == 'joint':
+                home_joints = np.asarray(target.get('joint_positions', ()), dtype=float)
+            else:
+                home_joints = None
+            already_home = (home_joints is not None and home_joints.shape == current_joints.shape
+                            and np.allclose(current_joints, home_joints, atol=1e-4, rtol=0))
+            home_row = {'command_id': 'global_perception_home', 'skill_name': 'move_to'}
+            # The normal command loop initializes these fields immediately
+            # before planning.  Global-perception home is an internal motion
+            # that runs before that loop, but it still uses the same
+            # trajectory callback and therefore needs the same context.
+            report['active_command_id'] = home_row['command_id']
+            report['active_substep'] = 'global_perception_home'
+            start_command(home_row['command_id'])
+            home_started = perf_counter()
+            if already_home:
+                home_row.update({'success': True, 'status': 'already_home',
+                                 'skipped': True, 'reason': 'robot_already_at_home'})
+            else:
+                home_row.update(execute_motion(home_request))
+                home_row['success'] = bool(home_row.get('success'))
+            home_row['elapsed_s'] = perf_counter() - home_started
+            stamp_command(home_row)
+            report['global_perception_home'] = home_row
+            if not home_row.get('success'):
+                error = home_row.get('error') or {
+                    'error_code': 'GLOBAL_PERCEPTION_HOME_FAILED',
+                    'error_message': 'Robot could not reach home before global perception.',
+                    'failed_stage': 'global_perception_home',
+                }
+                print(f"error|global_perception_home|{error.get('error_message', error)}", flush=True)
+                raise RuntimeError(f"Global perception home move failed: {error}")
+            sync.sync(backend, kin, checker)
+            report.pop('active_command_id', None)
+            report.pop('active_substep', None)
+            startup_frames.append(backend.get_state())
+            resolver.operation_ids = infer_operation_ids(commands)
+            report['global_perception'] = _run_global_perception(resolver, commands, resources)
         def write_task_frame(command_id, substep, frame_state):
             nonlocal frame_index
             blackboard.observe(frame_state)
@@ -923,7 +997,7 @@ def main():
     parser.add_argument('--collision-model', choices=('proxy', 'precise'), default=None,
                         help='Explicit collision representation; precise retains the original full geometry checker')
     parser.add_argument('--library', type=Path, default=DEFAULT_SIMPLATFORM_LIBRARY,
-                        help='SimPlatform native DLL (default: libraries/simplatform/bin/sim_platform_c.dll)')
+                        help='SimPlatform native collision library (platform-dependent default)')
     parser.add_argument('--output', type=Path, default=None,
                         help='输出目录（默认：对应 commands.xxx/output）')
     parser.add_argument('--viewer', action='store_true')

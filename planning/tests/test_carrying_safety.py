@@ -14,20 +14,20 @@ from libraries.curobo.policy import compile_policy, world_limits
 
 
 class CarryingSafetyTests(unittest.TestCase):
-    def test_default_allows_three_mm_only_for_payload_planning(self):
+    def test_default_requires_three_mm_for_payload_planning(self):
         for request in ({}, {'strategy_params': {}}, {'strategy_params': {'hold_force': 1.}}):
             _, value = split_carrying_safety(request)
-            self.assertEqual(value, -.003)
+            self.assertEqual(value, .003)
         _, explicit_zero = split_carrying_safety({'strategy_params': {'safety_distance': 0.}})
         self.assertEqual(explicit_zero, 0.)
-        self.assertEqual(payload_safety_distance(.003, 'payload'), -.003)
+        self.assertEqual(payload_safety_distance(.003, 'payload'), .003)
         self.assertEqual(payload_safety_distance(0., 'payload'), 0.)
         self.assertEqual(payload_safety_distance(.003, None), .003)
         with scene() as (runtime, checker, g):
             runtime.gripper_controller.held_name = 'payload'
             _, checker.carrying_safety_distance = split_carrying_safety({})
             policy, _ = freeze_policy(checker, [.4], .003)
-            self.assertEqual(pair_limit(policy, g('payload'), g('target')), -.003)
+            self.assertEqual(pair_limit(policy, g('payload'), g('target')), .003)
             self.assertEqual(pair_limit(policy, g('tool'), g('target')), .003)
             self.assertEqual(pair_limit(policy, g('arm'), g('target')), .003)
 
@@ -49,10 +49,10 @@ class CarryingSafetyTests(unittest.TestCase):
         with scene() as (runtime, checker, g):
             runtime.gripper_controller.held_name = 'payload'
             initial = planning_signature(runtime, checker)
-            checker.carrying_safety_distance = -.002
+            checker.carrying_safety_distance = .004
             self.assertNotEqual(initial, planning_signature(runtime, checker))
             policy, _ = freeze_policy(checker, [.4], .003)
-            self.assertEqual(pair_limit(policy, g('payload'), g('target')), -.002)
+            self.assertEqual(pair_limit(policy, g('payload'), g('target')), .004)
             self.assertEqual(pair_limit(policy, g('tool'), g('target')), .003)
             self.assertEqual(pair_limit(policy, g('arm'), g('target')), .003)
             execution, _ = freeze_policy(checker, [.4], 0.)
@@ -64,11 +64,11 @@ class CarryingSafetyTests(unittest.TestCase):
     def test_signed_margin_survives_curobo_export(self):
         with scene() as (runtime, checker, g), tempfile.TemporaryDirectory() as directory:
             runtime.gripper_controller.held_name = 'payload'
-            checker.carrying_safety_distance = -.002
+            checker.carrying_safety_distance = .004
             raw = export_runtime(runtime, checker, {'safety_distance': .003}, directory)
             converted = convert_runtime({'_runtime_collision': raw}, directory)
             limits = world_limits(compile_policy(converted), [g('payload'), g('tool'), g('arm')], [g('target')])
-            np.testing.assert_allclose(limits[:, 0], [-.002, .003, .003])
+            np.testing.assert_allclose(limits[:, 0], [.004, .003, .003])
 
     def test_actual_shallow_overlap_native_and_proxy(self):
         for simplified in (False, True):
@@ -84,7 +84,7 @@ class CarryingSafetyTests(unittest.TestCase):
                 target = runtime.object_ids['target']
                 model.body_pos[target] = center + [0, 0, -.119]
                 model.geom_size[g('target')] = [.01, .01, .1]
-                checker.carrying_safety_distance = -.002
+                checker.carrying_safety_distance = .003
                 # This fixture's gripper is an exact sphere, so no production mesh template is needed.
                 with patch('collision.proxy._gripper_spheres', side_effect=lambda geom, _: [
                         {'center': np.asarray(geom['matrix'])[:3, 3].tolist(), 'radius': geom['size'][0]}]):
@@ -93,14 +93,14 @@ class CarryingSafetyTests(unittest.TestCase):
                     def payload_contacts(margin):
                         result = checker.check([.4], safety_distance=margin)
                         return [c for c in result.contacts if {c['geom1'], c['geom2']} == {'payload', 'target'}]
-                    self.assertFalse(payload_contacts(.003))  # 1 mm overlap allowed in planning.
+                    self.assertTrue(payload_contacts(.003))  # Overlap is not allowed by the new default.
                     self.assertTrue(payload_contacts(0.))  # Execution still rejects penetration.
                     checker.carrying_safety_distance = 0.
                     self.assertTrue(payload_contacts(.003))  # Setting changes invalidate cached results.
-                    checker.carrying_safety_distance = -.002
+                    checker.carrying_safety_distance = .003
                     model.body_pos[target, 2] += .002
                     checker.scene_revision = getattr(checker, 'scene_revision', 0) + 1
-                    self.assertTrue(payload_contacts(.003))  # 3 mm overlap exceeds the allowance.
+                    self.assertTrue(payload_contacts(.003))  # Overlap exceeds the 3 mm clearance.
 
 
 if __name__ == '__main__':
