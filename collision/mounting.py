@@ -23,6 +23,26 @@ def fixed_base_links(urdf):
         fixed.update(added)
 
 
+def two_joint_neighbour_pairs(joints):
+    """Unordered link pairs separated by one or two URDF joints.
+
+    Fixed and moving joints each count as one edge. Traversal is undirected,
+    so siblings connected through their common parent are also two apart.
+    """
+    graph = {}
+    for joint in joints:
+        a, b = joint.find('parent').get('link'), joint.find('child').get('link')
+        graph.setdefault(a, set()).add(b)
+        graph.setdefault(b, set()).add(a)
+    pairs = set()
+    for link, neighbours in graph.items():
+        nearby = set(neighbours)
+        for neighbour in neighbours:
+            nearby.update(graph[neighbour])
+        pairs.update(frozenset((link, other)) for other in nearby if other != link)
+    return pairs
+
+
 def mounting_pedestals(scene, robot):
     """Recognize a static pedestal aligned below this arm, never ordinary obstacles."""
     base = np.asarray(component(robot, 'Transform').get('position', ()), dtype=float)

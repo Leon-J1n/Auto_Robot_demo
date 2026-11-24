@@ -332,7 +332,8 @@ class SimPlatformFCLCollisionChecker:
                 path = _asset_path(source.get('urdf'), self.scene_file, self.asset_root)
                 attachment_links.update(e.get('name') for e in ET.parse(path).getroot().findall('link'))
         self._arm_link_names = frozenset(links.values()) - attachment_links
-        adjacent = {frozenset((j.find('parent').get('link'), j.find('child').get('link'))) for j in joints}
+        from collision.mounting import two_joint_neighbour_pairs
+        adjacent = two_joint_neighbour_pairs(joints)
         for pair in self._allowed_link_pairs:
             if len(pair) != 2 or any(name not in set(links.values()) | attachment_links for name in pair):
                 raise ValueError(f'Invalid allowed collision link pair: {pair}')
@@ -353,7 +354,7 @@ class SimPlatformFCLCollisionChecker:
                 if a != b and (group(la) == group(lb) or frozenset((la, lb)) in adjacent)}
 
     def _arm_environment_pairs(self):
-        """Declared arm/fixture pairs, excluding attachments and held objects."""
+        """Declared arm/fixture pairs plus fixed-base/all-environment pairs."""
         names = self._allowed_arm_environment_names
         missing = names - set(self._entities)
         if missing:
@@ -362,8 +363,8 @@ class SimPlatformFCLCollisionChecker:
         fixtures = {h for h, name in self._names.items() if name in names}
         pairs = {frozenset((a, b)) for a in arm for b in fixtures if a != b}
         base = {h for h, link in self._collider_links.items() if link in self._fixed_base_link_names}
-        mounts = {h for h, name in self._names.items() if name in self._mounting_pedestal_names}
-        return pairs | {frozenset((a, b)) for a in base for b in mounts if a != b}
+        environment = set(self._names) - set(self._collider_links)
+        return pairs | {frozenset((a, b)) for a in base for b in environment if a != b}
 
     def _to_sdk_joints(self, joints: Sequence[float]) -> np.ndarray:
         values = np.asarray(joints, dtype=float)

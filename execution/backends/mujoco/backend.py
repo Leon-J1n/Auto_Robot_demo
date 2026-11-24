@@ -362,7 +362,9 @@ class MuJoCoExecutionBackend:
         goal_data = mujoco.MjData(self.model)
         goal_data.qpos[:] = self.data.qpos
         goal_data.qpos[self.qpos_indices] = q[-1]
-        mujoco.mj_forward(self.model, goal_data)
+        # Only the goal site's pose is needed; do not solve contacts for a
+        # teleported arm with the held object still at its current position.
+        mujoco.mj_kinematics(self.model, goal_data)
         goal_position = goal_data.site_xpos[self.tip_id].copy()
         goal_rotation = goal_data.site_xmat[self.tip_id].reshape(3, 3).copy()
         initial_gripper = self.gripper_controller.get_state() if self.gripper_controller else {}

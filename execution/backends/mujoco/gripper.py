@@ -15,6 +15,10 @@ def add_gripper(root, resources):
     equality = ET.SubElement(root, 'equality')
     contact = ET.SubElement(root, 'contact')
     master = 'robotiq_2f85_right_driver_joint'
+    # The two spring links interleave inside the linkage. Convex envelopes
+    # bridge their cavities; this structural pair must not block closure.
+    ET.SubElement(contact, 'exclude', body1='robotiq_2f85_left_spring_link',
+                  body2='robotiq_2f85_right_spring_link')
     for joint in source.findall('joint'):
         if joint.get('type') == 'fixed':
             continue
@@ -28,17 +32,22 @@ def add_gripper(root, resources):
             ET.SubElement(equality, 'joint', joint1=name, joint2=master,
                           polycoef=f'0 {ratio} 0 0 0', solref='0.005 1')
     for side in ('left', 'right'):
-        ET.SubElement(contact, 'exclude', body1=f'robotiq_2f85_{side}_coupler', body2=f'robotiq_2f85_{side}_follower')
+        # Closed-chain links share pin housings but are siblings in the URDF
+        # tree. Their visual-derived convex parts overlap at these joints.
+        # Exempt only these internal pairs; pad/object contacts stay active.
+        for first, second in (('coupler', 'follower'), ('driver', 'spring_link'),
+                              ('coupler', 'spring_link')):
+            ET.SubElement(contact, 'exclude', body1=f'robotiq_2f85_{side}_{first}',
+                          body2=f'robotiq_2f85_{side}_{second}')
         for suffix in ('pad', 'silicone_pad'):
             body = bodies[f'robotiq_2f85_{side}_{suffix}']
             for geom in list(body.findall('geom')):
-                # Finger pad boxes supply the contact surface; overlapping visual meshes do not.
-                if geom.get('type') == 'mesh' or geom.get('mesh'):
+                # URDF visuals are group 1; generated collision meshes must
+                # remain active, including the silicone contact surface.
+                if geom.get('group') == '1':
                     geom.set('contype', '0'); geom.set('conaffinity', '0')
                 else:
                     # Include torsional friction around the pad contact normal.
-                    # The pad boxes are the active contact surface; the overlapping
-                    # visual meshes remain disabled above.
                     geom.set('solref', '0.005 1'); geom.set('condim', '4')
                     if friction_attr is not None:
                         geom.set('friction', friction_attr)

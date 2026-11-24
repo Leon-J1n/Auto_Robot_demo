@@ -19,7 +19,7 @@ import trimesh
 from .mesh import CACHE_ROOT, prepare_mesh
 
 
-DEFAULTS = dict(mode='auto', max_convex_hulls=8, max_vertices=64,
+DEFAULTS = dict(mode='visual', max_convex_hulls=8, max_vertices=64,
                 max_input_faces=3000, threshold=.05, exclude_links=[], package_paths={}, link_overrides={})
 DECOMPOSITION_SETTINGS = dict(preprocess_mode='on', preprocess_resolution=30,
                               resolution=300, mcts_iterations=5)
@@ -49,22 +49,10 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
     """Return a derived URDF path, with bounded convex geometry per link."""
     source = Path(source).resolve()
     options = {**deepcopy(DEFAULTS), **deepcopy(options or {})}
-    # A configured bundle is an explicit, read-only source of collision
-    # geometry.  Do not regenerate it on this host (different native mesh
-    # libraries can produce different convex parts).  The bundle validates the
-    # source URDF hash and returns a portable URDF whose mesh paths stay inside
-    # the bundle directory.
-    from .bundle import configured_bundle
-    bundle = configured_bundle()
-    if bundle is not None:
-        bundled = bundle.robot_urdf(source)
-        if bundled is None:
-            raise ValueError('collision_bundle_asset_missing')
-        return bundled
     if set(options) - set(DEFAULTS) or options['mode'] not in ('auto', 'visual', 'authored'):
         raise ValueError('Invalid robot collision_geometry options')
-    if options['mode'] == 'authored':
-        return source
+    # Legacy scene modes remain readable, but never bypass visual generation.
+    options['mode'] = 'visual'
     for key, minimum in (('max_convex_hulls', 1), ('max_vertices', 8), ('max_input_faces', 12)):
         if type(options[key]) is not int or options[key] < minimum:
             raise ValueError(f'collision_geometry.{key} must be an integer >= {minimum}')
@@ -76,18 +64,6 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
             or not isinstance(options['package_paths'], dict)):
         raise ValueError('Invalid collision_geometry link exclusions or package paths')
     root = ET.parse(source).getroot()
-    # In auto mode, prefer authored collision geometry when every link that
-    # carries visual geometry also has at least one collision element.  This
-    # preserves the asset author's robot-specific collision design and avoids
-    # replacing it with a visual approximation merely because the generic
-    # decomposition pipeline is available.  Visual-derived geometry remains
-    # the deterministic fallback for incomplete URDFs.
-    if options['mode'] == 'auto':
-        visual_links = [link for link in root.findall('link') if link.findall('visual')]
-        if (visual_links and all(link.findall('collision') for link in visual_links)
-                and not options['exclude_links'] and not options['link_overrides']):
-            return source
-        options['mode'] = 'visual'
     overrides = options['link_overrides']
     allowed_overrides = {'max_convex_hulls', 'max_vertices', 'max_input_faces', 'threshold'}
     links = {link.get('name') for link in root.findall('link')}
@@ -105,18 +81,33 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
     missing = set(options['exclude_links']) - {link.get('name') for link in root.findall('link')}
     if missing:
         raise ValueError(f'Unknown collision_geometry.exclude_links: {sorted(missing)}')
+    for link in root.findall('link'):
+        if (link.findall('collision') and not link.findall('visual')
+                and link.get('name') not in options['exclude_links']):
+            raise ValueError(f'Robot link {link.get("name")} has collision but no visual geometry')
+    # Precomputed bundles must explicitly certify this same visual-only policy
+    # and its effective options; older authored/mixed bundles cannot bypass it.
+    from .bundle import configured_bundle
+    bundle = configured_bundle()
+    if bundle is not None:
+        if bundle.manifest.get('robot_collision_geometry') != options:
+            raise ValueError('collision_bundle_visual_policy_mismatch')
+        bundled = bundle.robot_urdf(source)
+        if bundled is None:
+            raise ValueError('collision_bundle_asset_missing')
+        return bundled
     # Obsolete authored mesh paths need not exist when visuals replace them.
     for link in root.findall('link'):
         if link.findall('visual') or link.get('name') in options['exclude_links']:
             for collider in list(link.findall('collision')):
                 link.remove(collider)
-    # Resolve all paths, including retained authored fallback and texture meshes.
+    # Resolve visual asset paths after removing authored colliders.
     inputs = []
     for mesh in root.findall('.//mesh'):
         path = _asset(mesh.get('filename'), source, options['package_paths'])
         mesh.set('filename', str(path))
         inputs.append(dict(path=str(path), sha256=sha256(path.read_bytes()).hexdigest()))
-    identity = dict(schema=2, coacd=version('coacd'), trimesh=version('trimesh'),
+    identity = dict(schema=3, coacd=version('coacd'), trimesh=version('trimesh'),
                     simplifier=version('fast-simplification'),
                     urdf=ET.tostring(root, encoding='unicode'),
                     inputs=inputs, options=options, decomposition=DECOMPOSITION_SETTINGS)
@@ -148,7 +139,7 @@ def prepare_robot_visual_collisions(source, options=None, *, cache_root=None):
                 records.append(dict(link=name, source='excluded', parts=0))
                 continue
             if not visuals:
-                records.append(dict(link=name, source='authored_fallback', parts=len(link.findall('collision'))))
+                records.append(dict(link=name, source='empty', parts=0))
                 continue
             pieces = []
             for visual in visuals:

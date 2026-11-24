@@ -18,10 +18,24 @@ class BindingGripperController:
         self.driver_id = self._id(mujoco.mjtObj.mjOBJ_JOINT, 'robotiq_2f85_right_driver_joint')
         self.driver_address = int(self.model.jnt_qposadr[self.driver_id])
         self.pad_geoms = {}
+        self.pad_vertices = {}
         for side in ('left', 'right'):
-            body = self._id(mujoco.mjtObj.mjOBJ_BODY, f'robotiq_2f85_{side}_pad')
-            self.pad_geoms[side] = {g for g in range(self.model.ngeom) if self.model.geom_bodyid[g] == body
+            bodies = {self._id(mujoco.mjtObj.mjOBJ_BODY, f'robotiq_2f85_{side}_{suffix}')
+                      for suffix in ('pad', 'silicone_pad')}
+            self.pad_geoms[side] = {g for g in range(self.model.ngeom) if self.model.geom_bodyid[g] in bodies
                                     and (self.model.geom_contype[g] or self.model.geom_conaffinity[g])}
+            if not self.pad_geoms[side]:
+                raise ValueError(f'Gripper {side} pad has no active collision geometry')
+            for g in self.pad_geoms[side]:
+                if self.model.geom_type[g] == mujoco.mjtGeom.mjGEOM_MESH:
+                    mesh = int(self.model.geom_dataid[g])
+                    start = int(self.model.mesh_vertadr[mesh])
+                    self.pad_vertices[g] = self.model.mesh_vert[start:start + int(self.model.mesh_vertnum[mesh])].copy()
+                elif self.model.geom_type[g] == mujoco.mjtGeom.mjGEOM_BOX:
+                    from itertools import product
+                    self.pad_vertices[g] = np.asarray(list(product((-1, 1), repeat=3))) * self.model.geom_size[g]
+                else:
+                    raise ValueError('Gripper pad requires mesh or box collision geometry')
         self.held_name = None
         self.relative_pose = None
         self.confirmed = False
@@ -39,14 +53,17 @@ class BindingGripperController:
 
     @property
     def width(self):
-        # Robotiq parallelogram: compute actual inner pad surface separation.
-        centers = []
-        for side in ('left', 'right'):
-            geoms = sorted(self.pad_geoms[side])
-            positions = [self.data.geom_xpos[g] + self.data.geom_xmat[g].reshape(3, 3) @ np.array([0, -.004, 0]) for g in geoms]
-            centers.append(np.mean(positions, axis=0))
+        # Measure facing surfaces, independent of convex-part count and mesh
+        # recentering performed by MuJoCo. Include the silicone contact layer.
         axis = self.data.xmat[self.base_id].reshape(3, 3)[:, 1]
-        return float(abs(np.dot(centers[0] - centers[1], axis)))
+        intervals = []
+        for side in ('left', 'right'):
+            projections = np.concatenate([
+                (vertices @ self.data.geom_xmat[g].reshape(3, 3).T + self.data.geom_xpos[g]) @ axis
+                for g in self.pad_geoms[side] for vertices in [self.pad_vertices[g]]])
+            intervals.append((float(projections.min()), float(projections.max())))
+        intervals.sort()
+        return max(0., intervals[1][0] - intervals[0][1])
 
     def _relative(self, body):
         base_rotation = self.data.xmat[self.base_id].reshape(3, 3)

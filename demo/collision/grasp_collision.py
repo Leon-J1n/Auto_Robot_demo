@@ -214,7 +214,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             and int(model.geom_bodyid[other]) not in self.robot_bodies], dtype=int).reshape(-1, 2)
 
     def _bind_arm_environment_policy(self):
-        """Resolve the same declared FCL arm/fixture policy to MuJoCo geometry."""
+        """Resolve declared fixtures and fixed-base/environment exemptions."""
         model = self.backend.model
         roots = set()
         for name in self._allowed_arm_environment_names:
@@ -237,19 +237,11 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         fixtures = {g for g in self.geoms if int(model.geom_bodyid[g]) in fixture_bodies}
         self._arm_environment_geom_pairs = frozenset(
             frozenset((a, b)) for a in arm for b in fixtures)
-        mount_roots = {self.backend.object_ids[name] for name in self._mounting_pedestal_names}
-        mount_bodies = set(mount_roots)
-        for body in range(1, model.nbody):
-            ancestor = body
-            while ancestor:
-                if ancestor in mount_roots:
-                    mount_bodies.add(body)
-                    break
-                ancestor = int(model.body_parentid[ancestor])
         base = {g for g in self.geoms if int(model.geom_bodyid[g]) in self.robot_bodies
                 and self.body_names[int(model.geom_bodyid[g])] in self._fixed_base_link_names}
-        mounts = {g for g in self.geoms if int(model.geom_bodyid[g]) in mount_bodies}
-        self._arm_environment_geom_pairs |= frozenset(frozenset((a, b)) for a in base for b in mounts)
+        environment = {g for g in self.geoms if int(model.geom_bodyid[g]) not in self.robot_bodies}
+        self._arm_environment_geom_pairs |= frozenset(
+            frozenset((a, b)) for a in base for b in environment)
 
     def set_entity_transform(self, name, **pose):
         dynamic = getattr(self, 'dynamic_names', set())

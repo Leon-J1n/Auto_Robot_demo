@@ -32,7 +32,7 @@ DEFAULT_SCENE_SETTINGS = {
         },
         'planning': {
             'mode': 'auto',
-            'planning_time': 10.0,
+            'planning_time': 30.0,
             'allow_replan': True,
             'collision_validation': {'spline_subdivisions': 2},
         },
@@ -274,6 +274,23 @@ class SceneResourceCoordinator:
                 raise ValueError('Attachment Transform.parent disagrees with RobotAttachment')
             if component(robots[0], 'GripperModel'):
                 raise ValueError('Only one gripper attachment is supported')
+            source = deepcopy(source)
+            tool_source = (root / source['urdf']).resolve()
+            source['source_urdf'] = str(tool_source)
+            tool_options = deepcopy(source.get('collision_geometry') or {})
+            # Preserve the Robotiq linkage cavities around the grasp volume.
+            # An eight-part envelope bridges them and can block the arm before
+            # the fingers close. Keep this in the shared generation/cache path.
+            tool_links = {link.get('name') for link in ET.parse(tool_source).findall('link')}
+            for side in ('left', 'right'):
+                link = f'robotiq_2f85_{side}_spring_link'
+                if link in tool_links:
+                    override = tool_options.setdefault('link_overrides', {}).setdefault(link, {})
+                    override.setdefault('max_convex_hulls', 32)
+                    override.setdefault('threshold', .01)
+            source['urdf'] = str(prepare_robot_visual_collisions(
+                tool_source, tool_options))
+            component(obj, 'GripperModel').update(source)
             robots[0]['components'].append({'component_type': 'GripperModel', 'properties': deepcopy(source)})
         from .assembly import assemble_robot
         assembled = assemble_robot(urdf, root, attachments)

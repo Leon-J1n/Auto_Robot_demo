@@ -1,9 +1,9 @@
 # Collision 模块
 
-机械臂默认从 URDF 的各 link `<visual>` 自动生成碰撞几何。资源加载时合并同一
+所有机械臂统一从 URDF 的各 link `<visual>` 自动生成碰撞几何。资源加载时合并同一
 link 的视觉部件并应用 `origin` / `scale`，简化输入面数，再生成 CoACD 凸分解；
 不会跨关节合并，不修改源 URDF、视觉网格、关节或惯性。没有 visual 的 link
-保留原有 collision；独立夹爪仍沿用自己的碰撞资产。
+若只有 collision 则报错要求补齐 visual，纯坐标 link 保留为空；独立夹爪仍沿用自己的碰撞资产。
 
 默认预算：每个 link 输入最多 3000 个三角面，输出最多 8 个凸块，每块最多
 64 个顶点。开放表面会经过 CoACD 预处理，结果是近似几何；预算较紧时不能
@@ -23,7 +23,7 @@ FCL 和 MuJoCo 使用同一份派生 URDF；显示仍使用原视觉资产。
 
 ```json
 {
-  "mode": "auto",
+  "mode": "visual",
   "max_input_faces": 3000,
   "max_convex_hulls": 8,
   "max_vertices": 64,
@@ -33,9 +33,10 @@ FCL 和 MuJoCo 使用同一份派生 URDF；显示仍使用原视觉资产。
 }
 ```
 
-`mode: "auto"`（默认）在 URDF 为所有视觉链提供 authored collision 时直接使用原始
-collision；只有碰撞几何不完整时才生成 visual-derived collision。`mode: "authored"`
-强制使用原 URDF collision，`mode: "visual"` 强制使用视觉网格生成碰撞。`exclude_links` 为明确不参与碰撞的
+`mode: "visual"` 是唯一有效生成策略；旧配置的 `auto`、`authored` 兼容读取后均归一为
+`visual`，不会直接使用原 URDF collision。碰撞缓存 schema 为 3。
+交付包必须在 `bundle.json.robot_collision_geometry` 声明与当前完整有效配置一致的
+视觉生成参数，否则拒绝加载，防止旧的混合来源几何绕过统一策略。`exclude_links` 为明确不参与碰撞的
 link 名单（例如专用装饰 link），名称拼错会报错。`package_paths` 将
 `package://` 的包名映射到本地绝对目录；普通相对路径按源 URDF 目录解析。
 
@@ -49,11 +50,11 @@ link 名单（例如专用装饰 link），名称拼错会报错。`package_path
 覆盖机械臂自碰撞、环境及携带物体。沿用原来的允许碰撞对和安全距离；
 同一刚体内部、直接相邻 link 的过滤不会因切换碰撞资产而取消。
 
-安装接触由运行时识别，无需给场景增加字段：已有语义或对象库引用表明是
-静态机械臂安装底座、且在机械臂基座下方水平对齐时，仅豁免 URDF 根节点
-经 fixed 关节连接的固定基座几何与该底座的接触。活动连杆、夹爪、携带物体
-及普通桌面障碍物不享有此豁免；多个候选底座时不自动推断。相同规则应用
-于 FCL、规划代理的源几何策略和 MuJoCo 物理接触过滤。
+固定基座统一豁免与所有环境物体的碰撞，无需场景配置或安装底座识别。
+固定基座指 URDF 根节点及经 fixed 关节连接的 link，遇到活动关节即停止。
+该规则包括桌面、普通障碍物和动态物体；基座与这些物体的穿透也不会报告，
+MuJoCo 不产生对应接触响应。活动连杆、夹爪和携带物体与其他环境的碰撞仍检查。
+相同规则应用于 FCL、规划代理的源几何策略和 MuJoCo 物理接触过滤。
 
 ## 1. 职责与边界
 

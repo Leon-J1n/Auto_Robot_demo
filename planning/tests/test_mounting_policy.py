@@ -1,4 +1,4 @@
-"""Automatic mounting exemptions never cover moving arm links or obstacles."""
+"""Fixed-base exemptions cover all environment, never moving arm links."""
 from copy import deepcopy
 from pathlib import Path
 import tempfile
@@ -19,6 +19,25 @@ def obj(name, position, semantic='', static=False):
 
 
 class MountingPolicyTests(unittest.TestCase):
+    def test_base_environment_rule_reaches_host_and_frozen_planning_policy(self):
+        from planning.tests.test_curobo_policy import scene
+        from collision.planning_policy import freeze_policy, pair_limit
+        with scene() as (runtime, checker, geom):
+            checker._arm_link_names = frozenset({'base', 'arm'})
+            checker._fixed_base_link_names = frozenset({'base'})
+            checker._allowed_arm_environment_names = frozenset()
+            checker._bind_arm_environment_policy()
+            runtime.gripper_controller.held_name = 'payload'
+            policy, _ = freeze_policy(checker, [.4], .003)
+            checker.check([.4], safety_distance=.003)
+            queried = {frozenset((a, b)) for a, b, _ in checker._pairs}
+            for obstacle in ('table', 'target', 'pedestal', 'pedestal_child', 'payload'):
+                self.assertIsNone(pair_limit(policy, geom('base'), geom(obstacle)))
+                self.assertNotIn(frozenset((geom('base'), geom(obstacle))), queried)
+            for actor in ('arm', 'tool', 'payload'):
+                self.assertEqual(pair_limit(policy, geom(actor), geom('table')), .003)
+            self.assertEqual(pair_limit(policy, geom('base'), geom('tool')), .003)
+
     def test_recognizes_only_static_aligned_unambiguous_pedestal(self):
         robot = obj('arm', [0, 0, .5])
         pedestal = obj('RobotPedestal', [0, 0, .25], 'robot_pedestal', True)
@@ -45,7 +64,7 @@ class MountingPolicyTests(unittest.TestCase):
                 _names={10: 'base', 11: 'moving', 20: 'RobotPedestal', 21: 'Table'},
                 _mounting_pedestal_names={'RobotPedestal'})
             self.assertEqual(SimPlatformFCLCollisionChecker._arm_environment_pairs(checker),
-                             {frozenset((10, 20))})
+                             {frozenset((10, 20)), frozenset((10, 21))})
             root = ET.fromstring('<mujoco><worldbody><body name="root"><body name="base">'
                 '<body name="moving"/></body></body><body name="RobotPedestal"/>'
                 '<body name="Table"/></worldbody></mujoco>')
@@ -56,7 +75,8 @@ class MountingPolicyTests(unittest.TestCase):
             pairs = {frozenset((e.get('body1'), e.get('body2'))) for e in root.findall('contact/exclude')}
             self.assertIn(frozenset(('base', 'RobotPedestal')), pairs)
             self.assertNotIn(frozenset(('moving', 'RobotPedestal')), pairs)
-            self.assertNotIn(frozenset(('base', 'Table')), pairs)
+            self.assertIn(frozenset(('base', 'Table')), pairs)
+            self.assertNotIn(frozenset(('moving', 'Table')), pairs)
 
 
 if __name__ == '__main__':

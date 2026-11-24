@@ -85,7 +85,8 @@ class RobotVisualCollisionTests(unittest.TestCase):
             source.write_text('<robot name="test"><link name="arm"><visual><geometry>'
                               '<box size="1 1 1"/></geometry></visual><collision><geometry>'
                               '<sphere radius="1"/></geometry></collision></link></robot>')
-            self.assertEqual(prepare_robot_visual_collisions(source, {'mode': 'authored'}), source)
+            generated = prepare_robot_visual_collisions(source, {'mode': 'authored'}, cache_root=Path(tmp)/'cache')
+            self.assertIsNotNone(ET.parse(generated).getroot().find('link/collision/geometry/mesh'))
             result = prepare_robot_visual_collisions(source, {'exclude_links': ['arm']}, cache_root=Path(tmp)/'cache')
             self.assertIsNone(ET.parse(result).getroot().find('link/collision'))
             with self.assertRaisesRegex(ValueError, 'Unknown'):

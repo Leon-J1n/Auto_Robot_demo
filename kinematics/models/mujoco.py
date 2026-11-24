@@ -26,7 +26,10 @@ class MujocoRobotModel:
             raise ValueError("Joint vector must contain one finite value per robot joint")
         self._work_data.qpos[:] = self.runtime.data.qpos
         self._work_data.qpos[self.qpos_indices] = values
-        mujoco.mj_forward(self.model, self._work_data)
+        # IK probes can intentionally overlap geometry. FK/Jacobians need
+        # kinematics and COM data, never contact constraints or their solver.
+        mujoco.mj_kinematics(self.model, self._work_data)
+        mujoco.mj_comPos(self.model, self._work_data)
 
     def forward(self, joints):
         self._set_joints(joints)

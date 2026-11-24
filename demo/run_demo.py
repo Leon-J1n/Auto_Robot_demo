@@ -631,6 +631,8 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         if isinstance(checker, GraspCollisionChecker):
             checker.bind_backend(backend)
             backend.gripper_controller = backend.create_gripper_controller()
+            from execution.runtime.checkpoint import restore
+            restore(backend, (task.get('runtime_context') or {}).get('execution_checkpoint'))
             proxy_config = resources.scene.get('planning_collision_proxy', {})
             if not isinstance(proxy_config, dict) or not isinstance(proxy_config.get('enabled', False), bool):
                 raise ValueError('planning_collision_proxy requires an enabled boolean')
@@ -928,6 +930,8 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
                 final_state = None
                 try:
                     final_state = backend.get_state()
+                    from execution.runtime.checkpoint import capture
+                    final_state['execution_checkpoint'] = capture(backend, task['request_id'])
                     blackboard.observe(final_state)
                     report['final_state'] = final_state
                     from execution.output.trajectory_export import append_final_frame

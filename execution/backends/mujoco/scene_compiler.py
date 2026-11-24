@@ -11,23 +11,29 @@ from ...resources import component, pose_matrix
 def exclude_arm_neighbours(root, resources):
     # MuJoCo does not automatically filter a moving link against its welded
     # world/base parent. Visual-derived base geometry now makes that pair
-    # tangible. Match the planner's direct-neighbour and explicit exemptions.
+    # tangible. Match the planner's two-joint-neighbour and explicit exemptions.
     arm = ET.parse(resources.robot_urdf).getroot()
-    pairs = [(j.find('parent').get('link'), j.find('child').get('link'))
-             for j in arm.findall('joint')]
+    from collision.mounting import two_joint_neighbour_pairs
+    pairs = [tuple(sorted(pair)) for pair in sorted(
+        two_joint_neighbour_pairs(arm.findall('joint')), key=lambda pair: tuple(sorted(pair)))]
     pairs.extend(component(resources.robot_object, 'RobotModelRef').get('allowed_collision_link_pairs', []))
-    from collision.mounting import fixed_base_links, mounting_pedestals
+    from collision.mounting import fixed_base_links
     base_links = fixed_base_links(resources.robot_urdf)
-    pedestal_names = mounting_pedestals(getattr(resources, 'scene', {}), resources.robot_object)
-    for name in pedestal_names:
-        wrapper = next((b for b in root.iter('body') if b.get('name') == name), None)
-        if wrapper is not None:
-            pairs.extend((link, body.get('name')) for link in base_links for body in wrapper.iter('body'))
+    # Keep attachments in the robot subtree; only external bodies are exempt.
+    robot_name = resources.robot_object.get('object_name_in_scene')
+    world = root.find('worldbody')
+    for wrapper in world.findall('body') if world is not None else ():
+        if wrapper.get('name') == robot_name or any(
+                body.get('name') in base_links for body in wrapper.iter('body')):
+            continue
+        pairs.extend((link, body.get('name')) for link in base_links for body in wrapper.iter('body'))
+    if world is not None and world.findall('geom'):
+        pairs.extend((link, 'world') for link in base_links)
     contact = root.find('contact')
     if contact is None:
         contact = ET.SubElement(root, 'contact')
     existing = {frozenset((e.get('body1'), e.get('body2'))) for e in contact.findall('exclude')}
-    bodies = {b.get('name') for b in root.iter('body')}
+    bodies = {b.get('name') for b in root.iter('body')} | {'world'}
     for a, b in pairs:
         key = frozenset((a, b))
         if a in bodies and b in bodies and key not in existing:
@@ -99,6 +105,9 @@ def urdf_mjcf(path, output_dir, prefix, tree=None):
         if not link.get('name', '').startswith('robotiq_2f85_') or not link.get('name', '').endswith('_spring_link'):
             continue
         for collision in list(link.findall('collision')):
+            if collision.get('name', '').startswith(link.get('name') + '_visual_collision_'):
+                # Already decomposed by the shared visual collision pipeline.
+                continue
             mesh = collision.find('geometry/mesh')
             if mesh is None:
                 continue
@@ -135,6 +144,16 @@ def urdf_mjcf(path, output_dir, prefix, tree=None):
     intermediate = output_dir / f'{prefix}_import.xml'
     mujoco.mj_saveLastXML(str(intermediate), model)
     imported = ET.parse(intermediate).getroot()
+    # mj_saveLastXML rounds numeric attributes (e.g. 1.2217304 -> 1.22173).
+    # Keep the compiled URDF limits at full precision so valid IK boundary
+    # solutions are also valid for execution and collision queries.
+    for joint in imported.iter('joint'):
+        name = joint.get('name')
+        if name is None:
+            continue
+        jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        if jid >= 0 and model.jnt_limited[jid]:
+            joint.set('range', numbers(model.jnt_range[jid]))
     # MuJoCo imports OBJ UVs through URDF, but does not load the associated MTL.
     # Match the final mesh filename so identically named source OBJs stay distinct.
     textures = {Path(mesh.get('filename')).resolve(): texture
@@ -164,10 +183,9 @@ def compile_scene(resources, output_dir):
         raise ValueError('MuJoCo plugin expects format=generate_from_scene')
     root = ET.Element('mujoco', model=str(resources.scene['scene_id']))
     ET.SubElement(root, 'compiler', angle='radian')
-    # Collision-rich target resolution evaluates many IK candidates in one
-    # MuJoCo data object. ``memory`` does not control MuJoCo's temporary
-    # computation stack, so reserve an explicit stack arena as well.
-    ET.SubElement(root, 'size', nconmax='10000', nstack='10000000')
+    # MuJoCo 3 uses a shared arena for contacts, constraints and the stack.
+    # Dense convex meshes can exceed the ~86 MiB legacy nstack allocation.
+    ET.SubElement(root, 'size', memory='256M')
     ET.SubElement(root, 'option', timestep='0.002', integrator='implicitfast', gravity='0 0 -9.81',
                   noslip_iterations='1')
     visual = ET.SubElement(root, 'visual')
@@ -289,4 +307,3 @@ def compile_scene(resources, output_dir):
     ET.indent(root)
     ET.ElementTree(root).write(path, encoding='utf-8', xml_declaration=True)
     return path
-
