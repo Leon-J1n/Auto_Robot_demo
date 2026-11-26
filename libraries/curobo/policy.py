@@ -9,7 +9,7 @@ import numpy as np
 IGNORE_DISTANCE = -1.e20
 # Float32 FK/SDF arithmetic can report nanometre-scale positive penetration at
 # an exact clearance boundary. This comparison tolerance does not change the
-# requested margin; the original host checker still validates every result.
+# requested margin.
 GPU_DISTANCE_EPS_M = 1.e-7
 
 
@@ -31,7 +31,8 @@ def compile_policy(converted: dict) -> dict:
             # Fail rather than silently approximate a future self-pair threshold.
             raise ValueError(f'Per-pair self distance requires a self-collision kernel extension: {pair}')
     return {'allowed': allowed, 'overrides': overrides, 'self_ignores': ignores,
-            'margin': float(source['safety_distance']), 'fingerprint': source['fingerprint']}
+            'margin': float(source['safety_distance']),
+            'fingerprint': source['fingerprint']}
 
 
 def world_limits(compiled: dict, sphere_geometries: list[int], obstacle_geometries: list[int | None]) -> np.ndarray:

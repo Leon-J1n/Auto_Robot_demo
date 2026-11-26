@@ -457,8 +457,8 @@ def create_goalset_pose_distance_kernel_with_constants(
     def _goalset_pose_distance_template(
         current_position: wp.array(dtype=wp.vec3),  # shape is [batch_size * horizon * nlinks, 3]
         current_quat: wp.array(dtype=wp.vec4),  # shape is [batch_size * horizon * nlinks, 4]
-        goal_position: wp.array(dtype=wp.vec3),  # shape is [batch_goals, num_links, num_goalset, 3]
-        goal_quat: wp.array(dtype=wp.vec4),  # shape is [batch_goals, num_links, num_goalset, 4]
+        goal_position: wp.array(dtype=wp.vec3),  # shape is [batch_goals, goal_horizon, num_links, num_goalset, 3]
+        goal_quat: wp.array(dtype=wp.vec4),  # shape is [batch_goals, goal_horizon, num_links, num_goalset, 4]
         idxs_goal: wp.array(dtype=wp.int32),  # shape is [batch_size]
         position_orientation_weight: wp.array(dtype=wp.float32),  # shape is [2]
         terminal_pose_axes_weight_factor: wp.array(dtype=wp.float32),  # shape is [num_links, 6]
@@ -489,6 +489,7 @@ def create_goalset_pose_distance_kernel_with_constants(
         batch_size: wp.int32,
         horizon: wp.int32,
         num_links: wp.int32,
+        goal_horizon: wp.int32,
     ):
         tid = wp.tid()  # threads launched = batch_size * horizon
         if tid >= batch_size * horizon * num_links:
@@ -572,14 +573,28 @@ def create_goalset_pose_distance_kernel_with_constants(
         # loop over num_goalset
         for g_idx in range(num_goalset):
             # read goal position and quat
-            # goal_position is shape (batch_goals, num_links, num_goalset, 3)
+            # goal_position is shape (batch_goals, goal_horizon, num_links, num_goalset, 3)
             # Use runtime num_goalset for indexing to handle cases where num_goalset != num_links
-            g_goal_position = goal_position[
-                goal_idx * num_links * num_goalset + link_idx * num_goalset + g_idx
-            ]
-            g_goal_quat = goal_quat[
-                goal_idx * num_links * num_goalset + link_idx * num_goalset + g_idx
-            ]
+            goal_h_idx = 0
+            next_h_idx = 0
+            goal_fraction = wp.float32(0.0)
+            if goal_horizon > 1 and horizon > 1:
+                goal_time = wp.float32(h_idx * (goal_horizon - 1)) / wp.float32(horizon - 1)
+                goal_h_idx = wp.int32(wp.floor(goal_time))
+                next_h_idx = wp.min(goal_h_idx + 1, goal_horizon - 1)
+                goal_fraction = goal_time - wp.float32(goal_h_idx)
+            goal_offset = ((goal_idx * goal_horizon + goal_h_idx) * num_links
+                           + link_idx) * num_goalset + g_idx
+            g_goal_position = goal_position[goal_offset]
+            g_goal_quat = goal_quat[goal_offset]
+            if goal_horizon > 1:
+                next_offset = ((goal_idx * goal_horizon + next_h_idx) * num_links
+                               + link_idx) * num_goalset + g_idx
+                g_goal_position = wp.lerp(g_goal_position, goal_position[next_offset], goal_fraction)
+                next_quat = goal_quat[next_offset]
+                if wp.dot(g_goal_quat, next_quat) < 0.0:
+                    next_quat = -next_quat
+                g_goal_quat = wp.normalize(wp.lerp(g_goal_quat, next_quat, goal_fraction))
             g_goal_quaternion = wp.quaternion(
                 g_goal_quat[1], g_goal_quat[2], g_goal_quat[3], g_goal_quat[0]
             )
@@ -727,8 +742,8 @@ class ToolPoseDistance(torch.autograd.Function):
             ctx: context
             current_position: Shape is (b, h, num_links, 3).
             current_quat: Shape is (b, h, num_links, 4)
-            goal_position: Shape is (-1, num_links, num_goalset, 3). The tensor is accessed using idxs_goal.
-            goal_quat: Shape is (-1, num_links, num_goalset, 4). The tensor is accessed using idxs_goal.
+            goal_position: Shape is (-1, goal_horizon, num_links, num_goalset, 3).
+            goal_quat: Shape is (-1, goal_horizon, num_links, num_goalset, 4).
             idxs_goal: Shape is (b,1). The tensor is accessed using b_idx.
             position_orientation_weight: Shape is (2,). The first element is the weight for
                 the position, the second element is the weight for the rotation.
@@ -766,10 +781,10 @@ class ToolPoseDistance(torch.autograd.Function):
         if current_quat.ndim != 4:
             log_and_raise("current_quat must be a 4D tensor")
 
-        if goal_position.ndim != 4:
-            log_and_raise("goal_position must be a 4D tensor with shape (-1, num_links, num_goalset, 3): got {}".format(goal_position.shape))
-        if goal_quat.ndim != 4:
-            log_and_raise("goal_quat must be a 4D tensor with shape (-1, num_links, num_goalset, 4): got {}".format(goal_quat.shape))
+        if goal_position.ndim != 5 or goal_position.shape[1] < 1:
+            log_and_raise("goal_position must have shape (-1, goal_horizon, num_links, num_goalset, 3): got {}".format(goal_position.shape))
+        if goal_quat.shape != (*goal_position.shape[:-1], 4):
+            log_and_raise("goal_quat shape disagrees with goal_position: got {}".format(goal_quat.shape))
 
         num_goalset = goal_position.shape[-2]
         b, h, num_links, _ = current_position.shape
@@ -828,6 +843,7 @@ class ToolPoseDistance(torch.autograd.Function):
                 b,
                 h,
                 num_links,
+                goal_position.shape[1],
             ],
             device=wp_device,
             stream=wp_stream,

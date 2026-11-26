@@ -655,7 +655,9 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             if crop_origin is not None:
                 diagnostics.update(image_region='target_aabb_crop',
                                    crop_origin_pixel={'x': crop_origin[0], 'y': crop_origin[1]})
-            progress('validation', 'Wrist camera / validating IK, collision and contact path')
+            deferred = resolved.get('contact_validation_deferred', False)
+            progress('validation', 'Wrist camera / checking gripper geometry' if deferred
+                     else 'Wrist camera / validating IK, collision and contact path')
             refined = deepcopy(resolved)
             new_surface = np.array([estimate['world_point'][key] for key in 'xyz'])
             transform = np.asarray(resolved['control_from_grasp'])
@@ -686,8 +688,13 @@ class VLMGraspResolver(ObjectLibraryGraspResolver):
             refined.pop('closure_validation', None)
             refined.update(candidates=candidates, visual_estimate=updated,
                 fixed_grasp_validation_pending=vertical, depth_search_pending=not vertical)
-            choice = self.select(refined, kin, checker, state['joints'], prefer_direct=False,
-                safety_distance=float(resources.scene.get('move_defaults', {}).get('constraints', {}).get('safety_distance', .003)))
+            safety_distance = float(resources.scene.get('move_defaults', {}).get('constraints', {}).get('safety_distance', .003))
+            if deferred:
+                choice = self.select_approach(refined, checker, safety_distance=safety_distance)
+                choice['visual_estimate']['wrist_refinement']['contact_validation_deferred'] = True
+            else:
+                choice = self.select(refined, kin, checker, state['joints'], prefer_direct=False,
+                                     safety_distance=safety_distance)
             progress('cache', 'Wrist camera / refinement validated')
             choice['visual_estimate']['wrist_refinement']['timing_s'] = dict(timings)
             choice['visual_estimate']['wrist_refinement']['elapsed_s'] = perf_counter() - started

@@ -90,6 +90,36 @@ class TestToolPoseCostCfg:
 class TestToolPoseCost:
     """Test ToolPoseCost class."""
 
+    def test_forward_interpolates_timed_goals(self, device_cfg):
+        """Map two time-stamped goals across a denser rollout horizon."""
+        frames = ["ee_link"]
+        cost = ToolPoseCost(ToolPoseCostCfg(
+            weight=[1.0, 1.0], tool_frames=frames, device_cfg=device_cfg
+        ))
+        cost.setup_batch_tensors(batch_size=1, horizon=5)
+        cost.update_tool_pose_criteria({
+            frames[0]: ToolPoseCriteria.track_position_and_orientation(non_terminal_scale=1.0)
+        })
+        positions = torch.zeros((1, 5, 1, 3), **device_cfg.as_torch_dict())
+        quaternions = torch.zeros((1, 5, 1, 4), **device_cfg.as_torch_dict())
+        quaternions[..., 0] = 1.0
+        goals = torch.zeros((1, 2, 1, 1, 3), **device_cfg.as_torch_dict())
+        goals[:, 1, ..., 0] = 0.4
+        goal_quaternions = torch.zeros((1, 2, 1, 1, 4), **device_cfg.as_torch_dict())
+        goal_quaternions[..., 0] = 1.0
+
+        _, distances, _, _ = cost.forward(
+            ToolPose(frames, positions, quaternions),
+            GoalToolPose(frames, goals, goal_quaternions),
+            torch.zeros((1, 1), device=device_cfg.device, dtype=torch.int32),
+        )
+
+        torch.testing.assert_close(
+            distances.flatten(),
+            torch.tensor([0., .1, .2, .3, .4], **device_cfg.as_torch_dict()),
+            atol=1e-5, rtol=0,
+        )
+
     def test_init(self, device_cfg):
         """Test ToolPoseCost initialization."""
         tool_frames = ["ee_link"]
@@ -512,4 +542,3 @@ class TestToolPoseCostGradients:
         assert current_quaternion.grad is not None
         assert current_position.grad.shape == current_position.shape
         assert current_quaternion.grad.shape == current_quaternion.shape
-

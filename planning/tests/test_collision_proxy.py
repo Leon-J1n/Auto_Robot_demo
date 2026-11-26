@@ -3,6 +3,7 @@ from copy import deepcopy
 from itertools import product
 from pathlib import Path
 from types import SimpleNamespace
+from xml.etree.ElementTree import Element
 import json
 import tempfile
 import unittest
@@ -11,7 +12,7 @@ from unittest.mock import patch
 import mujoco
 import numpy as np
 
-from collision.proxy import PlanningProxy, _cover_box, simplify_snapshot
+from collision.proxy import PlanningProxy, _cover_box, _cover_convex_mesh, simplify_snapshot
 from libraries.curobo.conversion.runtime import convert_runtime
 
 
@@ -30,6 +31,60 @@ def snapshot(geoms, allowed=(), overrides=()):
 
 
 class ProxyGeometryTests(unittest.TestCase):
+    def test_runtime_export_identifies_the_arm_from_urdf(self):
+        from libraries.curobo.runtime_policy import export_runtime
+        from planning.tests.test_curobo_policy import scene
+
+        with scene() as (runtime, checker, _), tempfile.TemporaryDirectory() as directory:
+            runtime.resources.robot_xml = Element('robot', name='UR3')
+            runtime.resources.robot_object = {'object_name_in_scene': 'renamed_arm'}
+            raw = export_runtime(runtime, checker, {'safety_distance': .003}, directory)
+            self.assertEqual(simplify_snapshot(raw)['planning_proxy']['arm_profile'], 'ur3')
+
+    def test_arm_profile_only_refines_the_selected_model_and_not_payload(self):
+        import trimesh
+
+        with tempfile.TemporaryDirectory() as directory:
+            mesh = Path(directory) / 'convex.obj'
+            trimesh.Trimesh(vertices=np.vstack((np.zeros(3), np.eye(3) * .03)),
+                            faces=[[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]]).export(mesh)
+            arm = geometry(0, 1, robot=True, kind='mesh', name='upper_arm_link')
+            arm.update(name='upper_arm_link_visual_collision_2', file_path=str(mesh))
+            payload = {**arm, 'id': 1, 'body': 2}
+            raw = snapshot([arm, payload], overrides=[[0, 1, .005]])
+            conservative = simplify_snapshot(dict(raw, arm_model='unknown', payload_bodies=[2]))
+            for model in ('ur3', 'ur5', 'ur10', 'piper', 'nero'):
+                with self.subTest(model=model):
+                    result = simplify_snapshot(dict(raw, arm_model=model, payload_bodies=[2]))
+                    self.assertEqual(result['planning_proxy']['arm_profile'], model)
+                    self.assertEqual(result['geometries'][1], conservative['geometries'][1])
+                    self.assertEqual(result['policy']['allowed_pairs'], conservative['policy']['allowed_pairs'])
+                    self.assertEqual(result['policy']['distance_overrides'], [[0, 1, .005]])
+                    self.assertEqual(result['geometries'][0] != conservative['geometries'][0], model.startswith('ur'))
+            self.assertIsNone(conservative['planning_proxy']['arm_profile'])
+
+    def test_convex_cover_keeps_interior_and_discards_empty_box_corners(self):
+        import trimesh
+        from scipy.spatial.transform import Rotation
+
+        vertices = np.vstack((np.zeros(3), np.eye(3) * .08))
+        hull = trimesh.convex.convex_hull(vertices)
+        with tempfile.TemporaryDirectory() as directory:
+            mesh = Path(directory) / 'convex.obj'
+            hull.export(mesh)
+            transform = np.eye(4)
+            transform[:3, :3] = Rotation.from_rotvec([0., 0., .62]).as_matrix()
+            transform[:3, 3] = [.1, .2, .3]
+            spheres = _cover_convex_mesh(dict(kind='mesh', size=[.08] * 3,
+                                           file_path=str(mesh), matrix=transform), .02, {})
+        centers = np.array([sphere['center'] for sphere in spheres])
+        radii = np.array([sphere['radius'] for sphere in spheres])
+        weights = np.asarray([values for values in product(range(11), repeat=3) if sum(values) <= 10]) / 10
+        points = (weights * .08) @ transform[:3, :3].T + transform[:3, 3]
+        distances = np.linalg.norm(points[:, None] - centers, axis=-1)
+        self.assertTrue(np.all((distances <= radii + 1.e-10).any(axis=1)))
+        self.assertLess(len(spheres), len(_cover_box(np.zeros(3), np.full(3, .08), .02)))
+
     def test_box_cover_contains_entire_cells(self):
         low, high = np.array([-.025,-.016,-.01]), np.array([.025,.016,.01])
         spheres = _cover_box(low, high, .02)

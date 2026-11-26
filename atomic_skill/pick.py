@@ -73,11 +73,13 @@ class DemoInteractionPick(DemoInteractionMove):
         self.contact_planner = PickContactPlanner(
             kinematics=kinematics, collision_checker=collision_checker, joint_limits=joint_limits)
 
-    def prepare(self, request, state, *, grasp_request=None, retreat_lift_height=0.01):
+    def prepare(self, request, state, *, grasp_request=None, retreat_lift_height=0.01,
+                deferred_grasp_index=None):
         if (isinstance(retreat_lift_height, bool) or not isinstance(retreat_lift_height, (int, float))
                 or not np.isfinite(retreat_lift_height) or retreat_lift_height < 0):
             raise ValueError('retreat_lift_height must be a finite nonnegative number in metres')
-        base, resolved, goal, world_grasp, requested_path = self._resolve_request(request, state, prefer_direct=False, closure_request=grasp_request)
+        base, resolved, goal, world_grasp, requested_path = self._resolve_request(request, state,
+            prefer_direct=False, closure_request=grasp_request, deferred_grasp_index=deferred_grasp_index)
         # Approach along the physical interaction frame, not an unrelated flange
         # axis. Moving the fixed grasp frame translates the controlled TCP equally.
         direction = world_grasp[:3, 2]
@@ -96,6 +98,12 @@ class DemoInteractionPick(DemoInteractionMove):
             linear.setdefault('planning', {}).update(mode='direct', allow_replan=False)
             linear.setdefault('strategy_params', {}).update(
                 max_joint_step=0.8, linear_search_mode='fast')
+            if resolved.get('contact_validation_deferred'):
+                linear['motion']['path_constraint'] = 'hard'
+                resolved['approach'] = {'used': False, 'mode': 'direct_grasp_move',
+                    'path_type': 'linear', 'distance_m': 0.0,
+                    'direction_world': np.asarray(direction, dtype=float).tolist()}
+                return [{'phase': 'contact', 'request': linear}], resolved
             joint = deepcopy(base)
             joint['motion'].update(path_type='joint', path_constraint='soft', phase='contact')
             # The fallback is the recovery route: let MoveJoint switch to the
@@ -177,5 +185,4 @@ class DemoInteractionPick(DemoInteractionMove):
             retreat_part['translation_world'] = (-distance * direction).tolist()
         parts.append(retreat_part)
         return parts, resolved
-
 

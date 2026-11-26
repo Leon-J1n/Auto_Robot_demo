@@ -30,11 +30,19 @@ def install_empty_self_pair_support():
     # to its metrics config. An empty set must return differentiable zero there
     # as well, rather than launch an invalid zero-block native kernel.
     from curobo._src.cost.cost_self_collision import SelfCollisionCost
+    import torch
     original_forward=SelfCollisionCost.forward
     def forward(self,robot_spheres):
-        if self.config.self_collision_kin_config.collision_pairs.numel()==0:
-            return robot_spheres[...,0,:1]*0.
-        return original_forward(self,robot_spheres)
+        config=self.config.self_collision_kin_config
+        base=(original_forward(self,robot_spheres) if config.collision_pairs.numel()
+              else robot_spheres[...,0,:1]*0.)
+        convex=getattr(config,'convex_self',None)
+        if convex is None:
+            return base
+        penalty=convex.clearance_cost(robot_spheres)*self._weight
+        if self.config.convert_to_binary:
+            penalty=torch.where(penalty>0,penalty.clamp(max=1.)+1.,penalty)
+        return torch.maximum(base,penalty)
     SelfCollisionCost.forward=forward
     cls._host_empty_pair_support=True
 

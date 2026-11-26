@@ -165,10 +165,13 @@ def export_runtime(runtime, checker, constraints: dict, cache_dir=None, *, _raw=
                 entry['matrix'] = (world[entry['body']] @ np.asarray(entry['local_matrix'])).tolist()
     site = int(checker.tcp_site_id)
     tcp_body = int(model.site_bodyid[site])
+    arm_xml = getattr(getattr(runtime, 'resources', None), 'robot_xml', None)
+    arm_model = arm_xml.get('name', '').strip().lower() if arm_xml is not None else None
     if planning_signature(runtime, checker) != initial_signature:
         raise ConversionError('Runtime or collision policy changed while capturing the planning scene')
-    return {**({'planning_proxy': _template['planning_proxy']} if _template is not None else {}),
-        'schema_version': 1, 'policy': policy, 'state_signature': initial_signature,
+    return {**({key: _template[key] for key in ('planning_proxy', 'convex_self') if key in _template}
+                if _template is not None else {}),
+        'schema_version': 1, 'policy': policy, 'state_signature': initial_signature, 'arm_model': arm_model,
         'body_world': {str(i): value.tolist() for i, value in world.items()},
         'bodies': bodies, 'geometries': geometries,
         'root': root, 'base_world': world[root].tolist(), 'payload_bodies': sorted(attached),

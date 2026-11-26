@@ -116,8 +116,8 @@ class ToolPoseCost(BaseCost):
 
 
         warp_kernel = self._warp_kernel
-        goal_pos = goal_tool_poses.position.squeeze(1)
-        goal_quat = goal_tool_poses.quaternion.squeeze(1)
+        goal_pos = goal_tool_poses.position.contiguous()
+        goal_quat = goal_tool_poses.quaternion.contiguous()
         cost, linear_distance, angular_distance, goalset_idx = (
             ToolPoseDistance.apply(
                 current_tool_poses.position,

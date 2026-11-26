@@ -6,6 +6,7 @@ Implements the interface contract in docs/OLS接口.md.
 """
 import argparse
 import hashlib
+import ipaddress
 import json
 import mimetypes
 import os
@@ -16,6 +17,11 @@ import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+if __package__:
+    from .xauth_client import AuthError, TokenVerifier, XAuthClient, bearer_token
+else:
+    from xauth_client import AuthError, TokenVerifier, XAuthClient, bearer_token
 
 ASSET_TYPES = ("scene", "model", "robot")
 TYPE_DIR = {"scene": "scenes", "model": "models", "robot": "robots"}
@@ -50,7 +56,7 @@ DRIVE_RE = re.compile(r"^[A-Za-z]:")
 
 # Q162: these three answer "what exists / what version", so they must always revalidate.
 ORACLE_ROUTES = ("/list", "/listCategory", "/assetVersion")
-IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable"
+IMMUTABLE_CACHE_CONTROL = "private, max-age=31536000, immutable"
 
 EXTRA_MIME = {
     ".obj": "application/octet-stream",
@@ -243,6 +249,10 @@ class OLSHandler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
     cache_version = ""
+    auth_verifier = None
+    trusted_machine_ips = frozenset()
+    request_uid = None
+    response_error = False
 
     # ---- plumbing -------------------------------------------------------
 
@@ -258,12 +268,15 @@ class OLSHandler(BaseHTTPRequestHandler):
     def _cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", self.config.get("cors_allow_origin", "*"))
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, If-None-Match")
+        self.send_header("Vary", "Authorization, Origin")
 
     def _cache_control(self):
+        if self.response_error:
+            return "no-store"
         if self.cache_version:
             return IMMUTABLE_CACHE_CONTROL
-        return "no-cache"
+        return "private, no-cache"
 
     def _etag_matches(self, etag):
         header = self.headers.get("If-None-Match")
@@ -296,6 +309,7 @@ class OLSHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _send_error(self, status, code, message):
+        self.response_error = True
         self._send_json({"error": code, "message": message}, status)
 
     def _send_file(self, target):
@@ -329,7 +343,17 @@ class OLSHandler(BaseHTTPRequestHandler):
                 qs.setdefault(k, v)
         return qs
 
+    def _trusted_peer(self):
+        # Q173: only the real TCP peer counts; forwarded headers are never trusted.
+        try:
+            peer = ipaddress.ip_address(self.client_address[0])
+        except ValueError:
+            return False
+        return peer in self.trusted_machine_ips
+
     def _dispatch(self, method):
+        self.request_uid = None
+        self.response_error = False
         parsed = urlparse(self.path)
         path = parsed.path
         if len(path) > 1 and path.endswith("/"):
@@ -343,7 +367,23 @@ class OLSHandler(BaseHTTPRequestHandler):
         if handler_name is None:
             return self._send_error(404, "not_found", f"unknown endpoint: {method} {parsed.path}")
         try:
+            if path == "/health":
+                getattr(self, "api_" + handler_name)(qs)
+                return
+            if method == "GET" and not self.headers.get("Authorization") and self._trusted_peer():
+                # Q173: a whitelisted machine reads without credentials; the legacy query uid
+                # names the visibility scope (default 0 = system assets). Writes never exempt.
+                self.request_uid = parse_uid(qs.get("uid", [""])[0])
+            else:
+                identity = self.auth_verifier.verify(bearer_token(self.headers.get("Authorization")))
+                self.request_uid = identity["user"]["user_id"]
             getattr(self, "api_" + handler_name)(qs)
+        except AuthError as e:
+            self.close_connection = True  # Reject POST before reading its potentially large body.
+            try:
+                self._send_error(e.status, e.code, e.message)
+            except ConnectionError:
+                pass
         except ApiError as e:
             try:
                 self._send_error(e.status, e.code, e.message)
@@ -357,6 +397,10 @@ class OLSHandler(BaseHTTPRequestHandler):
         except Exception:
             traceback.print_exc()
             self._send_error(500, "internal_error", "unexpected server error")
+
+    def api_health(self, qs):
+        """Public liveness endpoint; it must remain usable before login."""
+        self._send_json({"status": "ok", "service": "object-library-server"})
 
     def handle_one_request(self):
         # Q163: a cancelled request can also die before dispatch (reading the request line
@@ -397,7 +441,11 @@ class OLSHandler(BaseHTTPRequestHandler):
         return vals[0]
 
     def uid(self, qs):
-        return parse_uid(qs.get("uid", [""])[0] if qs.get("uid") else None)
+        return self.request_uid
+
+    def log_request(self, code="-", size="-"):
+        # Never log query strings, which may contain legacy clients' credentials.
+        self.log_message('"%s %s" %s %s', self.command, urlparse(self.path).path, code, size)
 
     # ---- query endpoints --------------------------------------------------
 
@@ -633,6 +681,7 @@ class OLSHandler(BaseHTTPRequestHandler):
 
 
 ROUTES_GET = {
+    "/health": "health",
     "/list": "list",
     "/listCategory": "listCategory",
     "/assetVersion": "assetVersion",
@@ -684,10 +733,18 @@ def load_config(args):
     return cfg
 
 
-def make_server(config):
+def make_server(config, *, auth_verifier=None):
     class BoundHandler(OLSHandler):
         pass
     BoundHandler.config = config
+    auth_config = config.get("auth", {}) if isinstance(config, dict) else {}
+    BoundHandler.auth_verifier = auth_verifier or TokenVerifier(
+        XAuthClient(config=config),
+        max_cache_seconds=auth_config.get("token_cache_max_seconds", 600),
+        max_cache_entries=auth_config.get("token_cache_max_entries", 4096),
+    )
+    BoundHandler.trusted_machine_ips = frozenset(
+        ipaddress.ip_address(entry) for entry in auth_config.get("trusted_machine_ips", []))
     ensure_schema(config["data_dir"])
     return ThreadingHTTPServer((config["host"], int(config["port"])), BoundHandler)
 

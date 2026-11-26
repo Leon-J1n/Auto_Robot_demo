@@ -188,6 +188,13 @@ result = checker.check(joints)
   source IDs 保留在 `source_geoms`，不按旧编号直接复制规则。
 - 机械臂圆柱用轴向覆盖球；普通持物用包络盒的网格覆盖球。环境使用有向盒体；
   指定的开口容器按底面及四侧分组，每个源凸块完整归入一个包络板，保留内部空间。
+- 机械臂通过 URDF 的 `<robot name>` 选择 `proxies/arms/` 下的同名配置，
+  与场景中的实例名无关。`convex_mesh_links` 启用逐凸块覆盖，
+  `mesh_cell_sizes_m` 可按源几何名进一步限制网格尺寸（米）。配置不改变豁免和阈值。
+  UR3、UR5、UR10 保留既有上臂设置。Nero 的 `convex_self_pairs` 对指定的腕部
+  自碰撞对使用 CUDA 凸块投影判定，保留原净空阈值。只有找到足够的分离间距才通过，
+  不新增豁免；其他几何对仍使用球代理。未知机型使用通用覆盖。修改配置后需重启进程。
+  导出的 `planning_proxy.arm_model` 和 `planning_proxy.arm_profile` 分别记录识别和命中结果。
 - Robotiq 的细小机构空隙不能直接用大盒填充。`proxies/robotiq_2f85.json` 保留了
   上一版已验证的 VOXEL 球拟合，并按形状／网格内容 SHA256 匹配。更换资产后不匹配
   会报错，需要重新制作和验证模板；不依赖本机 `.cache` 才能读取现有模板。

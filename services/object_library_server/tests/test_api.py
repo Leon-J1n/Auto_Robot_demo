@@ -19,12 +19,30 @@ from email.message import Message
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.parse import urlencode, urlsplit, parse_qs
+from urllib.request import Request, urlopen as raw_urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
 import init_index  # noqa: E402
+
+
+class FixtureVerifier:
+    """Asset primitive fixtures; production auth boundary is tested in test_auth.py.
+
+    Includes system maintenance identities unreachable via production TokenVerifier.
+    """
+    def verify(self, token):
+        return {"user": {"user_id": int(token[len("fixture-"):])}}
+
+
+def urlopen(request, *args, **kwargs):
+    if isinstance(request, str):
+        request = Request(request)
+    if not request.has_header("Authorization"):
+        uid = parse_qs(urlsplit(request.full_url).query).get("uid", ["0"])[0]
+        request.add_header("Authorization", "Bearer fixture-" + uid)
+    return raw_urlopen(request, *args, **kwargs)
 
 
 def http(method, url, body=None):
@@ -96,7 +114,7 @@ class APITestCase(unittest.TestCase):
             "allowed_extensions": [".obj", ".mtl", ".png", ".urdf", ".json"],
             "downloadable_types": ["model", "robot"],
         }
-        cls.httpd = server.make_server(cls.config)
+        cls.httpd = server.make_server(cls.config, auth_verifier=FixtureVerifier())
         cls.port = cls.httpd.server_address[1]
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
@@ -237,7 +255,7 @@ class TestQueryEndpoints(APITestCase):
         self.assertEqual(data["metadata"], "ur5e_arm.json")
 
     def test_bad_id_and_uid_params(self):
-        for bad in ({"id": "abc"}, {"id": "-3"}, {"uid": "x"}, {"uid": "-1"}):
+        for bad in ({"id": "abc"}, {"id": "-3"}):
             params = {"type": "model", "id": "1", "uid": "0"}
             params.update({k: str(v) for k, v in bad.items()})
             if "id" in bad:
@@ -624,10 +642,10 @@ class TestCaching(APITestCase):
         for endpoint, params in cases:
             with self.subTest(endpoint=endpoint):
                 _, _, plain = self.get_with_headers(endpoint, **params)
-                self.assertEqual(plain.get("Cache-Control"), "no-cache")
+                self.assertEqual(plain.get("Cache-Control"), "private, no-cache")
                 status, _, tagged = self.get_with_headers(endpoint, v="deadbeefdeadbeef", **params)
                 self.assertEqual(status, 200)
-                self.assertEqual(tagged.get("Cache-Control"), "public, max-age=31536000, immutable")
+                self.assertEqual(tagged.get("Cache-Control"), "private, max-age=31536000, immutable")
 
     def test_304_keeps_the_cache_strength_of_its_request(self):
         params = {"type": "model", "id": 1, "path": "apple.obj"}
@@ -635,14 +653,14 @@ class TestCaching(APITestCase):
         status, _, again = self.get_with_headers(
             "/file", v="deadbeefdeadbeef", headers={"If-None-Match": headers.get("ETag")}, **params)
         self.assertEqual(status, 304)
-        self.assertEqual(again.get("Cache-Control"), "public, max-age=31536000, immutable")
+        self.assertEqual(again.get("Cache-Control"), "private, max-age=31536000, immutable")
 
     def test_oracle_routes_never_go_immutable(self):
         for endpoint, params in (("/list", {"type": "model"}), ("/listCategory", {"type": "model"}),
                                  ("/assetVersion", {"type": "model", "id": 1})):
             with self.subTest(endpoint=endpoint):
                 _, _, headers = self.get_with_headers(endpoint, v="deadbeefdeadbeef", **params)
-                self.assertEqual(headers.get("Cache-Control"), "no-cache")
+                self.assertEqual(headers.get("Cache-Control"), "private, no-cache")
 
     def test_v_is_a_cache_key_not_a_credential(self):
         params = {"type": "model", "id": 1, "path": "apple.obj"}
@@ -792,6 +810,8 @@ class TestClientHangup(APITestCase):
         handler.requestline = f"GET {path} HTTP/1.1"
         handler.client_address = ("127.0.0.1", 40000)
         handler.headers = Message()
+        handler.headers["Authorization"] = "Bearer fixture-0"
+        handler.auth_verifier = FixtureVerifier()
         handler.cache_version = ""
         handler.close_connection = False
         handler.wfile = HangupWriter(error, ok_writes)
@@ -844,7 +864,7 @@ class TestClientHangup(APITestCase):
 
     def test_a_hangup_does_not_change_a_successful_response(self):
         handler, stderr = self.dispatch("/list?type=model")
-        self.assertEqual(stderr.count('"GET /list?type=model HTTP/1.1" 200'), 1)
+        self.assertEqual(stderr.count('"GET /list" 200'), 1)
         self.assertEqual(len(handler.wfile.writes), 2)
         self.assertIn(b"ETag", handler.wfile.writes[0])
         self.assertFalse(handler.close_connection)

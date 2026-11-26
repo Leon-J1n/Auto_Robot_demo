@@ -1,0 +1,7 @@
+{
+  "convex_mesh_links": ["upper_arm_link"],
+  "mesh_cell_sizes_m": {
+    "upper_arm_link_visual_collision_2": 0.014,
+    "upper_arm_link_visual_collision_3": 0.014
+  }
+}

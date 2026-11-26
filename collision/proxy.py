@@ -10,6 +10,7 @@ from __future__ import annotations
 from copy import deepcopy
 from collections import OrderedDict
 from contextlib import contextmanager
+from functools import lru_cache
 from hashlib import sha256
 from itertools import product
 import json
@@ -21,6 +22,31 @@ from collision.backends.simplatform_fcl import CollisionResult
 
 
 DEFAULTS = dict(sphere_cell_size=.035, container_names=['Tray', 'Basket'], batch_size=32)
+
+
+@lru_cache
+def _arm_profile(model):
+    if not model or not model.isascii() or not model.isidentifier():
+        return None
+    path = Path(__file__).with_name('proxies') / 'arms' / f'{model}.json'
+    if not path.is_file():
+        return None
+    profile = json.loads(path.read_text(encoding='utf-8'))
+    required = {'convex_mesh_links', 'mesh_cell_sizes_m'}
+    if not isinstance(profile, dict) or not required <= set(profile) <= required | {'convex_self_pairs'}:
+        raise ValueError(f'Invalid planning proxy profile for {model}')
+    links, sizes = profile['convex_mesh_links'], profile['mesh_cell_sizes_m']
+    if (not isinstance(links, list) or any(not isinstance(link, str) or not link for link in links)
+            or not isinstance(sizes, dict) or any(
+                not isinstance(mesh, str) or not mesh or type(size) not in (int, float)
+                or not np.isfinite(size) or size < 1.e-5 for mesh, size in sizes.items())):
+        raise ValueError(f'Invalid convex mesh settings in planning proxy profile for {model}')
+    pairs = profile.get('convex_self_pairs', [])
+    if not isinstance(pairs, list) or any(
+            not isinstance(pair, list) or len(pair) != 2 or pair[0] == pair[1]
+            or any(not isinstance(link, str) or not link for link in pair) for pair in pairs):
+        raise ValueError(f'Invalid convex self pairs in planning proxy profile for {model}')
+    return profile
 
 
 def _digest(value):
@@ -100,6 +126,26 @@ def _cover_box(low, high, cell_size):
     return [{'center': list(map(float, c)), 'radius': radius} for c in product(*axes)]
 
 
+def _cover_convex_mesh(geom, cell_size, cache):
+    """Cover a convex mesh with cells in its local frame."""
+    from scipy.spatial import ConvexHull
+
+    points = _local_points(geom, cache)
+    low, high = points.min(axis=0), points.max(axis=0)
+    cells = _cover_box(low, high, cell_size)
+    hull = ConvexHull(points)
+    normals = hull.equations[:, :3]
+    offsets = -np.max(points @ normals.T, axis=0)
+    widths = np.maximum(high - low, 1.e-8)
+    half = widths / np.maximum(1, np.ceil(widths / cell_size)) / 2
+    centers = np.asarray([sphere['center'] for sphere in cells])
+    reach = np.abs(normals) @ half
+    keep = np.all(centers @ normals.T + offsets <= reach + 1.e-8, axis=1)
+    transform = np.asarray(geom['matrix'])
+    centers = centers[keep] @ transform[:3, :3].T + transform[:3, 3]
+    return [dict(center=center.tolist(), radius=cells[0]['radius']) for center in centers]
+
+
 def _gripper_spheres(g, templates):
     shape = {key:g[key] for key in ('kind', 'size')}
     if 'file_path' in g:
@@ -117,6 +163,29 @@ def _gripper_spheres(g, templates):
     transform = np.asarray(g['matrix'])
     return [dict(center=(transform[:3,:3] @ s['center'] + transform[:3,3]).tolist(), radius=float(s['radius']))
             for s in template['spheres']]
+
+
+def _convex_self_model(pairs, source, proxies, cache, payload_bodies):
+    from scipy.spatial import ConvexHull
+
+    names = {name for pair in pairs for name in pair}
+    by_id = {geom['id']: geom for geom in source}
+    shapes = []
+    for proxy in proxies:
+        if (not proxy['robot'] or proxy['body_name'] not in names
+                or proxy['body'] in payload_bodies or len(proxy['source_geoms']) != 1):
+            continue
+        geom = by_id[proxy['source_geoms'][0]]
+        if geom['kind'] != 'mesh':
+            continue
+        points = _local_points(geom, cache)
+        hull = ConvexHull(points)
+        pose = np.asarray(geom['matrix'])
+        normals = np.unique(hull.equations[:, :3].round(6), axis=0) @ pose[:3, :3].T
+        vertices = points[hull.vertices] @ pose[:3, :3].T + pose[:3, 3]
+        shapes.append(dict(id=proxy['id'], body=proxy['body'], name=proxy['body_name'],
+                           vertices=vertices.tolist(), normals=normals.tolist()))
+    return dict(pairs=pairs, shapes=shapes)
 
 
 def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=None) -> dict:
@@ -143,6 +212,11 @@ def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=
         if len(g['size']) != 3 or not np.isfinite(g['size']).all() or np.any(np.asarray(g['size']) < 0):
             raise ValueError('Invalid source proxy dimensions')
     point_cache = {} if point_cache is None else point_cache
+    arm_model = raw.get('arm_model')
+    profile = _arm_profile(arm_model)
+    mesh_links = set(profile['convex_mesh_links']) if profile is not None else set()
+    mesh_sizes = profile['mesh_cell_sizes_m'] if profile is not None else {}
+    payload_bodies = set(raw.get('payload_bodies', ()))
     templates = json.loads((Path(__file__).with_name('proxies') / 'robotiq_2f85.json').read_text())['templates']
     limits = _limits(raw['policy'], geoms)
     groups = {}
@@ -189,8 +263,17 @@ def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=
                         source_geoms=[int(geoms[j]['id']) for j in selected],
                         source_index=selected[0])
             if robot:
-                if first['body_name'].startswith('robotiq_2f85'):
+                if first['body_name'].startswith('robotiq_2f85') and first['body_name'].endswith('_pad'):
+                    spheres = [s for j in selected for s in
+                               (_cover_convex_mesh(geoms[j], min(cell, .012), point_cache)
+                                if geoms[j]['kind'] == 'mesh' else _gripper_spheres(geoms[j], templates))]
+                elif first['body_name'].startswith('robotiq_2f85'):
                     spheres = [s for j in selected for s in _gripper_spheres(geoms[j], templates)]
+                elif (len(selected) == 1 and first['kind'] == 'mesh'
+                      and first['body'] not in payload_bodies
+                      and (first['body_name'] in mesh_links or first['name'] in mesh_sizes)):
+                    mesh_cell = min(cell, mesh_sizes.get(first['name'], cell))
+                    spheres = _cover_convex_mesh(first, mesh_cell, point_cache)
                 elif len(selected) == 1 and first['kind'] == 'sphere':
                     transform = np.asarray(first['matrix'])
                     spheres = [dict(center=transform[:3, 3].tolist(), radius=float(first['size'][0]))]
@@ -239,11 +322,16 @@ def simplify_snapshot(raw: dict, options=None, *, point_cache=None, lift_bounds=
                   source_geometry_count=len(geoms), proxy_geometry_count=len(output),
                   robot_spheres=sum(len(g.get('spheres', [])) for g in output),
                   world_boxes=sum(not g['robot'] for g in output), options=options,
+                  arm_model=arm_model, arm_profile=arm_model if profile is not None else None,
                   coverage='outer_envelope_except_retained_gripper_sphere_fit',
                   gripper_fit='retained_validated_cuRobo_voxel_templates',
                   maximum_box_cover_extra_m=float(np.sqrt(3) * cell / 2))
     policy['fingerprint'] = _digest([policy, output, report])
-    return {**raw, 'geometries': output, 'policy': policy, 'planning_proxy': report}
+    result = {**raw, 'geometries': output, 'policy': policy, 'planning_proxy': report}
+    if profile and profile.get('convex_self_pairs'):
+        result['convex_self'] = _convex_self_model(profile['convex_self_pairs'], geoms, output,
+                                                  point_cache, payload_bodies)
+    return result
 
 
 class PlanningProxy:

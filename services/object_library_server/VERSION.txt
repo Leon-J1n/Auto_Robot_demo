@@ -1,2 +1,2 @@
-AppVersion 1.0.8-8f84f1f
-built at 2026-11-12T21:23:27
+AppVersion 1.0.8-a448e44
+built at 2026-11-19T09:37:49

@@ -17,11 +17,19 @@ def _link(body: int) -> str:
     return f'runtime_body_{body}'
 
 
+def _set_runtime_origin(joint, transform):
+    set_origin(joint, transform)
+    origin = joint.find('origin')
+    for name, digits in (('xyz', 6), ('rpy', 4)):
+        values = (round(float(value), digits) for value in origin.get(name).split())
+        origin.set(name, ' '.join(str(value if value else 0.0) for value in values))
+
+
 def _fixed(xml, name, parent, child, transform):
     joint = ET.SubElement(xml, 'joint', name=name, type='fixed')
     ET.SubElement(joint, 'parent', link=parent)
     ET.SubElement(joint, 'child', link=child)
-    set_origin(joint, np.asarray(transform))
+    _set_runtime_origin(joint, np.asarray(transform))
 
 
 def _geometry(entry: dict, folder: Path) -> tuple[ET.Element, str]:
@@ -80,7 +88,7 @@ def convert_runtime(snapshot: dict, cache_dir) -> dict:
             joint = ET.SubElement(xml, 'joint', name=body['joint_name'], type=body['kind'])
             ET.SubElement(joint, 'parent', link=parent)
             ET.SubElement(joint, 'child', link=pivot)
-            set_origin(joint, transform)
+            _set_runtime_origin(joint, transform)
             ET.SubElement(joint, 'axis', xyz=' '.join(map(str, body['axis'])))
             ET.SubElement(joint, 'limit', lower=str(body['limit'][0]), upper=str(body['limit'][1]),
                           effort='1000', velocity='3.14')
@@ -154,6 +162,8 @@ def convert_runtime(snapshot: dict, cache_dir) -> dict:
         'primitive_spheres': primitive_spheres,
         'collision_policy': runtime['policy'], 'payload_bodies': runtime['payload_bodies'],
         'planning_proxy': runtime.get('planning_proxy'),
+        'fixed_simulation_scene': runtime.get('fixed_simulation_scene', False),
+        'convex_self': runtime.get('convex_self'),
         'notes': ['Measured runtime geometry and frozen host pair policy; sphere fitting remains approximate.']}
     (directory / 'conversion_manifest.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
     return result

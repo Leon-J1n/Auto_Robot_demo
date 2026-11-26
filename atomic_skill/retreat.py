@@ -1,6 +1,4 @@
 """Task-level retreat skill with the same pose-search contract as approach."""
-from copy import deepcopy
-
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -120,6 +118,31 @@ class RetreatSkill:
                           [np.zeros((1, 3)), np.ones((1, 1))]]), axis, distance
             )
 
+        override = {
+            "motion": {"path_type": "linear", "path_constraint": "hard"},
+            "planning": {"mode": "direct", "allow_replan": False},
+            "constraints": {"safety_distance": 0.003, "keep_end_effector_orientation": True},
+            "strategy_params": {"max_joint_step": 0.8, "linear_ik_backtrack_budget": 6},
+        }
+        distances = list(search_distances(params, minimum=minimum, maximum=maximum, step=step, label='retreat'))
+        supports_batch = getattr(getattr(e, 'execute_motion', None), 'uses_curobo', None)
+        if len(distances) > 1 and callable(supports_batch) and supports_batch(e.params):
+            preferred = params.get('_preferred_distance_m')
+            if preferred is not None:
+                match = next((distance for distance in distances if abs(distance - preferred) < 1e-8), None)
+                if match is not None:
+                    distances.remove(match)
+                    distances.insert(0, match)
+            origin = transform_for(distances[0])[:3, 3]
+            override['strategy_params']['linear_target_offsets_world'] = [
+                (transform_for(distance)[:3, 3] - origin).tolist() for distance in distances[1:]]
+            moved = e._move('retreat_batch', position=origin, rotation=rotation,
+                            linear=True, contact=True, override=override)
+            if moved:
+                diagnostics = e.phases[-1]['trajectory']['diagnostics']
+                e.successful_distance_m = float(distances[diagnostics['linear_target_batch']['selected_index']])
+            return moved
+
         def attempt(distance):
             candidate_transform = transform_for(distance)
             before = e.backend.physics_steps
@@ -127,15 +150,7 @@ class RetreatSkill:
                 f"retreat_{int(round(float(distance) * 1000))}mm",
                 position=candidate_transform[:3, 3], rotation=rotation,
                 linear=True, contact=True,
-                override={
-                    "motion": {"path_type": "linear", "path_constraint": "hard"},
-                    "planning": {"mode": "direct", "allow_replan": False},
-                    "constraints": {
-                        "safety_distance": 0.003,
-                        "keep_end_effector_orientation": True,
-                    },
-                    "strategy_params": {"max_joint_step": 0.8},
-                })
+                override=override)
             if moved:
                 e.successful_distance_m = float(distance)
                 return True
@@ -145,8 +160,6 @@ class RetreatSkill:
             return None
         return run_candidate_search(
             ordered_distances(e,
-                search_distances(params, minimum=minimum, maximum=maximum, step=step, label='retreat'),
+                distances,
                 transform_for, preferred=params.get('_preferred_distance_m')),
             attempt)
-
-

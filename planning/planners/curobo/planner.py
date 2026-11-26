@@ -10,7 +10,7 @@ class CuroboPlanner:
 
     def __init__(self,config=None,*,robot_runtime=None,scene=None,scene_provider=None,
                  robot_object_id=None,tool=None,trajectory_callback=None,kinematics=None,
-                 collision_checker=None,client=None):
+                 collision_checker=None,client=None,fixed_simulation_scene=False):
         from libraries.curobo import CuroboClient
         self.config=dict(config or {})
         self.robot_runtime=robot_runtime
@@ -21,12 +21,18 @@ class CuroboPlanner:
         self.trajectory_callback=trajectory_callback
         self.kinematics=kinematics
         self.collision_checker=collision_checker
+        self.fixed_simulation_scene=None
+        if fixed_simulation_scene:
+            from libraries.curobo.runtime_scene import FixedSimulationScene
+            self.fixed_simulation_scene=FixedSimulationScene(robot_runtime,collision_checker)
         self.client=client or CuroboClient(self.config.get('runtime'))
         self._own_client=client is None
 
     def _snapshot(self,request=None):
         from libraries.curobo.runtime_scene import runtime_snapshot
         explicit=(request or {}).get('scene')
+        if self.fixed_simulation_scene is not None and (explicit is not None or self.scene_provider is not None or self.scene is not None):
+            raise ValueError('Fixed cuRobo simulation scene requires the live MuJoCo scene')
         if explicit is not None:
             return deepcopy(explicit),self.robot_object_id
         if self.scene_provider is not None:
@@ -46,6 +52,8 @@ class CuroboPlanner:
             current_request = request or {'target': {'type': 'joint',
                 'joint_positions': self.robot_runtime.get_joint_positions().tolist()}}
             constraints = validate_move_request(_deep_merge(defaults, current_request), self.config)['constraints']
+            if self.fixed_simulation_scene is not None:
+                return self.fixed_simulation_scene.snapshot(constraints, getattr(self.client, 'cache', None))
             return runtime_snapshot(self.robot_runtime, collision_checker=self.collision_checker,
                 constraints=constraints, cache_dir=getattr(self.client, 'cache', None))
         raise ValueError('Provide the current scene JSON or a scene_provider')
@@ -93,10 +101,24 @@ class CuroboPlanner:
             snapshot,ident=self._snapshot(request)
             defaults=_deep_merge(snapshot.get('move_defaults',{}),self.config.get('move_defaults',{}))
             normalized=validate_move_request(_deep_merge(defaults,request))
-            if normalized['motion']['path_type'] not in {'auto','joint'}:
-                raise ValueError('CuRobo is a free-space joint planner; use existing linear/circular planners for geometric paths')
-            if normalized['constraints'].get('keep_end_effector_orientation'):
-                raise ValueError('Fixed orientation along the entire path is not implemented by this cuRobo adapter')
+            path_type=normalized['motion']['path_type']
+            if path_type == 'auto' and normalized['target']['type'] == 'pose' and normalized['motion']['phase'] in {'approach','retreat','contact'}:
+                path_type='linear'
+            if path_type not in {'auto','joint','linear'}:
+                raise ValueError('cuRobo supports joint and linear paths; circular paths require the CPU branch')
+            if path_type == 'linear' and normalized['target']['type'] != 'pose':
+                raise ValueError('cuRobo linear motion requires a pose target')
+            if path_type != 'linear' and normalized['constraints'].get('keep_end_effector_orientation'):
+                raise ValueError('Fixed orientation along a free-space cuRobo path is unsupported')
+            normalized['motion']['path_type']=path_type
+            if path_type == 'linear':
+                selection.update(path_strategy='linear_move', planning_mode='direct')
+            offsets=normalized['strategy_params'].get('linear_target_offsets_world',[])
+            pose_candidates=normalized['strategy_params'].get('pose_target_candidates_world',[])
+            if offsets and path_type != 'linear':
+                raise ValueError('Batched cuRobo targets require linear motion')
+            if pose_candidates and (path_type == 'linear' or normalized['target']['type'] != 'pose'):
+                raise ValueError('Batched approach targets require a free-space pose move')
             runtime_policy = snapshot.get('_runtime_collision', {}).get('policy')
             if runtime_policy is not None and (
                     runtime_policy['safety_distance'] != normalized['constraints']['safety_distance']
@@ -115,6 +137,27 @@ class CuroboPlanner:
                 normalized['target']=deepcopy(target)
             stage='planning'
             trajectory=self.client.plan(normalized,snapshot,robot_object_id=ident,tool=self.tool)
+            worker_verified=bool(trajectory.get('diagnostics',{}).get('gpu_collision_validation'))
+            if (offsets or pose_candidates or self.fixed_simulation_scene is not None
+                    or snapshot.get('_runtime_collision',{}).get('planning_proxy')) and not worker_verified:
+                raise ValueError('cuRobo worker did not verify the trajectory on GPU')
+            if offsets:
+                from libraries.curobo.linear import offset_world_target
+                index=trajectory['diagnostics']['linear_target_batch']['selected_index']
+                if type(index) is not int or not 0 <= index <= len(offsets):
+                    raise ValueError('cuRobo returned an invalid linear target index')
+                if index:
+                    normalized['target']=offset_world_target(normalized['target'],offsets[index-1])
+                del normalized['strategy_params']['linear_target_offsets_world']
+            if pose_candidates:
+                index=trajectory['diagnostics']['pose_target_batch']['selected_index']
+                if type(index) is not int or not 0 <= index <= len(pose_candidates):
+                    raise ValueError('cuRobo returned an invalid pose target index')
+                if index:
+                    normalized['target']=pose_candidates[index-1]
+                del normalized['strategy_params']['pose_target_candidates_world']
+            if trajectory.get('planning_mode') == 'direct':
+                selection['planning_mode']='direct'
             if runtime_policy is not None and self.robot_runtime is not None:
                 from collision.planning_policy import planning_signature
                 if planning_signature(self.robot_runtime, self.collision_checker) != snapshot['_runtime_collision']['state_signature']:
@@ -124,7 +167,7 @@ class CuroboPlanner:
             timing['preparation']=trajectory.get('diagnostics',{}).get('preparation_time',0.)
             if trajectory['planning_time']>normalized['planning']['planning_time']:
                 raise TimeoutError('cuRobo returned after the planning budget; trajectory was not executed')
-            if self.collision_checker is not None and normalized['constraints']['avoid_collision']:
+            if not worker_verified and self.collision_checker is not None and normalized['constraints']['avoid_collision']:
                 stage='validation'
                 check_started=time.perf_counter()
                 from planning.constraints.collision_sampling import collision_sampling_settings
@@ -157,7 +200,8 @@ class CuroboPlanner:
                     Rotation.from_matrix(expected_rotation.T @ actual['rotation_matrix']).magnitude()>2e-3):
                     raise ValueError('OLS TCP/FK disagrees with the live execution model; refusing execution')
                 if self.trajectory_callback:
-                    self.trajectory_callback(deepcopy(trajectory),normalized,selection)
+                    callback_trajectory = trajectory if path_type == 'linear' and not worker_verified else deepcopy(trajectory)
+                    self.trajectory_callback(callback_trajectory,normalized,selection)
                 stage='execution'
                 execution_input=deepcopy(trajectory)
                 execution_input['goal_tolerances']={'position_tolerance':normalized['constraints']['position_tolerance'],
@@ -204,4 +248,3 @@ class CuroboPlanner:
 
 MoveCuroboAction = CuroboPlanner
 MoveCuroboSkill = CuroboPlanner
-

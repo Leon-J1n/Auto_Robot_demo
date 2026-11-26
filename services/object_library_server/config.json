@@ -4,5 +4,14 @@
   "data_dir": "./data",
   "allowed_extensions": [".obj", ".mtl", ".png", ".jpg", ".jpeg", ".urdf", ".stl", ".dae", ".gltf", ".glb", ".bin"],
   "downloadable_types": ["model", "robot"],
-  "cors_allow_origin": "*"
+  "cors_allow_origin": "*",
+  "auth": {
+    "xauth_base_url": "",
+    "xauth_ca_certs": "",
+    "xauth_server_name": "",
+    "xauth_expected_key_id": "",
+    "token_cache_max_seconds": 600,
+    "token_cache_max_entries": 4096,
+    "trusted_machine_ips": ["127.0.0.1"]
+  }
 }

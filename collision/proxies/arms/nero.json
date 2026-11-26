@@ -1,0 +1,8 @@
+{
+  "convex_mesh_links": [],
+  "mesh_cell_sizes_m": {},
+  "convex_self_pairs": [
+    ["link5", "robotiq_2f85_base_mount"],
+    ["link5", "robotiq_2f85_base"]
+  ]
+}

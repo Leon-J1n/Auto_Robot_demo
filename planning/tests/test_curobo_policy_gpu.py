@@ -298,6 +298,47 @@ class GPUPolicyTests(unittest.TestCase):
 
 @unittest.skipUnless(ENABLED, 'Set ROBOT_AGENT_CUROBO_GPU_TESTS=1 in an isolated CUDA process')
 class WorkerPolicyTests(unittest.TestCase):
+    def test_convex_self_preserves_clearance_and_collision_on_cuda(self):
+        from itertools import product
+        import numpy as np
+        from libraries.curobo.convex_self import ConvexSelf
+
+        vertices = list(product((-.01, .01), repeat=3))
+        normals = np.eye(3).tolist()
+        anchors = [[0., 0., 0.], [.01, 0., 0.], [0., .01, 0.]]
+        local = torch.tensor(anchors + anchors, device='cuda')
+        padding = torch.tensor([.03] * 6, device='cuda')
+        kin = SimpleNamespace(link_spheres=torch.cat((local, padding[:, None]), dim=1)[None],
+            link_sphere_idx_map=torch.tensor([0, 0, 0, 1, 1, 1], device='cuda'),
+            link_name_to_idx_map={'part_a': 0, 'part_b': 1})
+        config = SimpleNamespace(collision_pairs=torch.tensor([[0, 3]], dtype=torch.int16, device='cuda'))
+        robot = SimpleNamespace(kinematics=SimpleNamespace(kinematics_config=kin, self_collision_config=config))
+        data = {'pairs': [['body_a', 'body_b']], 'shapes': [
+            dict(id=0, body=0, name='body_a', vertices=vertices, normals=normals),
+            dict(id=1, body=1, name='body_b', vertices=vertices, normals=normals)]}
+        query = ConvexSelf(data, robot, {'geometry_links': {'part_a': 0, 'part_b': 1}},
+                           {'allowed': set(), 'margin': .003})
+        self.assertEqual(query.pair_count, 1)
+        self.assertEqual(config.collision_pairs.numel(), 0)
+        spheres = kin.link_spheres[:, None].expand(3, -1, -1, -1).clone()
+        spheres[:, 0, 3:, 0] += torch.tensor([.024, .022, .015], device='cuda')[:, None]
+        spheres.requires_grad_()
+        cost = query.clearance_cost(spheres).flatten()
+        self.assertEqual(cost[0].item(), 0.)
+        self.assertAlmostEqual(cost[1].item(), .001002, places=6)
+        self.assertGreater(cost[2].item(), .003)
+        cost.sum().backward()
+        self.assertAlmostEqual(spheres.grad[1, 0, 3:, 0].sum().item(), -1., places=5)
+        graph = torch.cuda.CUDAGraph()
+        graph_input = spheres.detach().clone()
+        query.clearance_cost(graph_input)
+        torch.cuda.synchronize()
+        with torch.cuda.graph(graph):
+            result = query.clearance_cost(graph_input)
+        graph_input[0, 0, 3:, 0] -= .002
+        graph.replay()
+        self.assertGreater(result[0].item(), 0.)
+
     def test_shared_proxy_graph_replay_world_policy_and_pose_mode(self):
         import numpy as np
         from libraries.curobo import CuroboClient
@@ -320,10 +361,18 @@ class WorkerPolicyTests(unittest.TestCase):
                         distance_overrides=[],held_name=None,fingerprint='proxy_graph_test'))}
         request={'target':{'type':'joint','joint_positions':[.02]+[0.]*5},
                  'constraints':{'safety_distance':.003},'planning':{'max_attempts':2}}
-        with CuroboClient({'request_timeout':120}) as client:
+        with CuroboClient({'request_timeout':120,
+                           'conversion':{'runtime_proxy_cuda_graphs':True}}) as client:
+            snapshot['_runtime_collision']['geometries'][1]['matrix']=transform.tolist()
+            for _ in range(2):
+                with self.assertRaisesRegex(RuntimeError,'Runtime start is infeasible'):
+                    client.plan(request,snapshot)
+            snapshot['_runtime_collision']['geometries'][1]['matrix']=obstacle.tolist()
             for _ in range(3):
                 result=client.plan(request,snapshot)
+                self.assertGreater(result['diagnostics']['gpu_collision_validation']['samples'], 1)
                 self.assertTrue(result['diagnostics']['curobo']['cuda_graph_enabled'])
+                self.assertTrue(result['diagnostics']['curobo']['planner_reused'])
                 self.assertEqual(result['diagnostics']['curobo']['collision_policy']['geometry_source'],'shared_simplified_proxy')
             snapshot['_runtime_collision']['geometries'][1]['matrix']=transform.tolist()
             with self.assertRaisesRegex(RuntimeError,'Runtime start is infeasible'):
@@ -331,6 +380,14 @@ class WorkerPolicyTests(unittest.TestCase):
             snapshot['_runtime_collision']['policy'].update(allowed_pairs=[[0,1]],fingerprint='explicit_target_pair')
             result=client.plan(request,snapshot)
             self.assertTrue(result['diagnostics']['curobo']['cuda_graph_enabled'])
+            collision_pose = transform.copy()
+            snapshot['_runtime_collision']['geometries'].append(dict(
+                id=2,body=0,robot=True,kind='sphere',size=[.02,0,0],matrix=collision_pose.tolist()))
+            with self.assertRaisesRegex(RuntimeError, "Runtime start is infeasible.*self_collision"):
+                client.plan(request,snapshot)
+            snapshot['_runtime_collision']['policy'].update(
+                allowed_pairs=[[0,1],[0,2],[1,2]],fingerprint='explicit_structural_pair')
+            self.assertIn('gpu_collision_validation',client.plan(request,snapshot)['diagnostics'])
             prepared=client.prepare(snapshot,request={'target':{'type':'pose'},'constraints':{'safety_distance':.003}})
             self.assertFalse(prepared['cuda_graph_enabled'])
 

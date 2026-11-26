@@ -12,7 +12,7 @@ input:
       position: {type: object, description: "x/y/z in metres"}
       orientation: {type: object, description: "Quaternion x/y/z/w, or roll/pitch/yaw in degrees, matching existing Move."}
       joint_positions: {type: array, description: Values in scene RobotDriver.joint_sequence order.}
-  motion: {type: object, description: "path_type auto/joint only; linear/circular and orientation path constraints are rejected."}
+  motion: {type: object, description: "path_type auto/joint/linear; linear requires a pose target and is checked against the full Cartesian line; circular is unsupported."}
   planning: {type: object, description: "Explicit planner_type=curobo; max_attempts controls the official retry limit."}
   constraints: {type: object, description: "Existing Move limits; collision checks remain enabled. Speed scales dilate time without changing path."}
 output:

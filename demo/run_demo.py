@@ -246,7 +246,7 @@ def _write_command_planning_timing(output_dir, index, row):
         planner_details = {
             key: diagnostics[key] for key in
             ('algorithm', 'planning_stages_s', 'planning_proxy_cache', 'shortcut', 'trajopt', 'smoothing', 'collision_state_cache', 'path_quality',
-             'configuration_selection')
+             'configuration_selection', 'gpu_collision_validation')
             if key in diagnostics
         }
         ik_details = diagnostics.get('ik_branch_selection')
@@ -351,12 +351,33 @@ def _command_planning_time(row):
     return planning_s
 
 
+def _command_curobo_warmup_time(row):
+    phases = row.get('substeps')
+    candidates = phases if isinstance(phases, list) else [row]
+    durations = []
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        diagnostics = (item.get('trajectory') or {}).get('diagnostics', {})
+        if diagnostics.get('curobo', {}).get('planner_reused') is not False:
+            continue
+        preparation = (item.get('timing') or {}).get('preparation')
+        if preparation is None:
+            preparation = diagnostics.get('planning_stages_s', {}).get('preparation')
+        if isinstance(preparation, (int, float)) and np.isfinite(preparation) and preparation >= 0:
+            durations.append(preparation)
+    return sum(durations) if durations else None
+
+
 def _print_command_timing(row):
     """Print all motion preparation, excluding VLM calls and execution."""
     planning_s = _command_planning_time(row)
     row['planning_preparation_s'] = planning_s
     parts = [f"timing|command={row.get('command_id', 'unknown')}",
              f"planning={planning_s:.3f}s"]
+    warmup_s = _command_curobo_warmup_time(row)
+    if warmup_s is not None:
+        parts.append(f'curobo_warmup={warmup_s:.3f}s')
     vlm_request_s = _command_vlm_request_time(row)
     if vlm_request_s is not None:
         parts.append(f'vlm_request={vlm_request_s:.3f}s')
@@ -401,6 +422,11 @@ def _global_perception_home_request(resources):
     }
 
 
+def _use_curobo(request, *, gpu=False):
+    planner = request.get('planning', {}).get('planner_type', 'auto')
+    return planner == 'curobo' or (gpu and planner == 'auto')
+
+
 def _resolve_command_file(command_file):
     """Resolve a command path, including a bare commands.xxx.json filename."""
     command_path = Path(command_file).expanduser()
@@ -414,24 +440,35 @@ def _resolve_command_file(command_file):
     return command_path
 
 
+def _default_gpu_mode(explicit):
+    if explicit is not None:
+        return bool(explicit)
+    try:
+        from libraries.curobo.mode import get_mode
+        return get_mode() == 'gpu'
+    except Exception:
+        return False
+
+
 def run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
         output_dir=None, viewer=False, collision_probe=False,
         object_library_url=None, start_object_library=False, show_collision_geometry=False,
-        collision_model=None):
+        collision_model=None, gpu=None):
     if collision_model not in (None, 'proxy', 'precise'):
         raise ValueError('collision_model_invalid')
     output = output_dir if output_dir is not None else _default_output_dir(command_file)
+    gpu = _default_gpu_mode(gpu)
     with output_lock(output), command_timing_scope():
         return _run(command_file, catalog=catalog, scene_file=scene_file, backend_name=backend_name,
                     output_dir=output, viewer=viewer, collision_probe=collision_probe,
                     object_library_url=object_library_url, start_object_library=start_object_library,
-                    show_collision_geometry=show_collision_geometry, collision_model=collision_model)
+                    show_collision_geometry=show_collision_geometry, collision_model=collision_model, gpu=gpu)
 
 
 def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
          output_dir=None, viewer=False, collision_probe=False,
          object_library_url=None, start_object_library=False, show_collision_geometry=False,
-         collision_model=None):
+         collision_model=None, gpu=None):
     from libraries.eaik import load_urdf
     from collision import SimPlatformFCLCollisionChecker
     from planning.trajectory.time_parameterization import prepare_continuous_trajectory
@@ -685,18 +722,33 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
 
         def prepare_trajectory(trajectory, request, selection):
             from demo.interaction.command_converter import _deep_merge
-            request = _deep_merge(resources.scene['move_defaults'], request)
-            timed = prepare_continuous_trajectory(trajectory, request, collision_checker=checker,
-                                                 timestep=float(backend.model.opt.timestep), kinematics=kin)
-            trajectory.update(timed)
+            if not trajectory.get('diagnostics', {}).get('gpu_collision_validation'):
+                request = _deep_merge(resources.scene['move_defaults'], request)
+                timed = prepare_continuous_trajectory(trajectory, request, collision_checker=checker,
+                                                     timestep=float(backend.model.opt.timestep), kinematics=kin)
+                trajectory.update(timed)
             backend.set_status(f"{report['active_command_id']} | Executing / {report.get('active_substep', 'move')}")
 
         from planning.planners.curobo import CuroboPlanner
+        from libraries.curobo.client import shared_client
+        robotwin_fixed_scene = gpu and backend_name == 'mujoco' and not collision_probe
+        # Keep the isolated GPU worker alive when this module is used as a
+        # task runner.  Each subsequent task still sends a fresh runtime scene
+        # to worker.prepare(), which updates or rebuilds the planner as needed.
+        # The client is closed by the process-wide atexit handler rather than
+        # at the end of an individual task.
+        curobo_client = shared_client({'persistent_worker': True,
+                                       'persistent_worker_autostart': False}) if gpu else None
         curobo_action = CuroboPlanner(
             robot_runtime=backend,
             robot_object_id=resources.robot_object.get('object_id_in_scene'),
             collision_checker=checker,
+            client=curobo_client,
+            fixed_simulation_scene=robotwin_fixed_scene,
         )
+        if robotwin_fixed_scene:
+            print('warning|robotwin_fixed_scene|simulation only; frozen gripper, no payload or non-table obstacles',
+                  flush=True)
         motion_actions = {
             "linear": MoveLinearAction(robot_runtime=backend, kinematics=kin,
                                        collision_checker=checker, trajectory_callback=prepare_trajectory,
@@ -716,15 +768,32 @@ def _run(command_file, *, catalog=None, scene_file=None, backend_name='mujoco',
             sync.sync(backend, kin, checker)
             # Validation applies the same default later, but planner selection
             # happens before action validation. Treat omitted values as auto.
-            # Auto uses the configured direct -> collision-free (RRT) fallback
-            # chain.  cuRobo is selected only when explicitly requested.
-            requested_planner = request.get('planning', {}).get('planner_type', 'auto')
-            if requested_planner == 'curobo':
+            # CPU auto keeps direct -> RRT. GPU auto uses cuRobo without a CPU
+            # fallback; explicit per-request planner choices remain authoritative.
+            if _use_curobo(request, gpu=gpu):
                 curobo_result = curobo_action.execute(request)
                 return curobo_result
             path_type = request.get("motion", {}).get("path_type", "joint")
             action = motion_actions.get(path_type, motion_actions["joint"])
             return action.execute(request)
+
+        def retreat_uses_curobo(params):
+            from demo.interaction.command_converter import _deep_merge
+            request = params.get('move_request', params.get('request', {}))
+            return _use_curobo(_deep_merge(resources.scene['move_defaults'], request), gpu=gpu)
+
+        execute_motion.uses_curobo = retreat_uses_curobo
+
+        if robotwin_fixed_scene:
+            stage = 'curobo_startup_warmup'
+            warmup_started = perf_counter()
+            sync.sync(backend, kin, checker)
+            current_pose = backend.get_end_effector_pose()
+            curobo_action.prepare(request={
+                'target': {'type': 'pose', 'frame': 'world', 'position': current_pose['position'].tolist()},
+                'constraints': {'safety_distance': .003},
+            })
+            print(f'timing|curobo_startup_warmup={perf_counter() - warmup_started:.3f}s', flush=True)
 
         if callable(prime_perception):
             # A global camera observation is deliberately taken from the
@@ -1014,6 +1083,12 @@ def main():
     parser.add_argument('--output', type=Path, default=None,
                         help='输出目录（默认：对应 commands.xxx/output）')
     parser.add_argument('--viewer', action='store_true')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--gpu', dest='gpu', action='store_true',
+                      help='Route auto motion requests to cuRobo')
+    mode.add_argument('--cpu', dest='gpu', action='store_false',
+                      help='Force CPU planning for this task')
+    parser.set_defaults(gpu=None)
     parser.add_argument('--show-collision-geometry', action='store_true',
                         help='显示 MuJoCo 碰撞几何（自动打开 viewer）')
     parser.add_argument('--object-library-url', help='Existing OLS service URL')
@@ -1032,7 +1107,8 @@ def main():
     result = run(args.commands, catalog=args.catalog, backend_name=args.backend, output_dir=args.output,
                  viewer=args.viewer, collision_probe=args.collision_probe,
                  object_library_url=args.object_library_url, start_object_library=args.start_object_library,
-                 show_collision_geometry=args.show_collision_geometry, collision_model=args.collision_model)
+                 show_collision_geometry=args.show_collision_geometry, collision_model=args.collision_model,
+                 gpu=args.gpu)
     raise SystemExit(0 if result['success'] else 2 if result.get('status') == 'suspend' else 1)
 
 

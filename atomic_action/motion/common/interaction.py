@@ -74,7 +74,7 @@ class DemoInteractionMove:
         self.kinematics, self.checker = kinematics, collision_checker
 
     def _resolve_request(self, request, state, *, prefer_direct, closure_request=None,
-                         allow_fixed_orientation=False):
+                         allow_fixed_orientation=False, deferred_grasp_index=None):
         target = request['target']
         hold_orientation = request.get('constraints', {}).get('keep_end_effector_orientation', False)
         if hold_orientation and not allow_fixed_orientation:
@@ -120,9 +120,13 @@ class DemoInteractionMove:
                 return validate_grasp_geometry(self.checker, q, floor,
                     safety_distance=base['constraints']['safety_distance'])
         selection_started = perf_counter()
-        resolved = self.resolver.select(resolved, self.kinematics, self.checker, state['joints'],
-            safety_distance=base['constraints']['safety_distance'], grasp_index=target.get('grasp_index'),
-            prefer_direct=prefer_direct, candidate_validator=validator)
+        if deferred_grasp_index is not None:
+            resolved = self.resolver.select_approach(resolved, self.checker,
+                safety_distance=base['constraints']['safety_distance'], grasp_index=deferred_grasp_index)
+        else:
+            resolved = self.resolver.select(resolved, self.kinematics, self.checker, state['joints'],
+                safety_distance=base['constraints']['safety_distance'], grasp_index=target.get('grasp_index'),
+                prefer_direct=prefer_direct, candidate_validator=validator)
         self.last_resolution_timing_s = {
             'resolve_total': resolve_elapsed,
             'candidate_selection': perf_counter() - selection_started,
@@ -149,5 +153,4 @@ class DemoInteractionMove:
         if path_type == 'joint' and not base['constraints'].get('keep_end_effector_orientation'):
             base['target'] = {'type': 'joint', 'joint_positions': resolved['joint_positions']}
         return [{'phase': 'move', 'request': base}], resolved
-
 

@@ -82,6 +82,25 @@ class SearchBudgetTests(unittest.TestCase):
                     _print_command_timing({'command_id': '16', 'timing': {'planning': .562}, **fields})
                 self.assertEqual(output.getvalue().strip(), 'timing|command=16|planning=0.562s' + suffix)
 
+    def test_timing_prints_only_cold_curobo_preparation(self):
+        cold = {'timing': {'planning': .697, 'preparation': 5.219},
+                'trajectory': {'diagnostics': {'curobo': {'planner_reused': False}}}}
+        reused = {'timing': {'planning': .134, 'preparation': .009},
+                  'trajectory': {'diagnostics': {'curobo': {'planner_reused': True}}}}
+        fallback = {'timing': {'planning': .4},
+                    'trajectory': {'diagnostics': {'curobo': {'planner_reused': False},
+                                                   'planning_stages_s': {'preparation': .3}}}}
+        output = StringIO()
+        with redirect_stdout(output):
+            _print_command_timing({'command_id': '1', **cold})
+            _print_command_timing({'command_id': '2', **reused})
+            _print_command_timing({'command_id': '3', 'substeps': [reused, fallback]})
+        self.assertEqual(output.getvalue().splitlines(), [
+            'timing|command=1|planning=0.697s|curobo_warmup=5.219s',
+            'timing|command=2|planning=0.134s',
+            'timing|command=3|planning=0.534s|curobo_warmup=0.300s',
+        ])
+
     def action(self):
         action = _MoveExecutor.__new__(_MoveExecutor)
         action.collision_checker = SimpleNamespace(

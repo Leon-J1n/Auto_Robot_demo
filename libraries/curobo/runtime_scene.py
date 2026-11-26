@@ -18,6 +18,67 @@ def ensure_component(obj,kind):
     return result
 
 
+class FixedSimulationScene:
+    """RoboTwin-style fixed robot and table for a single MuJoCo demo run."""
+
+    def __init__(self, runtime, checker):
+        from execution.backends.mujoco.backend import MuJoCoExecutionBackend
+        if not isinstance(runtime, MuJoCoExecutionBackend):
+            raise ConversionError('Fixed cuRobo scene is only supported in MuJoCo simulation')
+        self.runtime, self.checker = runtime, checker
+        self.template = None
+
+    def snapshot(self, constraints, cache_dir):
+        from collision.planning_policy import planning_signature
+        from .conversion.assets import fingerprint
+        from .runtime_policy import matrix
+
+        runtime, checker = self.runtime, self.checker
+        if not constraints.get('avoid_collision', True):
+            raise ConversionError('Fixed cuRobo simulation scene requires collision checking')
+        before = planning_signature(runtime, checker)
+        if self.template is None:
+            scene, arm_id = runtime_snapshot(runtime, collision_checker=checker,
+                constraints={**constraints, 'avoid_collision': True}, cache_dir=cache_dir)
+            frozen = scene['_runtime_collision']
+            if frozen['payload_bodies']:
+                raise ConversionError('Initialize the fixed cuRobo scene before grasping a payload')
+            table_bodies = {int(body) for name, body in runtime.object_ids.items()
+                            if name.lower().replace('_', '') in {'table', 'worktable'}}
+            for body in range(1, runtime.model.nbody):
+                if int(runtime.model.body_parentid[body]) in table_bodies:
+                    table_bodies.add(body)
+            geometries = [geom for geom in frozen['geometries']
+                          if geom['robot'] or geom['body'] in table_bodies]
+            if not any(not geom['robot'] for geom in geometries):
+                raise ConversionError('Fixed cuRobo scene requires collision geometry for Table or WorkTable')
+            frozen['geometries'] = geometries
+            kept = {geom['id'] for geom in geometries}
+            policy = frozen['policy']
+            for key in ('allowed_pairs', 'distance_overrides', 'arm_environment_pairs'):
+                policy[key] = [entry for entry in policy.get(key, ()) if set(entry[:2]) <= kept]
+            frozen.pop('body_world', None)
+            frozen['fixed_simulation_scene'] = True
+            self.template = scene, arm_id
+
+        scene, arm_id = self.template
+        frozen = scene['_runtime_collision']
+        site = checker.tcp_site_id
+        base = matrix(runtime.data.xpos[runtime.base_id], runtime.data.xmat[runtime.base_id]).tolist()
+        if not np.allclose(base, frozen['base_world'], rtol=0., atol=1e-8):
+            raise ConversionError('Robot base moved after capturing the fixed cuRobo scene')
+        policy = {**frozen['policy'], 'safety_distance': float(constraints['safety_distance'])}
+        policy.pop('fingerprint', None)
+        policy.pop('collision_override', None)
+        policy['fingerprint'] = fingerprint(policy)
+        current = {**frozen, 'policy': policy, 'state_signature': before,
+            'joints': runtime.get_joint_positions().tolist(),
+            'tcp_world': matrix(runtime.data.site_xpos[site], runtime.data.site_xmat[site]).tolist()}
+        if before != planning_signature(runtime, checker):
+            raise ConversionError('Runtime changed while reading fixed-scene start state')
+        return {**scene, '_runtime_collision': current}, arm_id
+
+
 def runtime_snapshot(runtime, *, collision_checker=None, constraints=None, cache_dir=None):
     resources=getattr(runtime,'resources',None)
     if resources is None:

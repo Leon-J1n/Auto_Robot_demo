@@ -205,8 +205,15 @@ class TaskSkillExecutor:
                     # Pick only resolves and reaches the grasp pose here.
                     # Closure is a target-free gripper action performed after
                     # contact; do not run the legacy target-body closure probe.
+                    reference = getattr(self, '_interaction_history', {}).get(str(parameters['target']), {})
+                    uses_curobo = getattr(self.execute_motion, 'uses_curobo', None)
+                    deferred_index = None
+                    if (reference.get('skill_name') == 'approach' and reference.get('contact_validation_deferred')
+                            and request['target'].get('grasp_index') in (None, reference['grasp_index'])
+                            and callable(uses_curobo) and uses_curobo({'request': request})):
+                        deferred_index = reference['grasp_index']
                     parts, resolved = _planning_prepare(row, adapter.prepare, request, state, grasp_request=None,
-                        retreat_lift_height=0.0)
+                        retreat_lift_height=0.0, deferred_grasp_index=deferred_index)
                     if resolved.get('visual_estimate', {}).get('grasp_type') == 'handle':
                         backend.contact_target = resolved['target_name']
                         backend.contact_target_object_id = parameters['target']
@@ -248,8 +255,9 @@ class TaskSkillExecutor:
             if skill == 'pick' and part['phase'] == 'contact':
                 selected_control = np.asarray(resolved['selected']['world_from_control'], dtype=float)
                 selected_quat = Rotation.from_matrix(selected_control[:3, :3]).as_quat()
-                backend.grasp_approach_goal = (tuple(selected_control[:3, 3]), tuple(selected_quat),
-                                               tuple(resolved['joint_positions']))
+                backend.grasp_approach_goal = (tuple(selected_control[:3, 3]), tuple(selected_quat))
+                if 'joint_positions' in resolved:
+                    backend.grasp_approach_goal += (tuple(resolved['joint_positions']),)
                 backend.grasp_motion_phase = True
             if skill == 'pick' and part['phase'] == 'retreat':
                 result = execute_retreat_candidates(part, backend.get_end_effector_pose(),
@@ -276,6 +284,7 @@ class TaskSkillExecutor:
                         resolved['approach']['runtime_fallback']['reason'])
                     result = {**result, 'error': error}
             elif (skill == 'pick' and part['phase'] in {'approach','contact'} and
+                    not resolved.get('contact_validation_deferred') and
                     not part.get('grasp_pose_fallback') and not part.get('direct_pick_fallback') and
                     planning_failed_without_motion(result,backend,before)):
                 row['substeps'].append({'phase':part['phase'],'request':deepcopy(part['request']),
@@ -346,8 +355,9 @@ class TaskSkillExecutor:
                 previous_grasp_goal = getattr(backend, 'grasp_approach_goal', None)
                 selected_control = np.asarray(resolved['selected']['world_from_control'], dtype=float)
                 selected_quat = Rotation.from_matrix(selected_control[:3, :3]).as_quat()
-                backend.grasp_approach_goal = (tuple(selected_control[:3, 3]), tuple(selected_quat),
-                                               tuple(resolved['joint_positions']))
+                backend.grasp_approach_goal = (tuple(selected_control[:3, 3]), tuple(selected_quat))
+                if 'joint_positions' in resolved:
+                    backend.grasp_approach_goal += (tuple(resolved['joint_positions']),)
                 backend.grasp_motion_phase = False
                 try:
                     grasp_result = self.grasper.execute(grasp_request)
@@ -414,6 +424,8 @@ class TaskSkillExecutor:
             'skill_name': command['skill_name'],
             'world_from_control': np.asarray(control_pose, dtype=float).copy().tolist(),
             'control_from_grasp': calibration.copy().tolist(),
+            'grasp_index': selected['grasp_index'],
+            'contact_validation_deferred': resolved.get('contact_validation_deferred', False),
         }
 
     def _execute_pose_search(self, command, state, row):
@@ -459,11 +471,18 @@ class TaskSkillExecutor:
             resolved = _planning_prepare(row, self.resolver.resolve, target, self.resources, state)
             resolve_elapsed = time.perf_counter() - resolve_started
             select_started = time.perf_counter()
-            selected = _planning_prepare(row, self.resolver.select,
-                resolved, self.kinematics, self.checker, state['joints'],
-                safety_distance=float(self.resources.scene.get('move_defaults', {})
-                                      .get('constraints', {}).get('safety_distance', 0.003)),
-                prefer_direct=False)
+            safety_distance = float(self.resources.scene.get('move_defaults', {})
+                                    .get('constraints', {}).get('safety_distance', 0.003))
+            uses_curobo = getattr(self.execute_motion, 'uses_curobo', None)
+            select_approach = getattr(self.resolver, 'select_approach', None)
+            deferred = callable(select_approach) and callable(uses_curobo) and uses_curobo(parameters)
+            if deferred:
+                selected = _planning_prepare(row, select_approach, resolved, self.checker,
+                                             safety_distance=safety_distance)
+            else:
+                selected = _planning_prepare(row, self.resolver.select,
+                    resolved, self.kinematics, self.checker, state['joints'],
+                    safety_distance=safety_distance, prefer_direct=False)
             row['target_resolution_timing_s'] = {
                 'resolve_total': resolve_elapsed,
                 'candidate_selection': time.perf_counter() - select_started,
@@ -590,8 +609,6 @@ class TaskSkillExecutor:
         if not result.get('success'):
             self.stage = result.get('error', {}).get('failed_stage', skill)
         return row
-
-
 
 
 

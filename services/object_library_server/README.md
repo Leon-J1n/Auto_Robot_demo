@@ -2,6 +2,8 @@
 
 基于 Python 标准库的对象库 HTTP 服务器，为客户端提供**场景 / 模型 / 机械臂**三类资产数据的查询、下载、上传与软删除。接口规格见 `docs/OLS接口.md`。
 
+**认证升级**：`GET /health` 为匿名可读的存活检查，所有资产 GET/POST 必须携带 `Authorization: Bearer <token>`；身份由 XAuth 校验，query uid 不再决定用户身份，admin role 不授予额外资产权限。部署环境变量、证书、10 分钟缓存与失败语义见 [认证接入](docs/认证接入.md)。以下示例中的 `TOKEN` 为登录取得的用户 token。
+
 - 零第三方依赖，仅需 Python 3.8+
 - SQLite（`data/{scene,model,robot}_index.db`）作为资产索引
 - 多用户隔离（uid）、软删除、列表隐藏（`no_display`）、路径安全校验
@@ -116,7 +118,7 @@ python pack.py 1.0.2 --no-data        # 精简包：只需要一个版本号，�
 
 ## 接口使用指引
 
-以下示例中 `BASE=http://127.0.0.1:8000`。所有参数经 URL 查询串传递；`/uploadFile` 的文件内容放在 POST 请求体原始字节中。所有接口支持 `uid`（int ≥ 0，缺省 0）；**未提供 uid 即系统用户**。所有响应（含错误与文件下载）均携带 CORS 头（`Access-Control-Allow-Origin` 由 `cors_allow_origin` 配置），浏览器 `OPTIONS` 预检直接支持。
+以下示例中 `BASE=http://127.0.0.1:8000`。业务参数经 URL 查询串传递；`/uploadFile` 的文件内容放在 POST 请求体原始字节中。认证一律放在 Bearer 头，未提供认证返回 401，不回退到系统用户。所有响应（含错误与文件下载）均携带 CORS 头（`Access-Control-Allow-Origin` 由 `cors_allow_origin` 配置），浏览器 `OPTIONS` 预检直接支持。
 
 ### 用户隔离（uid）语义
 
@@ -139,33 +141,33 @@ UPDATE assets SET no_display = 1 WHERE id = 22; -- 在 data/model_index.db 中�
 
 ```bash
 # 资产列表（可按 category 精确过滤）
-curl "$BASE/list?type=model&uid=0&category=模型.抓取物"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/list?type=model&category=模型.抓取物"
 # -> {"type":"model","items":[{"id":1,"name":"apple","category":"模型.抓取物","version":"124d5e9696fc61f1"}, ...]}
 
 # 单个资产的版本号（与 /list 条目里的 version 逐字相同）
-curl "$BASE/assetVersion?type=model&id=1"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/assetVersion?type=model&id=1"
 # -> {"type":"model","id":1,"version":"124d5e9696fc61f1"}
 
 # 类别列表
-curl "$BASE/listCategory?type=scene"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/listCategory?type=scene"
 # -> {"type":"scene","category":["场景.开柜","场景.抓取","场景.空白"]}
 
 # 场景：/scene 按 id、/sceneByName 按 name（只返回入口 JSON，不拼接清单）
-curl "$BASE/scene?id=1"
-curl "$BASE/sceneByName?name=ur5e_table_apple"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/scene?id=1"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/sceneByName?name=ur5e_table_apple"
 
 # 模型/机械臂：返回 {name}.json 元数据与 {name}_files.json 清单**合并后的单个 JSON**
-curl "$BASE/model?id=1"          # /modelByName?name=apple
-curl "$BASE/robot?id=1"          # /robotByName?name=ur5e_arm
+curl -H "Authorization: Bearer $TOKEN" "$BASE/model?id=1"          # /modelByName?name=apple
+curl -H "Authorization: Bearer $TOKEN" "$BASE/robot?id=1"          # /robotByName?name=ur5e_arm
 
 # 文件下载（type 必须在 downloadable_types 中；扩展名必须在白名单中）
-curl -o apple.obj "$BASE/file?type=model&id=1&path=apple.obj"
-curl -o arm.urdf  "$BASE/fileByName?type=robot&name=ur5e_arm&path=ur5e_arm.urdf"
+curl -H "Authorization: Bearer $TOKEN" -o apple.obj "$BASE/file?type=model&id=1&path=apple.obj"
+curl -H "Authorization: Bearer $TOKEN" -o arm.urdf  "$BASE/fileByName?type=robot&name=ur5e_arm&path=ur5e_arm.urdf"
 # 支持 URDF 常用的 package:// 前缀（自动剥除）
-curl "$BASE/file?type=robot&id=1&path=package://ur5e_arm/ur5e_arm.urdf"
+curl -H "Authorization: Bearer $TOKEN" "$BASE/file?type=robot&id=1&path=package://ur5e_arm/ur5e_arm.urdf"
 
 # 缩略图（读取清单的 thumbnail 字段；三种类型均支持）
-curl -o thumb.png "$BASE/thumbnail?type=model&id=1"
+curl -H "Authorization: Bearer $TOKEN" -o thumb.png "$BASE/thumbnail?type=model&id=1"
 ```
 
 `/file`、`/fileByName` 的路径安全规则：禁止 `..`、绝对路径、盘符、空字节、符号链接；最终路径必须落在 `data/<type>s/<id>/` 内；`id`/`name` 必须先在索引中解析为可见记录。
@@ -174,7 +176,7 @@ curl -o thumb.png "$BASE/thumbnail?type=model&id=1"
 
 - **`version`**：16 位十六进制，由 `data/<type>s/<id>/` 下**全部文件**的 `(相对路径, 字节数, mtime_ns)` 排序后连同索引行的 `name`/`category` 一起做 SHA-256 得出。**只 stat、不读文件内容**，也不写进任何磁盘索引；改字节数、改 mtime、增删文件、改 `name`/`category` 都会让它变。两个出口：`/assetVersion?type=&id=` 与 `/list` 每个条目的 `version`，对同一资产必须相等。
 - **`ETag` / `If-None-Match`**：所有 GET 的 200 响应都带 `ETag`（JSON 取响应体哈希，文件取 `(字节数, mtime_ns)`）；带匹配的 `If-None-Match` 再来 ⇒ **304、空体、仍带 CORS 头、不带 `Content-Length`**。文件那一路在 304 时连读盘都省掉。
-- **`v` 决定缓存强度**：资产路由（`/scene`、`/model`、`/robot`、三条 `*ByName`、`/file`、`/fileByName`、`/thumbnail`）带 `v=<版本号>` ⇒ `Cache-Control: public, max-age=31536000, immutable`，浏览器刷新页签／重启后直接从磁盘缓存取、一个请求都不发；不带 `v` ⇒ `Cache-Control: no-cache`（存但每次复核）。服务端**不校验 `v` 的内容**——校验就要为每次文件请求走一遍目录；`v` 只是缓存键，资产变了版本号就变、URL 跟着变，旧键自然不再被问到。
+- **`v` 决定缓存强度**：资产路由（`/scene`、`/model`、`/robot`、三条 `*ByName`、`/file`、`/fileByName`、`/thumbnail`）带 `v=<版本号>` ⇒ `Cache-Control: private, max-age=31536000, immutable`，并带 `Vary: Authorization, Origin`；不带 `v` ⇒ `Cache-Control: private, no-cache`（存但每次复核）。服务端不校验 `v` 的内容，`v` 只是缓存键；认证仍独立检查，资产权限不会因版本号或 ETag 被绕过。
 - **三条 oracle 路由**（`/list`、`/listCategory`、`/assetVersion`）回答的是"有什么／是哪一版"，**永远 `no-cache`**，带 `v` 也不变 `immutable`。
 - 客户端拿不到版本号（旧服务端、`is_on_cos` 走 COS）时不拼 `v`，行为与加缓存之前逐字相同。
 
@@ -187,22 +189,22 @@ curl -o thumb.png "$BASE/thumbnail?type=model&id=1"
 ### 写入类（POST）
 
 ```bash
-# 1) 预注册：分配新 id（uid>0 从 10000 起累加；uid=0 在 10000 以下累加，用尽后回退全表最大 id+1；含已删除记录，id 不复用）
+# 1) 预注册：普通登录用户的新 id 从 10000 起累加；含已删除记录，id 不复用
 #    建目录并生成初始清单 {name}_files.json
-curl -X POST "$BASE/presignUploadID?type=model&name=my_cup&entranceFilePath=my_cup.obj&uid=7&category=模型.抓取物"
+curl -H "Authorization: Bearer $TOKEN" -X POST "$BASE/presignUploadID?type=model&name=my_cup&entranceFilePath=my_cup.obj&category=模型.抓取物"
 # -> {"type":"model","id":30,"name":"my_cup"}
 # category 缺省为 "模型.自定义" / "机械臂.自定义" / "场景.自定义"
 
 # 2) 上传文件：content 为请求体原始字节；role 缺省 reference
-curl -X POST --data-binary @my_cup.obj  "$BASE/uploadFile?type=model&id=30&path=my_cup.obj&uid=7"                 # 入口文件
-curl -X POST --data-binary @my_cup.mtl  "$BASE/uploadFile?type=model&id=30&path=my_cup.mtl&uid=7&role=reference"  # 追加进 reference
-curl -X POST --data-binary @my_cup.json "$BASE/uploadFile?type=model&id=30&path=my_cup.json&uid=7&role=metadata"  # 写清单 metadata 字段
-curl -X POST --data-binary @thumb.png   "$BASE/uploadFile?type=model&id=30&path=thumbnail.png&uid=7&role=thumbnail"
+curl -H "Authorization: Bearer $TOKEN" -X POST --data-binary @my_cup.obj  "$BASE/uploadFile?type=model&id=30&path=my_cup.obj"                 # 入口文件
+curl -H "Authorization: Bearer $TOKEN" -X POST --data-binary @my_cup.mtl  "$BASE/uploadFile?type=model&id=30&path=my_cup.mtl&role=reference"  # 追加进 reference
+curl -H "Authorization: Bearer $TOKEN" -X POST --data-binary @my_cup.json "$BASE/uploadFile?type=model&id=30&path=my_cup.json&role=metadata"  # 写清单 metadata 字段
+curl -H "Authorization: Bearer $TOKEN" -X POST --data-binary @thumb.png   "$BASE/uploadFile?type=model&id=30&path=thumbnail.png&role=thumbnail"
 # path 允许嵌套目录（如 meshes/part.obj）。role=metadata 对 scene 返回 400（场景清单无该字段）；
 # 场景清单也没有 reference 字段——场景的非入口 reference 文件只落盘、不登记。
 
-# 3) 软删除：仅置索引 is_deleted=1，磁盘文件保留；uid=0 为管理员可删任意记录
-curl -X POST "$BASE/deleteAsset?type=model&id=30&uid=7"
+# 3) 软删除本人资产：仅置索引 is_deleted=1，磁盘文件保留；admin role 也不能删除系统或他人资产
+curl -H "Authorization: Bearer $TOKEN" -X POST "$BASE/deleteAsset?type=model&id=30"
 # -> {"deleted": true, "type": "model", "id": 30}
 ```
 
@@ -243,11 +245,11 @@ python tests/test_hooks.py        # 钩子分类/刷新规则 + 临时仓库真�
 ```bash
 python init_index.py                       # 确保 data/*_index.db 已生成
 python server.py --port 8000 &             # 或 launch_server.bat
-curl "http://127.0.0.1:8000/list?type=model"            # 应返回 29 条系统资产
-curl "http://127.0.0.1:8000/modelByName?name=apple"     # 元数据+清单合并
-curl -o a.obj "http://127.0.0.1:8000/file?type=model&id=1&path=apple.obj"
-curl -o t.png "http://127.0.0.1:8000/thumbnail?type=scene&id=1"
-curl "http://127.0.0.1:8000/file?type=model&id=1&path=../docs/OLS%E6%8E%A5%E5%8F%A3.md"   # 期望 403
+curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:8000/list?type=model"            # 应返回 29 条系统资产
+curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:8000/modelByName?name=apple"     # 元数据+清单合并
+curl -H "Authorization: Bearer $TOKEN" -o a.obj "http://127.0.0.1:8000/file?type=model&id=1&path=apple.obj"
+curl -H "Authorization: Bearer $TOKEN" -o t.png "http://127.0.0.1:8000/thumbnail?type=scene&id=1"
+curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:8000/file?type=model&id=1&path=../docs/OLS%E6%8E%A5%E5%8F%A3.md"   # 期望 403
 ```
 
 > 写接口冒烟建议先复制数据目录，避免污染真实库：

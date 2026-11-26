@@ -121,7 +121,7 @@ class CollisionFreePlanner:
         validation_started = time.perf_counter()
         check = self.collision_checker.check_path(
             points, resolution=min(collision_resolution, 0.01), safety_distance=clearance,
-        ) if avoid_collision else None
+        ) if avoid_collision and not trajectory.get('diagnostics', {}).get('gpu_collision_validation') else None
         validation_s = time.perf_counter() - validation_started
         if check is not None and check.in_collision:
             raise PlanningError("Host collision validation rejected the cuRobo trajectory.",

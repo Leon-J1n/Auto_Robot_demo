@@ -8,6 +8,8 @@
 - `conversion/`：通过 OLS 下载资产及引用文件，读取当前 JSON，计算关节、层级、挂载与碰撞几何；生成独立装配 URDF。
 - `config/`：转换设置、必要差异和已测试 Windows/CUDA 依赖版本。官方规划任务 YAML 在 `source/` 中原样使用。
 - `client.py`、`worker.py`：隔离依赖的持久 GPU 工作进程；官方 RobotBuilder 拟合及保存机器人 YAML，官方 Scene.create 解析场景，官方 MotionPlanner 规划。
+
+daemon 会按机器人模型和规划配置缓存多个 `MotionPlanner`。默认最多保留 2 个 planner；切换回仍在缓存中的机器人时不会再次创建或 warmup。可在 `config/defaults.json` 中调整 `planner_cache_size`。缓存淘汰只销毁对应 planner，不会停止 worker；场景变化仍通过 `update_world` 应用，只有碰撞体数量超过已分配容量时才会重建该 planner。
 - `runtime_scene.py`：将本项目执行后端的实时状态读成当前场景副本。
 - `demo_plan.py`：无可视化、只输出轨迹的示例。
 - 生成物统一在项目 `.cache/curobo/`：下载资产、装配 URDF、YAML、拟合报告、GPU 编译缓存、工作进程日志和隔离 Python 依赖。原始资产路径不会作为交付依赖。
@@ -55,9 +57,25 @@ tool={'object_id': 3, 'link': '实际工具link',
 {"planning": {"planner_type": "curobo"}, "motion": {"path_type": "joint"}}
 ```
 
-`demo/run_demo.py` 延迟创建并复用显式选择的 `CuroboPlanner`，读取执行后端当前关节、夹爪、机构和物体状态，规划后调用原 `execute_trajectory()`。默认路径经 `CollisionFreePlanner` 在直接路径碰撞时调用 cuRobo，并经当前碰撞检查器复核：未启用简化代理时使用原 FCL／articulated 检查，启用后使用与 cuRobo 同源的简化代理。显式 cuRobo 不重新交给原 RRT 规划；时间与导数转换为原项目字段后直接交给执行器。
+`demo/run_demo.py` 延迟创建并复用显式选择的 `CuroboPlanner`，读取执行后端当前关节、夹爪、机构和物体状态，规划后调用原 `execute_trajectory()`。直接路径碰撞时也可经 `CollisionFreePlanner` 调用 cuRobo。cuRobo worker 在 GPU 上验收最终参考轨迹，宿主核对实时状态签名，不再重复几何终验或重新拟合轨迹。
 
-运行时配有 `GraspCollisionChecker` 时，适配层读取实测夹爪构型、持物相对变换及当前接触策略，支持持物的关节空间避障。严格直线/圆弧和全程姿态约束仍未接入 cuRobo 避障适配层，碰撞后会明确拒绝放宽硬路径。没有实时几何及策略的普通 JSON 入口仍不支持持物／目标接触豁免。
+GPU worker 支持手动管理的本地 Unix-socket daemon。先执行 `python -m libraries.curobo.daemon start`，再从多个独立的 `python -m demo.run_demo --gpu` 进程运行任务；这些进程会复用同一个 worker。未启动 daemon 时，`run_demo` 自动退回临时 worker，因此行为仍与原来一致，只是每次运行都会冷启动。任务仍向 worker 发送完整运行时场景；可复用时更新已有 planner，机器人模型或规划配置变化时由 worker 重建 planner。结束后执行 `python -m libraries.curobo.daemon stop` 释放 CUDA context 和显存。
+
+也可以用运行模式命令控制桥接层或其他未携带命令行参数的任务入口：
+
+```bash
+python -m libraries.curobo.mode gpu     # 写入 GPU 默认模式并自动启动/复用 worker
+python -m libraries.curobo.mode cpu     # 写入 CPU 默认模式并关闭 worker、释放 CUDA context
+python -m libraries.curobo.mode status
+```
+
+模式保存在 `.cache/curobo/mode.json`。`demo.run_demo` 未指定 `--gpu` 或 `--cpu` 时读取该模式；显式传入命令行参数仍只对当前任务生效。
+
+GPU 直线路径逐点以上一路点关节解和附近扰动求多种子 IK，优先采用满足 `max_joint_step`（默认 0.4 rad）的近邻候选。若时间参数化的整条轨迹未通过 GPU 碰撞／关节约束或 TCP 直线校验，会回溯改选构型（最多校验 32 条完整路径、求解 128 次 IK，受规划时间预算限制）。不使用 TrajOpt。
+
+实时代理保留冻结策略中的结构接触豁免、持物规则和逐对阈值。上臂和 Robotiq 垫片的相关凸网格使用网格局部坐标铺球，剔除能证明完全在凸包外的单元；针对已复现误报的上臂凸块和垫片使用更密的覆盖。GPU 检查所有未豁免的自碰撞及世界碰撞。终验按关节步长离散采样，最多 0.01 rad，`gpu_collision_validation` 记录样本数和分辨率。球近似仍可能受形状影响，离散检查不等于连续碰撞检测。
+
+运行时配有 `GraspCollisionChecker` 时，适配层读取实测夹爪构型、持物相对变换及当前接触策略，支持持物的关节空间避障。严格直线按上述逐点 IK 和全程复核处理；圆弧和自由空间运动的全程姿态约束仍未接入 cuRobo 避障适配层，碰撞后不会放宽硬路径。没有实时几何及策略的普通 JSON 入口仍不支持持物／目标接触豁免。
 
 ### 运行时碰撞策略
 
@@ -69,7 +87,7 @@ tool={'object_id': 3, 'link': '实际工具link',
 
 当前场景离线装配及原生 FCL 检查器验证得到 36 对原生允许对、9 对 MuJoCo／cuRobo 几何允许对（两者碰撞几何拆分不同）。肩部 geom 20 与底座 geom 143 明确豁免；80 个夹爪几何及 72 个持物几何与底座仍保留 3 mm 阈值。验证未发送运动命令。源配置在场景重新加载时生效。
 
-`policy_checker.py`／`policy_kernels.py` 在 GPU 的普通及 swept 查询中应用逐几何对距离表，IK、图搜索、轨迹优化和内部可行性检查使用同一个 SceneCollision。允许对从自碰撞矩阵严格生成，不使用默认姿态碰撞自动排除。策略表原位更新；几何容量或自碰撞矩阵改变时重新建立规划器，策略改变时清空图搜索缓存。场景／抓持／策略签名在捕获和规划后校验；最终轨迹通过当前宿主碰撞检查器复核。
+`policy_checker.py`／`policy_kernels.py` 在 GPU 的普通及 swept 查询中应用逐几何对距离表，IK、图搜索、轨迹优化和内部可行性检查使用同一个 SceneCollision。不使用默认姿态碰撞自动排除。策略表原位更新；几何容量或自碰撞矩阵改变时重新建立规划器，策略改变时清空图搜索缓存。场景／抓持／策略签名在捕获和规划后校验。
 
 查询按完整轨迹批次分批发射，避免超大场景的扁平线程索引溢出；AABB 预筛覆盖整个 swept 中心线段。规划前使用官方直接 metrics rollout 检查起点及关节目标；不可行时明确拒绝，不自动缩小安全距离、扩大允许对或删除几何。若当前策略允许全部自碰撞对，配置为空检查集合，避免调用不支持空集合的官方自碰撞内核。
 
@@ -128,6 +146,22 @@ GPU 测试在隔离工作进程规划六关节测试模型，不向机器人或�
 ### 安全间距的已知限制（原 OLS JSON 入口）
 
 `safety_distance` 通过机器人球半径生效，也会影响未被官方/项目装配例外排除的自碰撞对。本机 scene/1 张开夹爪在额外 3 mm 间距下，夹爪 base 与 coupler 的拟合球会发生内部冲突，官方规划器拒绝；同一完整场景以 0 额外间距可规划并交原执行器完成运动。0 表示保留原始拟合边界，不表示关闭碰撞检查。
+
+`python -m demo.run_demo --commands commands.001.json --gpu` 将自动规划请求交给 cuRobo（joint/pose PTP 和 pose 直线）；不加 `--gpu` 时仍由 CPU direct→RRT 处理。显式 `planning.planner_type` 覆盖自动路由。GPU 直线按距离和 `cartesian_step` 动态选取 IK 路点（至少 2 点，不超过 `trajopt_solver.action_horizon`），依次求解碰撞感知 waypoint IK，选取最靠近上一个关节解的候选；不调用 TrajOpt。相邻关节解以每段起止速度和加速度为零的五次曲线定时，在稠密采样上用当前 cuRobo 世界、自碰撞和豁免规则验证，并检查 TCP 的直线与姿态。速度、加速度、jerk 按机器人限制和请求缩放；离散采样不是数学上的连续碰撞证明。不满足直线/姿态容差、碰撞或关节限制时直接失败，不退回 CPU。当前单次直线最多 `trajopt_solver.action_horizon-1` 个 `cartesian_step`（默认 0.02 m）；长距离请拆成多段。圆弧仍只支持 CPU。
+
+GPU 撤退有多个候选距离时，先分批用 cuRobo 检查终点 IK。按请求优先级一次只为一个通过终点筛选的候选生成并求解直线路点，整段未通过才尝试下一个；终点 IK 成功不代表整段可行。诊断字段 `linear_target_batch` 分别记录终点筛选批数、检查的终点数量，以及实际推进的候选和各自的路点 IK 用量。
+
+GPU `approach` 用张开夹爪的快速几何预检选定抓取位姿，只规划和验证实际执行的接近轨迹，不提前求抓取终点 IK 或预演接触路径。随后对同一目标的 GPU `pick` 从实测关节状态规划并验证接触直线；规划失败时不切换关节路径、不闭爪。接近成功不代表抓取轨迹可行。
+
+GPU 关节目标先构造受速度、加速度及 jerk 约束的关节直达轨迹，按关节步长采样并用当前 cuRobo 场景与碰撞策略验证；通过则跳过 TrajOpt，GPU 检查失败或采样容量不足时才调用 `plan_cspace`。直达和绕行共用最终轨迹复核。
+
+MuJoCo demo 的 `--gpu` 默认采用 RoboTwin 式固定场景（`--collision-probe` 除外）：首次 GPU 规划固定机器人和夹爪的碰撞模型，环境只保留 `Table` 或 `WorkTable`；后续沿用该模型，只刷新机械臂关节角和 TCP。GPU 仍验证整条轨迹，但不会检查持物、夹爪开度变化或其他场景物体，因此此模式仅用于仿真，不代表真实场景可安全执行。
+
+固定场景模式在全局感知前初始化并预热单目标位姿规划和四路批量 IK，不执行预热轨迹。启动阶段的总耗时单独打印为 `timing|curobo_startup_warmup=...`，不计入首条命令的规划时间。CUDA Graph 设置不变。
+
+运行时代理默认关闭 CUDA Graph，使直线与关节直达共用同一个 cuRobo 模型，避免切换目标类型时重新初始化；需要为复杂 `plan_cspace` 单独启用 Graph 时可覆写 `runtime_proxy_cuda_graphs`。
+
+运行时 URDF 的安装位姿按位置 1 µm、角度 0.0001 rad 量化后作为 cuRobo 模型缓存键，避免夹爪的微小仿真抖动触发每条指令重新拟合与初始化；超出该精度的真实几何变化仍生成新模型。宿主碰撞终验仍使用未量化的运行时几何。
 
 模块不会自动降低原项目默认的 3 mm。调用方需要结合真实模型选择间距；若必须保证更大间距，需要另行校准夹爪碰撞表示/内部碰撞规则。本次没有通过增加忽略对来消除此问题。
 
@@ -231,4 +265,3 @@ approach 距离搜索开始；此前的目标解析／放置高度选择仍单�
 柜门/夹爪状态更新、圆柱新增、完全阻挡的盒体和圆柱体拒绝、障碍数超过缓存容量时重新构建，均已实测。当前示例不是对任意场景成功率或真实硬件安全性的验收。
 
 原演示入口需要原项目自身依赖正常。此机器的 auto_robot 缺少部分原依赖，实测时另外在 `.cache/curobo/host-test-deps` 放入 coacd 1.0.14、urchin 0.0.31、eaik 1.2.2，仅测试进程加载；未改主环境。正常业务请按原项目环境说明安装这些宿主依赖。纯轨迹 `demo_plan.py` 不要求 EAIK/FCL/MuJoCo 执行入口初始化。
-

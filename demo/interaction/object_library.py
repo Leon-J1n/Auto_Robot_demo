@@ -1,5 +1,6 @@
 """Demo object instance -> OLS interaction poses -> world control poses."""
 import re
+from time import perf_counter
 import xml.etree.ElementTree as ET
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -126,6 +127,39 @@ class ObjectLibraryGraspResolver:
             'model_id': model_id, 'model_name': metadata['semantic_properties']['object_name'],
             'source_url': self.client.base_url, 'control_from_grasp': transform.tolist(),
             'blackboard_revision': self.blackboard.revision, 'candidates': candidates}
+
+    @staticmethod
+    def select_approach(resolved, checker, *, safety_distance=.003, grasp_index=None):
+        from demo.interaction.table_clearance import DEFAULT_OPEN_WIDTH_M, table_floor
+
+        precheck = getattr(checker, 'check_gripper_pose', None)
+        evidence = resolved.get('visual_estimate', {})
+        attempts = []
+        for candidate in resolved['candidates']:
+            if grasp_index is not None and candidate['grasp_index'] != grasp_index:
+                continue
+            started = perf_counter()
+            attempt = {'grasp_index': candidate['grasp_index'],
+                       'grasp_depth_offset_m': candidate.get('grasp_depth_offset_m')}
+            if callable(precheck):
+                floor = None
+                if evidence.get('grasp_type') != 'handle' and hasattr(getattr(checker, 'backend', None), 'model'):
+                    floor = table_floor(checker.backend, np.asarray(candidate['world_from_grasp'])[:3, 3])
+                hit = precheck(candidate['world_from_control'], safety_distance=safety_distance,
+                               gripper_width=DEFAULT_OPEN_WIDTH_M, floor_z=floor,
+                               contact_target=(resolved['target_name'], resolved['target_id']))
+                attempt.update(status='rejected' if hit.in_collision else 'clear', contacts=list(hit.contacts))
+            else:
+                attempt['status'] = 'unavailable'
+            attempt['elapsed_s'] = perf_counter() - started
+            attempts.append(attempt)
+            if attempt['status'] != 'rejected':
+                return {**resolved, 'selected': candidate, 'gripper_pose_precheck': attempts,
+                        'contact_validation_deferred': True}
+        error = GraspResolutionError('No grasp candidate passed the gripper pose precheck')
+        error.details = {'error_code': 'GRASP_PRECHECK_FAILED', 'failed_stage': 'target_resolution',
+                         'error_message': str(error), 'rejected': attempts}
+        raise error
 
     @staticmethod
     def select(resolved, kin, checker, seed, *, safety_distance=.003, grasp_index=None, prefer_direct=False, candidate_validator=None):
@@ -258,5 +292,3 @@ def apply_ols_friction(resources, client, blackboard=None):
     model_id = gripper.get('_ols_model_id')
     if model_id is not None:
         gripper['_ols_friction'] = read(int(model_id), gripper.get('_ols_asset_type', 'model'))
-
-

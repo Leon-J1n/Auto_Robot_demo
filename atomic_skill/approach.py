@@ -15,6 +15,8 @@ from atomic_skill.pose_precheck import ordered_distances
 class PoseSearchExecutor:
     """Minimal execution context shared by standalone approach/retreat calls."""
 
+    batch_world_approach = True
+
     def __init__(self, *, resources, backend, synchronizer, kinematics, checker, execute_motion):
         self.resources, self.backend = resources, backend
         self.sync, self.kinematics, self.checker = synchronizer, kinematics, checker
@@ -200,7 +202,7 @@ class ApproachSkill:
         search_budget = float(base['constraints']['timeout'])
         search_deadline = search_started + search_budget
 
-        def move(name, **kwargs):
+        def move(name, *, batch_targets=None, **kwargs):
             remaining = search_deadline - perf_counter()
             if remaining < .1:  # Minimum validated Move request budget.
                 self._fail('PLANNING_TIMEOUT', 'Approach exhausted its shared search timeout')
@@ -208,11 +210,14 @@ class ApproachSkill:
                     details={'search_timeout_s': search_budget,
                              'elapsed_s': perf_counter() - search_started})
                 return False
-            return e._move(name, **kwargs, override={
+            override = {
                 'motion': {'path_type': 'joint', 'path_constraint': 'soft', 'phase': 'approach'},
                 'planning': {'mode': 'collision_free', 'allow_replan': True,
                              'planning_time': min(float(base['planning']['planning_time']), remaining)},
-                'constraints': {'timeout': remaining}})
+                'constraints': {'timeout': remaining}}
+            if batch_targets:
+                override['strategy_params'] = {'pose_target_candidates_world': batch_targets}
+            return e._move(name, **kwargs, override=override)
 
         observation = params.get('_wrist_observation')
         if observation is not None:
@@ -268,19 +273,53 @@ class ApproachSkill:
             return None
         before_search = e.backend.physics_steps
         distances = search_distances(params, minimum=minimum, maximum=maximum, step=step, label='approach')
+        uses_curobo = getattr(getattr(e, 'execute_motion', None), 'uses_curobo', None)
+        batch = (getattr(e, 'batch_world_approach', False) and len(distances) > 1
+                 and callable(uses_curobo) and uses_curobo(params))
+
+        def search(*, align_camera=False):
+            if not batch:
+                return run_candidate_search(
+                    ordered_distances(e, distances, lambda distance: transform_for(distance, align_camera=align_camera)),
+                    lambda distance: attempt(distance, align_camera=align_camera))
+            candidates = []
+            for distance in distances:
+                transform = transform_for(distance)
+                alignment = None
+                if align_camera:
+                    from demo.interaction.wrist_observation import camera_aligned_pose
+                    try:
+                        transform, alignment = camera_aligned_pose(
+                            transform, observation['control_from_camera'], observation['target_world'])
+                    except ValueError as exc:
+                        e.wrist_observation['rejected'].append({'distance_m': float(distance), 'reason': str(exc)})
+                        continue
+                candidates.append((distance, transform, alignment))
+            if not candidates:
+                return False
+            _, first, _ = candidates[0]
+            if not move(f'{operation}_approach_batch', position=first[:3, 3], rotation=first[:3, :3],
+                        contact=False, batch_targets=[pose_request(item[1]) for item in candidates[1:]]):
+                return False
+            diagnostics = e.phases[-1]['trajectory']['diagnostics'] if len(candidates) > 1 else {}
+            selected = diagnostics.get('pose_target_batch', {}).get('selected_index', 0)
+            distance, _, alignment = candidates[selected]
+            if align_camera:
+                e.phases[-1]['wrist_observation'] = alignment
+                e.wrist_observation.update(status='camera_aligned', **alignment)
+            else:
+                e.successful_distance_m = float(distance)
+            return True
+
         if observation is not None:
-            if run_candidate_search(
-                    ordered_distances(e, distances, lambda d: transform_for(d, align_camera=True)),
-                    lambda distance: attempt(distance, align_camera=True)):
+            if search(align_camera=True):
                 return True
             # Never retry after motion or an execution failure.
             if e.phases and not planning_failed_without_motion(e.phases[-1], e.backend, before_search):
                 e.wrist_observation['status'] = 'failed'
                 return False
             e.wrist_observation['status'] = 'fallback_to_gripper_approach'
-        if run_candidate_search(
-            ordered_distances(e, distances, transform_for),
-            attempt):
+        if search():
             return True
         failed = e.phases[-1] if e.phases else {}
         if not planning_failed_without_motion(failed, e.backend, before_search):

@@ -290,7 +290,7 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
             return False
 
     def check_gripper_pose(self, world_from_control, *, safety_distance=0.0,
-                           gripper_width=None, floor_z=None):
+                           gripper_width=None, floor_z=None, contact_target=None):
         """Precheck only the articulated gripper at a known TCP pose, without IK."""
         from types import SimpleNamespace
         from demo.interaction.table_clearance import gripper_clearance, set_static_gripper_width
@@ -340,11 +340,14 @@ class GraspCollisionChecker(SimPlatformFCLCollisionChecker):
         if not len(pairs):
             return CollisionResult(False, float('inf'), ())
         tool_ids, other_ids = pairs[:, 0], pairs[:, 1]
-        target = (getattr(backend.gripper_controller, 'held_name', None)
+        held_target = getattr(backend.gripper_controller, 'held_name', None)
+        target = (held_target
+                  or (contact_target[0] if contact_target is not None else None)
                   or getattr(backend, 'contact_target', None)
                   or getattr(self, '_physical_closure_target', None))
         if target:
-            target_id = (getattr(backend, 'contact_target_object_id', None)
+            target_id = (contact_target[1] if contact_target is not None and not held_target else
+                         getattr(backend, 'contact_target_object_id', None)
                          or getattr(self, '_physical_closure_target', None))
             target_bodies = set()
             if target_id is not None:

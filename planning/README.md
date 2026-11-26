@@ -75,7 +75,7 @@ trajectory = direct.plan(path_request, move_request, context)
 | --- | --- |
 | `DirectPlanner.plan(path_request, move_request, context)` | 验证或整理直接关节/笛卡尔路径，检查限位和碰撞，不搜索绕行路径 |
 | `CollisionFreePlanner.plan(path_request, move_request, context)` | 使用 RRT-Connect 搜索自由空间避障轨迹，优化后再用宿主碰撞检查器复核 |
-| `CuroboPlanner.plan(request)` | 使用官方 CuRobo 规划自由空间 joint 轨迹；不支持接触、严格直线/圆弧和全程姿态约束 |
+| `CuroboPlanner.plan(request)` | 使用 cuRobo 规划 joint/pose 自由空间及 pose 目标的笛卡尔直线；整段轨迹需通过线性与碰撞验证，不支持圆弧 |
 | `TrajOptOptimizer.optimize(path, safety_distance=...)` | 固定起终点优化已有可行路径；失败时保留输入路径 |
 | `prepare_continuous_trajectory(...)` | 对已验证路点建立连续路径并进行时间参数化 |
 | `PlanningError` / `CollisionPlanningError` | 传递错误代码、可恢复状态和诊断细节 |
@@ -153,8 +153,7 @@ CPU 对圆柱—环境的代理碰撞候选额外用原始 MuJoCo 凸几何复�
 
 1. 离散碰撞采样可能漏掉采样点之间的短暂碰撞，需要更高可靠性时应缩小采样间隔或使用碰撞后端的连续检查能力。
 2. Direct 不自行求 IK；IK 候选由运动策略和 Kinematics 提供。
-3. cuRobo 避障适配使用关节路径；配有实时 articulated 检查器时，已接入持物、允许碰撞对和阶段距离规则。球近似与宿主几何可能有差异，最终仍以宿主复核为准。全程姿态约束尚未接入，硬性几何路径在碰撞时返回失败。
+3. cuRobo 避障适配使用关节路径；配有实时 articulated 检查器时，已接入持物、允许碰撞对和阶段距离规则。cuRobo worker 在 GPU 上验证最终轨迹。全程姿态约束尚未接入，硬性几何路径在碰撞时返回失败。
 4. 规划结果的 `duration` 是轨迹估计值，执行时的实际耗时由 `execution` 后端决定。
 
 规划失败只返回结构化错误，不会推进仿真或执行机器人运动。
-

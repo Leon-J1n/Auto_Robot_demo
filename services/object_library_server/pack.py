@@ -26,7 +26,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-RELEASE_FILES = ["server.py", "config.json", "init_index.py", "launch_server.bat", "README.md"]
+RELEASE_FILES = ["server.py", "xauth_client.py", "config.json", "init_index.py", "launch_server.bat", "README.md"]
 RELEASE_DIRS = ["docs", "tests"]
 DATA_DIR = "data"
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.~_-]+)?$")
